@@ -30,7 +30,16 @@ const APP_LOTTERY_KEYS=Object.fromEntries(Object.entries(LOTTERY_APP_KEYS).map((
 // back to the bundled copy when offline. Web is unchanged (same-origin, already fresh).
 const IS_NATIVE_APP=(()=>{try{return !!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());}catch(_e){return false;}})();
 const NATIVE_DATA_BASE=String(window.LOTO_COMMERCIAL_CONFIG?.nativeDataBaseUrl||'https://redsprut.github.io/loto-simulator-web/').replace(/\/*$/,'/');
-const RESULTS_JSON_URL=IS_NATIVE_APP?`${NATIVE_DATA_BASE}results.json`:'./results.json';
+function resolveControlledResultsEndpoint(fallback){
+  const configured=String(window.LOTO_COMMERCIAL_CONFIG?.resultsReadEndpoint||'').trim();
+  if(!configured)return fallback;
+  try{
+    const endpoint=new URL(configured,window.location.href);
+    if(endpoint.protocol!=='https:'&&endpoint.origin!==window.location.origin)return fallback;
+    return endpoint.href;
+  }catch(_error){return fallback;}
+}
+const RESULTS_JSON_URL=resolveControlledResultsEndpoint(IS_NATIVE_APP?`${NATIVE_DATA_BASE}results.json`:'./results.json');
 const RESULTS_ARCHIVE_URL='./results-archive.json';
 const PRIZES_JSON_URL=IS_NATIVE_APP?`${NATIVE_DATA_BASE}prizes.json`:'./prizes.json';
 const RESULTS_JSON_BUNDLED='./results.json';   // offline fallback for native
@@ -41,6 +50,8 @@ const JACKPOTS_JSON_URL=IS_NATIVE_APP?`${NATIVE_DATA_BASE}jackpots.json`:'./jack
 const JACKPOTS_JSON_BUNDLED='./jackpots.json';
 let resultsJsonCache=null;
 let resultsArchiveJsonCache=null;
+let resultsJsonPending=null;
+let resultsArchiveJsonPending=null;
 let prizesJsonCache=null;
 
 const LOTS={
@@ -106,22 +117,33 @@ function normalizeResultDraw(draw){
 async function fetchResultsJson(url=RESULTS_JSON_URL){
   if(url===RESULTS_JSON_URL&&resultsJsonCache)return resultsJsonCache;
   if(url===RESULTS_ARCHIVE_URL&&resultsArchiveJsonCache)return resultsArchiveJsonCache;
-  let data;
-  try{
-    const res=await fetch(url,{cache:'no-store'});
-    if(!res.ok)throw new Error(`${url.split('/').pop()} HTTP ${res.status}`);
-    data=await res.json();
-  }catch(err){
-    // Native offline: a failed remote results fetch falls back to the bundled snapshot.
-    if(IS_NATIVE_APP&&url===RESULTS_JSON_URL){
-      const fb=await fetch(RESULTS_JSON_BUNDLED,{cache:'no-store'});
-      if(!fb.ok)throw err;
-      data=await fb.json();
-    }else throw err;
+  if(url===RESULTS_JSON_URL&&resultsJsonPending)return resultsJsonPending;
+  if(url===RESULTS_ARCHIVE_URL&&resultsArchiveJsonPending)return resultsArchiveJsonPending;
+  const pending=(async()=>{
+    let data;
+    try{
+      const res=await fetch(url,{cache:'no-store'});
+      if(!res.ok)throw new Error(`${url.split('/').pop()} HTTP ${res.status}`);
+      data=await res.json();
+    }catch(err){
+      // Native offline: a failed remote results fetch falls back to the bundled snapshot.
+      if(IS_NATIVE_APP&&url===RESULTS_JSON_URL){
+        const fb=await fetch(RESULTS_JSON_BUNDLED,{cache:'no-store'});
+        if(!fb.ok)throw err;
+        data=await fb.json();
+      }else throw err;
+    }
+    if(url===RESULTS_JSON_URL)resultsJsonCache=data;
+    if(url===RESULTS_ARCHIVE_URL)resultsArchiveJsonCache=data;
+    return data;
+  })();
+  if(url===RESULTS_JSON_URL)resultsJsonPending=pending;
+  if(url===RESULTS_ARCHIVE_URL)resultsArchiveJsonPending=pending;
+  try{return await pending;}
+  finally{
+    if(url===RESULTS_JSON_URL&&resultsJsonPending===pending)resultsJsonPending=null;
+    if(url===RESULTS_ARCHIVE_URL&&resultsArchiveJsonPending===pending)resultsArchiveJsonPending=null;
   }
-  if(url===RESULTS_JSON_URL)resultsJsonCache=data;
-  if(url===RESULTS_ARCHIVE_URL)resultsArchiveJsonCache=data;
-  return data;
 }
 async function loadHistoricalResults(gameKey,url=RESULTS_JSON_URL){
   const db=await fetchResultsJson(url);
@@ -568,7 +590,7 @@ function renderLotteryNav(){
   const tabs=document.getElementById('lot-tabs'),strip=document.getElementById('sched-strip');
   if(tabs){
     tabs.innerHTML=Object.entries(LOTS).map(([id,l])=>`
-      <div class="lt ${id===cur?(l.activeClass||'ow'):''}" id="lt-${id}" role="button" tabindex="0" aria-current="${id===cur?'true':'false'}" onclick="initLottery('${id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();initLottery('${id}');}">
+      <div class="lt ${id===cur?(l.activeClass||'ow'):''}" id="lt-${id}" role="button" tabindex="0" aria-current="${id===cur?'true':'false'}" data-loto-event-click="initLottery('${id}')" data-loto-event-keydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();initLottery('${id}');}">
         <div class="lt-flag">${l.flag||'🎲'}</div>
         <div class="lt-name">${l.short||l.name}</div>
       </div>`).join('');
@@ -576,7 +598,7 @@ function renderLotteryNav(){
   if(strip){
     strip.innerHTML=Object.entries(LOTS).map(([id,l],i)=>`
       ${i?'<div class="ss-div"></div>':''}
-      <div class="ss-item ${id===cur?'on':''}" id="ss-${id}" role="button" tabindex="0" aria-current="${id===cur?'true':'false'}" onclick="initLottery('${id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();initLottery('${id}');}">
+      <div class="ss-item ${id===cur?'on':''}" id="ss-${id}" role="button" tabindex="0" aria-current="${id===cur?'true':'false'}" data-loto-event-click="initLottery('${id}')" data-loto-event-keydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();initLottery('${id}');}">
         <div class="ss-name" style="color:${mColor(l.cls)}">${l.short||l.name}</div>
         <div class="ss-day"><span>${l.day}</span> · до ${scheduleTime(l)}</div>
         <div class="ss-price">${formatPrice(l)}/ряд</div>
@@ -630,9 +652,6 @@ function initLottery(gameKey){
 async function fetchTextResilient(url){
   const tryF=async u=>{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.text();};
   try{return await tryF(url);}catch(e){}
-  try{return await tryF('https://api.allorigins.win/raw?url='+encodeURIComponent(url));}catch(e){}
-  try{return await tryF('https://corsproxy.io/?url='+encodeURIComponent(url));}catch(e){}
-  try{return await tryF('https://r.jina.ai/'+url);}catch(e){}
   throw new Error('источник недоступен');
 }
 function parseMillions(text,re){
@@ -870,9 +889,9 @@ function renderRows(){
     }
     h+='</div>';
     const has=row.m.length>0||row.b.length>0;
-    if(i===act&&has)h+=`<button class="ract back-${l.cls}" onclick="event.stopPropagation();undo(${i})">←</button>`;
-    else if(has)h+=`<button class="ract" onclick="event.stopPropagation();clrRow(${i})">×</button>`;
-    else h+=`<button class="ract" onclick="event.stopPropagation();addRow()">+</button>`;
+    if(i===act&&has)h+=`<button class="ract back-${l.cls}" data-loto-event-click="event.stopPropagation();undo(${i})">←</button>`;
+    else if(has)h+=`<button class="ract" data-loto-event-click="event.stopPropagation();clrRow(${i})">×</button>`;
+    else h+=`<button class="ract" data-loto-event-click="event.stopPropagation();addRow()">+</button>`;
     if(groupAnalysisState.active&&i>=groupAnalysisState.limit&&has)h+=`<div class="analysis-pro-badge">${appText('Доступно в PRO')}</div>`;
     div.innerHTML=h;c.appendChild(div);
   });
@@ -1919,9 +1938,9 @@ async function renderFavs(){
     });
     div.innerHTML=`<div class="fav-main"><div class="fav-name">${fav.name}</div><div class="fav-rows">${rowsH}</div></div>
       <div class="fav-actions">
-        <button class="btn-fav-use" title="Загрузить" aria-label="Загрузить" onclick="useFav(${favIndex})">▶</button>
-        <button class="btn-fav-copy" title="Копировать" aria-label="Копировать" onclick="copyFav(${favIndex},this)">📋</button>
-        <button class="btn-fav-del" title="Удалить" aria-label="Удалить" onclick="delFav(${favIndex})">🗑</button>
+        <button class="btn-fav-use" title="Загрузить" aria-label="Загрузить" data-loto-event-click="useFav(${favIndex})">▶</button>
+        <button class="btn-fav-copy" title="Копировать" aria-label="Копировать" data-loto-event-click="copyFav(${favIndex},this)">📋</button>
+        <button class="btn-fav-del" title="Удалить" aria-label="Удалить" data-loto-event-click="delFav(${favIndex})">🗑</button>
       </div>`;
     c.appendChild(div);
   });
@@ -2185,7 +2204,8 @@ function validateDrawRecord(d,id,official=false){
   }
   return errs;
 }
-/* устойчивый fetch: прямой запрос → CORS-прокси (для GitHub Pages и строгих сред) */
+/* Только прямой запрос к allowlisted официальному API. Публичные CORS-прокси
+   запрещены; при CORS используется контролируемая общая база/backend. */
 async function fetchJsonResilient(url,init){
   const attempts=[];
   const tryFetch=async(u,opts)=>{
@@ -2195,12 +2215,6 @@ async function fetchJsonResilient(url,init){
   };
   /* 1) напрямую */
   try{return await tryFetch(url,init);}catch(e){attempts.push('直:'+e.message);}
-  /* POST через публичные прокси не ходит — дальше только GET */
-  if(init&&init.method&&init.method!=='GET')throw new Error('сеть недоступна ('+attempts.join('; ')+')');
-  /* 2) allorigins */
-  try{return await tryFetch('https://api.allorigins.win/raw?url='+encodeURIComponent(url),{cache:'no-store'});}catch(e){attempts.push('proxy1:'+e.message);}
-  /* 3) corsproxy.io */
-  try{return await tryFetch('https://corsproxy.io/?url='+encodeURIComponent(url),{cache:'no-store'});}catch(e){attempts.push('proxy2:'+e.message);}
   throw new Error('источник недоступен из этой среды. База проекта обновляется автоматическим серверным процессом; этот предпросмотр блокирует внешние запросы.');
 }
 async function fetchOfficialDraws(id){
@@ -2431,7 +2445,7 @@ async function renderHistory(){
     const era=ruleEraForDraw(d,eras),isCurrent=era?.current??d.ruleEra!=='legacy';
     const badge=era?`<span class="rule-badge ${isCurrent?'current':''}" title="${escapeHtml(era.label)}">${isCurrent?'текущие правила':'старые правила'}</span>`:'';
     const canDelete=canDeleteItem(d,{currentDates:pack.currentDates});   // official draws → no delete control at all
-    const action=canDelete?`<button class="btn-del" onclick="delDraw('${d.date}')">🗑</button>`:'<span></span>';
+    const action=canDelete?`<button class="btn-del" data-loto-event-click="delDraw('${d.date}')">🗑</button>`:'<span></span>';
     if(!canDelete)div.classList.add('no-action');
     const ballClass=histBallCount>=8?'hist-balls hist-many':'hist-balls';
     div.innerHTML=`<div class="hist-main"><div class="hist-date">${dy} ${ms[+mo-1]} ${y}${src}${badge}</div><div class="${ballClass}" style="--hist-ball-count:${Math.max(1,histBallCount)};--hist-sep-count:${histSepCount}">${balls}</div></div>${action}`;
@@ -2707,9 +2721,9 @@ function renderROI(){
     <div style="margin-top:10px;font-size:11px;color:var(--sub2)">Трата симулируется автоматически. Введи выигрыши вручную:</div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <input type="number" id="won-inp" placeholder="Сумма выигрыша ${currency}" class="num-inp" style="flex:1">
-      <button onclick="addWon()" style="padding:10px 14px;border-radius:10px;background:#34c759;color:#fff;border:none;font-weight:700;cursor:pointer;white-space:nowrap">+ Добавить</button>
+      <button data-loto-event-click="addWon()" style="padding:10px 14px;border-radius:10px;background:#34c759;color:#fff;border:none;font-weight:700;cursor:pointer;white-space:nowrap">+ Добавить</button>
     </div>
-    <button onclick="resetROI()" style="margin-top:8px;width:100%;padding:10px;border-radius:10px;border:none;background:var(--bg3);color:var(--sub);font-size:12px;cursor:pointer">Сбросить ROI</button>
+    <button data-loto-event-click="resetROI()" style="margin-top:8px;width:100%;padding:10px;border-radius:10px;border:none;background:var(--bg3);color:var(--sub);font-size:12px;cursor:pointer">Сбросить ROI</button>
   </div>`;
 }
 
@@ -2781,7 +2795,7 @@ async function renderPrizes(){
   });
   if(visible<withPayouts.length){
     const moreText=`Показать ещё · ${Math.min(15,withPayouts.length-visible)} из ${withPayouts.length-visible}`;
-    html+=`<button type="button" onclick="showMorePrizes()" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--gold);background:var(--bg2);color:var(--fg);font-weight:800;cursor:pointer">${moreText}</button>`;
+    html+=`<button type="button" data-loto-event-click="showMorePrizes()" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--gold);background:var(--bg2);color:var(--fg);font-weight:800;cursor:pointer">${moreText}</button>`;
   }
   html+=`<div style="font-size:10px;color:var(--sub2);margin-top:10px;text-align:center">Призы и победители открыты бесплатно · ${withPayouts.length} тиражей</div>`;
   outEl.innerHTML=html;
@@ -3167,7 +3181,7 @@ async function applyLang(){
 function openLangPicker(){
   const grid=document.getElementById('lang-grid');
   grid.innerHTML=LANG_ORDER.map(c=>
-    `<button class="lang-opt${c===curLang?' cur':''}" onclick="selectLang('${c}')">
+    `<button class="lang-opt${c===curLang?' cur':''}" data-loto-event-click="selectLang('${c}')">
       <span class="lang-flag">${LANG_FLAGS[c]}</span>
       <span class="lang-name">${escapeHtml(LOCALE_CATALOG[c].name)}</span>
       ${c===curLang?'<span class="lang-check">✓</span>':''}
@@ -3552,9 +3566,9 @@ function IF_tab(t){
   const glow=s=>'box-shadow:inset 0 -.3em .45em rgba(0,0,0,.28),inset 0 .1em .16em rgba(255,255,255,.4),0 0 '+(2+s.score/8)+'px '+(s.score/28)+'px rgba(233,180,76,'+(0.08+s.score/140)+')';
   const ballCls='rb-m-'+l.cls,bBallCls='rb-b-'+l.cls;
   if(t==='field'){
-    body.innerHTML='<div class="if-grid">'+A.scores.map(s=>'<div class="if-ball '+ballCls+'" style="'+glow(s)+';opacity:'+(0.55+s.score/220)+'" onclick="IF_ballInfo('+s.n+',false)">'+s.n+'</div>').join('')+'</div>'+
-      (Ab?'<div class="if-seclbl">'+(l.bonusName||'Дополнительные шары')+'</div><div class="if-grid">'+Ab.scores.map(s=>'<div class="if-ball '+bBallCls+'" style="'+glow(s)+';opacity:'+(0.55+s.score/220)+'" onclick="IF_ballInfo('+s.n+',true)">'+s.n+'</div>').join('')+'</div>':'')+
-      '<div class="if-note">Нажми на шар — увидишь его структурный балл и связи. Свечение отражает Structure Score. <b onclick="IF_scoreInfo()" style="color:var(--gold);cursor:pointer">ⓘ Что такое структурный балл</b></div>';
+    body.innerHTML='<div class="if-grid">'+A.scores.map(s=>'<div class="if-ball '+ballCls+'" style="'+glow(s)+';opacity:'+(0.55+s.score/220)+'" data-loto-event-click="IF_ballInfo('+s.n+',false)">'+s.n+'</div>').join('')+'</div>'+
+      (Ab?'<div class="if-seclbl">'+(l.bonusName||'Дополнительные шары')+'</div><div class="if-grid">'+Ab.scores.map(s=>'<div class="if-ball '+bBallCls+'" style="'+glow(s)+';opacity:'+(0.55+s.score/220)+'" data-loto-event-click="IF_ballInfo('+s.n+',true)">'+s.n+'</div>').join('')+'</div>':'')+
+      '<div class="if-note">Нажми на шар — увидишь его структурный балл и связи. Свечение отражает Structure Score. <b data-loto-event-click="IF_scoreInfo()" style="color:var(--gold);cursor:pointer">ⓘ Что такое структурный балл</b></div>';
   }
   if(t==='links'){
     const top=[...A.pairs.lift.values()].filter(p=>p.obs>=2).sort((a,b)=>b.lift-a.lift).slice(0,14);
@@ -3577,7 +3591,7 @@ function IF_tab(t){
     body.innerHTML=rows.map((r,i)=>'<div class="if-rowcard"><div style="display:flex;justify-content:space-between;align-items:center"><span class="if-rowtype">'+(i+1)+' · '+r.typeName+'</span><span class="if-rowscore">Structure Score '+r.fieldScore+'</span></div>'+
       '<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball '+ballCls+'">'+n+'</div>').join('')+(r.b&&r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball '+bBallCls+'">'+n+'</div>').join(''):'')+'</div>'+
       '<div class="if-rowexp">'+r.explanation+' Новых пар: '+r.newPairs+(r.maxOverlap?' · пересечение с другими строками: до '+r.maxOverlap+' чисел':'')+'</div></div>').join('')+
-      '<button class="btn-draw '+l.cls+'" style="margin-top:6px" onclick="IF_useRows()">Использовать 10 строк в симуляторе</button>';
+      '<button class="btn-draw '+l.cls+'" style="margin-top:6px" data-loto-event-click="IF_useRows()">Использовать 10 строк в симуляторе</button>';
   }
 }
 function IF_ballInfo(n,isBonus){
@@ -3719,8 +3733,8 @@ const PICK_MODES=[
 function CONS_openPick(){
   if(!CONS_state)return;
   document.getElementById('cons-ov').classList.remove('show');
-  document.getElementById('pick-counts').innerHTML=[1,3,5,10,20].map(n=>'<button class="pick-cnt'+(n===CONS_state.pickN?' on':'')+'" onclick="PICK_setN('+n+')">'+n+'</button>').join('');
-  document.getElementById('pick-modes').innerHTML=PICK_MODES.map(m=>'<div class="pick-mode'+(m[0]===CONS_state.pickMode?' on':'')+'" onclick="PICK_setMode(\''+m[0]+'\')"><div><div class="pick-mode-t">'+m[1]+'</div><div class="pick-mode-d">'+m[2]+'</div></div></div>').join('');
+  document.getElementById('pick-counts').innerHTML=[1,3,5,10,20].map(n=>'<button class="pick-cnt'+(n===CONS_state.pickN?' on':'')+'" data-loto-event-click="PICK_setN('+n+')">'+n+'</button>').join('');
+  document.getElementById('pick-modes').innerHTML=PICK_MODES.map(m=>'<div class="pick-mode'+(m[0]===CONS_state.pickMode?' on':'')+'" data-loto-event-click="PICK_setMode(\''+m[0]+'\')"><div><div class="pick-mode-t">'+m[1]+'</div><div class="pick-mode-d">'+m[2]+'</div></div></div>').join('');
   document.getElementById('pick-go').textContent='Сформировать '+CONS_state.pickN+' '+rowWord(CONS_state.pickN);
   document.getElementById('pick-ov').classList.add('show');
 }
@@ -3798,7 +3812,7 @@ async function PICK_go(){
     const supModels=new Set(),supFams=new Set();
     r.m.forEach(n=>{st.modelRows.forEach(mr=>{if(mr.m.includes(n)){supModels.add(mr.modelId);supFams.add(mr.family);}});});
     r._exp='Числа строки поддержали '+supModels.size+' моделей из '+CONS_MODELS.length+' ('+supFams.size+' семейств). '+(r.explanation||'')+' Включена в матрицу за '+(st.pickMode==='coverage'?'вклад в покрытие пар':(st.pickMode==='minoverlap'?'минимальное пересечение':'сочетание Candidate Score и разнообразия'))+'. Анализ выполнен по '+ctx.currentDraws.length+' последним тиражам '+ctx.lotteryName+'.';
-    return '<div class="if-rowcard"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="if-rowtype">Строка '+(i+1)+' · '+who+'</span><span class="if-rowscore">CS '+r.cs+'<span class="mx-info" onclick="MATRIX_info('+i+')">ⓘ</span></span></div>'+
+    return '<div class="if-rowcard"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="if-rowtype">Строка '+(i+1)+' · '+who+'</span><span class="if-rowscore">CS '+r.cs+'<span class="mx-info" data-loto-event-click="MATRIX_info('+i+')">ⓘ</span></span></div>'+
       '<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b&&r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>'+
       '<div class="if-rowexp">Добавляет '+r.newPairs+' новых пар'+(i?' · пересечение с предыдущими: до '+r.overlapPrev+' чисел':'')+'</div></div>';
   }).join('');
@@ -3939,7 +3953,7 @@ function SUP_open(src){
   const processingRows=prepareRowsForGroupAnalysis(srcRows,'judge');
   SUP_state={src,srcRows:processingRows,n:Math.min(3,processingRows.length)};
   document.getElementById('sup-src').textContent=label;
-  document.getElementById('sup-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===SUP_state.n?' on':'')+'" onclick="SUP_setN('+n+',this)">'+n+'</button>').join('');
+  document.getElementById('sup-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===SUP_state.n?' on':'')+'" data-loto-event-click="SUP_setN('+n+',this)">'+n+'</button>').join('');
   document.getElementById('sup-result').innerHTML='';
   document.getElementById('sup-go').style.display='';
   document.getElementById('sup-ov').classList.add('show');
@@ -3990,8 +4004,8 @@ async function SUP_go(){
   res.innerHTML='<div class="if-seclbl">Вердикт судьи · '+verdict.length+' '+rowWord(verdict.length)+'</div>'+
     issued.map((r,i)=>'<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>').join('')+
     '<div class="if-note">Судья объединил голоса твоих рядов ('+st.srcRows.length+') со структурным баллом последних '+(ctx.currentDraws.length)+' тиражей и собрал разнообразный вердикт. Это исследовательские строки, а не прогноз.</div>'+
-    '<button class="btn-draw '+l.cls+'" style="margin-top:10px" onclick="SUP_use()">Использовать в симуляторе</button>'+
-    '<button class="btn-exp" style="margin-top:8px" onclick="SUP_share()">📤 Поделиться вердиктом</button>';
+    '<button class="btn-draw '+l.cls+'" style="margin-top:10px" data-loto-event-click="SUP_use()">Использовать в симуляторе</button>'+
+    '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="SUP_share()">📤 Поделиться вердиктом</button>';
   document.getElementById('sup-go').style.display='none';
 }
 function SUP_use(){
@@ -4033,7 +4047,7 @@ async function PERIOD_open(){
   [150,100,50].forEach(k=>{if(n>k)presets.push([k,'Последние '+k]);});
   document.getElementById('period-note').textContent='Для '+(l.short||l.name)+' доступно '+n+' тиражей. Все модели, структурный анализ и консенсус будут считать по выбранному периоду.';
   const curW=IF_getRange()?-1:IF_getWin();
-  document.getElementById('period-presets').innerHTML=presets.map(([v,lbl])=>'<div class="pick-mode'+(v===curW?' on':'')+'" onclick="PERIOD_set('+v+')"><div class="pick-mode-t">'+lbl+'</div></div>').join('');
+  document.getElementById('period-presets').innerHTML=presets.map(([v,lbl])=>'<div class="pick-mode'+(v===curW?' on':'')+'" data-loto-event-click="PERIOD_set('+v+')"><div class="pick-mode-t">'+lbl+'</div></div>').join('');
   document.getElementById('period-custom').max=n;
   document.getElementById('period-ov').classList.add('show');
 }
@@ -4355,7 +4369,7 @@ async function renderCrowd(dM,dB){
 
 
 /* ═══════════ КВАНТОВО-АСТРАЛЬНЫЙ ГЕНЕРАТОР ═══════════
-   Настоящая квантовая случайность (ANU QRNG / крипто-энтропия) +
+   Криптографическая энтропия устройства +
    настоящая астрономия (фаза Луны, Луна в знаке на дату тиража).
    Символическая интерпретация, не предсказание — шансы не меняет. */
 var QA_state=null;
@@ -4398,9 +4412,9 @@ function QA_open(){
   const dd=QA_nextDrawDate(),ph=QA_moonPhase(dd),ms=QA_moonSign(dd);
   document.getElementById('qa-ctx').textContent=l.name+' · тираж '+dd.toLocaleDateString(appLocale(),{weekday:'short',day:'numeric',month:'short'});
   const zs=QA_getSign();
-  document.getElementById('qa-signs').innerHTML=QA_ZODIAC.map((z,i)=>'<div class="qa-sign'+(i===zs?' on':'')+'" onclick="QA_setSign('+i+',this)"><div class="z">'+z[0]+'</div><div class="zn">'+z[1]+'</div></div>').join('');
+  document.getElementById('qa-signs').innerHTML=QA_ZODIAC.map((z,i)=>'<div class="qa-sign'+(i===zs?' on':'')+'" data-loto-event-click="QA_setSign('+i+',this)"><div class="z">'+z[0]+'</div><div class="zn">'+z[1]+'</div></div>').join('');
   document.getElementById('qa-moon').innerHTML=ph.emoji+' <b>'+ph.name+'</b> · освещённость '+ph.illum+'%<br>Луна в знаке <b>'+QA_ZODIAC[ms][0]+' '+QA_ZODIAC[ms][1]+'</b> на момент тиража';
-  document.getElementById('qa-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===QA_state.n?' on':'')+'" onclick="QA_setN('+n+',this)">'+n+'</button>').join('');
+  document.getElementById('qa-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===QA_state.n?' on':'')+'" data-loto-event-click="QA_setN('+n+',this)">'+n+'</button>').join('');
   document.getElementById('qa-result').innerHTML='';
   QA_refreshBirthUI();
   document.getElementById('qa-ov').classList.add('show');
@@ -4438,9 +4452,9 @@ async function QA_go(){
     (rows.meta.natal?'<br>Натальная Луна: '+QA_ZODIAC[rows.meta.natal.moonSign][0]+' '+QA_ZODIAC[rows.meta.natal.moonSign][1]+(rows.meta.natal.hasTime?' (по времени рождения)':' (~полдень)')+' · Число судьбы: '+rows.meta.natal.lifePath:'')+
     '<br>Тираж: '+drawDate.toLocaleString(appLocale(),{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'<br>Источник случайности: '+src+
     (rows.meta.baseN?'<br>Данные базы: структурные веса рассчитаны по '+rows.meta.baseN+' тиражам':'')+'</div>'+
-    '<button class="btn-draw euro qa-go" style="margin-top:12px" onclick="QA_use()">Использовать в симуляторе</button>'+
-    '<button class="btn-exp" style="margin-top:8px;border-color:#C9A55A;color:#F5CE7B" onclick="HORO_open()">📜 Гороскоп на сегодня</button>'+
-    '<button class="btn-exp" style="margin-top:8px;border-color:#6B4BA8;color:#E8DEFA" onclick="QA_share()">📤 Поделиться со Вселенной</button>';
+    '<button class="btn-draw euro qa-go" style="margin-top:12px" data-loto-event-click="QA_use()">Использовать в симуляторе</button>'+
+    '<button class="btn-exp" style="margin-top:8px;border-color:#C9A55A;color:#F5CE7B" data-loto-event-click="HORO_open()">📜 Гороскоп на сегодня</button>'+
+    '<button class="btn-exp" style="margin-top:8px;border-color:#6B4BA8;color:#E8DEFA" data-loto-event-click="QA_share()">📤 Поделиться со Вселенной</button>';
 }
 function QA_use(){
   const st=QA_state;if(!st||!st.rows)return;
@@ -4600,7 +4614,7 @@ function HORO_text(sign){
 }
 function HORO_open(sign){
   HORO_sign=(sign!=null?sign:(QA_getSign()||0));
-  document.getElementById('horo-signs').innerHTML=QA_ZODIAC.map((z,i)=>'<div class="horo-schip'+(i===HORO_sign?' on':'')+'" onclick="HORO_open('+i+')">'+z[0]+'</div>').join('');
+  document.getElementById('horo-signs').innerHTML=QA_ZODIAC.map((z,i)=>'<div class="horo-schip'+(i===HORO_sign?' on':'')+'" data-loto-event-click="HORO_open('+i+')">'+z[0]+'</div>').join('');
   document.getElementById('horo-glyph').textContent=QA_ZODIAC[HORO_sign][0];
   const sg=document.getElementById('horo-seal-glyph');if(sg)sg.textContent=QA_ZODIAC[HORO_sign][0];
   document.getElementById('horo-title').textContent=QA_ZODIAC[HORO_sign][1];
@@ -4667,7 +4681,7 @@ function GENN_open(mode){
   GENN_mode=mode||'wheel';
   const cur=getGenCount();
   document.getElementById('genn-note').textContent=GENN_mode==='wheel'?'Колёсная матрица построит покрытие пар на выбранное число рядов.':'Количество применится ко всем моделям генерации.';
-  document.getElementById('genn-chips').innerHTML=[1,3,5,10,15,20,30,40,50].map(n=>'<button class="pick-cnt'+(n===cur?' on':'')+'" onclick="GENN_set('+n+',this)">'+n+'</button>').join('');
+  document.getElementById('genn-chips').innerHTML=[1,3,5,10,15,20,30,40,50].map(n=>'<button class="pick-cnt'+(n===cur?' on':'')+'" data-loto-event-click="GENN_set('+n+',this)">'+n+'</button>').join('');
   document.getElementById('genn-custom').value='';
   document.getElementById('genn-go').textContent=GENN_mode==='wheel'?'📐 Сформировать матрицу':'Применить';
   document.getElementById('genn-ov').classList.add('show');
@@ -4744,7 +4758,7 @@ async function ADV_open(algo){
   document.getElementById('adv-draw').innerHTML='🎯 Исследовательский набор для выбранной даты:<br><b>'+dd.toLocaleString(appLocale(),{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})+'</b> · '+when;
   const draws=IF_window(await loadD(cur));
   document.getElementById('adv-sub').textContent=l.name+' · анализ по '+draws.length+' тиражам выбранного периода';
-  document.getElementById('adv-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===ADV_state.n?' on':'')+'" onclick="ADV_setN('+n+',this)">'+n+'</button>').join('');
+  document.getElementById('adv-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===ADV_state.n?' on':'')+'" data-loto-event-click="ADV_setN('+n+',this)">'+n+'</button>').join('');
   document.getElementById('adv-result').innerHTML='';
   document.getElementById('adv-go').style.display='';
   document.getElementById('adv-ov').classList.add('show');
@@ -4772,10 +4786,10 @@ async function ADV_go(){
     '<div class="if-seclbl">Совет модели · '+st.rows.length+' '+rowWord(st.rows.length)+'</div>'+
     st.rows.map(r=>'<div class="adv-row">'+ADV_ballsHtml(r,l)+'</div>').join('')+
     '<div class="if-note" style="margin-top:8px">«'+(ADV_NAMES[st.algo]||st.algo)+'» советую применить эти числа на тираж '+dd.toLocaleDateString(appLocale(),{weekday:'short',day:'numeric',month:'short'})+'.</div>'+
-    '<button class="btn-draw '+l.cls+'" style="margin-top:12px" onclick="ADV_use()">Использовать в билете</button>'+
+    '<button class="btn-draw '+l.cls+'" style="margin-top:12px" data-loto-event-click="ADV_use()">Использовать в билете</button>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'+
-    '<button class="btn-exp" style="margin:0" onclick="ADV_share()">📤 Поделиться</button>'+
-    '<button class="btn-exp" style="margin:0" onclick="ADV_judge()">⚖️ Вердикт судьи</button></div>';
+    '<button class="btn-exp" style="margin:0" data-loto-event-click="ADV_share()">📤 Поделиться</button>'+
+    '<button class="btn-exp" style="margin:0" data-loto-event-click="ADV_judge()">⚖️ Вердикт судьи</button></div>';
 }
 /* Судья-следователь: проверяет каждое число совета силой поля и исправляет слабые */
 async function ADV_judge(){
@@ -4829,7 +4843,7 @@ var SUPC_pending=null; /* {algo, reason} — активное направлен
 function SUPC_open(){
   setTimeout(()=>SUPC_way('astro'),30);
   const zs=QA_getSign();
-  document.getElementById('supc-signs').innerHTML=QA_ZODIAC.map((z,i)=>'<div class="supc-sign'+(i===zs?' on':'')+'" onclick="SUPC_setSign('+i+',this)"><div>'+z[0]+'</div><div class="zn">'+z[1]+'</div></div>').join('');
+  document.getElementById('supc-signs').innerHTML=QA_ZODIAC.map((z,i)=>'<div class="supc-sign'+(i===zs?' on':'')+'" data-loto-event-click="SUPC_setSign('+i+',this)"><div>'+z[0]+'</div><div class="zn">'+z[1]+'</div></div>').join('');
   const b=QA_birth();
   document.getElementById('supc-birthval').textContent=b?(String(b.d).padStart(2,'0')+'.'+String(b.m).padStart(2,'0')+'.'+b.y+(b.hh!=null?' · '+String(b.hh).padStart(2,'0')+':'+String(b.mm).padStart(2,'0'):'')):'не указана';
   document.getElementById('supc-result').innerHTML='';
@@ -4879,7 +4893,7 @@ async function SUPC_route(){
   SUPC_pending={algo,reason};
   document.getElementById('supc-result').innerHTML=
     '<div class="supc-route"><b>⚖️ Моё направление: '+(ADV_NAMES[algo]||algo)+'</b><br>'+reason+'<br><br>'+why.charAt(0).toUpperCase()+why.slice(1)+'.<br><br>Идите к этой модели, выберите количество рядов, получите её совет — и <b>возвращайтесь ко мне за решающим вердиктом</b>: я рассмотрю дело сам.</div>'+
-    '<button class="btn-draw '+l.cls+'" style="margin-top:12px" onclick="SUPC_goModel()">Перейти к модели →</button>';
+    '<button class="btn-draw '+l.cls+'" style="margin-top:12px" data-loto-event-click="SUPC_goModel()">Перейти к модели →</button>';
 }
 function SUPC_goModel(){
   if(!SUPC_pending)return;
@@ -4897,7 +4911,7 @@ function SUPC_way(w){
   document.getElementById('supc-way-db').classList.toggle('on',w==='db');
   document.getElementById('supc-result').innerHTML='';
   if(w==='db'){
-    document.getElementById('supcdb-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===SUPC_dbN?' on':'')+'" onclick="SUPC_dbSetN('+n+',this)">'+n+'</button>').join('');
+    document.getElementById('supcdb-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===SUPC_dbN?' on':'')+'" data-loto-event-click="SUPC_dbSetN('+n+',this)">'+n+'</button>').join('');
   }
 }
 function SUPC_dbSetN(n,el){SUPC_dbN=n;document.querySelectorAll('#supcdb-counts .pick-cnt').forEach(b=>b.classList.toggle('on',b===el));}
@@ -4972,8 +4986,8 @@ async function SUPC_db(){
     '<div class="if-seclbl">Совет судьи · '+data.rows.length+' '+rowWord(data.rows.length)+'</div>'+
     data.rows.map(r=>'<div class="adv-row">'+ADV_ballsHtml(r,l)+'</div>').join('')+
     '<div class="if-note" style="margin-top:8px">Лидеры прошлого не повышают шанс будущего тиража — гарантий не существует. Это исследование структуры базы.</div>'+
-    '<button class="btn-draw '+l.cls+'" style="margin-top:12px" onclick="SUPC_dbUse()">Использовать в билете</button>'+
-    '<button class="btn-exp" style="margin-top:8px" onclick="SUPC_dbShare()">📤 Поделиться</button>';
+    '<button class="btn-draw '+l.cls+'" style="margin-top:12px" data-loto-event-click="SUPC_dbUse()">Использовать в билете</button>'+
+    '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="SUPC_dbShare()">📤 Поделиться</button>';
 }
 function SUPC_dbUse(){
   if(!window.SUPC_dbRows)return;
@@ -5068,7 +5082,7 @@ function JUDGE_render(ns){
   st.plan.forEach((p,ri)=>{
     html+='<div class="pdx-jrow"><div class="pdx-jhead">Ряд '+(ri+1)+'</div>'+JUDGE_ballsHtml(p,l);
     if(p.swaps.length){
-      html+='<div class="pdx-swaps">'+p.swaps.map((s,si)=>'<button class="pdx-swap'+(s.apply?' on':'')+'" aria-pressed="'+(s.apply?'true':'false')+'" onclick="JUDGE_toggle(\''+ns+'\','+ri+','+si+')">'+(s.apply?'✓ ':'')+s.from+' → '+s.to+'<span class="pdx-sd">балл '+s.sf+'→'+s.st+'</span></button>').join('')+'</div>';
+      html+='<div class="pdx-swaps">'+p.swaps.map((s,si)=>'<button class="pdx-swap'+(s.apply?' on':'')+'" aria-pressed="'+(s.apply?'true':'false')+'" data-loto-event-click="JUDGE_toggle(\''+ns+'\','+ri+','+si+')">'+(s.apply?'✓ ':'')+s.from+' → '+s.to+'<span class="pdx-sd">балл '+s.sf+'→'+s.st+'</span></button>').join('')+'</div>';
     }else{
       html+='<div class="pdx-ok">Возражений нет — ряд выдержал проверку поля ✅</div>';
     }
@@ -5096,10 +5110,10 @@ function JUDGE_render(ns){
     '<div class="judge-action-panel">';
   if(proposed>0){
     html+='<div class="judge-bulk">'+
-      '<button class="btn-exp" style="margin:0" onclick="JUDGE_setAll(\''+ns+'\',true)">Включить все замены</button>'+
-      '<button class="btn-exp" style="margin:0" onclick="JUDGE_setAll(\''+ns+'\',false)">Снять все замены</button></div>';
+      '<button class="btn-exp" style="margin:0" data-loto-event-click="JUDGE_setAll(\''+ns+'\',true)">Включить все замены</button>'+
+      '<button class="btn-exp" style="margin:0" data-loto-event-click="JUDGE_setAll(\''+ns+'\',false)">Снять все замены</button></div>';
   }
-  html+='<button class="btn-draw '+l.cls+'" onclick="JUDGE_apply(\''+ns+'\')">'+applyText+'</button>';
+  html+='<button class="btn-draw '+l.cls+'" data-loto-event-click="JUDGE_apply(\''+ns+'\')">'+applyText+'</button>';
   html+='</div>';
   document.getElementById(st.mountId).innerHTML=html;
 }
@@ -5147,7 +5161,7 @@ function PDX_open(){
   PDX_state={useBase:true,n:Math.min(5,getGenCount()),rows:null};
   document.getElementById('pdx-sub').textContent=lotteryName(cur)+' · 5 контринтуитивных парадоксов лото';
   PDX_renderMode();
-  document.getElementById('pdx-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===PDX_state.n?' on':'')+'" onclick="PDX_setN('+n+',this)">'+n+'</button>').join('');
+  document.getElementById('pdx-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===PDX_state.n?' on':'')+'" data-loto-event-click="PDX_setN('+n+',this)">'+n+'</button>').join('');
   document.getElementById('pdx-result').innerHTML='';
   document.getElementById('pdx-go').style.display='';
   document.getElementById('pdx-ov').classList.add('show');
@@ -5189,13 +5203,13 @@ function PDX_renderRows(){
   document.getElementById('pdx-result').innerHTML=
     '<div class="if-seclbl">♾️ Парадоксы · '+st.rows.length+' '+rowWord(st.rows.length)+' '+(st.useBase?'(с базой тиражей)':'(без базы)')+'</div>'+
     st.rows.map(r=>PDX_rowHtml(r,l)).join('')+
-    '<button class="btn-draw '+l.cls+'" style="margin-top:12px" onclick="PDX_use()">Использовать в билете</button>'+
+    '<button class="btn-draw '+l.cls+'" style="margin-top:12px" data-loto-event-click="PDX_use()">Использовать в билете</button>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'+
-    '<button class="btn-exp" style="margin:0" onclick="PDX_copy(this)">📋 Копировать</button>'+
-    '<button class="btn-exp" style="margin:0" onclick="PDX_share()">📤 Поделиться</button></div>'+
-    '<button class="btn-exp" style="margin-top:8px" onclick="PDX_judge()">⚖️ Что скажет Верховный судья</button>'+
+    '<button class="btn-exp" style="margin:0" data-loto-event-click="PDX_copy(this)">📋 Копировать</button>'+
+    '<button class="btn-exp" style="margin:0" data-loto-event-click="PDX_share()">📤 Поделиться</button></div>'+
+    '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="PDX_judge()">⚖️ Что скажет Верховный судья</button>'+
     '<div id="pdx-jmount" style="margin-top:6px"></div>'+
-    '<button class="btn-exp" style="margin-top:10px" onclick="PDX_go()">🔄 Пересобрать парадоксы</button>';
+    '<button class="btn-exp" style="margin-top:10px" data-loto-event-click="PDX_go()">🔄 Пересобрать парадоксы</button>';
 }
 function PDX_use(){
   const st=PDX_state;if(!st||!st.rows)return;
@@ -5241,8 +5255,8 @@ async function JC_open(){
     '<div class="jc-intro"><b>'+escapeHtml(appText('Разбор моей комбинации'))+'</b><br>'+
     escapeHtml(appText('Судья проверит заполненные ряды по истории выбранного периода: частота, пары, пропуски, зоны, чётность и суммы. Анализ начнётся только после подтверждения. Закройте окно, если хотите отменить без запуска.'))+
     '</div><div class="jc-actions">'+
-    '<button type="button" class="btn-close2" onclick="JC_close()">'+escapeHtml(appText('Отмена'))+'</but'+'ton>'+
-    '<button type="button" class="btn-draw" onclick="JC_continue()">'+escapeHtml(appText('Понятно / Продолжить'))+'</but'+'ton>'+
+    '<button type="button" class="btn-close2" data-loto-event-click="JC_close()">'+escapeHtml(appText('Отмена'))+'</but'+'ton>'+
+    '<button type="button" class="btn-draw" data-loto-event-click="JC_continue()">'+escapeHtml(appText('Понятно / Продолжить'))+'</but'+'ton>'+
     '</div>';
   document.getElementById('jc-ov').classList.add('show','jc-intro-mode');
 }

@@ -1,25 +1,34 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the 9006b9a placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 1f6d058 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-9006b9a';
+const CACHE_VERSION='loto-shell-v1f6d058';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
-const PRECACHE=[
-  './','./index.html','./commercial-config.js','./auth-client.js','./native-bridge.js',
-  './i18n-catalog.js','./i18n-runtime.js','./commercial-runtime.js','./pwa-runtime.js',
+const CORE_PRECACHE=[
+  './','./index.html','./commercial-config.js',
+  './i18n-catalog.js','./i18n-runtime.js','./commercial-runtime.js','./pwa-runtime.js','./native-loader.js',
   './notifications-runtime.js',
   './boot-runtime.js','./app-runtime.js','./manifest.webmanifest','./favicon-64.png',
-  './icon-192.png','./icon-512.png','./jackpots.json','./prizes.json','./results.json',
+  './icon-192.png','./icon-512.png','./results.json',
 ];
-const NEVER_CACHE=/(?:results-archive|\/functions\/v1\/|\/auth\/v1\/|pro-(?:analysis|compute)|access-state|consume-feature|start-trial|revenuecat|token|session)/i;
+const OPTIONAL_PRECACHE=[
+  './safe-payment.html','./safe-payment-runtime.js','./auth-client.js','./native-bridge.js','./billing-web.js',
+  './jackpots.json','./prizes.json',
+];
+const SUPPORTED_LOCALES=new Set(['ru','en','no','sv','da','fi','de','fr','es','it','pt','pl','nl','et','lv','lt','uk']);
+const NEVER_CACHE=/(?:results-archive|\/functions\/v1\/|\/auth\/v1\/|pro-(?:analysis|compute)|access-state|consume-feature|start-trial|billing-(?:status|reconcile)|checkout|subscription|management|payment-return|revenuecat|paddle|token|session)/i;
 
 self.addEventListener('install',event=>{
   // Take over immediately so a version bump reaches returning users / installed
   // PWAs on the very next visit (with clients.claim() on activate), and the old
   // cache (stale index.html / JS) is purged — no manual Safari cache clearing.
   self.skipWaiting();
-  event.waitUntil(caches.open(SHELL_CACHE).then(cache=>cache.addAll(PRECACHE.map(url=>new Request(url,{cache:'reload'})))));
+  event.waitUntil(caches.open(SHELL_CACHE).then(async cache=>{
+    const request=url=>new Request(url,{cache:'reload'});
+    await cache.addAll(CORE_PRECACHE.map(request));
+    await Promise.allSettled(OPTIONAL_PRECACHE.map(url=>cache.add(request(url))));
+  }));
 });
 
 self.addEventListener('activate',event=>{
@@ -31,7 +40,16 @@ self.addEventListener('activate',event=>{
 });
 
 self.addEventListener('message',event=>{
-  if(event.data?.type==='SKIP_WAITING')self.skipWaiting();
+  if(event.data?.type==='SKIP_WAITING'){
+    self.skipWaiting();
+    return;
+  }
+  if(event.data?.type!=='CACHE_LOCALE')return;
+  const code=String(event.data.code||'').toLowerCase();
+  if(!SUPPORTED_LOCALES.has(code))return;
+  event.waitUntil(caches.open(SHELL_CACHE).then(cache=>
+    cache.add(new Request(`./i18n/${code}.json`))
+  ).catch(()=>undefined));
 });
 
 function cacheable(request,response){

@@ -1,14 +1,22 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="9006b9a" data-build-ts="2026-08-23T16:43:18.533Z">
+<html lang="ru" data-build="1f6d058" data-build-ts="2026-08-23T18:26:32.525Z">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self'; script-src-elem 'self'; script-src-attr 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co https://redsprut.github.io; worker-src 'self'; manifest-src 'self'; frame-src 'self'; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=20260726-4"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com; font-src 'self'; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
+<script src="./boot-runtime.js?v=1f6d058"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Loto Simulator</title>
+<meta name="description" content="Lottery draw simulator and analytics tool. No ticket sales, bets, or guaranteed winnings.">
+<meta property="og:title" content="Loto Simulator">
+<meta property="og:description" content="Lottery draw simulator and analytics tool. No ticket sales, bets, or guaranteed winnings.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://redsprut.github.io/loto-simulator-web/">
+<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="https://redsprut.github.io/loto-simulator-web/">
 <link rel="icon" href="./favicon-64.png?v=183" type="image/png" sizes="64x64">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=183">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -1293,7 +1301,8 @@ body.light .mb[class*="miss-"]{text-shadow:none}
 .pro-price:focus-visible{outline:3px solid rgba(179,38,30,.32);outline-offset:2px}
 .pro-price[aria-pressed="true"]{border-color:#B3261E;box-shadow:0 0 0 2px rgba(179,38,30,.18),0 8px 20px rgba(120,20,10,.22)}
 .pro-price .pro-per{font-size:12px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#8A6B2E}
-.pro-price .pro-amt{font-family:'Unbounded',sans-serif;font-weight:900;font-size:26px;line-height:1.1;margin-top:5px;background:linear-gradient(175deg,#B8860B,#7A5410);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pro-price .pro-amt{font-family:'Unbounded',sans-serif;font-weight:900;font-size:20px;line-height:1.2;margin-top:5px;min-height:48px;display:flex;align-items:center;justify-content:center;overflow-wrap:anywhere;background:linear-gradient(175deg,#B8860B,#7A5410);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pro-price:disabled{opacity:.5;cursor:not-allowed;transform:none}.pro-permonth{min-height:18px;margin-top:4px;font-size:11px;font-weight:800;color:#6B5128}
 .pro-price.best{border-color:#B3261E;box-shadow:0 6px 18px rgba(120,20,10,.24),inset 0 1px 2px rgba(255,255,255,.6)}
 .pro-best{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:9.5px;font-weight:900;letter-spacing:.8px;text-transform:uppercase;color:#fff;background:linear-gradient(160deg,#E85A4A,#B3261E);padding:2px 10px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 6px rgba(120,20,10,.4)}
 .pro-selected-plan{margin-top:9px;text-align:center;color:#5A3E0C;font-size:13px;font-weight:900}.pro-renewal-copy{margin-top:7px;color:#6B4A0E;font-size:11.5px;line-height:1.5;text-align:center;font-weight:700}
@@ -1328,6 +1337,7 @@ body.light .mb[class*="miss-"]{text-shadow:none}
 .pro-auth-message[data-kind="error"]{border-color:rgba(122,20,16,.32);background:rgba(179,38,30,.10);color:#7A1410}
 .pro-auth-message[hidden]{display:none!important}
 .pro-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:13px}.pro-actions .btn-exp{margin:0;min-height:46px}.pro-actions .wide{grid-column:1/-1}.pro-actions button:disabled{opacity:.45;cursor:not-allowed}
+.pro-legal-links{grid-template-columns:1fr}.pro-legal-links .btn-exp{display:flex;align-items:center;justify-content:center;text-decoration:none;overflow-wrap:anywhere;text-align:center}
 .hist-pro-card{position:relative;overflow:hidden;margin:12px 0 4px;padding:18px;border:1.5px solid var(--gold);border-radius:18px;background:linear-gradient(145deg,var(--bg2),var(--bg3));text-align:center;box-shadow:var(--card-shadow)}
 .hist-pro-blur{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;filter:blur(5px);opacity:.38;pointer-events:none;user-select:none;margin-bottom:13px}.hist-pro-blur span{height:34px;border-radius:999px;background:linear-gradient(145deg,var(--gold2),var(--gold))}
 .hist-pro-title{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:900;color:var(--gold)}.hist-pro-copy{font-size:12.5px;line-height:1.5;color:var(--sub2);margin:7px auto 10px;max-width:330px}.hist-pro-card .btn-exp{margin:0}
@@ -1451,23 +1461,23 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 </div>
 
 <div class="hdr" id="main-hdr">
-  <button class="hdr-back" onclick="handleBack()">‹</button>
+  <button class="hdr-back" data-loto-event-click="handleBack()">‹</button>
   <img class="hdr-logo" src="./icon-192.png?v=183" alt="Loto Simulator">
   <button class="hdr-icon hdr-bell" id="bell-btn" type="button" aria-label="Уведомления" title="Уведомления" data-i18n-ignore>
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9a6 6 0 0 1 12 0c0 5 1.6 6.3 2 7H4c.4-.7 2-2 2-7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
     <span class="bell-badge" id="bell-badge" hidden aria-hidden="true">0</span>
   </button>
   <div class="hdr-title" id="hdr-title">Fyll ut minst 2 rekker</div>
-  <button class="hdr-icon" onclick="cycleLang()" id="lang-btn" title="Language" style="font-size:12px;font-weight:800;font-family:'Manrope',sans-serif">RU</button>
-  <button class="hdr-icon" onclick="toggleDark()" id="theme-btn" title="Тема">🌙</button>
-  <button class="hdr-icon hdr-info" onclick="openAbout()" id="about-btn" type="button" aria-haspopup="dialog" aria-expanded="false" title="О приложении" aria-label="О приложении"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="7.7" r="1.25" fill="currentColor"/><path d="M12 10.9v6.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button>
+  <button class="hdr-icon" data-loto-event-click="cycleLang()" id="lang-btn" title="Language" style="font-size:12px;font-weight:800;font-family:'Manrope',sans-serif">RU</button>
+  <button class="hdr-icon" data-loto-event-click="toggleDark()" id="theme-btn" title="Тема">🌙</button>
+  <button class="hdr-icon hdr-info" data-loto-event-click="openAbout()" id="about-btn" type="button" aria-haspopup="dialog" aria-expanded="false" title="О приложении" aria-label="О приложении"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="7.7" r="1.25" fill="currentColor"/><path d="M12 10.9v6.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button>
 </div>
 
 <div class="lot-nav-shell" id="lot-nav-shell">
-  <button type="button" class="lot-scroll-btn lot-scroll-prev" id="lot-scroll-prev" aria-label="Предыдущие лотереи" title="Предыдущие лотереи" onclick="scrollLotteryNav(-1)">‹</button>
+  <button type="button" class="lot-scroll-btn lot-scroll-prev" id="lot-scroll-prev" aria-label="Предыдущие лотереи" title="Предыдущие лотереи" data-loto-event-click="scrollLotteryNav(-1)">‹</button>
   <div class="lot-tabs" id="lot-tabs">
   </div>
-  <button type="button" class="lot-scroll-btn lot-scroll-next" id="lot-scroll-next" aria-label="Следующие лотереи" title="Следующие лотереи" onclick="scrollLotteryNav(1)">›</button>
+  <button type="button" class="lot-scroll-btn lot-scroll-next" id="lot-scroll-next" aria-label="Следующие лотереи" title="Следующие лотереи" data-loto-event-click="scrollLotteryNav(1)">›</button>
 </div>
 
 <!-- ══ SIMULATOR PAGE ══ -->
@@ -1488,7 +1498,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   </div>
   <div class="responsible-note">18+ · Симуляция и аналитика. Приложение не продаёт билеты, не принимает ставки и не связано с операторами лотерей, Apple или Google. Названия игр используются только для их идентификации. Отдельные числа могут повторяться; полная основная комбинация в симуляторе не повторяется до завершения цикла. В реальном независимом тираже повтор возможен.</div>
 
-  <div class="win-banner none" id="win-banner" onclick="ticketOrCombo(event)" style="cursor:pointer">
+  <div class="win-banner none" id="win-banner" data-loto-event-click="ticketOrCombo(event)" style="cursor:pointer">
     <div class="wb-top"><div class="wb-icon" id="wb-icon">🎯</div><div><div class="wb-title" id="wb-title">Результат симуляции</div><div class="wb-sub" id="wb-sub">Запусти тираж или проверь билет</div></div></div>
     <div id="wb-body" style="display:none">
       <div class="wb-drawn-block">
@@ -1523,7 +1533,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
       <div class="gen-grid">
         <div>
           <div class="gen-label">Количество</div>
-          <select class="gen-select" id="gen-count" onchange="onGenCountChange()">
+          <select class="gen-select" id="gen-count" data-loto-event-change="onGenCountChange()">
             <option value="1">1 ряд</option><option value="2">2 ряда</option><option value="3">3 ряда</option><option value="4">4 ряда</option><option value="5">5 рядов</option>
             <option value="6">6 рядов</option><option value="7">7 рядов</option><option value="8">8 рядов</option><option value="9">9 рядов</option><option value="10" selected>10 рядов</option>
             <option value="15">15 рядов</option><option value="20">20 рядов</option><option value="30">30 рядов</option><option value="40">40 рядов</option><option value="50">50 рядов</option>
@@ -1552,8 +1562,8 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
         </div>
       </div>
       <div class="gen-actions">
-        <button class="btn-exp" onclick="generateSelectedRows()" style="margin-top:0">Сгенерировать</button>
-        <button class="btn-exp" onclick="renderWorldAnalysis()" style="margin-top:0">Анализ лото по миру</button>
+        <button class="btn-exp" data-loto-event-click="generateSelectedRows()" style="margin-top:0">Сгенерировать</button>
+        <button class="btn-exp" data-loto-event-click="renderWorldAnalysis()" style="margin-top:0">Анализ лото по миру</button>
       </div>
       <div class="filter-grid">
         <label class="filter-check"><input type="checkbox" id="flt-parity" checked>Исключать все чётные / все нечётные ряды</label>
@@ -1564,42 +1574,42 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
         </div>
         <label class="filter-check"><input type="checkbox" id="flt-consec" checked>Запретить больше 3 чисел подряд</label>
       </div>
-      <button class="btn-exp" id="copy-rows-btn" onclick="copyRowsForNorsk(this)" style="margin-top:10px">📋 Скопировать ряды</button>
+      <button class="btn-exp" id="copy-rows-btn" data-loto-event-click="copyRowsForNorsk(this)" style="margin-top:10px">📋 Скопировать ряды</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <button class="btn-exp" style="margin:0" onclick="shareRows()">📤 Поделиться</button>
-        <button class="btn-exp" style="margin:0" onclick="SUP_open('sim')">⚖️ Верховный судья</button>
+        <button class="btn-exp" style="margin:0" data-loto-event-click="shareRows()">📤 Поделиться</button>
+        <button class="btn-exp" style="margin:0" data-loto-event-click="SUP_open('sim')">⚖️ Верховный судья</button>
       </div>
       <div id="world-analysis-out" class="warn-note" style="display:none"></div>
       <div id="copy-out" class="copy-out"></div>
     </div>
-    <button class="btn-draw euro" id="btn-draw" onclick="doDraw()">🎲 Симулировать тираж</button>
+    <button class="btn-draw euro" id="btn-draw" data-loto-event-click="doDraw()">🎲 Симулировать тираж</button>
     <div class="life-panel">
       <div class="card-t" style="margin-bottom:4px">Reality Check Simulator</div>
       <div style="font-size:13px;color:var(--sub2);line-height:1.5">Проверяет текущие ряды на 50 годах случайных тиражей. Это не прогноз, а демонстрация дисперсии и стоимости игры.</div>
-      <button class="btn-exp" onclick="runLifeSim()" style="margin-top:10px">🏦 Прожить 50 лет с этими числами</button>
+      <button class="btn-exp" data-loto-event-click="runLifeSim()" style="margin-top:10px">🏦 Прожить 50 лет с этими числами</button>
       <div id="life-out" class="life-out"></div>
     </div>
-    <button class="ndb euro" id="ndb" onclick="openSG()">
+    <button class="ndb euro" id="ndb" data-loto-event-click="openSG()">
       <div class="ndb-l"><div class="ndb-title">🎯 Генератор комбинаций</div><div class="ndb-sub" id="ndb-sub">Исследовательские модели · без прогноза выигрыша</div></div>
       <div style="font-size:20px">→</div>
     </button>
-    <button class="ndb euro" id="cons-btn" onclick="CONS_run()">
+    <button class="ndb euro" id="cons-btn" data-loto-event-click="CONS_run()">
       <div class="ndb-l"><div class="ndb-title">🧠 Консенсус моделей <span class="if-badge">meta</span></div><div class="ndb-sub">Сравнение моделей и структурный анализ результатов</div></div>
       <div style="font-size:20px">→</div>
     </button>
-    <button class="ndb euro qa-card" id="qa-btn" onclick="QA_open()">
+    <button class="ndb euro qa-card" id="qa-btn" data-loto-event-click="QA_open()">
       <div class="ndb-l"><div class="ndb-title">🔮 Квантово-астральный <span class="qa-badge">PREMIUM</span></div><div class="ndb-sub">Квантовый поток + твой знак + Луна на дату тиража</div></div>
       <div style="font-size:20px">✨</div>
     </button>
-    <button class="ndb euro" id="pdx-btn" onclick="PDX_open()">
+    <button class="ndb euro" id="pdx-btn" data-loto-event-click="PDX_open()">
       <div class="ndb-l"><div class="ndb-title">♾️ Система парадоксов</div><div class="ndb-sub">С базой или без · 1–10 рядов · разбор Верховного судьи</div></div>
       <div style="font-size:20px">→</div>
     </button>
-    <button class="ndb euro" id="jc-btn" onclick="JC_open()">
+    <button class="ndb euro" id="jc-btn" data-loto-event-click="JC_open()">
       <div class="ndb-l"><div class="ndb-title">⚖️ Разбор моей комбинации</div><div class="ndb-sub">Структурный разбор выбранных рядов без прогноза выигрыша</div></div>
       <div style="font-size:20px">→</div>
     </button>
-    <button class="ndb euro" id="wheel-btn" onclick="GENN_open('wheel')">
+    <button class="ndb euro" id="wheel-btn" data-loto-event-click="GENN_open('wheel')">
       <div class="ndb-l"><div class="ndb-title">Колесная матрица</div><div class="ndb-sub" id="wheel-sub">10 рядов · покрытие пар</div></div>
       <div style="font-size:20px">⠿</div>
     </button>
@@ -1608,19 +1618,19 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
       <div class="card-t" style="margin-bottom:4px">Конструктор колёсных систем</div>
       <div style="font-size:13px;color:var(--sub2);line-height:1.5">Выберите пул чисел кликами, затем гарантию покрытия. Если полная гарантия не помещается в 50 рядов, будет показан честный процент покрытия.</div>
       <div class="wheel-tools">
-        <select class="gen-select" id="wheel-guarantee" onchange="renderWheelBuilder()">
+        <select class="gen-select" id="wheel-guarantee" data-loto-event-change="renderWheelBuilder()">
           <option value="2">Гарантия 2 из 2</option>
           <option value="3">Гарантия 3 из 3</option>
           <option value="4" selected>Гарантия 4 из 4</option>
           <option value="5">Гарантия 5 из 5</option>
         </select>
-        <button class="btn-exp" onclick="autoWheelPool()" style="margin-top:0">Автопул</button>
+        <button class="btn-exp" data-loto-event-click="autoWheelPool()" style="margin-top:0">Автопул</button>
       </div>
       <div class="wheel-grid" id="wheel-pool-grid"></div>
       <div class="wheel-summary" id="wheel-builder-summary"></div>
       <div class="gen-actions">
-        <button class="btn-exp" onclick="clearWheelPool()" style="margin-top:0">Очистить</button>
-        <button class="btn-exp" onclick="applyWheelBuilder()" style="margin-top:0">Сгенерировать wheel</button>
+        <button class="btn-exp" data-loto-event-click="clearWheelPool()" style="margin-top:0">Очистить</button>
+        <button class="btn-exp" data-loto-event-click="applyWheelBuilder()" style="margin-top:0">Сгенерировать wheel</button>
       </div>
     </div>
     <!-- CHECK TICKET inline -->
@@ -1629,7 +1639,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
       <div style="font-size:12px;color:var(--sub2);margin-bottom:8px">Введи числа которые выпали в реальном тираже — система проверит твои ряды</div>
       <div class="draw-check-row">
         <select class="gen-select" id="saved-draw-select"><option value="">Выбрать сохранённый тираж</option></select>
-        <button class="btn-exp" onclick="checkAgainstSavedDraw()" style="margin-top:0">Проверить против тиража из базы</button>
+        <button class="btn-exp" data-loto-event-click="checkAgainstSavedDraw()" style="margin-top:0">Проверить против тиража из базы</button>
       </div>
       <div id="draw-check-out" class="draw-check-out"></div>
       <div class="ticket-check-fields">
@@ -1642,14 +1652,14 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
           <div class="check-inp-row" id="chk-bonus-inp"></div>
         </div>
       </div>
-      <button class="btn-draw euro" id="chk-btn" onclick="checkTicket()" style="margin-top:8px;font-size:14px;padding:12px">🔍 Проверить мой билет</button>
+      <button class="btn-draw euro" id="chk-btn" data-loto-event-click="checkTicket()" style="margin-top:8px;font-size:14px;padding:12px">🔍 Проверить мой билет</button>
       <div id="chk-result" style="margin-top:8px"></div>
     </div>
     <!-- SAVE COMBO -->
     <div class="card favorite-combos-card">
       <div class="card-t">⭐ Избранные комбинации</div>
       <div id="fav-list"><div class="empty" style="padding:16px">Нет сохранённых. Добавь кнопкой ниже.</div></div>
-      <button class="btn-exp" onclick="saveFav()">⭐ Сохранить текущие ряды</button>
+      <button class="btn-exp" data-loto-event-click="saveFav()">⭐ Сохранить текущие ряды</button>
     </div>
   </div>
 </div>
@@ -1657,12 +1667,12 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <!-- ══ ANALYTICS PAGE ══ -->
 <div class="page" id="pg-ana">
   <div class="sec-tabs">
-    <button type="button" class="st on" id="st-inp" aria-pressed="true" onclick="selAT('inp')"><span class="st-ic st-ic-plus">+</span><span class="st-tx">Ввод</span></button>
-    <button type="button" class="st" id="st-freq" aria-pressed="false" onclick="selAT('freq')"><span class="st-ic">📊</span><span class="st-tx">Частоты</span></button>
-    <button type="button" class="st" id="st-chi" aria-pressed="false" onclick="selAT('chi')"><span class="st-ic">🔬</span><span class="st-tx">χ²&nbsp;тест</span></button>
-    <button type="button" class="st" id="st-cmp" aria-pressed="false" onclick="selAT('cmp')"><span class="st-ic">⚖️</span><span class="st-tx">Сравнение</span></button>
-    <button type="button" class="st" id="st-prize" aria-pressed="false" onclick="selAT('prize')"><span class="st-ic">💵</span><span class="st-tx">Призы</span></button>
-    <button type="button" class="st" id="st-man" aria-pressed="false" onclick="selAT('man')"><span class="st-ic">📐</span><span class="st-tx">Комбинации</span></button>
+    <button type="button" class="st on" id="st-inp" aria-pressed="true" data-loto-event-click="selAT('inp')"><span class="st-ic st-ic-plus">+</span><span class="st-tx">Ввод</span></button>
+    <button type="button" class="st" id="st-freq" aria-pressed="false" data-loto-event-click="selAT('freq')"><span class="st-ic">📊</span><span class="st-tx">Частоты</span></button>
+    <button type="button" class="st" id="st-chi" aria-pressed="false" data-loto-event-click="selAT('chi')"><span class="st-ic">🔬</span><span class="st-tx">χ²&nbsp;тест</span></button>
+    <button type="button" class="st" id="st-cmp" aria-pressed="false" data-loto-event-click="selAT('cmp')"><span class="st-ic">⚖️</span><span class="st-tx">Сравнение</span></button>
+    <button type="button" class="st" id="st-prize" aria-pressed="false" data-loto-event-click="selAT('prize')"><span class="st-ic">💵</span><span class="st-tx">Призы</span></button>
+    <button type="button" class="st" id="st-man" aria-pressed="false" data-loto-event-click="selAT('man')"><span class="st-ic">📐</span><span class="st-tx">Комбинации</span></button>
   </div>
 
   <!-- INPUT -->
@@ -1675,28 +1685,28 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
       <div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px" id="lbl-m-inp">Главные числа</div><div style="display:flex;gap:6px;flex-wrap:wrap" id="inp-main"></div></div>
       <div id="inp-bwrap" style="display:none;margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px" id="lbl-b-inp">Бонусные</div><div style="display:flex;gap:6px;flex-wrap:wrap" id="inp-bonus"></div></div>
       <div style="margin-bottom:10px">
-        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="togglePayoutInp()">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" data-loto-event-click="togglePayoutInp()">
           <div style="font-size:12px;font-weight:600;color:var(--sub2)">💵 Призовая таблица тиража (необязательно)</div>
           <div id="payout-toggle-icon" style="font-size:14px;color:var(--sub)">▾</div>
         </div>
         <div id="payout-inp-wrap" style="display:none;margin-top:8px"></div>
       </div>
-      <button class="btn-draw euro" id="btn-add-draw" onclick="addDraw()" style="font-size:14px;padding:12px;margin-top:6px">+ Добавить тираж</button>
+      <button class="btn-draw euro" id="btn-add-draw" data-loto-event-click="addDraw()" style="font-size:14px;padding:12px;margin-top:6px">+ Добавить тираж</button>
     </div>
     <div class="card">
       <div class="card-t" id="official-title">Официальные результаты</div>
       <div id="official-desc" style="font-size:12px;color:var(--sub2);line-height:1.55;margin-bottom:10px">Обновляет последние тиражи из подключённого официального источника или общей базы results.json.</div>
-      <div class="sub-banner" onclick="openSubInfo()">
+      <div class="sub-banner" data-loto-event-click="openSubInfo()">
         <div class="sub-badge" id="sub-badge">СКОРО</div>
         <div class="sub-title">Loto Simulator</div>
         <div class="sub-desc">Максимально полная доступная база каждой игры · Квантово-астральный · безлимит Судьи и Консенсуса</div>
-        <div class="sub-price" id="sub-price-line">Free · Trial · PRO <span>· цена и валюта показываются платёжным магазином</span></div>
+        <div class="sub-price" id="sub-price-line">Free · PRO <span>· цена и валюта показываются платёжным магазином</span></div>
         <div class="sub-cta" id="sub-cta">Тарифы и возможности →</div>
       </div>
-      <button class="btn-draw euro" id="official-btn" onclick="updateOfficialCurrent()" style="font-size:14px;padding:12px;margin-top:0">↻ Обновить текущую лотерею</button>
+      <button class="btn-draw euro" id="official-btn" data-loto-event-click="updateOfficialCurrent()" style="font-size:14px;padding:12px;margin-top:0">↻ Обновить текущую лотерею</button>
       <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn-exp" id="official-all-btn" onclick="updateOfficialAll()" style="margin-top:0">↻ Все игры</button>
-        <button class="btn-exp" id="official-open-btn" onclick="openSourceInfo()" style="margin-top:0">🔎 Проверить источник результатов</button>
+        <button class="btn-exp" id="official-all-btn" data-loto-event-click="updateOfficialAll()" style="margin-top:0">↻ Все игры</button>
+        <button class="btn-exp" id="official-open-btn" data-loto-event-click="openSourceInfo()" style="margin-top:0">🔎 Проверить источник результатов</button>
       </div>
       <div id="official-status" class="warn-note" style="display:none"></div>
     </div>
@@ -1713,25 +1723,25 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
       <div id="notif-unsupported" class="warn-note" style="display:none">Push-уведомления недоступны в этом браузере</div>
       <div id="notif-install" class="warn-note" style="display:none">Чтобы получать уведомления из веб-версии на iPhone, добавьте Loto Simulator на экран «Домой».</div>
       <div id="notif-denied" class="warn-note" style="display:none">Уведомления отключены в настройках устройства
-        <button class="btn-exp" id="notif-open-settings" onclick="NOTIF_openSettings()" style="margin-top:8px">Открыть настройки</button>
+        <button class="btn-exp" id="notif-open-settings" data-loto-event-click="NOTIF_openSettings()" style="margin-top:8px">Открыть настройки</button>
       </div>
       <div id="notif-main" style="display:none">
-        <label class="notif-row"><span>Разрешить уведомления</span><input type="checkbox" id="notif-master" onchange="NOTIF_master(this.checked)"></label>
+        <label class="notif-row"><span>Разрешить уведомления</span><input type="checkbox" id="notif-master" data-loto-event-change="NOTIF_master(this.checked)"></label>
         <div id="notif-explain" class="if-note" style="display:none;margin:8px 0">Будем присылать результаты тиражей и обновления джекпотов выбранных лотерей. Ничего не отправим без вашего разрешения.
           <div style="display:flex;gap:8px;margin-top:8px">
-            <button class="btn-exp" onclick="NOTIF_allow()" style="margin:0">Разрешить</button>
-            <button class="btn-exp" onclick="NOTIF_notNow()" style="margin:0">Не сейчас</button>
+            <button class="btn-exp" data-loto-event-click="NOTIF_allow()" style="margin:0">Разрешить</button>
+            <button class="btn-exp" data-loto-event-click="NOTIF_notNow()" style="margin:0">Не сейчас</button>
           </div>
         </div>
         <div id="notif-cats" style="display:none;margin-top:6px">
-          <label class="notif-row"><span><b>Результаты тиражей</b><small>Уведомление, когда опубликованы официальные результаты выбранных лотерей.</small></span><input type="checkbox" id="notif-cat-draw_results" onchange="NOTIF_cat('draw_results',this.checked)"></label>
-          <label class="notif-row"><span><b>Обновление джекпота</b><small>Уведомление, когда опубликована новая официальная сумма следующего джекпота.</small></span><input type="checkbox" id="notif-cat-jackpot_updates" onchange="NOTIF_cat('jackpot_updates',this.checked)"></label>
-          <label class="notif-row"><span><b>Распределение призов</b><small>Уведомление, когда опубликована официальная таблица выплат по категориям.</small></span><input type="checkbox" id="notif-cat-prize_breakdown" onchange="NOTIF_cat('prize_breakdown',this.checked)"></label>
-          <label class="notif-row"><span><b>Напоминание о дедлайне</b><small>Уведомление перед окончанием приёма ставок выбранной лотереи.</small></span><input type="checkbox" id="notif-cat-deadline_reminders" onchange="NOTIF_cat('deadline_reminders',this.checked)"></label>
-          <label class="notif-row"><span><b>Проверка моих сохранённых рядов</b><small>Если сохранённые комбинации проверены против опубликованного официального тиража — уведомить о результате.</small></span><input type="checkbox" id="notif-cat-saved_ticket_results" onchange="NOTIF_cat('saved_ticket_results',this.checked)"></label>
+          <label class="notif-row"><span><b>Результаты тиражей</b><small>Уведомление, когда опубликованы официальные результаты выбранных лотерей.</small></span><input type="checkbox" id="notif-cat-draw_results" data-loto-event-change="NOTIF_cat('draw_results',this.checked)"></label>
+          <label class="notif-row"><span><b>Обновление джекпота</b><small>Уведомление, когда опубликована новая официальная сумма следующего джекпота.</small></span><input type="checkbox" id="notif-cat-jackpot_updates" data-loto-event-change="NOTIF_cat('jackpot_updates',this.checked)"></label>
+          <label class="notif-row"><span><b>Распределение призов</b><small>Уведомление, когда опубликована официальная таблица выплат по категориям.</small></span><input type="checkbox" id="notif-cat-prize_breakdown" data-loto-event-change="NOTIF_cat('prize_breakdown',this.checked)"></label>
+          <label class="notif-row"><span><b>Напоминание о дедлайне</b><small>Уведомление перед окончанием приёма ставок выбранной лотереи.</small></span><input type="checkbox" id="notif-cat-deadline_reminders" data-loto-event-change="NOTIF_cat('deadline_reminders',this.checked)"></label>
+          <label class="notif-row"><span><b>Проверка моих сохранённых рядов</b><small>Если сохранённые комбинации проверены против опубликованного официального тиража — уведомить о результате.</small></span><input type="checkbox" id="notif-cat-saved_ticket_results" data-loto-event-change="NOTIF_cat('saved_ticket_results',this.checked)"></label>
           <div style="margin-top:10px">
             <div style="font-size:12px;font-weight:700;color:var(--sub2);margin-bottom:6px">Лотереи</div>
-            <label class="notif-row"><span>Все мои лотереи</span><input type="checkbox" id="notif-all-lots" onchange="NOTIF_allLots(this.checked)"></label>
+            <label class="notif-row"><span>Все мои лотереи</span><input type="checkbox" id="notif-all-lots" data-loto-event-change="NOTIF_allLots(this.checked)"></label>
             <div id="notif-lot-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px"></div>
           </div>
         </div>
@@ -1741,25 +1751,25 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
     <div class="card">
       <div class="card-t" id="hist-title">История (0 тиражей)</div>
       <div id="hist-rule-summary" class="rule-summary"></div>
-      <input class="num-inp" id="hist-search" placeholder="🔍 Поиск: дата, год или число (напр. 2023, 07 апр, 44)" style="width:100%;margin:8px 0 10px" oninput="HIST_filter()">
+      <input class="num-inp" id="hist-search" placeholder="🔍 Поиск: дата, год или число (напр. 2023, 07 апр, 44)" style="width:100%;margin:8px 0 10px" data-loto-event-input="HIST_filter()">
       <div id="hist-list"><div class="empty">📭 Тиражей нет</div></div>
       <div class="hist-pro-card" id="hist-pro-card">
         <div class="hist-pro-blur" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
         <div class="hist-pro-title" data-pro-history-title>Полная история доступна в PRO</div>
         <div class="hist-pro-copy">Free показывает и анализирует только 20 последних тиражей. Полная история никогда не загружается в бесплатный клиент.</div>
-        <button type="button" class="btn-exp" onclick="LotoCommercial.openPaywall('full_history')">Посмотреть Trial и PRO</button>
+        <button type="button" class="btn-exp" data-loto-event-click="LotoCommercial.openPaywall('full_history')">Посмотреть PRO</button>
       </div>
-      <button class="btn-exp" onclick="doExport()">📤 Экспорт JSON</button>
-      <button class="btn-exp" onclick="doImport()" style="margin-top:4px">📥 Импорт JSON (файл)</button>
-      <input type="file" id="imp-file" accept=".json" style="display:none" onchange="handleImp(event)">
+      <button class="btn-exp" data-loto-event-click="doExport()">📤 Экспорт JSON</button>
+      <button class="btn-exp" data-loto-event-click="doImport()" style="margin-top:4px">📥 Импорт JSON (файл)</button>
+      <input type="file" id="imp-file" accept=".json" style="display:none" data-loto-event-change="handleImp(event)">
       <div style="margin-top:10px">
-        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleTextImport()">
+        <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" data-loto-event-click="toggleTextImport()">
           <div style="font-size:12px;font-weight:600;color:var(--sub2)">📋 Импорт через вставку текста (надёжнее на iPhone)</div>
           <div id="text-import-icon" style="font-size:14px;color:var(--sub)">▾</div>
         </div>
         <div id="text-import-wrap" style="display:none;margin-top:8px">
           <textarea id="text-import-area" placeholder="Вставь сюда содержимое JSON файла" style="width:100%;min-height:120px;padding:10px;border-radius:10px;border:1.5px solid var(--inp-border);background:var(--inp-bg);color:var(--fg);font-size:12px;font-family:monospace"></textarea>
-          <button class="btn-draw euro" onclick="handleTextImport()" style="margin-top:8px;font-size:14px;padding:12px">📥 Импортировать из текста</button>
+          <button class="btn-draw euro" data-loto-event-click="handleTextImport()" style="margin-top:8px;font-size:14px;padding:12px">📥 Импортировать из текста</button>
         </div>
       </div>
     </div>
@@ -1790,7 +1800,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
     <div class="card">
       <div class="card-t">🌍 Анализ лото по миру</div>
       <div style="font-size:12px;color:var(--sub2);margin-bottom:8px">Нормализует накопленные результаты всех игр в приложении и строит профиль для текущей лотереи.</div>
-      <button class="btn-exp" onclick="renderWorldAnalysis('world-analysis-ana')" style="margin-top:0">🌍 Рассчитать мировой профиль</button>
+      <button class="btn-exp" data-loto-event-click="renderWorldAnalysis('world-analysis-ana')" style="margin-top:0">🌍 Рассчитать мировой профиль</button>
       <div id="world-analysis-ana"><div class="empty">Нажми кнопку для анализа</div></div>
     </div>
   </div>
@@ -1841,7 +1851,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
       <div id="man-out"></div>
       <div style="margin-top:12px">
         <div id="jackpot-currency-label" style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px">Текущий джекпот (млн в валюте игры)</div>
-        <input type="number" class="num-inp" id="jackpot-inp" placeholder="Например: 150" oninput="renderCombinationAnalysis()">
+        <input type="number" class="num-inp" id="jackpot-inp" placeholder="Например: 150" data-loto-event-input="renderCombinationAnalysis()">
       </div>
     </div>
     <div class="card"><div class="card-t">Проверка математики</div><div id="math-check-out"><div class="empty">Нет данных</div></div></div>
@@ -1851,19 +1861,19 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 
 <!-- BOTTOM NAV -->
 <div class="bnav">
-  <div class="bn on" id="bn-sim" data-route="sim" onclick="bottomNavRoute('sim')"><div class="bn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.6"/><path d="M8 15.1 6.4 20.4M16 15.1 17.6 20.4M6.4 20.4h11.2"/><circle cx="9.9" cy="8.4" r="1.6" fill="currentColor" stroke="none"/><circle cx="14.3" cy="9.5" r="1.35" fill="currentColor" stroke="none"/><circle cx="11.5" cy="12.1" r="1.25" fill="currentColor" stroke="none"/></svg></div><div class="bn-lbl">Симулятор</div></div>
-  <div class="bn" id="bn-drum3d" data-route="drum3d" role="button" tabindex="0" aria-label="3D-розыгрыш" onclick="openDrum3D()">
+  <div class="bn on" id="bn-sim" data-route="sim" data-loto-event-click="bottomNavRoute('sim')"><div class="bn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.6"/><path d="M8 15.1 6.4 20.4M16 15.1 17.6 20.4M6.4 20.4h11.2"/><circle cx="9.9" cy="8.4" r="1.6" fill="currentColor" stroke="none"/><circle cx="14.3" cy="9.5" r="1.35" fill="currentColor" stroke="none"/><circle cx="11.5" cy="12.1" r="1.25" fill="currentColor" stroke="none"/></svg></div><div class="bn-lbl">Симулятор</div></div>
+  <div class="bn" id="bn-drum3d" data-route="drum3d" role="button" tabindex="0" aria-label="3D-розыгрыш" data-loto-event-click="openDrum3D()">
     <div class="bn-icon bn-icon-3d" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 20.5 7.75 12 12.5 3.5 7.75Z" fill="#ffffff"/><path d="M3.5 7.75 12 12.5 12 21 3.5 16.25Z" fill="#b4bccb"/><path d="M20.5 7.75 12 12.5 12 21 20.5 16.25Z" fill="#dde1e9"/><path d="M12 3 20.5 7.75 20.5 16.25 12 21 3.5 16.25 3.5 7.75Z" fill="none" stroke="rgba(20,28,46,.34)" stroke-width=".7" stroke-linejoin="round"/><path d="M12 12.5 12 21M12 12.5 3.5 7.75M12 12.5 20.5 7.75" stroke="rgba(20,28,46,.18)" stroke-width=".55" stroke-linejoin="round"/><g fill="#28324c"><circle transform="matrix(8.5 -4.75 8.5 4.75 3.5 7.75)" cx=".5" cy=".5" r=".12"/><circle transform="matrix(8.5 4.75 0 8.5 3.5 7.75)" cx=".3" cy=".3" r=".12"/><circle transform="matrix(8.5 4.75 0 8.5 3.5 7.75)" cx=".7" cy=".7" r=".12"/><circle transform="matrix(8.5 -4.75 0 8.5 12 12.5)" cx=".28" cy=".28" r=".12"/><circle transform="matrix(8.5 -4.75 0 8.5 12 12.5)" cx=".5" cy=".5" r=".12"/><circle transform="matrix(8.5 -4.75 0 8.5 12 12.5)" cx=".72" cy=".72" r=".12"/></g></svg></div>
     <div class="bn-lbl">3D-тираж</div>
   </div>
-  <div class="bn" id="bn-ana" data-route="ana" onclick="bottomNavRoute('ana')"><div class="bn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="12" width="3.6" height="6.5" rx="1.2" fill="currentColor" stroke="none"/><rect x="10.2" y="8.5" width="3.6" height="10" rx="1.2" fill="currentColor" stroke="none"/><rect x="15.9" y="13.5" width="3.6" height="5" rx="1.2" fill="currentColor" stroke="none"/><path d="M4.5 8.2 9.4 5.2 14.3 7.8 19.6 3.8"/></svg></div><div class="bn-lbl">Аналитика</div></div>
+  <div class="bn" id="bn-ana" data-route="ana" data-loto-event-click="bottomNavRoute('ana')"><div class="bn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="12" width="3.6" height="6.5" rx="1.2" fill="currentColor" stroke="none"/><rect x="10.2" y="8.5" width="3.6" height="10" rx="1.2" fill="currentColor" stroke="none"/><rect x="15.9" y="13.5" width="3.6" height="5" rx="1.2" fill="currentColor" stroke="none"/><path d="M4.5 8.2 9.4 5.2 14.3 7.8 19.6 3.8"/></svg></div><div class="bn-lbl">Аналитика</div></div>
 </div>
 
 <!-- SMART GEN MODAL -->
-<div class="sg-ov" id="sg-ov" onclick="sgOut(event)">
+<div class="sg-ov" id="sg-ov" data-loto-event-click="sgOut(event)">
   <div class="sg-sheet" style="position:relative">
     <div class="sg-hndl"></div>
-    <button class="btn-close2" onclick="closeSG()" style="position:absolute;top:14px;right:14px;width:38px;height:38px;padding:0;margin:0;border-radius:11px;font-size:16px;font-weight:900;z-index:2">✕</button>
+    <button class="btn-close2" data-loto-event-click="closeSG()" style="position:absolute;top:14px;right:14px;width:38px;height:38px;padding:0;margin:0;border-radius:11px;font-size:16px;font-weight:900;z-index:2">✕</button>
     <div class="sg-header"><div class="sg-icon" id="sg-icon">🎯</div><div class="sg-title" id="sg-name">EUROJACKPOT</div><div class="sg-sub">Генератор комбинаций · исследовательский анализ</div></div>
     <div class="sg-cd euro" id="sg-cd">
       <div class="sg-cd-lbl">Следующий розыгрыш</div>
@@ -1873,49 +1883,49 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
     </div>
     <div class="sg-algo-t">Выбери алгоритм</div>
     <div class="sg-algos">
-      <div class="if-winrow" onclick="PERIOD_open()" style="cursor:pointer">
+      <div class="if-winrow" data-loto-event-click="PERIOD_open()" style="cursor:pointer">
         <div><div class="if-winlbl">Период анализа</div><div class="if-winsub" id="if-win-note">Вся доступная база выбранной лотереи</div></div>
         <div class="if-winsel" id="if-win-btn" style="width:auto;padding:9px 14px;border:1.5px solid var(--gold);border-radius:12px;font-weight:800;font-size:13px;color:var(--gold)">Вся база ▾</div>
       </div>
-      <div class="if-winrow" onclick="GENN_open('sg')" style="cursor:pointer;margin-bottom:10px">
+      <div class="if-winrow" data-loto-event-click="GENN_open('sg')" style="cursor:pointer;margin-bottom:10px">
         <div><div class="if-winlbl">Сколько рядов</div><div class="if-winsub" id="sg-count-note">Применяется ко всем моделям</div></div>
         <div class="if-winsel" id="sg-count-btn" style="width:auto;padding:9px 14px;border:1.5px solid var(--gold);border-radius:12px;font-weight:800;font-size:13px;color:var(--gold)">10 ▾</div>
       </div>
-      <div class="supc-card" onclick="SUPC_open()">
+      <div class="supc-card" data-loto-event-click="SUPC_open()">
         <div style="font-size:22px">⚖️</div>
         <div><div style="font-family:'Unbounded',sans-serif;font-weight:900;font-size:13.5px">Персональный совет судьи</div>
         <div style="font-size:11.5px;color:var(--sub2);margin-top:2px">Знает звёзды, вашу натальную карту и базу тиражей. Выпишет направление к модели и вынесет решающий вердикт.</div></div>
       </div>
       <div class="if-note" style="margin:0 0 10px">Каждая модель — свой способ читать историю тиражей за выбранный период: одни ищут частоту, другие связи пар, третьи пропуски и циклы. Ни одна не предсказывает будущее — они показывают структуру прошлого, из которой ты собираешь свою стратегию.</div>
-      <div class="sg-algo" id="al-freq" onclick="selAlgo('freq')"><div class="sg-algo-icon">🔥</div><div><div class="sg-algo-name">Частотный анализ</div><div class="sg-algo-desc">Вес числа пропорционален его наблюдаемой частоте: pₙ = cₙ / Σc</div></div></div>
-      <div class="sg-algo" id="al-bal" onclick="selAlgo('bal')"><div class="sg-algo-icon">⚖️</div><div><div class="sg-algo-name">Балансированный</div><div class="sg-algo-desc">Около 40% горячих + 30% средних + 30% холодных; округление чередуется между строками</div></div></div>
-      <div class="sg-algo" id="al-rnd" onclick="selAlgo('rnd')"><div class="sg-algo-icon">🎲</div><div><div class="sg-algo-name">Равновероятный (pure random)</div><div class="sg-algo-desc">Равномерный выбор k различных чисел без возвращения с криптографическим seed устройства</div></div></div>
-      <div class="sg-algo" id="al-man" onclick="selAlgo('man')"><div class="sg-algo-icon">📐</div><div><div class="sg-algo-name">Сегментный охват</div><div class="sg-algo-desc">Равномерный охват диапазона — числа выбираются из разных сегментов</div></div></div>
-      <div class="sg-algo" id="al-world-hot" onclick="selAlgo('world-hot')"><div class="sg-algo-icon">🌍</div><div><div class="sg-algo-name">Мировой горячий</div><div class="sg-algo-desc">Профиль всех сохранённых игр, нормализованный под текущую лотерею</div></div></div>
-      <div class="sg-algo" id="al-world-mix" onclick="selAlgo('world-mix')"><div class="sg-algo-icon">🌐</div><div><div class="sg-algo-name">Мировой комбинированный</div><div class="sg-algo-desc">Горячие зоны + средние + холодные для каждой строки</div></div></div>
-      <div class="sg-algo" id="al-markov" onclick="selAlgo('markov')"><div class="sg-algo-icon">🔗</div><div><div class="sg-algo-name">Цепи Маркова</div><div class="sg-algo-desc">P(b|a) = (Nₐᵦ+1)/(Nₐ+N): переходы после чисел последнего тиража со сглаживанием Лапласа</div></div></div>
-      <div class="sg-algo" id="al-gauss" onclick="selAlgo('gauss')"><div class="sg-algo-icon">🔔</div><div><div class="sg-algo-name">Гаусс · ЦПТ</div><div class="sg-algo-desc">Сумма ряда около μ=k(N+1)/2; дисперсия без возвращения σ²=k(N+1)(N−k)/12</div></div></div>
-      <div class="sg-algo" id="al-delta" onclick="selAlgo('delta')"><div class="sg-algo-icon">📏</div><div><div class="sg-algo-name">Интервальная модель Δ</div><div class="sg-algo-desc">Эмпирический bootstrap первых чисел и соседних интервалов Δ из реальных тиражей</div></div></div>
-      <div class="sg-algo" id="al-bayes" onclick="selAlgo('bayes')"><div class="sg-algo-icon">🧮</div><div><div class="sg-algo-name">Байес · Дирихле</div><div class="sg-algo-desc">Апостериорный вес (cₙ+α)/(kD+αN), α=3: равномерный prior обновляется наблюдениями</div></div></div>
-      <div class="sg-algo" id="al-overdue" onclick="selAlgo('overdue')"><div class="sg-algo-icon">⏳</div><div><div class="sg-algo-name">Gap-анализ</div><div class="sg-algo-desc">Эвристический вес (gap/E[gap])^1.6 + 0.15; показывает интервалы, но не меняет шанс шара</div></div></div>
-      <div class="sg-algo" id="al-phys" onclick="selAlgo('phys')"><div class="sg-algo-icon">🎱</div><div><div class="sg-algo-name">Физическая модель лототрона</div><div class="sg-algo-desc">Упрощённая 2D-модель: турбулентный поток, сопротивление, стенки и упругие столкновения равных масс</div></div></div>
-      <div class="sg-algo" id="al-chaos" onclick="selAlgo('chaos')"><div class="sg-algo-icon">🌀</div><div><div class="sg-algo-name">Детерминированный хаос</div><div class="sg-algo-desc">Логистическое отображение x→3.99·x·(1−x): предсказание невозможно даже в детерминированной системе</div></div></div>
-      <div class="sg-algo" id="al-quantum" onclick="selAlgo('quantum')"><div class="sg-algo-icon">⚛️</div><div><div class="sg-algo-name">Квантовый коллапс</div><div class="sg-algo-desc">Поток ANU QRNG при доступности; иначе криптоэнтропия устройства. Выбор проходит через экспоненциальный частотный барьер.</div></div></div>
-      <div class="sg-algo if-card" id="al-field" onclick="IF_run()"><div class="sg-algo-icon">🧬</div><div><div class="sg-algo-name">Структурное поле данных <span class="if-badge">meta</span></div><div class="sg-algo-desc">Исследовательская модель анализирует доступные тиражи, структуру комбинаций, частоты, интервалы, связи между числами и разнообразие. Она не прогнозирует выигрыш и создаёт 10 демонстрационных строк.</div></div></div>
+      <div class="sg-algo" id="al-freq" data-loto-event-click="selAlgo('freq')"><div class="sg-algo-icon">🔥</div><div><div class="sg-algo-name">Частотный анализ</div><div class="sg-algo-desc">Вес числа пропорционален его наблюдаемой частоте: pₙ = cₙ / Σc</div></div></div>
+      <div class="sg-algo" id="al-bal" data-loto-event-click="selAlgo('bal')"><div class="sg-algo-icon">⚖️</div><div><div class="sg-algo-name">Балансированный</div><div class="sg-algo-desc">Около 40% горячих + 30% средних + 30% холодных; округление чередуется между строками</div></div></div>
+      <div class="sg-algo" id="al-rnd" data-loto-event-click="selAlgo('rnd')"><div class="sg-algo-icon">🎲</div><div><div class="sg-algo-name">Равновероятный (pure random)</div><div class="sg-algo-desc">Равномерный выбор k различных чисел без возвращения с криптографическим seed устройства</div></div></div>
+      <div class="sg-algo" id="al-man" data-loto-event-click="selAlgo('man')"><div class="sg-algo-icon">📐</div><div><div class="sg-algo-name">Сегментный охват</div><div class="sg-algo-desc">Равномерный охват диапазона — числа выбираются из разных сегментов</div></div></div>
+      <div class="sg-algo" id="al-world-hot" data-loto-event-click="selAlgo('world-hot')"><div class="sg-algo-icon">🌍</div><div><div class="sg-algo-name">Мировой горячий</div><div class="sg-algo-desc">Профиль всех сохранённых игр, нормализованный под текущую лотерею</div></div></div>
+      <div class="sg-algo" id="al-world-mix" data-loto-event-click="selAlgo('world-mix')"><div class="sg-algo-icon">🌐</div><div><div class="sg-algo-name">Мировой комбинированный</div><div class="sg-algo-desc">Горячие зоны + средние + холодные для каждой строки</div></div></div>
+      <div class="sg-algo" id="al-markov" data-loto-event-click="selAlgo('markov')"><div class="sg-algo-icon">🔗</div><div><div class="sg-algo-name">Цепи Маркова</div><div class="sg-algo-desc">P(b|a) = (Nₐᵦ+1)/(Nₐ+N): переходы после чисел последнего тиража со сглаживанием Лапласа</div></div></div>
+      <div class="sg-algo" id="al-gauss" data-loto-event-click="selAlgo('gauss')"><div class="sg-algo-icon">🔔</div><div><div class="sg-algo-name">Гаусс · ЦПТ</div><div class="sg-algo-desc">Сумма ряда около μ=k(N+1)/2; дисперсия без возвращения σ²=k(N+1)(N−k)/12</div></div></div>
+      <div class="sg-algo" id="al-delta" data-loto-event-click="selAlgo('delta')"><div class="sg-algo-icon">📏</div><div><div class="sg-algo-name">Интервальная модель Δ</div><div class="sg-algo-desc">Эмпирический bootstrap первых чисел и соседних интервалов Δ из реальных тиражей</div></div></div>
+      <div class="sg-algo" id="al-bayes" data-loto-event-click="selAlgo('bayes')"><div class="sg-algo-icon">🧮</div><div><div class="sg-algo-name">Байес · Дирихле</div><div class="sg-algo-desc">Апостериорный вес (cₙ+α)/(kD+αN), α=3: равномерный prior обновляется наблюдениями</div></div></div>
+      <div class="sg-algo" id="al-overdue" data-loto-event-click="selAlgo('overdue')"><div class="sg-algo-icon">⏳</div><div><div class="sg-algo-name">Gap-анализ</div><div class="sg-algo-desc">Эвристический вес (gap/E[gap])^1.6 + 0.15; показывает интервалы, но не меняет шанс шара</div></div></div>
+      <div class="sg-algo" id="al-phys" data-loto-event-click="selAlgo('phys')"><div class="sg-algo-icon">🎱</div><div><div class="sg-algo-name">Физическая модель лототрона</div><div class="sg-algo-desc">Упрощённая 2D-модель: турбулентный поток, сопротивление, стенки и упругие столкновения равных масс</div></div></div>
+      <div class="sg-algo" id="al-chaos" data-loto-event-click="selAlgo('chaos')"><div class="sg-algo-icon">🌀</div><div><div class="sg-algo-name">Детерминированный хаос</div><div class="sg-algo-desc">Логистическое отображение x→3.99·x·(1−x): предсказание невозможно даже в детерминированной системе</div></div></div>
+      <div class="sg-algo" id="al-quantum" data-loto-event-click="selAlgo('quantum')"><div class="sg-algo-icon">⚛️</div><div><div class="sg-algo-name">Квантовый коллапс</div><div class="sg-algo-desc">Криптографически стойкая энтропия устройства. Выбор проходит через экспоненциальный частотный барьер.</div></div></div>
+      <div class="sg-algo if-card" id="al-field" data-loto-event-click="IF_run()"><div class="sg-algo-icon">🧬</div><div><div class="sg-algo-name">Структурное поле данных <span class="if-badge">meta</span></div><div class="sg-algo-desc">Исследовательская модель анализирует доступные тиражи, структуру комбинаций, частоты, интервалы, связи между числами и разнообразие. Она не прогнозирует выигрыш и создаёт 10 демонстрационных строк.</div></div></div>
     </div>
     <div id="sg-result"></div>
     <div class="sg-disc">⚠️ <b>Важно:</b> Ни один алгоритм не может предсказать независимый тираж. Модели исследуют разные математические структуры и не меняют вероятность комбинации.</div>
-    <button class="sg-use euro" id="sg-use" onclick="useGen()">✅ Перенести в симулятор</button>
-    <button class="btn-close2" onclick="closeSG()">Закрыть</button>
+    <button class="sg-use euro" id="sg-use" data-loto-event-click="useGen()">✅ Перенести в симулятор</button>
+    <button class="btn-close2" data-loto-event-click="closeSG()">Закрыть</button>
   </div>
 </div>
 
 <!-- CUSTOM CONFIRM (native confirm() can be blocked in sandboxed artifact iframes) -->
-<div class="lang-ov" id="lang-ov" onclick="if(event.target===this)closeLangPicker()">
+<div class="lang-ov" id="lang-ov" data-loto-event-click="if(event.target===this)closeLangPicker()">
   <div class="lang-box">
     <div class="lang-title">🌐 Language · Язык · Språk</div>
     <div class="lang-grid" id="lang-grid"></div>
-    <button class="btn-close2" onclick="closeLangPicker()">✕</button>
+    <button class="btn-close2" data-loto-event-click="closeLangPicker()">✕</button>
   </div>
 </div>
 
@@ -1923,40 +1933,40 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   <div class="if-sheet">
     <div class="if-hdr">
       <div><div class="if-title">🧠 Консенсус моделей</div><div class="if-sub">Модели создали исследовательские строки, затем выполнен их структурный анализ</div></div>
-      <button class="btn-close2" onclick="CONS_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
+      <button class="btn-close2" data-loto-event-click="CONS_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
     </div>
     <div class="if-ctx" id="cons-ctx">—</div>
     <div class="if-summary" id="cons-summary"></div>
     <div id="cons-body"></div>
-    <button class="btn-draw euro" id="cons-pick-btn" style="margin-top:14px" onclick="CONS_openPick()">💠 Сформировать выборку</button>
+    <button class="btn-draw euro" id="cons-pick-btn" style="margin-top:14px" data-loto-event-click="CONS_openPick()">💠 Сформировать выборку</button>
     <div class="if-legal">Модели анализируют последние доступные тиражи выбранной лотереи и структуру комбинаций. Независимый будущий тираж не становится предсказуемым.</div>
   </div>
 </div>
 
-<div class="lang-ov" id="pick-ov" onclick="if(event.target===this)PICK_close()">
+<div class="lang-ov" id="pick-ov" data-loto-event-click="if(event.target===this)PICK_close()">
   <div class="lang-box">
     <div class="lang-title">💠 Собрать итоговую выборку</div>
     <div class="if-note" style="margin:0 0 10px">Выберите, сколько исследовательских строк включить в итоговую матрицу.</div>
     <div class="pick-counts" id="pick-counts"></div>
     <div class="if-seclbl" style="margin-top:14px">Режим отбора</div>
     <div id="pick-modes"></div>
-    <button class="btn-draw euro" id="pick-go" style="margin-top:12px" onclick="PICK_go()">Сформировать 5 строк</button>
-    <button class="btn-close2" onclick="PICK_close()">Закрыть</button>
+    <button class="btn-draw euro" id="pick-go" style="margin-top:12px" data-loto-event-click="PICK_go()">Сформировать 5 строк</button>
+    <button class="btn-close2" data-loto-event-click="PICK_close()">Закрыть</button>
   </div>
 </div>
 
-<div class="lang-ov" id="wc-ov" onclick="if(event.target===this)WC_close()">
+<div class="lang-ov" id="wc-ov" data-loto-event-click="if(event.target===this)WC_close()">
   <div class="lang-box">
     <div class="lang-title" id="wc-title">🎯 Результат симуляции</div>
     <div class="if-ctx" id="wc-date" style="text-align:center;margin:2px 0 10px"></div>
     <div class="if-rowballs" id="wc-balls" style="justify-content:center"></div>
     <div class="if-note" id="wc-info" style="text-align:center"></div>
-    <button class="btn-draw euro" style="margin-top:12px" onclick="WC_check()">🔍 Проверить мой билет</button>
+    <button class="btn-draw euro" style="margin-top:12px" data-loto-event-click="WC_check()">🔍 Проверить мой билет</button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-      <button class="btn-exp" style="margin:0" onclick="WC_fav()">⭐ В избранное</button>
-      <button class="btn-exp" style="margin:0" onclick="WC_share()">📤 Поделиться</button>
+      <button class="btn-exp" style="margin:0" data-loto-event-click="WC_fav()">⭐ В избранное</button>
+      <button class="btn-exp" style="margin:0" data-loto-event-click="WC_share()">📤 Поделиться</button>
     </div>
-    <button class="btn-close2" onclick="WC_close()">Закрыть</button>
+    <button class="btn-close2" data-loto-event-click="WC_close()">Закрыть</button>
   </div>
 </div>
 
@@ -1964,12 +1974,12 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   <div class="if-sheet">
     <div class="if-hdr">
       <div><div class="if-title" id="tk-title">🎫 Мой билет</div><div class="if-sub" id="tk-sub"></div></div>
-      <button class="btn-close2" onclick="TK_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
+      <button class="btn-close2" data-loto-event-click="TK_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
     </div>
     <div id="tk-body" style="margin-top:12px"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
-      <button class="btn-exp" style="margin:0" onclick="shareRows()">📤 Поделиться</button>
-      <button class="btn-exp" style="margin:0" onclick="TK_close()">Закрыть</button>
+      <button class="btn-exp" style="margin:0" data-loto-event-click="shareRows()">📤 Поделиться</button>
+      <button class="btn-exp" style="margin:0" data-loto-event-click="TK_close()">Закрыть</button>
     </div>
   </div>
 </div>
@@ -1978,23 +1988,23 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   <div class="if-sheet qa-sheet">
     <div class="if-hdr">
       <div><div class="if-title">🔮 Квантово-астральный генератор</div><div class="if-sub" id="qa-ctx">Квантовый поток · знак · Луна · натальная карта</div></div>
-      <button class="btn-close2" onclick="QA_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
+      <button class="btn-close2" data-loto-event-click="QA_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
     </div>
     <div class="if-seclbl">Твой знак зодиака</div>
     <div class="qa-signs" id="qa-signs"></div>
-    <div class="qa-birthline" id="qa-birthline" onclick="QAB_open()">🎂 Дата рождения: <b id="qa-birthval">не указана</b> · настроить</div>
+    <div class="qa-birthline" id="qa-birthline" data-loto-event-click="QAB_open()">🎂 Дата рождения: <b id="qa-birthval">не указана</b> · настроить</div>
     <div class="qa-moon" id="qa-moon"></div>
     <div class="if-seclbl">Сколько рядов</div>
     <div class="pick-counts" id="qa-counts" style="grid-template-columns:repeat(5,1fr)"></div>
-    <button class="btn-draw euro qa-go" id="qa-go" onclick="QA_go()">⚛️ Спросить Вселенную</button>
+    <button class="btn-draw euro qa-go" id="qa-go" data-loto-event-click="QA_go()">⚛️ Спросить Вселенную</button>
     <div id="qa-result"></div>
-    <div class="if-note" style="margin-top:12px">Квантовый поток ANU, когда он доступен, или криптоэнтропия устройства соединяются с положением Луны и твоим звёздным профилем. Вероятность джекпота при этом остаётся прежней. 💜</div>
+    <div class="if-note" style="margin-top:12px">Криптографическая энтропия устройства соединяется с положением Луны и твоим звёздным профилем. Вероятность джекпота при этом остаётся прежней. 💜</div>
   </div>
 </div>
 
-<div class="horo-ov" id="horo-ov" onclick="if(event.target===this)HORO_close()">
+<div class="horo-ov" id="horo-ov" data-loto-event-click="if(event.target===this)HORO_close()">
   <div class="horo-sheet">
-    <button class="horo-close" onclick="HORO_close()">✕</button>
+    <button class="horo-close" data-loto-event-click="HORO_close()">✕</button>
     <div class="horo-glyph" id="horo-glyph">♌</div>
     <div class="horo-ribbon">
       <svg viewBox="0 0 400 156" preserveAspectRatio="xMidYMid meet">
@@ -2037,15 +2047,15 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
     <div class="horo-seal"><span id="horo-seal-glyph">♌</span></div>
     <div class="horo-note">Гороскоп создаёт персональный символический профиль; вероятность любой допустимой комбинации остаётся прежней. 📜</div>
     <div class="horo-btns">
-      <button class="btn-draw euro" onclick="HORO_share()">📤 Поделиться гороскопом</button>
-      <button class="btn-exp" style="margin-top:8px" onclick="HORO_close()">Закрыть</button>
+      <button class="btn-draw euro" data-loto-event-click="HORO_share()">📤 Поделиться гороскопом</button>
+      <button class="btn-exp" style="margin-top:8px" data-loto-event-click="HORO_close()">Закрыть</button>
     </div>
   </div>
 </div>
 
-<div class="lang-ov" id="qab-ov" onclick="if(event.target===this)QAB_close()">
+<div class="lang-ov" id="qab-ov" data-loto-event-click="if(event.target===this)QAB_close()">
   <div class="lang-box qa-sheet" style="border-radius:22px;position:relative">
-    <button class="horo-close" style="background:rgba(155,123,216,.25);border-color:#9B7BD8;color:#fff" onclick="QAB_close()">✕</button>
+    <button class="horo-close" style="background:rgba(155,123,216,.25);border-color:#9B7BD8;color:#fff" data-loto-event-click="QAB_close()">✕</button>
     <div class="lang-title" style="color:#F2EAFF">🎂 Дата рождения</div>
     <div class="if-note" style="margin:0 0 12px;color:#C9B8E8">Чем точнее данные, тем глубже звёздный профиль: натальная Луна, число судьбы и солнечный градус. Всё считается на устройстве и никуда не отправляется.</div>
     <div style="display:grid;grid-template-columns:1fr 1.4fr 1.2fr;gap:8px">
@@ -2062,48 +2072,48 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
     <div class="if-seclbl" style="color:#F2EAFF">Время рождения (если известно)</div>
     <input type="time" class="num-inp qab-inp" id="qab-t" style="width:100%">
     <div class="qab-hint">Тапни на поле выше, чтобы выбрать часы и минуты</div>
-    <button class="btn-draw euro qa-go" style="margin-top:12px" onclick="QAB_save(true)">✨ Сохранить с временем</button>
+    <button class="btn-draw euro qa-go" style="margin-top:12px" data-loto-event-click="QAB_save(true)">✨ Сохранить с временем</button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-      <button class="btn-exp" style="margin:0;border-color:#6B4BA8;color:#E8DEFA" onclick="QAB_save(false)">Время неизвестно</button>
-      <button class="btn-exp" style="margin:0;border-color:#6B4BA8;color:#E8DEFA" onclick="QAB_skip()">Пропустить</button>
+      <button class="btn-exp" style="margin:0;border-color:#6B4BA8;color:#E8DEFA" data-loto-event-click="QAB_save(false)">Время неизвестно</button>
+      <button class="btn-exp" style="margin:0;border-color:#6B4BA8;color:#E8DEFA" data-loto-event-click="QAB_skip()">Пропустить</button>
     </div>
-    <button class="btn-exp" id="qab-clear" style="margin-top:8px;border-color:rgba(232,106,106,.5);color:#F0A8A8;display:none" onclick="QAB_clear()">🗑 Удалить сохранённую дату</button>
+    <button class="btn-exp" id="qab-clear" style="margin-top:8px;border-color:rgba(232,106,106,.5);color:#F0A8A8;display:none" data-loto-event-click="QAB_clear()">🗑 Удалить сохранённую дату</button>
   </div>
 </div>
 
-<div class="lang-ov" id="sup-ov" onclick="if(event.target===this)SUP_close()">
+<div class="lang-ov" id="sup-ov" data-loto-event-click="if(event.target===this)SUP_close()">
   <div class="lang-box">
     <div class="lang-title">⚖️ Верховный судья</div>
     <div class="if-note" id="sup-src" style="margin:0 0 10px;text-align:center"></div>
     <div class="if-note" style="margin:0 0 10px">Как работает судья: каждое число получает «голоса» из твоих рядов (55% веса) и структурный балл по истории выбранного периода (частота, пары и интервалы — 45%). Затем судья собирает разные строки; уже использованные числа временно теряют вес. Это анализ структуры, а не прогноз.</div>
     <div class="if-seclbl" style="margin-top:0">Сколько строк собрать</div>
     <div class="pick-counts" id="sup-counts" style="grid-template-columns:repeat(5,1fr)"></div>
-    <button class="btn-draw euro" id="sup-go" style="margin-top:12px" onclick="SUP_go()">Собрать вердикт</button>
+    <button class="btn-draw euro" id="sup-go" style="margin-top:12px" data-loto-event-click="SUP_go()">Собрать вердикт</button>
     <div id="sup-result"></div>
-    <button class="btn-close2" onclick="SUP_close()">Закрыть</button>
+    <button class="btn-close2" data-loto-event-click="SUP_close()">Закрыть</button>
   </div>
 </div>
 
-<div class="lang-ov" id="supc-ov" onclick="if(event.target===this)SUPC_close()">
+<div class="lang-ov" id="supc-ov" data-loto-event-click="if(event.target===this)SUPC_close()">
   <div class="lang-box" style="position:relative">
-    <button class="horo-close" style="background:var(--bg2);border-color:var(--srow-border);color:var(--sub)" onclick="SUPC_close()">✕</button>
+    <button class="horo-close" style="background:var(--bg2);border-color:var(--srow-border);color:var(--sub)" data-loto-event-click="SUPC_close()">✕</button>
     <div class="lang-title">⚖️ Кабинет судьи</div>
     <div class="if-note" style="margin:0 0 10px">Выберите путь совета:</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-      <button class="pick-mode" id="supc-way-astro" onclick="SUPC_way('astro')" style="text-align:center"><div style="font-size:20px">🔮</div><div class="pick-mode-t">Через звёзды</div><div style="font-size:10px;color:var(--sub2)">знак · натал · Луна · база</div></button>
-      <button class="pick-mode" id="supc-way-db" onclick="SUPC_way('db')" style="text-align:center"><div style="font-size:20px">📊</div><div class="pick-mode-t">Только база</div><div style="font-size:10px;color:var(--sub2)">лидеры пар · троек · четвёрок</div></button>
+      <button class="pick-mode" id="supc-way-astro" data-loto-event-click="SUPC_way('astro')" style="text-align:center"><div style="font-size:20px">🔮</div><div class="pick-mode-t">Через звёзды</div><div style="font-size:10px;color:var(--sub2)">знак · натал · Луна · база</div></button>
+      <button class="pick-mode" id="supc-way-db" data-loto-event-click="SUPC_way('db')" style="text-align:center"><div style="font-size:20px">📊</div><div class="pick-mode-t">Только база</div><div style="font-size:10px;color:var(--sub2)">лидеры пар · троек · четвёрок</div></button>
     </div>
     <div id="supc-astro-block">
     <div class="if-seclbl" style="margin-top:0">Ваш знак зодиака</div>
     <div class="supc-signs" id="supc-signs"></div>
-    <div class="qa-birthline" id="supc-birthline" onclick="QAB_open()" style="border-color:var(--srow-border);color:var(--sub2)">🎂 Дата рождения: <b id="supc-birthval" style="color:var(--gold)">не указана</b> · настроить</div>
-    <button class="btn-draw euro" style="margin-top:12px" onclick="SUPC_route()">Получить направление</button>
+    <div class="qa-birthline" id="supc-birthline" data-loto-event-click="QAB_open()" style="border-color:var(--srow-border);color:var(--sub2)">🎂 Дата рождения: <b id="supc-birthval" style="color:var(--gold)">не указана</b> · настроить</div>
+    <button class="btn-draw euro" style="margin-top:12px" data-loto-event-click="SUPC_route()">Получить направление</button>
     </div>
     <div id="supc-db-block" style="display:none">
       <div class="if-note" style="margin:0 0 10px">Без астрологии: судья находит лидеров совместных выпадений в базе — пары, тройки и четвёрки главных чисел (и пары звёздных, где их две) — и собирает ряды вокруг них.</div>
       <div class="if-seclbl" style="margin-top:0">Сколько рядов</div>
       <div class="pick-counts" id="supcdb-counts" style="grid-template-columns:repeat(5,1fr)"></div>
-      <button class="btn-draw euro" style="margin-top:12px" onclick="SUPC_db()">📊 Совет по лидерам базы</button>
+      <button class="btn-draw euro" style="margin-top:12px" data-loto-event-click="SUPC_db()">📊 Совет по лидерам базы</button>
     </div>
     <div id="supc-result"></div>
   </div>
@@ -2111,18 +2121,18 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 
 <div class="if-ov" id="adv-ov">
   <div class="if-sheet" style="position:relative">
-    <button class="btn-close2" onclick="ADV_close()" style="position:absolute;top:14px;right:14px;width:38px;height:38px;padding:0;margin:0;border-radius:11px;font-size:16px;font-weight:900;z-index:2">✕</button>
+    <button class="btn-close2" data-loto-event-click="ADV_close()" style="position:absolute;top:14px;right:14px;width:38px;height:38px;padding:0;margin:0;border-radius:11px;font-size:16px;font-weight:900;z-index:2">✕</button>
     <div class="if-hdr"><div><div class="if-title" id="adv-title">💬 Совет модели</div><div class="if-sub" id="adv-sub"></div></div></div>
     <div class="adv-draw" id="adv-draw"></div>
     <div class="if-seclbl">Сколько рядов совета</div>
     <div class="pick-counts" id="adv-counts" style="grid-template-columns:repeat(5,1fr)"></div>
-    <button class="btn-draw euro" id="adv-go" style="margin-top:12px" onclick="ADV_go()">💬 Дать совет</button>
+    <button class="btn-draw euro" id="adv-go" style="margin-top:12px" data-loto-event-click="ADV_go()">💬 Дать совет</button>
     <div id="adv-result"></div>
     <div class="if-note" style="margin-top:12px">Гарантий победы не существует и существовать не может — вероятность тиража не меняется никаким анализом. Это исследовательский совет по структуре прошлого.</div>
   </div>
 </div>
 
-<!-- Loto Simulator: Free / Trial / PRO -->
+<!-- Loto Simulator: Free / PRO -->
 <style>
 .prev-sheet{display:flex;flex-direction:column;justify-content:center;text-align:center}
 .prev-lede{font-size:15.5px;line-height:1.5;color:#3E2C12;font-weight:600;margin:6px auto 16px;max-width:420px}
@@ -2147,15 +2157,15 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
     <div class="prev-fine">Одна попытка списывается только после успешного результата. Проверка PRO выполняется на сервере.</div>
   </div>
 </div>
-<div class="pro-ov" id="pro-ov" onclick="if(event.target===this)PRO_close()">
+<div class="pro-ov" id="pro-ov" role="dialog" aria-modal="true" aria-labelledby="pro-title" data-loto-event-click="if(event.target===this)PRO_close()">
   <div class="pro-sheet">
-    <button class="pro-close" onclick="PRO_close()">✕</button>
+    <button class="pro-close" data-loto-event-click="PRO_close()" aria-label="Закрыть">✕</button>
     <div class="pro-crown">👑</div>
-    <div class="pro-title">Loto Simulator</div>
+    <div class="pro-title" id="pro-title">Loto Simulator</div>
     <div class="pro-tag">Твоя лаборатория тиражей</div>
     <div class="pro-access-status" id="pro-access-status" data-level="free">Постоянный Free</div>
-    <div class="pro-context" id="pro-context">Откройте Trial или PRO, чтобы использовать полную лабораторию.</div>
-    <div class="pro-preview" id="pro-preview"><b>Демонстрационный пример PRO — не расчёт по вашим данным</b><span>Полный результат появляется только после серверной проверки Trial или PRO.</span></div>
+    <div class="pro-context" id="pro-context">Откройте PRO, чтобы использовать полную лабораторию.</div>
+    <div class="pro-preview" id="pro-preview"><b>Демонстрационный пример PRO — не расчёт по вашим данным</b><span>Полный результат появляется только после серверной проверки PRO.</span></div>
     <div class="pro-step" id="pro-plans-step">
       <div class="pro-sec">
         <div class="pro-sec-t">✨ Постоянный Free</div>
@@ -2164,21 +2174,17 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
         <div class="pro-li"><span class="pro-ic">◆</span><span>Проверка билета, базовая частота и случайный генератор</span></div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>Никаких ежедневных, еженедельных или месячных сбросов лимита</span></div>
       </div>
-      <div class="pro-sec">
-        <div class="pro-sec-t">⏱ Одноразовый Trial</div>
-        <div class="pro-li"><span class="pro-ic">◆</span><span>Полный PRO на <b>7 дней или 25 PRO-действий</b> — что наступит раньше</span></div>
-        <div class="pro-li"><span class="pro-ic">◆</span><span>Начинается только при первом осознанном запросе PRO, а не при установке</span></div>
-        <button type="button" class="btn-draw" id="pro-trial-btn" onclick="LotoCommercial.trialClick()">Попробовать PRO бесплатно</button>
-      </div>
-      <div class="pro-sec">
+      <div class="pro-sec" id="pro-purchase-area">
         <div class="pro-sec-t">👑 PRO · полная база</div>
         <div class="pro-prices" id="pro-subscription-plans" aria-label="Срок подписки PRO">
-          <button type="button" class="pro-price" data-plan="m1" aria-pressed="false" onclick="LotoCommercial.selectPlan('m1')"><div class="pro-per">1 месяц</div><div class="pro-amt">$4.99</div></button>
-          <button type="button" class="pro-price" data-plan="m3" aria-pressed="false" onclick="LotoCommercial.selectPlan('m3')"><div class="pro-per">3 месяца</div><div class="pro-amt">$12.99</div></button>
-          <button type="button" class="pro-price" data-plan="m6" aria-pressed="false" onclick="LotoCommercial.selectPlan('m6')"><div class="pro-per">6 месяцев</div><div class="pro-amt">$22.99</div></button>
-          <button type="button" class="pro-price best" data-plan="m12" aria-pressed="true" onclick="LotoCommercial.selectPlan('m12')"><span class="pro-best">выгодно</span><div class="pro-per">12 месяцев</div><div class="pro-amt">$34.99</div></button>
+          <button type="button" class="pro-price" data-plan="m1" aria-pressed="false" data-loto-event-click="LotoCommercial.selectPlan('m1')"><span class="pro-best" data-best hidden>выгодно</span><div class="pro-per">1 месяц</div><div class="pro-amt" data-amt>Цена загружается…</div><div class="pro-permonth" data-permonth></div></button>
+          <button type="button" class="pro-price" data-plan="m3" aria-pressed="false" data-loto-event-click="LotoCommercial.selectPlan('m3')"><span class="pro-best" data-best hidden>выгодно</span><div class="pro-per">3 месяца</div><div class="pro-amt" data-amt>Цена загружается…</div><div class="pro-permonth" data-permonth></div></button>
+          <button type="button" class="pro-price" data-plan="m6" aria-pressed="false" data-loto-event-click="LotoCommercial.selectPlan('m6')"><span class="pro-best" data-best hidden>выгодно</span><div class="pro-per">6 месяцев</div><div class="pro-amt" data-amt>Цена загружается…</div><div class="pro-permonth" data-permonth></div></button>
+          <button type="button" class="pro-price" data-plan="m12" aria-pressed="true" data-loto-event-click="LotoCommercial.selectPlan('m12')"><span class="pro-best" data-best hidden>выгодно</span><div class="pro-per">12 месяцев</div><div class="pro-amt" data-amt>Цена загружается…</div><div class="pro-permonth" data-permonth></div></button>
         </div>
-        <div class="pro-selected-plan" id="pro-selected-plan">12 месяцев · $34.99</div>
+        <div class="pro-selected-plan" id="pro-selected-plan">12 месяцев · Цена загружается…</div>
+        <div class="pro-fine" id="pro-price-note">Цена и валюта загружаются из Apple, Google Play или Paddle. Предварительная цена не используется для покупки.</div>
+        <div class="pro-fine" id="pro-provider-trial" hidden></div>
         <div class="pro-renewal-copy">Подписка продлевается автоматически на выбранный срок. Отменить её можно в магазине или кабинете; после отмены PRO работает до оплаченной даты, а затем закрывается. Итоговая локальная цена и валюта всегда подтверждаются платёжным магазином.</div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>Вся доступная история и <b>все эпохи правил</b></span></div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>PRO-модели считают по полному набору; Free никогда не получает эти данные и результаты</span></div>
@@ -2189,20 +2195,28 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
         <div id="pro-auth-form">
           <div class="pro-auth-row">
             <input type="email" id="pro-email" autocomplete="email" inputmode="email" placeholder="name@example.com" aria-label="E-mail для безопасного входа">
-            <button type="button" class="btn-draw" id="pro-auth-submit" onclick="LotoCommercial.submitEmail()">Войти или создать аккаунт</button>
+            <button type="button" class="btn-draw" id="pro-auth-submit" data-loto-event-click="LotoCommercial.submitEmail()">Войти или создать аккаунт</button>
           </div>
           <div class="pro-fine">Без пароля: безопасная одноразовая ссылка придёт на e-mail. Бесплатным режимом можно пользоваться без входа.</div>
         </div>
         <div class="pro-auth-message" id="pro-auth-message" aria-live="polite" hidden></div>
       </div>
       <div class="pro-actions">
-        <button type="button" class="btn-exp wide" id="pro-purchase-btn" onclick="LotoCommercial.purchase()">Открыть безопасную оплату PRO</button>
-        <button type="button" class="btn-exp" id="pro-restore-btn" onclick="LotoCommercial.restorePurchase()">Восстановить покупку</button>
-        <button type="button" class="btn-exp" onclick="LotoCommercial.accountPortal()">Управление подпиской</button>
-        <button type="button" class="btn-exp wide" id="pro-signout-btn" onclick="LotoCommercial.signOut()" hidden>Выйти из аккаунта</button>
+        <button type="button" class="btn-exp wide" id="pro-purchase-btn" data-loto-event-click="LotoCommercial.purchase()">Открыть безопасную оплату PRO</button>
+        <button type="button" class="btn-exp" id="pro-restore-btn" data-loto-event-click="LotoCommercial.restorePurchase()">Восстановить покупку</button>
+        <button type="button" class="btn-exp" id="pro-account-portal-btn" data-loto-event-click="LotoCommercial.accountPortal()">Управление подпиской</button>
+        <button type="button" class="btn-exp wide" id="pro-signout-btn" data-loto-event-click="LotoCommercial.signOut()" hidden>Выйти из аккаунта</button>
       </div>
       <div class="pro-pay-status" id="pro-pay-status" aria-live="polite"></div>
-      <div class="pro-fine">На iOS оплата и восстановление проходят через Apple, на Android — через Google Play, в браузере — через RevenueCat Billing со Stripe. Цена, валюта, пробный период и автопродление всегда подтверждаются платёжным магазином до покупки.</div>
+      <div class="pro-fine">На iOS оплата проходит через Apple, на Android — через Google Play, в браузере — через RevenueCat и Paddle. Способ оплаты выбирается только в защищённом системном или провайдерском окне.</div>
+      <div class="pro-fine">PRO оплачивает только дополнительные программные функции. Loto Simulator не продаёт билеты, не принимает ставки и не гарантирует выигрыш.</div>
+      <div class="pro-actions pro-legal-links">
+        <a class="btn-exp" id="pro-privacy-link" href="#" target="_blank" rel="noopener" hidden>Политика конфиденциальности</a>
+        <a class="btn-exp" id="pro-terms-link" href="#" target="_blank" rel="noopener" hidden>Условия использования</a>
+        <a class="btn-exp" id="pro-subscription-terms-link" href="#" target="_blank" rel="noopener" hidden>Условия подписки</a>
+        <a class="btn-exp" id="pro-refund-link" href="#" target="_blank" rel="noopener" hidden>Политика возвратов</a>
+        <a class="btn-exp" href="./safe-payment.html" target="_blank" rel="noopener">Безопасная оплата</a>
+      </div>
     </div>
   </div>
 </div>
@@ -2222,9 +2236,9 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 </div>
 
 <!-- РАЗБОР МОЕЙ КОМБИНАЦИИ -->
-<div class="if-ov" id="jc-ov" onclick="if(event.target===this)JC_close()">
+<div class="if-ov" id="jc-ov" data-loto-event-click="if(event.target===this)JC_close()">
   <div class="if-sheet" style="position:relative">
-    <button class="btn-close2" onclick="JC_close()" style="position:absolute;top:14px;right:14px;width:38px;height:38px;padding:0;margin:0;border-radius:11px;font-size:16px;font-weight:900;z-index:2">✕</button>
+    <button class="btn-close2" data-loto-event-click="JC_close()" style="position:absolute;top:14px;right:14px;width:38px;height:38px;padding:0;margin:0;border-radius:11px;font-size:16px;font-weight:900;z-index:2">✕</button>
     <div class="if-hdr"><div><div class="if-title">⚖️ Разбор моей комбинации</div><div class="if-sub" id="jc-sub"></div></div></div>
     <div id="jc-mount"><div class="if-empty">Судья изучает твои ряды…</div></div>
     <div class="if-note" style="margin-top:14px">Судья оценивает структуру твоих рядов по истории выбранного периода. Это не прогноз и не гарантия — вероятность каждого тиража одинакова для любой комбинации.</div>
@@ -2234,37 +2248,37 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <!-- ПАРАДОКСЫ MODAL -->
 <div class="if-ov" id="pdx-ov">
   <div class="if-sheet" style="position:relative">
-    <button class="btn-close2" onclick="PDX_close()" style="position:absolute;top:14px;right:14px;width:38px;height:38px;padding:0;margin:0;border-radius:11px;font-size:16px;font-weight:900;z-index:2">✕</button>
+    <button class="btn-close2" data-loto-event-click="PDX_close()" style="position:absolute;top:14px;right:14px;width:38px;height:38px;padding:0;margin:0;border-radius:11px;font-size:16px;font-weight:900;z-index:2">✕</button>
     <div class="if-hdr"><div><div class="if-title">♾️ Система парадоксов</div><div class="if-sub" id="pdx-sub"></div></div></div>
     <div class="if-note" style="margin:10px 0 4px">Парадокс — это когда интуиция обманывает. В лото есть реальные контринтуитивные явления: их и превращаю в ряды. Вероятность выигрыша это не меняет, но раскрывает структуру иначе, чем обычные модели.</div>
     <div class="if-seclbl">Источник</div>
     <div class="pdx-modes">
-      <button class="pick-mode" id="pdx-mode-base" onclick="PDX_setMode(true)" style="text-align:center"><div style="font-size:20px">🗄️</div><div class="pick-mode-t">С базой тиражей</div><div style="font-size:10px;color:var(--sub2)">частоты · пропуски · пары</div></button>
-      <button class="pick-mode" id="pdx-mode-free" onclick="PDX_setMode(false)" style="text-align:center"><div style="font-size:20px">✨</div><div class="pick-mode-t">Без базы</div><div style="font-size:10px;color:var(--sub2)">чистая структура и случай</div></button>
+      <button class="pick-mode" id="pdx-mode-base" data-loto-event-click="PDX_setMode(true)" style="text-align:center"><div style="font-size:20px">🗄️</div><div class="pick-mode-t">С базой тиражей</div><div style="font-size:10px;color:var(--sub2)">частоты · пропуски · пары</div></button>
+      <button class="pick-mode" id="pdx-mode-free" data-loto-event-click="PDX_setMode(false)" style="text-align:center"><div style="font-size:20px">✨</div><div class="pick-mode-t">Без базы</div><div style="font-size:10px;color:var(--sub2)">чистая структура и случай</div></button>
     </div>
     <div class="if-seclbl">Сколько рядов</div>
     <div class="pick-counts" id="pdx-counts" style="grid-template-columns:repeat(5,1fr)"></div>
-    <button class="btn-draw euro" id="pdx-go" style="margin-top:12px" onclick="PDX_go()">♾️ Собрать парадоксы</button>
+    <button class="btn-draw euro" id="pdx-go" style="margin-top:12px" data-loto-event-click="PDX_go()">♾️ Собрать парадоксы</button>
     <div id="pdx-result"></div>
     <div class="if-note" style="margin-top:14px">Ни один метод не увеличивает вероятность выигрыша — тиражи независимы. Парадоксы лишь по-другому показывают структуру и могут отличаться от популярных человеческих шаблонов; разделение возможного приза это не гарантирует.</div>
   </div>
 </div>
 
-<div class="lang-ov" id="genn-ov" onclick="if(event.target===this)GENN_close()">
+<div class="lang-ov" id="genn-ov" data-loto-event-click="if(event.target===this)GENN_close()">
   <div class="lang-box">
     <div class="lang-title">📐 Сколько рядов сгенерировать</div>
     <div class="if-note" style="margin:0 0 10px;text-align:center" id="genn-note"></div>
     <div class="pick-counts" id="genn-chips" style="grid-template-columns:repeat(5,1fr)"></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <input type="number" class="num-inp" id="genn-custom" min="1" max="50" placeholder="или своё: 1–50" style="flex:1">
-      <button class="btn-exp" style="margin:0;width:auto;padding:0 16px" onclick="GENN_custom()">ОК</button>
+      <button class="btn-exp" style="margin:0;width:auto;padding:0 16px" data-loto-event-click="GENN_custom()">ОК</button>
     </div>
-    <button class="btn-draw euro" style="margin-top:12px" id="genn-go" onclick="GENN_go()">Сформировать</button>
-    <button class="btn-close2" onclick="GENN_close()">Закрыть</button>
+    <button class="btn-draw euro" style="margin-top:12px" id="genn-go" data-loto-event-click="GENN_go()">Сформировать</button>
+    <button class="btn-close2" data-loto-event-click="GENN_close()">Закрыть</button>
   </div>
 </div>
 
-<div class="lang-ov" id="period-ov" onclick="if(event.target===this)PERIOD_close()">
+<div class="lang-ov" id="period-ov" data-loto-event-click="if(event.target===this)PERIOD_close()">
   <div class="lang-box">
     <div class="lang-title">🗓 Период анализа</div>
     <div class="if-note" id="period-note" style="margin:0 0 10px;text-align:center"></div>
@@ -2274,13 +2288,13 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
       <input type="date" class="num-inp" id="period-from" style="width:100%">
       <input type="date" class="num-inp" id="period-to" style="width:100%">
     </div>
-    <button class="btn-exp" style="margin-top:8px" onclick="PERIOD_range()">Применить диапазон</button>
+    <button class="btn-exp" style="margin-top:8px" data-loto-event-click="PERIOD_range()">Применить диапазон</button>
     <div class="if-seclbl">Или своё число тиражей</div>
     <div style="display:flex;gap:8px">
       <input type="number" class="num-inp" id="period-custom" min="5" placeholder="например 73" style="flex:1">
-      <button class="btn-exp" style="margin:0;width:auto;padding:0 18px" onclick="PERIOD_custom()">ОК</button>
+      <button class="btn-exp" style="margin:0;width:auto;padding:0 18px" data-loto-event-click="PERIOD_custom()">ОК</button>
     </div>
-    <button class="btn-close2" onclick="PERIOD_close()">Закрыть</button>
+    <button class="btn-close2" data-loto-event-click="PERIOD_close()">Закрыть</button>
   </div>
 </div>
 
@@ -2293,13 +2307,13 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   </div>
 </div>
 
-<div class="cele-ov" id="cele-ov" onclick="CELE_close()">
-  <div class="cele-box" onclick="event.stopPropagation()">
+<div class="cele-ov" id="cele-ov" data-loto-event-click="CELE_close()">
+  <div class="cele-box" data-loto-event-click="event.stopPropagation()">
     <div class="cele-burst" id="cele-burst"></div>
     <div class="cele-icon" id="cele-icon">🏆</div>
     <div class="cele-title" id="cele-title">ПОЗДРАВЛЯЕМ!</div>
     <div class="cele-msg" id="cele-msg"></div>
-    <button class="btn-draw euro" style="margin-top:14px" onclick="CELE_close()">Ура! 🎉</button>
+    <button class="btn-draw euro" style="margin-top:14px" data-loto-event-click="CELE_close()">Ура! 🎉</button>
   </div>
 </div>
 
@@ -2307,17 +2321,17 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   <div class="if-sheet">
     <div class="if-hdr">
       <div><div class="if-title">💠 Итоговая матрица консенсуса</div><div class="if-sub" id="matrix-sub">—</div></div>
-      <button class="btn-close2" onclick="MATRIX_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
+      <button class="btn-close2" data-loto-event-click="MATRIX_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
     </div>
     <div class="if-ctx" id="matrix-ctx">—</div>
     <div id="matrix-body"></div>
     <div class="matrix-actions">
-      <button class="btn-draw euro" onclick="MATRIX_use()">Использовать в симуляторе</button>
+      <button class="btn-draw euro" data-loto-event-click="MATRIX_use()">Использовать в симуляторе</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <button class="btn-exp" style="margin:0" onclick="shareMatrix()">📤 Поделиться</button>
-        <button class="btn-exp" style="margin:0" onclick="MATRIX_judge()">⚖️ Проверить матрицу судьёй</button>
+        <button class="btn-exp" style="margin:0" data-loto-event-click="shareMatrix()">📤 Поделиться</button>
+        <button class="btn-exp" style="margin:0" data-loto-event-click="MATRIX_judge()">⚖️ Проверить матрицу судьёй</button>
       </div>
-      <button class="btn-exp matrix-copy" id="matrix-copy-btn" onclick="MATRIX_copy(this)">📋 Копировать</button>
+      <button class="btn-exp matrix-copy" id="matrix-copy-btn" data-loto-event-click="MATRIX_copy(this)">📋 Копировать</button>
     </div>
     <div id="matrix-jmount" class="matrix-judge-mount"></div>
     <div class="if-legal">Важно: это образовательный анализ последних доступных результатов выбранной лотереи. Ни одна модель не делает будущий независимый тираж более предсказуемым.</div>
@@ -2328,15 +2342,15 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   <div class="if-sheet">
     <div class="if-hdr">
       <div><div class="if-title">🧬 Структурное поле данных</div><div class="if-sub">Карта структуры и связей чисел · без прогноза выигрыша</div></div>
-      <button class="btn-close2" onclick="IF_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
+      <button class="btn-close2" data-loto-event-click="IF_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
     </div>
     <div class="if-ctx" id="if-ctx">—</div>
     <div class="if-summary" id="if-summary"></div>
     <div class="if-tabs">
-      <button class="if-tab on" id="ift-field" onclick="IF_tab('field')">Структура</button>
-      <button class="if-tab" id="ift-links" onclick="IF_tab('links')">Связи</button>
-      <button class="if-tab" id="ift-div" onclick="IF_tab('div')">Разнообразие</button>
-      <button class="if-tab" id="ift-rows" onclick="IF_tab('rows')">10 строк</button>
+      <button class="if-tab on" id="ift-field" data-loto-event-click="IF_tab('field')">Структура</button>
+      <button class="if-tab" id="ift-links" data-loto-event-click="IF_tab('links')">Связи</button>
+      <button class="if-tab" id="ift-div" data-loto-event-click="IF_tab('div')">Разнообразие</button>
+      <button class="if-tab" id="ift-rows" data-loto-event-click="IF_tab('rows')">10 строк</button>
     </div>
     <div id="if-body"></div>
     <div class="if-legal">Модели анализируют последние доступные тиражи выбранной лотереи и структуру комбинаций. Независимый будущий тираж не становится предсказуемым.</div>
@@ -2357,9 +2371,9 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 .about-foot button{background:none;border:0;color:inherit;font:inherit;text-decoration:underline;cursor:pointer;padding:0}
 </style>
 <!-- О ПРИЛОЖЕНИИ / ПРАВОВАЯ ИНФОРМАЦИЯ -->
-<div class="lang-ov" id="about-ov" onclick="if(event.target===this)closeAbout()">
+<div class="lang-ov" id="about-ov" data-loto-event-click="if(event.target===this)closeAbout()">
   <div class="lang-box about-box">
-    <button class="btn-close2 about-x about-x-top" onclick="closeAbout()" type="button" title="Закрыть" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M7 7l10 10M17 7 7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <button class="btn-close2 about-x about-x-top" data-loto-event-click="closeAbout()" type="button" title="Закрыть" aria-label="Закрыть"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M7 7l10 10M17 7 7 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     <div class="about-scroll">
     <div class="lang-title" style="text-align:center;padding:0 44px">О приложении</div>
     <div style="text-align:center;font-weight:900;font-size:18px;margin-top:4px">Loto Simulator</div>
@@ -2404,35 +2418,35 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   </div>
 </div>
 
-<div class="lang-ov" id="src-ov" onclick="if(event.target===this)closeSourceInfo()">
+<div class="lang-ov" id="src-ov" data-loto-event-click="if(event.target===this)closeSourceInfo()">
   <div class="lang-box">
     <div class="lang-title">📊 Источники данных</div>
     <div id="src-body"></div>
-    <button class="btn-exp" onclick="openOfficialResults()" style="margin-top:12px">Открыть страницу официальных результатов</button>
-    <button class="btn-close2" onclick="closeSourceInfo()">Закрыть</button>
+    <button class="btn-exp" data-loto-event-click="openOfficialResults()" style="margin-top:12px">Открыть страницу официальных результатов</button>
+    <button class="btn-close2" data-loto-event-click="closeSourceInfo()">Закрыть</button>
   </div>
 </div>
 
-<div class="cc-ov" id="cc-ov" onclick="ccOut(event)">
+<div class="cc-ov" id="cc-ov" data-loto-event-click="ccOut(event)">
   <div class="cc-box">
-    <button class="cc-x" type="button" onclick="ccAnswer(false)" aria-label="Закрыть">✕</button>
+    <button class="cc-x" type="button" data-loto-event-click="ccAnswer(false)" aria-label="Закрыть">✕</button>
     <div class="cc-title" id="cc-title">Подтверждение</div>
     <div class="cc-msg" id="cc-msg">Подтвердить?</div>
     <div class="cc-btns">
-      <button class="cc-btn cancel" id="cc-cancel" onclick="ccAnswer(false)">Отмена</button>
-      <button class="cc-btn ok" id="cc-ok" onclick="ccAnswer(true)">Удалить</button>
+      <button class="cc-btn cancel" id="cc-cancel" data-loto-event-click="ccAnswer(false)">Отмена</button>
+      <button class="cc-btn ok" id="cc-ok" data-loto-event-click="ccAnswer(true)">Удалить</button>
     </div>
   </div>
 </div>
 
 <!-- FEEDBACK MODAL -->
-<div class="fb-ov" id="fb-ov" onclick="fbOut(event)">
+<div class="fb-ov" id="fb-ov" data-loto-event-click="fbOut(event)">
   <div class="fb-box">
     <div class="fb-icon" id="fb-icon">✅</div>
     <div class="fb-title" id="fb-title">Готово</div>
     <div class="fb-msg" id="fb-msg">Действие выполнено.</div>
     <div class="fb-actions">
-      <button class="fb-btn" id="fb-primary" onclick="closeFeedback()">OK</button>
+      <button class="fb-btn" id="fb-primary" data-loto-event-click="closeFeedback()">OK</button>
       <button class="fb-btn fb-btn-secondary" id="fb-secondary" hidden>OK</button>
     </div>
   </div>
@@ -2441,14 +2455,15 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=20260725-1"></script>
-<script src="./commercial-config.js?v=20260725-1"></script>
-<script src="./auth-client.js?v=20260726-1"></script>
-<script src="./native-bridge.js?v=20260725-1"></script>
-<script src="./i18n-catalog.js?v=20260718-6"></script>
-<script src="./i18n-runtime.js?v=20260718-6"></script>
-<script src="./app-runtime.js?v=20260726-4"></script>
-<script src="./commercial-runtime.js?v=20260725-1"></script>
+<script src="./version.js?v=1f6d058"></script>
+<script src="./commercial-config.js?v=1f6d058"></script>
+<script src="./event-runtime.js?v=1f6d058"></script>
+<script src="./auth-client.js?v=1f6d058"></script>
+<script src="./native-loader.js?v=1f6d058"></script>
+<script src="./i18n-catalog.js?v=1f6d058"></script>
+<script src="./i18n-runtime.js?v=1f6d058"></script>
+<script src="./app-runtime.js?v=1f6d058"></script>
+<script src="./commercial-runtime.js?v=1f6d058"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide the redundant Back control on the Simulator home. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -2518,11 +2533,11 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=20260823-1"></script>
-<script src="./notifications-runtime.js?v=20260818-1"></script>
-<script src="./pwa-runtime.js?v=20260726-4"></script>
+<script src="./notification-center.js?v=1f6d058"></script>
+<script src="./notifications-runtime.js?v=1f6d058"></script>
+<script src="./pwa-runtime.js?v=1f6d058"></script>
 <div class="scroll-anchors" id="scroll-anchors">
-  <button class="sa-btn" id="sa-btn" onclick="SA_go()">↓</button>
+  <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
 <!-- ── Embedded 3D lottery-drum launcher ──────────────────────────────────────
      Opens the standalone drum bundle (./demo-drum/) in a same-origin overlay
@@ -2531,7 +2546,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-2.js?v=20260726-4"></script>
-<script src="./inline-runtime-3.js?v=20260726-4"></script>
+<script src="./inline-runtime-2.js?v=1f6d058"></script>
+<script src="./inline-runtime-3.js?v=1f6d058"></script>
 </body>
 </html>

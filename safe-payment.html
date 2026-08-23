@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru" class="i18n-pending">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>Безопасная оплата | Loto Simulator</title>
+  <link rel="icon" href="./favicon-64.png">
+  <style>
+    :root{font-family:Manrope,system-ui,sans-serif;color:#28170f;background:#fffaf2}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;padding:calc(24px + env(safe-area-inset-top)) 18px calc(32px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#fffaf2,#f8eddc)}
+    main{width:min(720px,100%);margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}
+    h1{font-size:clamp(25px,5vw,38px);line-height:1.08;margin:0}h2{font-size:18px;margin:28px 0 8px}p,li{font-size:15px;line-height:1.58}ul{padding-left:22px}
+    select,a{font:700 14px inherit}select{max-width:190px;padding:10px;border:1px solid #b5894c;background:#fff;border-radius:7px}
+    .domain{padding:12px;border-left:4px solid #b8860b;background:#fff;overflow-wrap:anywhere}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+    .button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;border-radius:7px;background:#2b1710;color:#fff;text-decoration:none;font-weight:800}
+    .secondary{background:#fff;color:#2b1710;border:1px solid #b5894c}[hidden]{display:none!important}
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Безопасная оплата</h1>
+      <label><span>Язык</span><br><select id="safe-language" aria-label="Язык"></select></label>
+    </header>
+    <p class="domain" id="safe-domain">Коммерческий домен ещё не активирован. Оплата на этом адресе отключена.</p>
+    <h2>Как проходит оплата</h2>
+    <ul>
+      <li>На iPhone и iPad подписка оформляется только через системный экран Apple.</li>
+      <li>На Android подписка оформляется только через Google Play.</li>
+      <li>В браузере защищённый checkout откроется через RevenueCat и Paddle только после письменного compliance-подтверждения.</li>
+    </ul>
+    <h2>Защита от фишинга</h2>
+    <p>Loto Simulator никогда не просит отправлять номер карты, CVV, пароль или код подтверждения через e-mail, чат, SMS либо push-уведомление.</p>
+    <p>Не вводите платёжные данные на домене, который отличается от официального адреса приложения или системного экрана Apple, Google Play либо Paddle.</p>
+    <h2>Что оплачивает PRO</h2>
+    <p>PRO оплачивает только дополнительные программные функции симулятора и аналитического инструмента. Приложение не продаёт билеты, не принимает ставки и не гарантирует выигрыш.</p>
+    <div class="actions">
+      <a class="button" href="./">Вернуться в приложение</a>
+      <a class="button secondary" id="safe-support" href="#" hidden>Поддержка</a>
+      <a class="button secondary" id="safe-app-store" href="#" hidden>App Store</a>
+      <a class="button secondary" id="safe-play-store" href="#" hidden>Google Play</a>
+    </div>
+  </main>
+  <script src="./commercial-config.js"></script>
+  <script src="./i18n-catalog.js"></script>
+  <script src="./i18n-runtime.js"></script>
+  <script src="./safe-payment-runtime.js"></script>
+</body>
+</html>
