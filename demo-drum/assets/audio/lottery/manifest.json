@@ -1,0 +1,22 @@
+{
+  "_note": "Real CC0 impacts (Kenney Impact Sounds, CC0). See ../../AUDIO_SOURCES.md. Add game-specific recordings later; empty arrays = silent.",
+  "plastic": {
+    "ballBall": ["kenney/impactGeneric_light_000.ogg","kenney/impactGeneric_light_001.ogg","kenney/impactGeneric_light_002.ogg","kenney/impactGeneric_light_003.ogg","kenney/impactGeneric_light_004.ogg"],
+    "ballWall": ["kenney/impactSoft_medium_000.ogg","kenney/impactSoft_medium_001.ogg","kenney/impactSoft_medium_002.ogg"],
+    "exit": ["kenney/impactSoft_medium_003.ogg"],
+    "rack": ["kenney/impactSoft_medium_004.ogg"]
+  },
+  "soft-polymer": {
+    "ballBall": ["kenney/impactSoft_medium_000.ogg","kenney/impactSoft_medium_001.ogg","kenney/impactSoft_medium_002.ogg","kenney/impactSoft_medium_003.ogg","kenney/impactSoft_medium_004.ogg"],
+    "ballWall": ["kenney/impactGeneric_light_000.ogg","kenney/impactGeneric_light_001.ogg","kenney/impactGeneric_light_002.ogg"],
+    "exit": ["kenney/impactGeneric_light_003.ogg"],
+    "rack": ["kenney/impactGeneric_light_004.ogg"]
+  },
+  "neutral": {
+    "ballBall": ["kenney/impactSoft_medium_000.ogg","kenney/impactSoft_medium_001.ogg","kenney/impactSoft_medium_002.ogg","kenney/impactGeneric_light_000.ogg","kenney/impactGeneric_light_001.ogg"],
+    "ballWall": ["kenney/impactGeneric_light_002.ogg","kenney/impactGeneric_light_003.ogg","kenney/impactGeneric_light_004.ogg"],
+    "exit": ["kenney/impactSoft_medium_003.ogg"],
+    "rack": ["kenney/impactSoft_medium_004.ogg"]
+  },
+  "mechanism": []
+}

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Loto Simulator — шары 18, 8 и 3">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8b002b"/><stop offset="1" stop-color="#19000d"/></linearGradient>
+    <radialGradient id="gold" cx="31%" cy="24%" r="76%"><stop stop-color="#fff6a6"/><stop offset=".34" stop-color="#ffc51a"/><stop offset=".72" stop-color="#d98700"/><stop offset="1" stop-color="#7a3900"/></radialGradient>
+    <radialGradient id="rose" cx="31%" cy="24%" r="76%"><stop stop-color="#ffd3e2"/><stop offset=".38" stop-color="#ff2d73"/><stop offset="1" stop-color="#8f0038"/></radialGradient>
+    <radialGradient id="blue" cx="31%" cy="24%" r="76%"><stop stop-color="#bfe4ff"/><stop offset=".38" stop-color="#087cff"/><stop offset="1" stop-color="#00347f"/></radialGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#000" flood-opacity=".5"/></filter>
+  </defs>
+  <rect width="1024" height="1024" rx="218" fill="url(#bg)"/>
+  <g filter="url(#shadow)">
+    <circle cx="292" cy="670" r="202" fill="url(#rose)" stroke="#ff91bd" stroke-width="12"/>
+    <circle cx="732" cy="670" r="202" fill="url(#blue)" stroke="#72c1ff" stroke-width="12"/>
+    <circle cx="512" cy="376" r="246" fill="url(#gold)" stroke="#fff19b" stroke-width="15"/>
+  </g>
+  <circle cx="292" cy="670" r="112" fill="#fff5df" stroke="#9c1648" stroke-width="8"/>
+  <circle cx="732" cy="670" r="112" fill="#fff5df" stroke="#064da8" stroke-width="8"/>
+  <circle cx="512" cy="376" r="142" fill="#fff5df" stroke="#d88f00" stroke-width="10"/>
+  <g text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" fill="#210813">
+    <text x="292" y="724" font-size="150">18</text>
+    <text x="732" y="735" font-size="188">3</text>
+    <text x="512" y="462" font-size="250">8</text>
+  </g>
+  <circle cx="438" cy="252" r="30" fill="#fff" opacity=".62"/>
+</svg>

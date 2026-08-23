@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-23",
+  "freeRecentDrawsPerGame": 20,
+  "games": {
+    "lotto": {
+      "availableDraws": 764,
+      "freeDraws": 20
+    },
+    "vikinglotto": {
+      "availableDraws": 757,
+      "freeDraws": 20
+    },
+    "eurojackpot": {
+      "availableDraws": 983,
+      "freeDraws": 20
+    },
+    "powerball": {
+      "availableDraws": 1982,
+      "freeDraws": 20
+    },
+    "megaMillions": {
+      "availableDraws": 2530,
+      "freeDraws": 20
+    },
+    "euroMillions": {
+      "availableDraws": 1974,
+      "freeDraws": 20
+    },
+    "superEnalotto": {
+      "availableDraws": 4254,
+      "freeDraws": 20
+    },
+    "lottoMax": {
+      "availableDraws": 1261,
+      "freeDraws": 20
+    },
+    "powerballAustralia": {
+      "availableDraws": 1579,
+      "freeDraws": 20
+    }
+  }
+}
