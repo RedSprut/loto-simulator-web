@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-08-23T12:19:51.209Z",
+  "updated": "2026-08-24T06:03:34.456Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,7 +12,7 @@
       "lastDrawDate": "2026-08-22",
       "expectedLastDraw": "2026-08-22",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-23T12:19:51.209Z",
+      "updatedAt": "2026-08-24T06:03:34.456Z",
       "status": "fresh",
       "synced": true,
       "source": "norsk-tipping.no"
@@ -27,7 +27,7 @@
       "lastDrawDate": "2026-08-19",
       "expectedLastDraw": "2026-08-19",
       "nextDrawDate": "2026-08-26",
-      "updatedAt": "2026-08-23T12:19:51.209Z",
+      "updatedAt": "2026-08-24T06:03:34.456Z",
       "status": "fresh",
       "synced": true,
       "source": "norsk-tipping.no"
@@ -42,7 +42,7 @@
       "lastDrawDate": "2026-08-21",
       "expectedLastDraw": "2026-08-21",
       "nextDrawDate": "2026-08-25",
-      "updatedAt": "2026-08-23T12:19:51.209Z",
+      "updatedAt": "2026-08-24T06:03:34.456Z",
       "status": "fresh",
       "synced": true,
       "source": "norsk-tipping.no"
@@ -57,7 +57,7 @@
       "lastDrawDate": "2026-08-22",
       "expectedLastDraw": "2026-08-22",
       "nextDrawDate": "2026-08-24",
-      "updatedAt": "2026-08-23T12:19:51.209Z",
+      "updatedAt": "2026-08-24T06:03:34.456Z",
       "status": "fresh",
       "synced": true,
       "source": "powerball.com"
@@ -72,7 +72,7 @@
       "lastDrawDate": "2026-08-21",
       "expectedLastDraw": "2026-08-21",
       "nextDrawDate": "2026-08-25",
-      "updatedAt": "2026-08-23T12:19:51.209Z",
+      "updatedAt": "2026-08-24T06:03:34.456Z",
       "status": "fresh",
       "synced": true,
       "source": "megamillions.com"
@@ -87,7 +87,7 @@
       "lastDrawDate": "2026-08-21",
       "expectedLastDraw": "2026-08-21",
       "nextDrawDate": "2026-08-25",
-      "updatedAt": "2026-08-23T12:19:51.209Z",
+      "updatedAt": "2026-08-24T06:03:34.456Z",
       "status": "fresh",
       "synced": true,
       "source": "national-lottery.com"
@@ -102,7 +102,7 @@
       "lastDrawDate": "2026-08-22",
       "expectedLastDraw": "2026-08-22",
       "nextDrawDate": "2026-08-25",
-      "updatedAt": "2026-08-23T12:19:51.209Z",
+      "updatedAt": "2026-08-24T06:03:34.456Z",
       "status": "fresh",
       "synced": true,
       "source": "superenalotto.net"
@@ -117,7 +117,7 @@
       "lastDrawDate": "2026-08-21",
       "expectedLastDraw": "2026-08-21",
       "nextDrawDate": "2026-08-25",
-      "updatedAt": "2026-08-23T12:19:51.209Z",
+      "updatedAt": "2026-08-24T06:03:34.456Z",
       "status": "fresh",
       "synced": true,
       "source": "lottomaxnumbers.com"
@@ -132,7 +132,7 @@
       "lastDrawDate": "2026-08-20",
       "expectedLastDraw": "2026-08-20",
       "nextDrawDate": "2026-08-27",
-      "updatedAt": "2026-08-23T12:19:51.209Z",
+      "updatedAt": "2026-08-24T06:03:34.456Z",
       "status": "fresh",
       "synced": true,
       "source": "thelott.com"
