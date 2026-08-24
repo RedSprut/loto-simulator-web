@@ -1,0 +1,36 @@
+:root{font-family:Manrope,system-ui,sans-serif;color:#201a17;background:#f7f7f5;color-scheme:light}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:#f7f7f5;padding:calc(18px + env(safe-area-inset-top)) 18px calc(34px + env(safe-area-inset-bottom))}
+a{color:#8a2b23;text-underline-offset:3px}
+.legal-shell{width:min(880px,100%);margin:0 auto}
+.legal-header{display:grid;grid-template-columns:1fr auto;align-items:start;gap:18px;padding:12px 0 20px;border-bottom:2px solid #d5b45d}
+.legal-brand{font-weight:900;font-size:15px;color:#6a4a12;text-decoration:none}
+.legal-title{margin:7px 0 0;font-size:clamp(26px,4vw,40px);line-height:1.12;letter-spacing:0}
+.legal-language{font-size:12px;font-weight:800;color:#51463e}
+.legal-language select{display:block;width:180px;max-width:42vw;margin-top:5px;padding:10px;border:1px solid #a47b28;border-radius:6px;background:#fff;color:#201a17;font:700 14px inherit}
+.legal-nav{display:flex;flex-wrap:wrap;gap:8px 18px;padding:14px 0;border-bottom:1px solid #d9d6d0;font-size:13px;font-weight:800}
+.legal-nav a[aria-current="page"]{color:#201a17;text-decoration-thickness:3px}
+.legal-meta{margin:18px 0 4px;color:#645b55;font-size:13px;line-height:1.55}
+.legal-section{padding:22px 0;border-bottom:1px solid #d9d6d0}
+.legal-section h2{margin:0 0 9px;font-size:19px;line-height:1.25;letter-spacing:0}
+.legal-section p,.legal-section li{font-size:15px;line-height:1.65}
+.legal-section p{margin:8px 0}
+.legal-section ul{margin:8px 0;padding-left:22px}
+.legal-note{border-left:4px solid #a47b28;padding:10px 14px;background:#fff;color:#40372f}
+.legal-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.legal-action{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;border:1px solid #8a2b23;border-radius:6px;background:#8a2b23;color:#fff;text-decoration:none;font-weight:850}
+.legal-action.secondary{background:#fff;color:#8a2b23}
+[hidden]{display:none!important}
+@media(max-width:560px){
+  body{padding-left:14px;padding-right:14px}
+  .legal-header{grid-template-columns:1fr}
+  .legal-language select{width:100%;max-width:none}
+  .legal-nav{gap:10px 14px}
+  .legal-title{font-size:29px}
+}
+@media(orientation:landscape) and (max-height:520px){
+  body{padding-top:calc(10px + env(safe-area-inset-top))}
+  .legal-header{padding-top:4px;padding-bottom:12px}
+  .legal-section{padding:16px 0}
+}

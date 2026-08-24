@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the f7e2fe5 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the c1c274f placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-vf7e2fe5';
+const CACHE_VERSION='loto-shell-vc1c274f';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -14,10 +14,11 @@ const CORE_PRECACHE=[
 ];
 const OPTIONAL_PRECACHE=[
   './safe-payment.html','./safe-payment-runtime.js','./auth-client.js','./native-bridge.js','./billing-web.js',
+  './privacy.html','./terms.html','./subscription-terms.html','./legal.css','./legal-runtime.js',
   './jackpots.json','./prizes.json',
 ];
 const SUPPORTED_LOCALES=new Set(['ru','en','no','sv','da','fi','de','fr','es','it','pt','pl','nl','et','lv','lt','uk']);
-const NEVER_CACHE=/(?:results-archive|\/functions\/v1\/|\/auth\/v1\/|pro-(?:analysis|compute)|access-state|consume-feature|start-trial|billing-(?:status|reconcile)|checkout|subscription|management|payment-return|revenuecat|paddle|token|session)/i;
+const NEVER_CACHE=/(?:results-archive|\/functions\/v1\/|\/auth\/v1\/|pro-(?:analysis|compute)|access-state|consume-feature|start-trial|billing-(?:status|reconcile)|checkout|management|payment-return|revenuecat|paddle|token|session)/i;
 
 self.addEventListener('install',event=>{
   // Take over immediately so a version bump reaches returning users / installed
