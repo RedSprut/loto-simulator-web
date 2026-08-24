@@ -293,8 +293,7 @@ function applyBackendRows(result,label){
   const next=(Array.isArray(result)?result:[]).map(row=>({m:[...(row.main||[])],b:[...(row.bonus||[])]}));
   if(!next.length){showFeedback('Нет результата','Backend не вернул допустимых рядов.','⚠️',3200);return false;}
   rows=next;act=0;renderSim();resetBanner();goToRows();
-  const duration=revealResult(document.getElementById('rows-c'),'start');
-  setTimeout(()=>showFeedback('Расчёт готов',`${label} · ${rows.length} ${rowWord(rows.length)}. Расчёт выполнен на защищённом Backend.`,'✅',2800),duration+120);
+  revealResult(document.getElementById('rows-c'),'start');
   return true;
 }
 function renderBackendJudge(result,mountId,target,handlers){
@@ -322,8 +321,7 @@ function renderBackendJudge(result,mountId,target,handlers){
   const defaultApply=(finalRows,meta)=>{
     const choice=JUDGE_choiceText(meta);
     if(mountId==='jc-mount')window.JC_close?.();
-    const dur=setGeneratedRows(finalRows,choice+'. Комбинация применена в билете. ⚖️');
-    setTimeout(()=>showFeedback('Готово',choice+'.','⚖️',2400),dur+150);
+    setGeneratedRows(finalRows,choice+'. Комбинация применена в билете. ⚖️');
   };
   JUDGE_state[ns]={
     plan,l,
@@ -336,8 +334,9 @@ function renderBackendJudge(result,mountId,target,handlers){
   // Fail-closed: a structural verdict must never be shown for zero drawn history.
   if(!(JUDGE_state[ns].drawsN>0)){mount.innerHTML='<div class="if-empty">⚖️ Анализ невозможен: история тиражей не загружена. Обновите официальные результаты.</div>';return false;}
   JUDGE_render(ns);
-  if((mountId==='jc-mount'||mount.id==='jc-mount')&&window.LotoModals)window.LotoModals.openModal('jc-ov');
-  else if(mountId==='jc-mount'||mount.id==='jc-mount')document.getElementById('jc-ov')?.classList.add('show');
+  const resultOverlay=mount.closest?.('[id$="-ov"]');
+  if(resultOverlay&&window.LotoModals)window.LotoModals.openModal(resultOverlay.id);
+  else if(resultOverlay)resultOverlay.classList.add('show');
   mount.scrollIntoView?.({behavior:'smooth',block:'nearest'});
   return true;
 }
@@ -379,6 +378,29 @@ function showModelResult(result,model){
   return true;
 }
 window.showModelResult=showModelResult;
+function showPreviewResultStatus(message){
+  const activeId=window.LotoModals?.active;
+  const active=activeId?document.getElementById(activeId):document.querySelector('[id$="-ov"].show:not(#prev-ov):not(#pro-ov):not(#fb-ov):not(#cc-ov)');
+  if(!active||['prev-ov','pro-ov','fb-ov','cc-ov','busy-ov'].includes(active.id))return false;
+  const host=active.querySelector('.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet')||active.firstElementChild;
+  if(!host)return false;
+  let status=host.querySelector('[data-preview-result-state]');
+  if(!status){status=document.createElement('div');status.className='preview-result-state';status.dataset.previewResultState='';status.setAttribute('role','status');status.setAttribute('aria-live','polite');host.appendChild(status);}
+  status.textContent=appText(message);
+  status.hidden=false;
+  return true;
+}
+window.showPreviewResultStatus=showPreviewResultStatus;
+function clearProtectedHistoryView(){
+  Object.keys(drawsCache||{}).forEach(key=>{drawsCache[key]=[];});
+  const freeLimit=Number(window.LOTO_COMMERCIAL_CONFIG?.freeRecentDrawsByGame?.[resolveConfigKey(cur)]||0);
+  loadHistoricalResults(cur).then(recent=>{
+    draws=(recent||[]).slice(0,freeLimit);
+    drawsCache[cur]=draws;
+    if(typeof renderHistory==='function')renderHistory();
+  }).catch(()=>{});
+}
+window.clearProtectedHistoryView=clearProtectedHistoryView;
 function renderBackendWorldAnalysis(analysis,targetId='world-analysis-out'){
   const target=document.getElementById(targetId);if(!target)return false;
   target.replaceChildren();
@@ -1145,6 +1167,7 @@ function normalizeGeneratedRows(gen,l=L()){
   return (Array.isArray(gen)?gen:[]).slice(0,MAX_ROWS).map(r=>normalizeGeneratedRow(r,l));
 }
 function setGeneratedRows(gen,status,unique=false){
+  clearGroupAnalysisState();
   const alreadyIssued=Array.isArray(gen)&&gen.length>0&&gen.every(r=>r&&r._uniqueIssued);
   rows=unique&&!alreadyIssued?ensureUniqueGeneratedRows(gen,L()):normalizeGeneratedRows(gen,L());
   if(!rows.length)rows=[nr()];
@@ -1349,8 +1372,7 @@ async function generateSelectedRows(){
     return;
   }
   const labels={freq:'горячие числа',bal:'комбинированный анализ',rnd:'pure random',man:'сегментный охват',wheel:'колесная матрица','world-hot':'мировой горячий профиль','world-mix':'мировой комбинированный профиль',markov:'цепи Маркова',gauss:'Гаусс · ЦПТ',delta:'интервальная модель Δ',bayes:'Байес · Дирихле',overdue:'gap-анализ',phys:'физическая модель лототрона',chaos:'детерминированный хаос',quantum:'квантовый коллапс',paradox:'система парадоксов'};
-  const dur=setGeneratedRows(gen,`Готово: ${count} ${rowWord(count)} · ${labels[algo]||algo} · база сохранённых тиражей не очищается при обновлении.`,true);
-  setTimeout(()=>showFeedback('Ряды готовы',`Сгенерировано ${count} ${rowWord(count)}.\nМетод: ${labels[algo]||algo}.`,'🎯',2600),dur+150);
+  setGeneratedRows(gen,`Готово: ${count} ${rowWord(count)} · ${labels[algo]||algo} · база сохранённых тиражей не очищается при обновлении.`,true);
 }
 function rowsToNorskText(){
   const l=L();
@@ -1538,7 +1560,7 @@ async function applyWheelBuilder(){
   rows=built.rows.map(m=>({m,b:genBonus(l,draws,'freq')}));
   if(!rows.length)rows=[randomFilteredRow(l,draws)];
   act=0;renderSim();resetBanner();
-  const dur=revealResult(document.getElementById('rows-c'),'start');
+  revealResult(document.getElementById('rows-c'),'start');
   const pct=built.total?Math.round(built.covered/built.total*100):100;
   const el=document.getElementById('wheel-status');
   el.style.display='';
@@ -1546,7 +1568,6 @@ async function applyWheelBuilder(){
     ? `Wheel готов: ${rows.length} ${rowWord(rows.length)} · полная гарантия ${t} из ${t} для пула ${pool.length} чисел. Нижняя граница: ${built.lowerBound}.`
     : `Wheel готов: ${rows.length} ${rowWord(rows.length)} · покрытие ${built.covered}/${built.total} (${pct}%). Полная гарантия ${t} из ${t} не поместилась в лимит ${MAX_ROWS} рядов.`;
   if(built.usedUnfiltered)el.textContent+=' Фильтры были слишком строгими для пула, часть wheel построена без них.';
-  setTimeout(()=>showFeedback('Wheel готов',`${rows.length} ${rowWord(rows.length)} для пула ${pool.length} чисел.\nГарантия: ${t} из ${t}.\nМетод: колёсная матрица (wheeling).`,'📐',2400),dur+150);
 }
 
 function buildWheelPool(maxN,pick,poolSize,seed,freq){throw new Error('backend_only');}
@@ -1568,8 +1589,7 @@ async function applyWheelMatrix(){
   renderSim();
   resetBanner();
   goToRows();
-  const dur=revealResult(document.getElementById('rows-c'),'start');
-  setTimeout(()=>showFeedback('Матрица готова',`Сгенерировано ${rows.length} ${rowWord(rows.length)}.\nМетод: колёсная матрица · покрытие пар ${built.cov.covered}/${built.cov.total}.`,'📐',2400),dur+150);
+  revealResult(document.getElementById('rows-c'),'start');
   const el=document.getElementById('wheel-status');
   el.style.display='';
   el.textContent=`Матрица готова: ${rows.length} ${rowWord(rows.length)} · пары исходной матрицы ${built.cov.covered}/${built.cov.total} · пул ${built.pool.length} чисел · фильтры применены`;
@@ -3360,21 +3380,20 @@ function customConfirm(msg,okLabel,options={}){
     if(cancelBtn)cancelBtn.textContent=appText(cancelLabel);
     if(okBtn)okBtn.textContent=appText(okText);
     if(closeBtn)closeBtn.setAttribute('aria-label',appText('Закрыть'));
-    _ccEsc=e=>{if(e.key==='Escape'||e.key==='Esc')ccAnswer(false);};
-    document.addEventListener('keydown',_ccEsc);
-    ov.classList.add('show');
-    setTimeout(()=>{try{cancelBtn&&cancelBtn.focus();}catch(e){}},0);
+    ov.__lotoClose=()=>ccAnswer(false);
+    if(window.LotoModals)window.LotoModals.openModal('cc-ov');else ov.classList.add('show');
   });
 }
 function ccAnswer(val){
-  document.getElementById('cc-ov').classList.remove('show');
+  const ov=document.getElementById('cc-ov');
+  if(ov)ov.__lotoClose=null;
+  ov?.classList.remove('show');
   if(_ccEsc){document.removeEventListener('keydown',_ccEsc);_ccEsc=null;}
   if(_ccResolve){_ccResolve(val);_ccResolve=null;}
 }
-function ccOut(e){if(e.target===document.getElementById('cc-ov'))ccAnswer(false);}
+function ccOut(){}
 window.customConfirm=customConfirm;
 
-let _fbTimer=null;
 function showFeedback(title,msg,icon='✅',autoMs=2200,options){
   const ov=document.getElementById('fb-ov');
   if(!ov)return;
@@ -3398,18 +3417,16 @@ function showFeedback(title,msg,icon='✅',autoMs=2200,options){
       secondary.textContent=appText('OK');
     }
   }
-  ov.classList.add('show');
-  clearTimeout(_fbTimer);
-  if(autoMs)_fbTimer=setTimeout(closeFeedback,autoMs);
+  ov.__lotoClose=closeFeedback;
+  if(window.LotoModals)window.LotoModals.openModal('fb-ov');else ov.classList.add('show');
 }
 function closeFeedback(){
-  clearTimeout(_fbTimer);
-  document.getElementById('fb-ov')?.classList.remove('show');
+  const ov=document.getElementById('fb-ov');
+  if(ov)ov.__lotoClose=null;
+  ov?.classList.remove('show');
   document.querySelector('#fb .fb-actions')?.classList.remove('has-secondary');
 }
-function fbOut(e){
-  if(e.target===document.getElementById('fb-ov'))closeFeedback();
-}
+function fbOut(){}
 
 // ═══════════════════════════════════════════════
 //  INIT
@@ -3612,8 +3629,7 @@ function IF_scoreInfo(){
 function IF_useRows(){
   if(!IF_state)return;
   IF_close();
-  const dur=setGeneratedRows(IF_state.rows,'Готово: 10 исследовательских строк · Структурное поле данных · '+IF_state.ctx.lotteryName+' · '+IF_state.ctx.currentDraws.length+' тиражей.',true);
-  setTimeout(()=>showFeedback('Строки поля готовы','10 исследовательских строк Информационного поля перенесены в симулятор.','🧬',2400),dur+150);
+  setGeneratedRows(IF_state.rows,'Готово: 10 исследовательских строк · Структурное поле данных · '+IF_state.ctx.lotteryName+' · '+IF_state.ctx.currentDraws.length+' тиражей.',true);
 }
 /* инициализация селектора окна */
 document.addEventListener('DOMContentLoaded',()=>{
@@ -3836,8 +3852,7 @@ function MATRIX_close(){document.getElementById('matrix-ov').classList.remove('s
 function MATRIX_use(){
   const st=CONS_state;if(!st||!st.matrix)return;
   MATRIX_close();CONS_close();
-  const dur=setGeneratedRows(st.matrix,'Готово: '+st.matrix.length+' '+rowWord(st.matrix.length)+' · Итоговая матрица консенсуса · '+st.ctx.lotteryName+'.',true);
-  setTimeout(()=>showFeedback('Матрица готова',st.matrix.length+' '+rowWord(st.matrix.length)+' итоговой матрицы консенсуса перенесены в симулятор.','💠',2600),dur+150);
+  setGeneratedRows(st.matrix,'Готово: '+st.matrix.length+' '+rowWord(st.matrix.length)+' · Итоговая матрица консенсуса · '+st.ctx.lotteryName+'.',true);
 }
 function MATRIX_judge(){
   const st=CONS_state;
@@ -3845,8 +3860,7 @@ function MATRIX_judge(){
   JUDGE_open('matrix',st.matrix.map(r=>({m:[...r.m],b:[...(r.b||[])]})),'matrix-jmount',(finalRows,meta)=>{
     MATRIX_close();CONS_close();
     const decision=JUDGE_choiceText(meta);
-    const dur=setGeneratedRows(finalRows,'Проверенная судьёй матрица перенесена в симулятор. '+decision+'.');
-    setTimeout(()=>showFeedback('Решение применено',decision+'. Матрица перенесена на главный экран.','⚖️',2800),dur+150);
+    setGeneratedRows(finalRows,'Проверенная судьёй матрица перенесена в симулятор. '+decision+'.');
   },{
     intro:'Судья проверяет уже собранную итоговую матрицу и только предлагает точечные замены. Нажми на любую замену, чтобы принять или отклонить её; остальные строки сохранятся как есть.',
     applyLabel:'Использовать проверенную матрицу'
@@ -4011,8 +4025,7 @@ async function SUP_go(){
 function SUP_use(){
   const st=SUP_state;if(!st||!st.verdict)return;
   SUP_close();try{MATRIX_close();CONS_close();}catch(e){}
-  const dur=setGeneratedRows(st.verdict,'Готово: '+st.verdict.length+' '+rowWord(st.verdict.length)+' · Верховный судья.',true);
-  setTimeout(()=>showFeedback('Вердикт принят',st.verdict.length+' '+rowWord(st.verdict.length)+' Верховного судьи перенесены в симулятор.','⚖️',2400),dur+150);
+  setGeneratedRows(st.verdict,'Готово: '+st.verdict.length+' '+rowWord(st.verdict.length)+' · Верховный судья.',true);
 }
 function SUP_share(){
   const st=SUP_state;if(!st||!st.verdict)return;
@@ -4459,8 +4472,7 @@ async function QA_go(){
 function QA_use(){
   const st=QA_state;if(!st||!st.rows)return;
   QA_close();
-  const dur=setGeneratedRows(st.rows,'Готово: '+st.rows.length+' '+rowWord(st.rows.length)+' · Квантово-астральный режим.',true);
-  setTimeout(()=>showFeedback('Вселенная услышала',st.rows.length+' '+rowWord(st.rows.length)+' перенесены в симулятор. Шансы прежние — мечта бесценна. ✨','🔮',2600),dur+150);
+  setGeneratedRows(st.rows,'Готово: '+st.rows.length+' '+rowWord(st.rows.length)+' · Квантово-астральный режим.',true);
 }
 function QA_share(){
   const st=QA_state;if(!st||!st.rows)return;
@@ -5231,8 +5243,7 @@ function PDX_judge(){
   JUDGE_open('pdx',st.rows.map(r=>({m:r.m,b:r.b})),'pdx-jmount',(finalRows,meta)=>{
     PDX_close();
     const choice=JUDGE_choiceText(meta);
-    const dur=setGeneratedRows(finalRows,choice+'. Парадоксы перенесены в билет. ⚖️♾️ Гарантий нет.');
-    setTimeout(()=>showFeedback('Готово',choice+'. Ряды перенесены в билет.','⚖️',2600),dur+150);
+    setGeneratedRows(finalRows,choice+'. Парадоксы перенесены в билет. ⚖️♾️ Гарантий нет.');
   });
 }
 
@@ -5288,7 +5299,7 @@ async function JC_continue(){
   const covLine=' Твои '+good.length+' '+rowWord(good.length)+' покрывают '+uniq.size+' из '+l.mB+' чисел поля ('+covPct+'%) — '+(covPct>=45?'широкий охват.':covPct>=22?'умеренный охват; больше рядов раскрыли бы поле шире.':'узкий охват: для покрытия поля возьми больше рядов.');
   const intro='<b>Дело о твоей комбинации.</b> Проверил '+checked+' чисел по силе поля из '+data.drawsN+' тиражей (частота, пары, пропуски, зоны, чётность, суммы). Согласен с <b>'+agreed+'</b>. '+
     (proposed?('Под подозрением <b>'+proposed+'</b>: '+swapsList.slice(0,8).map(x=>x.from+'→'+x.to).join(', ')+(proposed>8?' и ещё '+(proposed-8):'')+'.'):'Возражений нет.')+covLine+'<br><br>'+verdict;
-  JUDGE_state['jc']={plan:data.plan,l,drawsN:data.drawsN,mountId:'jc-mount',intro,applyLabel:'Применить в билете',onApply:(finalRows,meta)=>{JC_close();const choice=JUDGE_choiceText(meta),dur=setGeneratedRows(finalRows,choice+'. Комбинация применена в билете. ⚖️');setTimeout(()=>showFeedback('Готово',choice+'.','⚖️',2400),dur+150);}};
+  JUDGE_state['jc']={plan:data.plan,l,drawsN:data.drawsN,mountId:'jc-mount',intro,applyLabel:'Применить в билете',onApply:(finalRows,meta)=>{JC_close();const choice=JUDGE_choiceText(meta);setGeneratedRows(finalRows,choice+'. Комбинация применена в билете. ⚖️');}};
   JUDGE_render('jc');
 }
 /* ═══════════════ MODAL MANAGER ═══════════════
@@ -5302,49 +5313,123 @@ async function JC_continue(){
  * closed. busy-ov (loading spinner) is transient and may briefly overlay. */
 (function(){
   var TRANSIENT={'busy-ov':1};
+  var CRITICAL={
+    'cc-ov':1,'fb-ov':1,'prev-ov':1,'pro-ov':1,'mres-ov':1,'jc-ov':1,
+    'cons-ov':1,'qa-ov':1,'adv-ov':1,'sup-ov':1,'pdx-ov':1,'matrix-ov':1,
+    'if-ov':1,'ticket-ov':1
+  };
   function tops(){return Array.prototype.slice.call(document.querySelectorAll('[id$="-ov"]')).filter(function(el){return el.parentElement===document.body;});}
   function isContentModal(el){return el&&!TRANSIENT[el.id];}
   function visibleContent(){return tops().filter(function(el){return el.classList.contains('show')&&isContentModal(el);});}
-  function closeOverlay(el){
+  function labelModal(el){
+    if(!el.hasAttribute('role'))el.setAttribute('role','dialog');
+    el.setAttribute('aria-modal','true');
+    if(el.hasAttribute('aria-label')||el.hasAttribute('aria-labelledby'))return;
+    var title=el.querySelector('.if-title,.sg-title,.lang-title,.fb-title,.cc-title,.pro-title,.horo-title,.card-t');
+    if(!title)return;
+    if(!title.id)title.id=el.id+'-title';
+    el.setAttribute('aria-labelledby',title.id);
+  }
+  function focusable(el){
+    return Array.prototype.slice.call(el.querySelectorAll('button:not([disabled]):not([hidden]),a[href]:not([hidden]),input:not([disabled]):not([hidden]),select:not([disabled]):not([hidden]),textarea:not([disabled]):not([hidden]),[tabindex]:not([tabindex="-1"])')).filter(function(node){return node.offsetParent!==null||node===document.activeElement;});
+  }
+  function closeOverlay(el,reason){
     if(!el||!el.classList.contains('show'))return;
-    /* pro-ov / prev-ov own scroll-lock + body class via commercial-runtime; use its close so the lock is released. */
-    if((el.id==='pro-ov'||el.id==='prev-ov')&&typeof window.PRO_close==='function'){try{window.PRO_close();return;}catch(e){}}
+    if(typeof el.__lotoClose==='function'){try{el.__lotoClose(reason||'close');return;}catch(e){}}
+    if(el.id==='pro-ov'&&typeof window.PRO_close==='function'){try{window.PRO_close();return;}catch(e){}}
     el.classList.remove('show');
   }
-  var activeModal=null,lastTrigger=null,guard=false;
-  function recomputeActive(){var v=visibleContent();activeModal=v.length?v[v.length-1].id:null;}
+  var activeModal=null,lastTrigger=null,guard=false,locked=false,lockY=0,openers={};
+  function lockBody(){
+    if(locked)return;
+    locked=true;lockY=window.scrollY||window.pageYOffset||0;
+    document.body.style.top='-'+lockY+'px';
+    document.body.classList.add('loto-modal-open');
+  }
+  function unlockBody(){
+    if(!locked)return;
+    locked=false;document.body.classList.remove('loto-modal-open');document.body.style.top='';
+    window.scrollTo(0,lockY);
+  }
+  function restoreFocus(id){
+    var target=openers[id];delete openers[id];
+    if(target&&document.contains(target)){try{target.focus({preventScroll:true});}catch(_){try{target.focus();}catch(__){}}}
+  }
+  function focusInitial(el){
+    requestAnimationFrame(function(){
+      if(!el.classList.contains('show'))return;
+      var items=focusable(el),target=el.querySelector('[autofocus]')||items[0];
+      if(!target){el.tabIndex=-1;target=el;}
+      try{target.focus({preventScroll:true});}catch(_){try{target.focus();}catch(__){}}
+    });
+  }
+  function activate(opened){
+    if(!opened||!isContentModal(opened))return;
+    if(!openers[opened.id]){
+      var candidate=document.activeElement;
+      if(candidate&&candidate!==document.body&&!opened.contains(candidate))openers[opened.id]=candidate;
+      else if(lastTrigger&&!opened.contains(lastTrigger))openers[opened.id]=lastTrigger;
+    }
+    guard=true;
+    try{tops().forEach(function(el){
+      if(el===opened||!isContentModal(el)||!el.classList.contains('show'))return;
+      if(openers[el.id]&&!openers[opened.id])openers[opened.id]=openers[el.id];
+      delete openers[el.id];closeOverlay(el,'replace');
+    });}
+    finally{guard=false;}
+    labelModal(opened);activeModal=opened.id;lockBody();focusInitial(opened);
+  }
+  function recomputeActive(closedId){
+    var v=visibleContent();activeModal=v.length?v[v.length-1].id:null;
+    if(activeModal){lockBody();return;}
+    unlockBody();if(closedId)requestAnimationFrame(function(){restoreFocus(closedId);});
+  }
   var obs=new MutationObserver(function(recs){
     if(guard)return;
-    var opened=null;
+    var opened=null,closedId=null;
     for(var i=0;i<recs.length;i++){
       var el=recs[i].target,old=recs[i].oldValue||'';
       var wasShown=/(^|\s)show(\s|$)/.test(old),isShown=el.classList.contains('show');
       if(!wasShown&&isShown&&isContentModal(el))opened=el; /* last open in the batch wins */
+      if(wasShown&&!isShown&&isContentModal(el))closedId=el.id;
     }
-    if(opened){
-      guard=true;
-      try{tops().forEach(function(el){if(el!==opened&&!TRANSIENT[el.id]&&el.classList.contains('show'))closeOverlay(el);});}
-      finally{guard=false;}
-    }
-    recomputeActive();
+    if(opened)activate(opened);
+    else recomputeActive(closedId);
   });
-  function attach(){tops().forEach(function(el){obs.observe(el,{attributes:true,attributeFilter:['class'],attributeOldValue:true});});}
+  function attach(){tops().forEach(function(el){labelModal(el);obs.observe(el,{attributes:true,attributeFilter:['class'],attributeOldValue:true});});}
   /* remember the control that triggered a modal so focus can return to it */
   document.addEventListener('pointerdown',function(e){var t=e.target&&e.target.closest&&e.target.closest('button,a,[onclick],[role="button"]');if(t)lastTrigger=t;},true);
-  /* Escape closes the active top-level modal (spinner excluded) */
   document.addEventListener('keydown',function(e){
-    if(e.key!=='Escape'&&e.key!=='Esc')return;
     if(!activeModal)return;
     var el=document.getElementById(activeModal);if(!el)return;
-    closeOverlay(el);recomputeActive();
-    if(!activeModal&&lastTrigger&&document.contains(lastTrigger)){try{lastTrigger.focus();}catch(_){}}
+    if(e.key==='Tab'){
+      var items=focusable(el);if(!items.length){e.preventDefault();el.focus();return;}
+      var first=items[0],last=items[items.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+      return;
+    }
+    if(e.key!=='Escape'&&e.key!=='Esc')return;
+    e.preventDefault();closeOverlay(el,'escape');recomputeActive(el.id);
   });
+  document.addEventListener('click',function(e){
+    if(!activeModal||!CRITICAL[activeModal])return;
+    var el=document.getElementById(activeModal);
+    if(e.target===el){e.preventDefault();e.stopImmediatePropagation();}
+  },true);
+  function nativeBack(e){
+    if(!activeModal)return;
+    e.preventDefault();var el=document.getElementById(activeModal);closeOverlay(el,'back');recomputeActive(el.id);
+  }
+  window.addEventListener('loto:nativeback',nativeBack);
+  document.addEventListener('backbutton',nativeBack,false);
   window.LotoModals={
-    openModal:function(id){var el=document.getElementById(id);if(!el)return;el.classList.add('show');},
-    closeModal:function(id){closeOverlay(document.getElementById(id));recomputeActive();},
+    openModal:function(id){var el=document.getElementById(id);if(!el)return;el.classList.add('show');activate(el);},
+    closeModal:function(id){var el=document.getElementById(id);if(!el)return;closeOverlay(el,'close');recomputeActive(id);},
     closeActiveModal:function(){if(activeModal)this.closeModal(activeModal);},
     replaceModal:function(from,to){this.closeModal(from);this.openModal(to);},
     visibleTopLevelModals:function(){return visibleContent().map(function(el){return el.id;});},
+    managesBodyScroll:true,
     get active(){return activeModal;}
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach,{once:true});else attach();

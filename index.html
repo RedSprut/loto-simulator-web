@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="c1c274f" data-build-ts="2026-08-24T09:32:40.425Z">
+<html lang="ru" data-build="1d9084f" data-build-ts="2026-08-24T16:07:13.174Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=c1c274f"></script>
+<script src="./boot-runtime.js?v=1d9084f"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -836,6 +836,9 @@ body[data-game] .qa-ball.bonus{color:var(--gb-txt);background:radial-gradient(ci
 .fb-actions{display:grid;grid-template-columns:1fr;gap:8px}
 .fb-actions.has-secondary{grid-template-columns:1fr 1fr}
 .fb-btn-secondary{background:var(--exp-bg);color:var(--exp-c);border:1.5px solid var(--exp-border)}
+.preview-result-state{margin:14px 0 0;padding:11px 13px;border:1.5px solid var(--gold);border-radius:12px;background:var(--bg3);color:var(--fg);font-size:13px;font-weight:800;line-height:1.45;text-align:center}
+body.loto-modal-open{position:fixed;left:0;right:0;width:100%;overflow:hidden}
+body.loto-modal-open [id$="-ov"].show{overscroll-behavior:contain}
 
 /* тосты */
 .toast-root{position:fixed;left:14px;right:14px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:700;display:grid;justify-items:center;gap:8px;pointer-events:none}
@@ -1335,7 +1338,7 @@ body.light .mb[class*="miss-"]{text-shadow:none}
 .pro-context{padding:12px 14px;border-radius:14px;background:rgba(255,250,235,.62);border:1px solid rgba(138,107,46,.34);color:#5A3E0C;font-size:13px;line-height:1.5;font-weight:700}
 .pro-account{margin-top:14px;padding:13px;border-radius:14px;border:1px solid rgba(138,107,46,.34);background:rgba(255,250,235,.48)}
 .pro-account-state{font-size:12.5px;color:#6B4A0E;font-weight:800;overflow-wrap:anywhere}
-.pro-auth-row{display:flex;gap:7px;margin-top:9px}.pro-auth-row input{min-width:0;flex:1;padding:11px 12px;border-radius:11px;border:1.5px solid #C9A55A;background:#fffaf0;color:#2A1608;font:700 14px 'Manrope',sans-serif}.pro-auth-row button{flex:0 0 auto;margin:0!important;padding:10px 13px!important;width:auto!important;font-size:12px!important}
+.pro-auth-row{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;margin-top:9px}.pro-auth-row input{display:block;width:100%;min-width:0;min-height:54px;padding:13px 14px;border-radius:11px;border:1.5px solid #C9A55A;background:#fffaf0;color:#2A1608;font:700 16px 'Manrope',sans-serif}.pro-auth-row button{display:block;min-height:54px;margin:0!important;padding:12px 14px!important;width:100%!important;font-size:14px!important;white-space:normal}
 .pro-auth-message{margin-top:10px;padding:10px 12px;border-radius:11px;border:1.5px solid rgba(32,122,67,.34);background:rgba(52,199,89,.14);color:#285A28;font-size:12.5px;font-weight:900;line-height:1.42;text-align:center}
 .pro-auth-message[data-kind="error"]{border-color:rgba(122,20,16,.32);background:rgba(179,38,30,.10);color:#7A1410}
 .pro-auth-message[hidden]{display:none!important}
@@ -1759,7 +1762,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
       <div class="hist-pro-card" id="hist-pro-card">
         <div class="hist-pro-blur" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
         <div class="hist-pro-title" data-pro-history-title>Полная история доступна в PRO</div>
-        <div class="hist-pro-copy">Free показывает и анализирует только 20 последних тиражей. Полная история никогда не загружается в бесплатный клиент.</div>
+        <div class="hist-pro-copy" data-pro-history-copy>FREE показывает только официальное скользящее окно этой лотереи. Полная история никогда не загружается в бесплатный клиент.</div>
         <button type="button" class="btn-exp" data-loto-event-click="LotoCommercial.openPaywall('full_history')">Посмотреть PRO</button>
       </div>
       <button class="btn-exp" data-loto-event-click="doExport()">📤 Экспорт JSON</button>
@@ -2173,7 +2176,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
       <div class="pro-sec">
         <div class="pro-sec-t">✨ Постоянный Free</div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>Симулятор всех <b>9 лотерей</b> без ограничений</span></div>
-        <div class="pro-li"><span class="pro-ic">◆</span><span><b>20 последних тиражей</b> каждой игры — и все Free-расчёты только по ним</span></div>
+        <div class="pro-li"><span class="pro-ic">◆</span><span>Официальное FREE-окно каждой игры — и все FREE-расчёты только по нему</span></div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>Проверка билета, базовая частота и случайный генератор</span></div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>Никаких ежедневных, еженедельных или месячных сбросов лимита</span></div>
       </div>
@@ -2430,7 +2433,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   </div>
 </div>
 
-<div class="cc-ov" id="cc-ov" data-loto-event-click="ccOut(event)">
+<div class="cc-ov" id="cc-ov" role="alertdialog" aria-modal="true" aria-labelledby="cc-title" aria-describedby="cc-msg">
   <div class="cc-box">
     <button class="cc-x" type="button" data-loto-event-click="ccAnswer(false)" aria-label="Закрыть">✕</button>
     <div class="cc-title" id="cc-title">Подтверждение</div>
@@ -2443,7 +2446,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 </div>
 
 <!-- FEEDBACK MODAL -->
-<div class="fb-ov" id="fb-ov" data-loto-event-click="fbOut(event)">
+<div class="fb-ov" id="fb-ov" role="dialog" aria-modal="true" aria-labelledby="fb-title" aria-describedby="fb-msg">
   <div class="fb-box">
     <div class="fb-icon" id="fb-icon">✅</div>
     <div class="fb-title" id="fb-title">Готово</div>
@@ -2458,15 +2461,15 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=c1c274f"></script>
-<script src="./commercial-config.js?v=c1c274f"></script>
-<script src="./event-runtime.js?v=c1c274f"></script>
-<script src="./auth-client.js?v=c1c274f"></script>
-<script src="./native-loader.js?v=c1c274f"></script>
-<script src="./i18n-catalog.js?v=c1c274f"></script>
-<script src="./i18n-runtime.js?v=c1c274f"></script>
-<script src="./app-runtime.js?v=c1c274f"></script>
-<script src="./commercial-runtime.js?v=c1c274f"></script>
+<script src="./version.js?v=1d9084f"></script>
+<script src="./commercial-config.js?v=1d9084f"></script>
+<script src="./event-runtime.js?v=1d9084f"></script>
+<script src="./auth-client.js?v=1d9084f"></script>
+<script src="./native-loader.js?v=1d9084f"></script>
+<script src="./i18n-catalog.js?v=1d9084f"></script>
+<script src="./i18n-runtime.js?v=1d9084f"></script>
+<script src="./app-runtime.js?v=1d9084f"></script>
+<script src="./commercial-runtime.js?v=1d9084f"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide the redundant Back control on the Simulator home. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -2536,9 +2539,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=c1c274f"></script>
-<script src="./notifications-runtime.js?v=c1c274f"></script>
-<script src="./pwa-runtime.js?v=c1c274f"></script>
+<script src="./notification-center.js?v=1d9084f"></script>
+<script src="./notifications-runtime.js?v=1d9084f"></script>
+<script src="./pwa-runtime.js?v=1d9084f"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -2549,7 +2552,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-2.js?v=c1c274f"></script>
-<script src="./inline-runtime-3.js?v=c1c274f"></script>
+<script src="./inline-runtime-2.js?v=1d9084f"></script>
+<script src="./inline-runtime-3.js?v=1d9084f"></script>
 </body>
 </html>

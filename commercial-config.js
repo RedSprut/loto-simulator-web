@@ -25,7 +25,18 @@ window.LOTO_COMMERCIAL_CONFIG=Object.freeze({
   "googlePlayUrl": "",
   "webPushVapidPublicKey": "BAdL5Hii8fIwQ_S8h3SyrV0lwF9pHtweahb_XlcAmrPCsbgqkI_gVz8VhTYE5xHGaHWrHc1i4Uf674EiDSdklW4",
   "resultsReadEndpoint": "",
-  "freeRecentDraws": 20,
+  "freeRecentDrawsByGame": {
+    "lotto": 15,
+    "vikinglotto": 15,
+    "eurojackpot": 30,
+    "powerball": 30,
+    "megaMillions": 12,
+    "euroMillions": 51,
+    "superEnalotto": 30,
+    "lottoMax": 8,
+    "powerballAustralia": 10
+  },
+  "allowClientNetworkUpdates": false,
   "freeProPreviews": 3,
   "subscriptionPlans": {
     "m1": {
