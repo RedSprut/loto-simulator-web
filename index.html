@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="3c8bed5" data-build-ts="2026-08-26T13:51:05.507Z">
+<html lang="ru" data-build="8278c38" data-build-ts="2026-08-26T14:38:04.691Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=3c8bed5"></script>
+<script src="./boot-runtime.js?v=8278c38"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1472,7 +1472,12 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   <button class="hdr-back" data-loto-event-click="handleBack()">‹</button>
   <img class="hdr-logo" src="./icon-192.png?v=183" alt="Loto Simulator">
   <button class="hdr-icon hdr-bell" id="bell-btn" type="button" aria-label="Уведомления" title="Уведомления" data-i18n-ignore>
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M6 9a6 6 0 0 1 12 0c0 5 1.6 6.3 2 7H4c.4-.7 2-2 2-7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+    <svg class="bell-svg" viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+      <path class="bell-glow" d="M8.8 14.1a7.2 7.2 0 0 1 14.4 0c0 5.6 2.2 7.1 2.8 8.2H6c.6-1.1 2.8-2.6 2.8-8.2Z"/>
+      <path class="bell-body" d="M8.8 14.1a7.2 7.2 0 0 1 14.4 0c0 5.6 2.2 7.1 2.8 8.2H6c.6-1.1 2.8-2.6 2.8-8.2Z"/>
+      <path class="bell-clapper" d="M12.7 25.1a3.4 3.4 0 0 0 6.6 0"/>
+      <path class="bell-shine" d="M11.2 12.6c.5-2 2-3.7 4.1-4.2"/>
+    </svg>
     <span class="bell-badge" id="bell-badge" hidden aria-hidden="true">0</span>
   </button>
   <div class="hdr-title" id="hdr-title">Fyll ut minst 2 rekker</div>
@@ -2463,29 +2468,38 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=3c8bed5"></script>
-<script src="./commercial-config.js?v=3c8bed5"></script>
-<script src="./event-runtime.js?v=3c8bed5"></script>
-<script src="./auth-client.js?v=3c8bed5"></script>
-<script src="./native-loader.js?v=3c8bed5"></script>
-<script src="./i18n-catalog.js?v=3c8bed5"></script>
-<script src="./i18n-runtime.js?v=3c8bed5"></script>
-<script src="./app-runtime.js?v=3c8bed5"></script>
-<script src="./commercial-runtime.js?v=3c8bed5"></script>
+<script src="./version.js?v=8278c38"></script>
+<script src="./commercial-config.js?v=8278c38"></script>
+<script src="./event-runtime.js?v=8278c38"></script>
+<script src="./auth-client.js?v=8278c38"></script>
+<script src="./native-loader.js?v=8278c38"></script>
+<script src="./i18n-catalog.js?v=8278c38"></script>
+<script src="./i18n-runtime.js?v=8278c38"></script>
+<script src="./app-runtime.js?v=8278c38"></script>
+<script src="./commercial-runtime.js?v=8278c38"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide the redundant Back control on the Simulator home. */
 html.on-sim #main-hdr .hdr-back{display:none}
-.hdr-bell{position:relative}
-.hdr-bell svg{width:20px;height:20px}
-.bell-badge{position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;padding:0 4px;display:grid;place-items:center;border-radius:999px;background:#e23b4e;color:#fff;font:800 10.5px/1 'Manrope',sans-serif;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.hdr-bell{position:relative;isolation:isolate;overflow:visible;background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(233,180,76,.11) 48%,rgba(226,59,78,.13));border-color:rgba(233,214,156,.38);box-shadow:0 8px 22px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.22)}
+.hdr-bell::before{content:'';position:absolute;inset:-3px;border-radius:999px;background:conic-gradient(from 220deg,rgba(233,180,76,0),rgba(233,180,76,.55),rgba(226,59,78,.42),rgba(233,180,76,0));opacity:.34;filter:blur(6px);z-index:-1}
+.hdr-bell svg{width:24px;height:24px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.32))}
+.bell-glow{fill:rgba(233,180,76,.22)}
+.bell-body{fill:rgba(255,255,255,.08);stroke:#f2d784;stroke-width:1.9;stroke-linejoin:round}
+.bell-clapper,.bell-shine{stroke:#fff7df;stroke-width:1.9;stroke-linecap:round}
+.bell-shine{opacity:.86}
+.hdr-bell.has-unread{border-color:rgba(255,219,120,.72);box-shadow:0 9px 24px rgba(0,0,0,.3),0 0 18px rgba(233,180,76,.28),inset 0 1px 0 rgba(255,255,255,.25)}
+.hdr-bell.has-unread .bell-svg{animation:lnc-bell-ring 2.8s ease-in-out infinite;transform-origin:50% 9px}
+.bell-badge{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;padding:0 5px;display:grid;place-items:center;border-radius:999px;background:linear-gradient(145deg,#ff4964,#b81635);color:#fff;font:900 10.5px/1 'Manrope',sans-serif;box-shadow:0 5px 14px rgba(184,22,53,.42),0 0 0 2px rgba(20,14,24,.9)}
 .bell-badge[hidden]{display:none}
+@keyframes lnc-bell-ring{0%,8%,100%{transform:rotate(0)}2%{transform:rotate(13deg)}5%{transform:rotate(-10deg)}}
+@media(prefers-reduced-motion:reduce){.hdr-bell.has-unread .bell-svg{animation:none}}
 /* Notification center — bottom sheet on mobile, centered card on desktop. */
 html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-ov{position:fixed;inset:0;z-index:100050;display:flex;align-items:flex-end;justify-content:center;background:rgba(6,8,14,.58);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:lnc-fade .18s ease}
 .lnc-ov.hidden{display:none}
 @keyframes lnc-fade{from{opacity:0}to{opacity:1}}
 .lnc-sheet{width:100%;max-width:640px;max-height:90vh;max-height:min(90vh,90dvh);display:flex;flex-direction:column;color:#f4f1ea;overflow-x:hidden;
-  background:linear-gradient(180deg,#171a26,#10121b);border:1px solid rgba(233,214,156,.22);border-top-left-radius:22px;border-top-right-radius:22px;
+  background:linear-gradient(180deg,rgba(35,28,44,.98),rgba(17,18,27,.99) 44%,rgba(12,15,20,.99)),linear-gradient(115deg,rgba(233,180,76,.12),rgba(226,59,78,.08) 42%,rgba(52,199,137,.07));border:1px solid rgba(233,214,156,.26);border-top-left-radius:22px;border-top-right-radius:22px;
   box-shadow:0 -18px 60px rgba(0,0,0,.55);padding:8px 14px calc(14px + env(safe-area-inset-bottom));animation:lnc-up .26s cubic-bezier(.34,1.2,.5,1)}
 @keyframes lnc-up{from{transform:translateY(28px);opacity:.6}to{transform:translateY(0);opacity:1}}
 @media(max-width:699px){.lnc-sheet{height:92dvh;max-height:calc(100dvh - 12px);padding-top:calc(8px + env(safe-area-inset-top))}}
@@ -2502,19 +2516,19 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-close{width:44px;height:44px;border-radius:10px;border:1px solid rgba(233,214,156,.24);background:rgba(255,255,255,.07);color:#f4f1ea;font-size:15px;font-weight:900;cursor:pointer;flex-shrink:0}
 .lnc-selbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
 .lnc-selcount{margin-left:auto;font:800 12px 'Manrope',sans-serif;color:#9aa2bd}
-.lnc-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;padding:10px 2px 4px}
+.lnc-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:12px;padding:10px 2px 4px}
 .lnc-empty{color:#9aa2bd;text-align:center;padding:26px 8px;font-size:13.5px}
-.lnc-card{position:relative;border-radius:15px;padding:12px 13px 12px 15px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);overflow:hidden}
+.lnc-card{position:relative;border-radius:16px;padding:13px 14px 13px 17px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.1);overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.16)}
 .lnc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--lnc-grad,linear-gradient(#8a6b2e,#4a3210))}
 .lnc-card.read{opacity:.72}
-.lnc-card-top{display:flex;align-items:center;gap:8px;font-size:11.5px}
+.lnc-card-top{display:flex;align-items:flex-start;gap:6px 8px;flex-wrap:wrap;font-size:11.5px;line-height:1.35}
 .lnc-check{width:20px;height:20px;flex:0 0 auto;accent-color:var(--gold,#E9B44C)}
-.lnc-lot{font-weight:800;background:var(--lnc-grad);-webkit-background-clip:text;background-clip:text;color:transparent;filter:brightness(1.5)}
-.lnc-kind{font-weight:800;color:#c9cfe0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lnc-lot{font-weight:900;background:var(--lnc-grad);-webkit-background-clip:text;background-clip:text;color:transparent;filter:brightness(1.5);overflow-wrap:anywhere}
+.lnc-kind{font-weight:800;color:#c9cfe0;min-width:0;flex:1 1 150px;white-space:normal;overflow-wrap:anywhere}
 .lnc-dot{width:8px;height:8px;border-radius:50%;background:#e23b4e;flex:0 0 auto}
 .lnc-dot[hidden]{display:none}
-.lnc-time{margin-left:auto;color:#9aa2bd}
-.lnc-card-title{font-weight:800;font-size:14px;margin:5px 0 2px;overflow-wrap:anywhere}
+.lnc-time{margin-left:auto;color:#9aa2bd;white-space:normal;text-align:right;overflow-wrap:anywhere}
+.lnc-card-title{font-weight:900;font-size:14px;line-height:1.35;margin:7px 0 4px;overflow-wrap:anywhere}
 .lnc-card-body{font-size:12.8px;line-height:1.4;color:#c9cfe0;overflow-wrap:anywhere}
 .lnc-card-actions{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
 .lnc-abtn{font:700 11.5px 'Manrope',sans-serif;color:#f4f1ea;background:rgba(255,255,255,.06);border:1px solid rgba(233,214,156,.2);border-radius:8px;padding:8px 10px;min-height:40px;cursor:pointer;flex:1 1 auto}
@@ -2533,12 +2547,15 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-scard-pad{padding:12px}
 .lnc-scard .lnc-row{margin:0;padding:13px 16px;min-height:56px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.06)}
 .lnc-scard .lnc-row:last-child{border-bottom:0}
+.lnc-lottery-row{position:relative;padding-left:20px!important}
+.lnc-lottery-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--lnc-grad);opacity:.95}
+.lnc-lottery-row span{font-weight:800}
 .lnc-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
-.lnc-row span{font-weight:600;color:#eef1f8;letter-spacing:.1px}
+.lnc-row span{font-weight:600;color:#eef1f8;letter-spacing:.1px;min-width:0;overflow-wrap:anywhere}
 .lnc-perm-val{font-weight:700;color:#c9cfe0;text-align:right}
 .lnc-perm-btn{width:100%;margin-top:10px}
 /* modern toggle switch — the native checkbox is restyled, so all change handlers keep working */
-.lnc-row input[type=checkbox]{appearance:none;-webkit-appearance:none;position:relative;flex:0 0 auto;width:48px;height:29px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:background .22s ease,border-color .22s ease;margin:0}
+.lnc-row input[type=checkbox]{appearance:none;-webkit-appearance:none;position:relative;flex:0 0 48px;width:48px;height:29px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:background .22s ease,border-color .22s ease;margin:0}
 .lnc-row input[type=checkbox]::after{content:'';position:absolute;top:2.5px;left:2.5px;width:23px;height:23px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.45);transition:transform .24s cubic-bezier(.34,1.4,.5,1),width .12s ease}
 .lnc-row input[type=checkbox]:checked{background:linear-gradient(135deg,#34d27f 0%,#1f9e5b 100%);border-color:transparent}
 .lnc-row input[type=checkbox]:checked::after{transform:translateX(19px)}
@@ -2546,6 +2563,22 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-row input[type=checkbox]:focus-visible{outline:2px solid var(--gold,#E9B44C);outline-offset:3px}
 .lnc-select{width:100%;padding:12px 40px 12px 14px;border-radius:13px;background:rgba(0,0,0,.28);color:#eef1f8;border:1px solid rgba(255,255,255,.1);font:600 14px 'Manrope',sans-serif;-webkit-appearance:none;appearance:none;cursor:pointer;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" fill="none" stroke="%238b93ad" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>');background-repeat:no-repeat;background-position:right 15px center}
 .lnc-select:focus-visible{outline:2px solid var(--gold,#E9B44C);outline-offset:2px}
+@media(max-width:480px){
+  .lnc-sheet{padding-left:12px;padding-right:12px}
+  .lnc-head{gap:8px}
+  .lnc-title{font-size:15px}
+  .lnc-head-actions{gap:5px}
+  .lnc-tbtn{padding-left:10px;padding-right:10px}
+  .lnc-list{gap:12px;padding-left:0;padding-right:0}
+  .lnc-card{border-radius:15px;padding:13px 12px 13px 16px}
+  .lnc-kind{flex-basis:100%}
+  .lnc-time{margin-left:0;text-align:left;flex:1 1 155px}
+  .lnc-card-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .lnc-abtn{width:100%;min-width:0;text-align:center}
+  .lnc-selbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .lnc-selcount{grid-column:1/-1;grid-row:1;margin:0;text-align:center}
+  .lnc-selbar .lnc-tbtn{width:100%;min-width:0}
+}
 .lnc-detail{position:absolute;inset:0;z-index:2;display:flex;align-items:flex-end;justify-content:center;background:rgba(6,8,14,.62)}
 .lnc-detail-card{width:100%;max-height:100%;overflow:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#1b2033,#111522);border-radius:20px 20px 0 0;border-top:1px solid rgba(233,214,156,.25);padding:14px 14px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -16px 50px rgba(0,0,0,.42)}
 @media(min-width:700px){.lnc-detail{align-items:center}.lnc-detail-card{max-width:600px;max-height:76vh;border-radius:18px;border:1px solid rgba(233,214,156,.25)}}
@@ -2561,9 +2594,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=3c8bed5"></script>
-<script src="./notifications-runtime.js?v=3c8bed5"></script>
-<script src="./pwa-runtime.js?v=3c8bed5"></script>
+<script src="./notification-center.js?v=8278c38"></script>
+<script src="./notifications-runtime.js?v=8278c38"></script>
+<script src="./pwa-runtime.js?v=8278c38"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -2574,7 +2607,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-2.js?v=3c8bed5"></script>
-<script src="./inline-runtime-3.js?v=3c8bed5"></script>
+<script src="./inline-runtime-2.js?v=8278c38"></script>
+<script src="./inline-runtime-3.js?v=8278c38"></script>
 </body>
 </html>
