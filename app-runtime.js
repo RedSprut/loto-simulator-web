@@ -2807,7 +2807,7 @@ async function renderPrizes(){
         <div class="prize-tier-amt">${fmtMoney(amount,currency)}${isJackpot&&t.winners===0?'<div style="font-size:9px;color:var(--sub)">не разыгран</div>':''}</div>
       </div>`;
     });
-    html+=`<div class="prize-draw-card">
+    html+=`<div class="prize-draw-card" data-draw-date="${escapePrizeHtml(d.date)}" data-draw-id="${escapePrizeHtml(d.drawId||d.date)}">
       <div class="prize-draw-date">${fmtDate(d.date)}</div>
       ${balls?`<div class="prize-draw-balls">${balls}</div>`:''}
       ${rowsH}
@@ -2843,6 +2843,68 @@ async function renderPrizes(){
   });
   avgEl.innerHTML=avgHtml||'<div class="empty">Нет данных</div>';
 }
+
+// ─── PRECISE PER-DRAW NAVIGATION (from notifications) ─────────────────────────
+// Opens the EXACT draw a notification refers to (gameId+drawId/date), never the last
+// draw. Reuses the notification-center 17-locale dictionary via LotoNotifCenter._t so
+// no user-visible string is added outside a fully-translated key set.
+function _ncText(key,arg){try{return(window.LotoNotifCenter&&window.LotoNotifCenter._t)?window.LotoNotifCenter._t(key,arg):key;}catch(e){return key;}}
+function _normDrawDate(v){if(!v)return null;const m=String(v).match(/\d{4}-\d{2}-\d{2}/);return m?m[0]:null;}
+function _focusPrizeCard(card){
+  if(!card)return;
+  try{card.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){card.scrollIntoView();}
+  card.classList.remove('nc-draw-highlight');void card.offsetWidth; // restart animation
+  card.classList.add('nc-draw-highlight');
+  setTimeout(()=>{try{card.classList.remove('nc-draw-highlight');}catch(e){}},2800);
+}
+async function _showPrizeAwaitingOrNotFound(gameId,date,outEl){
+  if(!outEl)return;
+  let known=false;
+  try{const draws=await loadD(cur);known=!!(date&&draws.some(d=>d.date===date));}catch(e){}
+  let lot=gameId||cur||'';try{lot=(L&&L().name)||lot;}catch(e){}
+  const label=lot+(date?(' · '+date):'');
+  const msg=known?_ncText('nc.status.awaitingData'):_ncText('nc.notFound',label);
+  const banner=document.createElement('div');
+  banner.className='prize-draw-card';
+  banner.setAttribute('data-draw-date',date||'');
+  banner.setAttribute('role','status');
+  banner.innerHTML='<div class="prize-draw-date">'+escapePrizeHtml(label)+'</div>'+
+    '<div style="font-size:13px;color:var(--sub);padding:6px 0">'+escapePrizeHtml(msg)+'</div>';
+  outEl.insertBefore(banner,outEl.firstChild);
+  _focusPrizeCard(banner);
+}
+async function revealPrizeDraw(gameId,drawId,dateStr,cb){
+  const done=()=>{try{if(typeof cb==='function')cb();}catch(e){}};
+  try{
+    const date=_normDrawDate(dateStr)||_normDrawDate(drawId);
+    if(gameId&&window.selLot&&cur!==gameId)selLot(gameId);
+    if(window.selPage)selPage('ana');
+    if(window.selAT)await selAT('prize');else await renderPrizes();
+    const outEl=document.getElementById('prize-out');
+    const sel=date?'.prize-draw-card[data-draw-date="'+date+'"]':null;
+    let card=(date&&outEl)?outEl.querySelector(sel):null;
+    // Reveal more pages until the target draw's card is materialised (or all shown).
+    let guard=0;
+    while(!card&&date&&outEl&&outEl.querySelector('button[onclick="showMorePrizes()"]')&&guard++<50){
+      prizeVisibleCounts[cur]=(prizeVisibleCounts[cur]||15)+15;
+      await renderPrizes();
+      card=outEl.querySelector(sel);
+    }
+    if(card){_focusPrizeCard(card);return done();}
+    await _showPrizeAwaitingOrNotFound(gameId,date,outEl);
+    return done();
+  }catch(e){done();}
+}
+async function revealUpcomingDraw(gameId,drawId,dateStr,cb){
+  const done=()=>{try{if(typeof cb==='function')cb();}catch(e){}};
+  try{
+    if(gameId&&window.selLot&&cur!==gameId)selLot(gameId);
+    if(window.selPage)selPage('sim');
+  }catch(e){}
+  done();
+}
+window.revealPrizeDraw=revealPrizeDraw;
+window.revealUpcomingDraw=revealUpcomingDraw;
 
 // ─── JACKPOT CHART ────────────────────────────
 async function renderJackpotChart(){
