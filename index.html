@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="c5bf4eb" data-build-ts="2026-08-26T13:31:02.520Z">
+<html lang="ru" data-build="3c8bed5" data-build-ts="2026-08-26T13:49:02.561Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=c5bf4eb"></script>
+<script src="./boot-runtime.js?v=3c8bed5"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2463,15 +2463,15 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=c5bf4eb"></script>
-<script src="./commercial-config.js?v=c5bf4eb"></script>
-<script src="./event-runtime.js?v=c5bf4eb"></script>
-<script src="./auth-client.js?v=c5bf4eb"></script>
-<script src="./native-loader.js?v=c5bf4eb"></script>
-<script src="./i18n-catalog.js?v=c5bf4eb"></script>
-<script src="./i18n-runtime.js?v=c5bf4eb"></script>
-<script src="./app-runtime.js?v=c5bf4eb"></script>
-<script src="./commercial-runtime.js?v=c5bf4eb"></script>
+<script src="./version.js?v=3c8bed5"></script>
+<script src="./commercial-config.js?v=3c8bed5"></script>
+<script src="./event-runtime.js?v=3c8bed5"></script>
+<script src="./auth-client.js?v=3c8bed5"></script>
+<script src="./native-loader.js?v=3c8bed5"></script>
+<script src="./i18n-catalog.js?v=3c8bed5"></script>
+<script src="./i18n-runtime.js?v=3c8bed5"></script>
+<script src="./app-runtime.js?v=3c8bed5"></script>
+<script src="./commercial-runtime.js?v=3c8bed5"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide the redundant Back control on the Simulator home. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -2525,11 +2525,27 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-settings.hidden{display:none}
 /* Full-size settings screen: fills the whole modal, list hidden underneath (no nested panel). */
 .lnc-mode-settings .lnc-selbar,.lnc-mode-settings .lnc-list,.lnc-mode-settings .lnc-foot{display:none!important}
-.lnc-mode-settings .lnc-settings{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;margin-top:6px;border-top:0;padding-top:2px;padding-right:2px;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.lnc-shdr{margin:14px 0 4px;font:800 10.5px 'Manrope',sans-serif;letter-spacing:.5px;text-transform:uppercase;color:#9aa2bd}
-.lnc-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 2px;font-size:13.5px;min-height:44px}
-.lnc-row input[type=checkbox]{width:24px;height:24px;flex-shrink:0;accent-color:var(--gold,#E9B44C)}
-.lnc-select{width:100%;padding:9px 10px;border-radius:10px;background:rgba(0,0,0,.3);color:#f4f1ea;border:1px solid rgba(233,214,156,.24);font:inherit}
+.lnc-mode-settings .lnc-settings{display:flex;flex-direction:column;flex:1 1 auto;min-height:0;margin-top:4px;border-top:0;padding:2px 3px 12px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+/* ── Notification settings — premium 2026 redesign (visual only; inputs & handlers unchanged) ── */
+.lnc-shdr{margin:18px 6px 8px;font:800 11px 'Manrope',sans-serif;letter-spacing:.7px;text-transform:uppercase;color:#8b93ad}
+.lnc-mode-settings .lnc-settings>.lnc-scard:first-child{margin-top:4px}
+.lnc-scard{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:18px;overflow:hidden}
+.lnc-scard-pad{padding:12px}
+.lnc-scard .lnc-row{margin:0;padding:13px 16px;min-height:56px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.lnc-scard .lnc-row:last-child{border-bottom:0}
+.lnc-row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.lnc-row span{font-weight:600;color:#eef1f8;letter-spacing:.1px}
+.lnc-perm-val{font-weight:700;color:#c9cfe0;text-align:right}
+.lnc-perm-btn{width:100%;margin-top:10px}
+/* modern toggle switch — the native checkbox is restyled, so all change handlers keep working */
+.lnc-row input[type=checkbox]{appearance:none;-webkit-appearance:none;position:relative;flex:0 0 auto;width:48px;height:29px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.1);cursor:pointer;transition:background .22s ease,border-color .22s ease;margin:0}
+.lnc-row input[type=checkbox]::after{content:'';position:absolute;top:2.5px;left:2.5px;width:23px;height:23px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.45);transition:transform .24s cubic-bezier(.34,1.4,.5,1),width .12s ease}
+.lnc-row input[type=checkbox]:checked{background:linear-gradient(135deg,#34d27f 0%,#1f9e5b 100%);border-color:transparent}
+.lnc-row input[type=checkbox]:checked::after{transform:translateX(19px)}
+.lnc-row input[type=checkbox]:active::after{width:27px}
+.lnc-row input[type=checkbox]:focus-visible{outline:2px solid var(--gold,#E9B44C);outline-offset:3px}
+.lnc-select{width:100%;padding:12px 40px 12px 14px;border-radius:13px;background:rgba(0,0,0,.28);color:#eef1f8;border:1px solid rgba(255,255,255,.1);font:600 14px 'Manrope',sans-serif;-webkit-appearance:none;appearance:none;cursor:pointer;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" fill="none" stroke="%238b93ad" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>');background-repeat:no-repeat;background-position:right 15px center}
+.lnc-select:focus-visible{outline:2px solid var(--gold,#E9B44C);outline-offset:2px}
 .lnc-detail{position:absolute;inset:0;z-index:2;display:flex;align-items:flex-end;justify-content:center;background:rgba(6,8,14,.62)}
 .lnc-detail-card{width:100%;max-height:100%;overflow:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#1b2033,#111522);border-radius:20px 20px 0 0;border-top:1px solid rgba(233,214,156,.25);padding:14px 14px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -16px 50px rgba(0,0,0,.42)}
 @media(min-width:700px){.lnc-detail{align-items:center}.lnc-detail-card{max-width:600px;max-height:76vh;border-radius:18px;border:1px solid rgba(233,214,156,.25)}}
@@ -2545,9 +2561,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=c5bf4eb"></script>
-<script src="./notifications-runtime.js?v=c5bf4eb"></script>
-<script src="./pwa-runtime.js?v=c5bf4eb"></script>
+<script src="./notification-center.js?v=3c8bed5"></script>
+<script src="./notifications-runtime.js?v=3c8bed5"></script>
+<script src="./pwa-runtime.js?v=3c8bed5"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -2558,7 +2574,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-2.js?v=c5bf4eb"></script>
-<script src="./inline-runtime-3.js?v=c5bf4eb"></script>
+<script src="./inline-runtime-2.js?v=3c8bed5"></script>
+<script src="./inline-runtime-3.js?v=3c8bed5"></script>
 </body>
 </html>
