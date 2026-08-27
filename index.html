@@ -2475,11 +2475,12 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <script src="./native-loader.js?v=a872b04"></script>
 <script src="./i18n-catalog.js?v=a872b04"></script>
 <script src="./i18n-runtime.js?v=a872b04"></script>
-<script src="./app-runtime.js?v=a872b04"></script>
+<script src="./app-runtime.js?v=1bf498f"></script>
 <script src="./commercial-runtime.js?v=a872b04"></script>
 <style id="lnc-styles">
-/* Header bell + unread badge; hide the redundant Back control on the Simulator home. */
+/* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
+html.on-ana #main-hdr #bell-btn{display:none!important}
 .hdr-bell{position:relative;isolation:isolate;overflow:visible;background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(233,180,76,.11) 48%,rgba(226,59,78,.13));border-color:rgba(233,214,156,.38);box-shadow:0 8px 22px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.22)}
 .hdr-bell::before{content:'';position:absolute;inset:-3px;border-radius:999px;background:conic-gradient(from 220deg,rgba(233,180,76,0),rgba(233,180,76,.55),rgba(226,59,78,.42),rgba(233,180,76,0));opacity:.34;filter:blur(6px);z-index:-1}
 .hdr-bell svg{width:24px;height:24px;filter:drop-shadow(0 3px 6px rgba(0,0,0,.32))}
@@ -2517,10 +2518,11 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-tbtn:focus-visible,.lnc-close:focus-visible{outline:2px solid var(--gold,#E9B44C);outline-offset:2px}
 .lnc-close{width:44px;height:44px;border-radius:10px;border:1px solid rgba(233,214,156,.24);background:rgba(255,255,255,.07);color:#f4f1ea;font-size:15px;font-weight:900;cursor:pointer;flex-shrink:0}
 .lnc-selbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
+.lnc-selbar[hidden],.lnc-back[hidden],.lnc-dot[hidden]{display:none!important}
 .lnc-selcount{margin-left:auto;font:800 12px 'Manrope',sans-serif;color:#9aa2bd}
 .lnc-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:12px;padding:10px 2px 4px}
 .lnc-empty{color:#9aa2bd;text-align:center;padding:26px 8px;font-size:13.5px}
-.lnc-card{position:relative;border-radius:16px;padding:13px 14px 13px 17px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.1);overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.16)}
+.lnc-card{position:relative;display:block;min-height:128px;border-radius:16px;padding:13px 14px 13px 17px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.1);overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.16)}
 .lnc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--lnc-grad,linear-gradient(#8a6b2e,#4a3210))}
 .lnc-card.read{opacity:.72}
 .lnc-card-top{display:flex;align-items:flex-start;gap:6px 8px;flex-wrap:wrap;font-size:11.5px;line-height:1.35}
@@ -2528,12 +2530,11 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-lot{font-weight:900;background:var(--lnc-grad);-webkit-background-clip:text;background-clip:text;color:transparent;filter:brightness(1.5);overflow-wrap:anywhere}
 .lnc-kind{font-weight:800;color:#c9cfe0;min-width:0;flex:1 1 150px;white-space:normal;overflow-wrap:anywhere}
 .lnc-dot{width:8px;height:8px;border-radius:50%;background:#e23b4e;flex:0 0 auto}
-.lnc-dot[hidden]{display:none}
 .lnc-time{margin-left:auto;color:#9aa2bd;white-space:normal;text-align:right;overflow-wrap:anywhere}
-.lnc-card-title{font-weight:900;font-size:14px;line-height:1.35;margin:7px 0 4px;overflow-wrap:anywhere}
-.lnc-card-body{font-size:12.8px;line-height:1.4;color:#c9cfe0;overflow-wrap:anywhere}
-.lnc-card-actions{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
-.lnc-abtn{font:700 11.5px 'Manrope',sans-serif;color:#f4f1ea;background:rgba(255,255,255,.06);border:1px solid rgba(233,214,156,.2);border-radius:8px;padding:8px 10px;min-height:40px;cursor:pointer;flex:1 1 auto}
+.lnc-card-title{display:block;font-weight:900;font-size:14px;line-height:1.35;margin:7px 0 4px;overflow-wrap:anywhere}
+.lnc-card-body{display:block;font-size:12.8px;line-height:1.4;color:#c9cfe0;overflow-wrap:anywhere}
+.lnc-card-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:9px}
+.lnc-abtn{font:700 11.5px/1.2 'Manrope',sans-serif;color:#f4f1ea;background:rgba(255,255,255,.06);border:1px solid rgba(233,214,156,.2);border-radius:8px;padding:8px 10px;min-height:40px;cursor:pointer;min-width:0;white-space:normal;text-align:center}
 .lnc-abtn.danger{color:#ff9a9a;border-color:rgba(255,107,107,.35)}
 .lnc-foot{margin-top:8px}
 .lnc-foot .lnc-tbtn{width:100%}
@@ -2576,7 +2577,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
   .lnc-head-actions{gap:5px}
   .lnc-tbtn{padding-left:10px;padding-right:10px}
   .lnc-list{gap:12px;padding-left:0;padding-right:0}
-  .lnc-card{border-radius:15px;padding:13px 12px 13px 16px}
+  .lnc-card{min-height:156px;border-radius:15px;padding:13px 12px 13px 16px}
   .lnc-kind{flex-basis:100%}
   .lnc-time{margin-left:0;text-align:left;flex:1 1 155px}
   .lnc-card-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
@@ -2609,8 +2610,8 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=20260827-notif-logic"></script>
-<script src="./notifications-runtime.js?v=20260827-notif-logic"></script>
+<script src="./notification-center.js?v=1bf498f"></script>
+<script src="./notifications-runtime.js?v=1bf498f"></script>
 <script src="./pwa-runtime.js?v=a872b04"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>

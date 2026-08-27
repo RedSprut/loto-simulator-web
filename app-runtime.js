@@ -506,6 +506,7 @@ function selPage(p){
   // On the Simulator home screen the round Back control is redundant (it only resets
   // rows), so hide it there and let the logo sit far-left with the bell beside it.
   try{document.documentElement.classList.toggle('on-sim',p==='sim');}catch(e){}
+  try{document.documentElement.classList.toggle('on-ana',p==='ana');}catch(e){}
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('show'));
   document.getElementById('pg-'+p).classList.add('show');
   document.querySelectorAll('.bn').forEach(x=>x.classList.remove('on'));
