@@ -765,12 +765,13 @@ async function getJackpot(id){
   const j=await fetchJackpots();
   const e=j&&j.values&&j.values[id];
   if(!e)return{status:'unavailable'};
-  /* Client freshness: a "fresh" amount whose next draw already passed without a refresh
-     is stale/pending — the source hasn't published the new draw's jackpot yet. */
+  /* Client freshness: when the next-draw date has passed, the amount is no longer safe
+     to label as the current NEXT jackpot. Keep the confirmed amount visible and let the
+     hero relabel it; do not collapse the card into the recurring "updating" state. */
   let status=e.status||'unavailable';
   if(status==='fresh'&&e.nextDrawDate){
     const nd=Date.parse(e.nextDrawDate+'T23:59:59Z'),upd=Date.parse(e.updatedAt||j.updated||'');
-    if(Number.isFinite(nd)&&Date.now()>nd+6*3600*1000)status=(Number.isFinite(upd)&&upd>nd)?'pending':'stale';
+    if(Number.isFinite(nd)&&Date.now()>nd+6*3600*1000)status=(Number.isFinite(upd)&&upd>nd)?'rollover-confirmed':'last-confirmed';
   }
   return{
     status,amount:e.amount||null,
@@ -804,11 +805,13 @@ async function renderHero(){
        from nextDraw(cur), so last-draw and next-draw are never mixed. */
     potEl.textContent=jp.txt;
     potSub.textContent=jp.sub+(jp.offline?' · офлайн':'');
-  }else if(jp&&(jp.status==='pending'||jp.status==='stale')){
-    /* Draw window passed but the official next-draw amount isn't published yet — never
-       show the previous (now outdated) jackpot as current. */
-    potEl.textContent='Обновляется…';
-    potSub.textContent='официальная сумма следующего тиража ещё публикуется';
+  }else if(jp&&(jp.status==='rollover-confirmed'||jp.status==='last-confirmed')&&jp.amount){
+    /* The draw window passed but the next-draw amount has not landed in the snapshot yet.
+       Show the last confirmed official amount with an honest label instead of the noisy,
+       recurring "updating" banner. */
+    potLbl.textContent='Последняя подтверждённая сумма';
+    potEl.textContent=jp.txt;
+    potSub.textContent='ожидается новая официальная сумма'+(jp.sub?' · '+jp.sub:'')+(jp.offline?' · офлайн':'');
   }else{
     /* Source does not currently provide a confirmed amount. Odds are NOT a jackpot,
        so they are not substituted here. */

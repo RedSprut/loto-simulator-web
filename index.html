@@ -2475,7 +2475,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <script src="./native-loader.js?v=a872b04"></script>
 <script src="./i18n-catalog.js?v=a872b04"></script>
 <script src="./i18n-runtime.js?v=a872b04"></script>
-<script src="./app-runtime.js?v=726654d"></script>
+<script src="./app-runtime.js?v=08bfec1"></script>
 <script src="./commercial-runtime.js?v=a872b04"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
@@ -2520,9 +2520,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-selbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
 .lnc-selbar[hidden],.lnc-back[hidden],.lnc-dot[hidden]{display:none!important}
 .lnc-selcount{margin-left:auto;font:800 12px 'Manrope',sans-serif;color:#9aa2bd}
-.lnc-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:12px;padding:10px 2px 4px}
+.lnc-list{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:12px;padding:10px 2px 4px;overscroll-behavior:contain}
 .lnc-empty{color:#9aa2bd;text-align:center;padding:26px 8px;font-size:13.5px}
-.lnc-card{position:relative;display:block;min-height:128px;border-radius:16px;padding:13px 14px 13px 17px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.1);overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.16)}
+.lnc-card{position:relative;display:block;flex:0 0 auto;min-height:128px;border-radius:16px;padding:13px 14px 13px 17px;background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.1);overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.16)}
 .lnc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--lnc-grad,linear-gradient(#8a6b2e,#4a3210))}
 .lnc-card.read{opacity:.72}
 .lnc-card-top{display:flex;align-items:flex-start;gap:6px 8px;flex-wrap:wrap;font-size:11.5px;line-height:1.35}
@@ -2536,7 +2536,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-card-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:9px}
 .lnc-abtn{font:700 11.5px/1.2 'Manrope',sans-serif;color:#f4f1ea;background:rgba(255,255,255,.06);border:1px solid rgba(233,214,156,.2);border-radius:8px;padding:8px 10px;min-height:40px;cursor:pointer;min-width:0;white-space:normal;text-align:center}
 .lnc-abtn.danger{color:#ff9a9a;border-color:rgba(255,107,107,.35)}
-.lnc-foot{margin-top:8px}
+.lnc-foot{margin-top:8px;flex:0 0 auto}
 .lnc-foot .lnc-tbtn{width:100%}
 .lnc-settings{margin-top:10px;border-top:1px solid rgba(233,214,156,.18);padding-top:10px;overflow-y:auto}
 .lnc-settings.hidden{display:none}
@@ -2569,14 +2569,16 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-select{width:100%;padding:12px 40px 12px 14px;border-radius:13px;background:rgba(0,0,0,.28);color:#eef1f8;border:1px solid rgba(255,255,255,.1);font:600 14px 'Manrope',sans-serif;-webkit-appearance:none;appearance:none;cursor:pointer;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" fill="none" stroke="%238b93ad" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>');background-repeat:no-repeat;background-position:right 15px center}
 .lnc-select:focus-visible{outline:2px solid var(--gold,#E9B44C);outline-offset:2px}
 @media(max-width:480px){
-  .lnc-sheet{padding-left:12px;padding-right:12px}
+  .lnc-sheet{height:calc(100dvh - 6px);max-height:calc(100dvh - 6px);padding-left:12px;padding-right:12px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
   .lnc-mode-settings .lnc-sheet{height:calc(100dvh - 6px);max-height:calc(100dvh - 6px)}
   .lnc-mode-settings .lnc-settings{padding-left:0;padding-right:0}
-  .lnc-head{gap:8px}
+  .lnc-head{gap:8px;align-items:flex-start;min-height:0}
   .lnc-title{font-size:15px}
   .lnc-head-actions{gap:5px}
+  .lnc-head .lnc-tbtn:not([data-gear]){min-width:92px}
+  .lnc-head .lnc-tbtn[data-gear],.lnc-head .lnc-close{width:44px;padding-left:0;padding-right:0}
   .lnc-tbtn{padding-left:10px;padding-right:10px}
-  .lnc-list{gap:12px;padding-left:0;padding-right:0}
+  .lnc-list{gap:12px;padding-left:0;padding-right:0;padding-bottom:12px}
   .lnc-card{min-height:156px;border-radius:15px;padding:13px 12px 13px 16px}
   .lnc-kind{flex-basis:100%}
   .lnc-time{margin-left:0;text-align:left;flex:1 1 155px}
@@ -2585,6 +2587,12 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
   .lnc-selbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
   .lnc-selcount{grid-column:1/-1;grid-row:1;margin:0;text-align:center}
   .lnc-selbar .lnc-tbtn{width:100%;min-width:0}
+}
+@media(max-width:390px){
+  .lnc-head{flex-wrap:wrap}
+  .lnc-title{flex:1 1 100%;order:2;white-space:normal;line-height:1.25}
+  .lnc-head-actions{order:1;margin-left:auto}
+  .lnc-back{order:1}
 }
 @media(min-width:820px){
   .lnc-settings-grid{grid-template-columns:minmax(420px,1.12fr) minmax(300px,.88fr);gap:16px}
@@ -2610,8 +2618,8 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=726654d"></script>
-<script src="./notifications-runtime.js?v=726654d"></script>
+<script src="./notification-center.js?v=08bfec1"></script>
+<script src="./notifications-runtime.js?v=08bfec1"></script>
 <script src="./pwa-runtime.js?v=a872b04"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
