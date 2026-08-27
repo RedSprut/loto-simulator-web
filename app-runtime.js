@@ -4172,6 +4172,10 @@ function notifyAllowed(){return localStorage.getItem('loto_notify')==='1'&&typeo
    saved_ticket_results category; loto_notify is kept mirrored so autoCheckFavorites still
    works as a local fallback while the app is open. */
 function NOTIF_lotList(){try{return Object.keys(LOTS);}catch(e){return[];}}
+/* selected_lotteries tri-state, shared with notification-center.js: [] = all, ['__none__'] = none, [ids...] = subset. The sentinel matches no real lottery, so the backend delivers nothing for it. */
+var NOTIF_NONE='__none__';
+function NOTIF_selectedGames(sel){sel=sel||[];if(sel.indexOf(NOTIF_NONE)>=0)return[];const all=NOTIF_lotList();if(!sel.length)return all.slice();return all.filter(id=>sel.indexOf(id)>=0);}
+function NOTIF_canonLots(ids){const all=NOTIF_lotList();const uniq=all.filter(id=>ids.indexOf(id)>=0);if(!uniq.length)return[NOTIF_NONE];if(uniq.length===all.length)return[];return uniq;}
 function NOTIF_boot(){
   if(!window.LotoNotifications)return;
   window.LotoNotifications.onChange(NOTIF_render);
@@ -4213,8 +4217,8 @@ async function NOTIF_syncWatches(enabled){
   const watches=enabled?await NOTIF_collectWatches():[];
   window.LotoNotifications.syncWatches(watches,enabled);
 }
-function NOTIF_allLots(on){window.LotoNotifications.setSelectedLotteries(on?[]:NOTIF_lotList());}
-function NOTIF_toggleLot(id){const s=window.LotoNotifications.getState();let sel=(s.prefs.selected_lotteries||[]).slice();if(sel.length===0)sel=NOTIF_lotList();const i=sel.indexOf(id);if(i>=0)sel.splice(i,1);else sel.push(id);window.LotoNotifications.setSelectedLotteries(sel);}
+function NOTIF_allLots(on){window.LotoNotifications.setSelectedLotteries(on?[]:[NOTIF_NONE]);}
+function NOTIF_toggleLot(id){const s=window.LotoNotifications.getState();const sel=NOTIF_selectedGames(s.prefs.selected_lotteries);const i=sel.indexOf(id);if(i>=0)sel.splice(i,1);else sel.push(id);window.LotoNotifications.setSelectedLotteries(NOTIF_canonLots(sel));}
 function NOTIF_openSettings(){if(!window.LotoNotifications.openAppSettings())showFeedback('Настройки','Откройте настройки устройства → приложение → Уведомления.','🔔',4200);}
 function NOTIF_mirrorLegacy(){const s=window.LotoNotifications.getState();const on=s.prefs.enabled&&s.prefs.saved_ticket_results&&s.permission==='granted';try{localStorage.setItem('loto_notify',on?'1':'0');}catch(e){}}
 function NOTIF_render(s){
@@ -4234,9 +4238,9 @@ function NOTIF_render(s){
   const master=document.getElementById('notif-master');if(master)master.checked=s.prefs.enabled&&s.permission==='granted';
   show('notif-cats',s.prefs.enabled&&s.permission==='granted');
   ['draw_results','jackpot_updates','prize_breakdown','deadline_reminders','saved_ticket_results'].forEach(k=>{const el=document.getElementById('notif-cat-'+k);if(el)el.checked=s.prefs[k]!==false;});
-  const all=(s.prefs.selected_lotteries||[]).length===0;const allEl=document.getElementById('notif-all-lots');if(allEl)allEl.checked=all;
+  const picked=NOTIF_selectedGames(s.prefs.selected_lotteries);const all=picked.length===NOTIF_lotList().length;const allEl=document.getElementById('notif-all-lots');if(allEl)allEl.checked=all;
   const wrap=document.getElementById('notif-lot-chips');
-  if(wrap){const sel=s.prefs.selected_lotteries||[];wrap.style.display=all?'none':'flex';wrap.innerHTML='';NOTIF_lotList().forEach(id=>{const l=LOTS[id];const chip=document.createElement('div');chip.className='notif-lot-chip'+(sel.indexOf(id)>=0?' on':'');chip.textContent=(l.flag||'')+' '+(l.short||l.name||id);chip.onclick=()=>NOTIF_toggleLot(id);wrap.appendChild(chip);});}
+  if(wrap){wrap.style.display=all?'none':'flex';wrap.innerHTML='';NOTIF_lotList().forEach(id=>{const l=LOTS[id];const chip=document.createElement('div');chip.className='notif-lot-chip'+(picked.indexOf(id)>=0?' on':'');chip.textContent=(l.flag||'')+' '+(l.short||l.name||id);chip.onclick=()=>NOTIF_toggleLot(id);wrap.appendChild(chip);});}
   const lbl=document.getElementById('notif-state-label');
   if(lbl){
     const preparing=s.phase===P.GRANTED&&s.prefs.enabled&&!s.transportReady;
