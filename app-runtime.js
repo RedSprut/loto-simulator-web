@@ -108,10 +108,15 @@ function normalizeResultDraw(draw){
     lotteryName:draw.lotteryName||'',
     source:draw.source||'',
     sourceUrl:draw.sourceUrl||'',
+    isUserOwned:draw.isUserOwned===true||!String(draw.source||'').trim(),
     drawId:draw.drawId??null,
     ruleVersion:draw.ruleVersion||'',
     ruleEra:draw.ruleEra||'',
-    extraGroups:Array.isArray(draw.extraGroups)?draw.extraGroups.map(group=>({label:group.label||'',numbers:[...(group.numbers||[])]})):null
+    extraGroups:Array.isArray(draw.extraGroups)?draw.extraGroups.map(group=>({
+      groupId:group.groupId||'',type:group.type||'',label:group.label||'',numbers:[...(group.numbers||[])]
+    })):null,
+    dataCompleteness:draw.dataCompleteness||draw.data_completeness||'complete',
+    missingGroups:Array.isArray(draw.missingGroups)?[...draw.missingGroups]:[]
   };
 }
 async function fetchResultsJson(url=RESULTS_JSON_URL){
@@ -201,7 +206,9 @@ async function loadFullHistory(gameKey){
   const current=await loadD(gameKey);
   const archive=await loadArchivePackage(gameKey).catch(()=>({draws:[],eras:[],updatedAt:''}));
   const merged=mergeDrawLists(archive.draws,current).merged;
-  return{draws:merged,eras:archive.eras,updatedAt:archive.updatedAt,currentCount:current.length,currentDates:new Set(current.map(draw=>draw.date))};
+  const currentEra=(archive.eras||[]).find(era=>era.current||!era.to);
+  const currentCount=currentEra?merged.filter(draw=>ruleEraForDraw(draw,archive.eras)?.id===currentEra.id).length:current.length;
+  return{draws:merged,eras:archive.eras,updatedAt:archive.updatedAt,currentCount};
 }
 function analyzeData(gameKey,historicalData=[]){
   const cfg=getLotteryConfig(gameKey);
@@ -249,6 +256,7 @@ const LOTTERY_LABELS=Object.fromEntries(Object.entries(LOTS).map(([id,l])=>[id,l
 const OFFICIAL_LOTS=Object.keys(LOTS);
 const lotteryName=id=>LOTTERY_LABELS[id]||LOTS[id]?.name||String(id||'').toUpperCase();
 const appText=value=>window.LotoI18n?.translate?window.LotoI18n.translate(value):String(value??'');
+const historyText=(value,...args)=>appText(String(value??'').replace(/{{(\d+)}}/g,(_match,index)=>String(args[Number(index)]??'')));
 let groupAnalysisState={active:false,limit:0,total:0};
 function hasConfirmedPro(){
   try{return window.LotoCommercial?.access?.accessLevel==='pro';}catch(e){return false;}
@@ -2360,18 +2368,18 @@ async function openSourceInfo(){
   try{const d=await loadD(cur);cnt=(d||[]).length;if(d&&d[0]&&d[0].date)last=d[0].date;}catch(e){}
   const archive=await loadArchivePackage(cur).catch(()=>({draws:[],eras:[],updatedAt:''}));
   const provider=getOfficialProvider(cur);
-  const status=provider?'Живое обновление подключено':'Локальная база (results.json)';
+  const status=historyText(provider?'Живое обновление подключено':'Локальная база (results.json)');
   const rows=[
-    ['Оператор',l.officialSourceName||'—'],
-    ['Лотерея',l.short||l.name],
-    ['Текущие правила',String(cnt)+' тиражей'],
-    ['Полный архив',String(archive.draws.length||cnt)+' тиражей'],
-    ['Исторических версий правил',String(archive.eras.length||1)],
-    ['Последнее обновление',last],
-    ['Статус источника',status]
-  ].map(r=>`<div class="src-row"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
+    [historyText('Оператор'),l.officialSourceName||'—'],
+    [historyText('Лотерея'),l.short||l.name],
+    [historyText('Текущие правила'),historyText('{{0}} тиражей',cnt)],
+    [historyText('Полный архив'),historyText('{{0}} тиражей',archive.draws.length||cnt)],
+    [historyText('Исторических версий правил'),String(archive.eras.length||1)],
+    [historyText('Последнее обновление'),last==='—'?last:formatHistoryDate(last)],
+    [historyText('Статус источника'),status]
+  ].map(r=>`<div class="src-row"><span>${escapeHtml(r[0])}</span><b>${escapeHtml(r[1])}</b></div>`).join('');
   document.getElementById('src-body').innerHTML=rows+
-    '<div class="src-note">Текущая матрица используется в моделях и симуляциях. Более старые тиражи показываются и считаются отдельно по историческим версиям правил.</div>';
+    `<div class="src-note">${escapeHtml(historyText('Текущая матрица используется в моделях и симуляциях. Более старые тиражи показываются и рассчитываются отдельно по историческим версиям правил.'))}</div>`;
   document.getElementById('src-ov').classList.add('show');
 }
 function closeSourceInfo(){document.getElementById('src-ov').classList.remove('show');}
@@ -2406,7 +2414,7 @@ async function addDraw(){
   const draws=await loadD(cur);
   const ex=draws.findIndex(d=>d.date===date);
   if(ex>=0){if(!(await customConfirm(`Тираж ${date} уже есть. Заменить?`)))return;draws.splice(ex,1);}
-  draws.push({date,main,bonus,jackpot,payoutTiers,lotteryId:cur,lotteryName:lotteryName(cur)});draws.sort((a,b)=>b.date.localeCompare(a.date));
+  draws.push({date,main,bonus,jackpot,payoutTiers,lotteryId:cur,lotteryName:lotteryName(cur),source:'user',isUserOwned:true});draws.sort((a,b)=>b.date.localeCompare(a.date));
   await saveD(cur,draws);
   document.querySelectorAll('.binp').forEach(i=>{i.value='';i.className='binp';});
   document.getElementById('inp-jackpot').value='';
@@ -2415,14 +2423,33 @@ async function addDraw(){
   await renderSavedDrawOptions();
 }
 
+function formatHistoryDate(value){
+  const parsed=new Date(`${value}T12:00:00.000Z`);
+  if(!Number.isFinite(parsed.getTime()))return value;
+  return new Intl.DateTimeFormat(appLocale(),{year:'numeric',month:'short',day:'2-digit',timeZone:'UTC'}).format(parsed);
+}
+function ruleGroupLabel(group){
+  const labels={
+    supplementary:historyText('Дополнительные номера'),lucky_number:historyText('Lucky Number'),viking_number:historyText('Viking Number'),
+    euro_numbers:historyText('Euro numbers'),powerball:historyText('Powerball'),mega_ball:historyText('Mega Ball'),lucky_stars:historyText('Lucky Stars'),jolly:historyText('Jolly'),bonus:historyText('Bonus')
+  };
+  return labels[group.type]||labels[group.id]||group.type||group.id||historyText('Дополнительные номера');
+}
+function ruleParameters(era){
+  const main=`${historyText('Основные числа')}: ${era.mainCount}/${era.mainMax}`;
+  const groups=(era.extraGroups||[]).map(group=>`${ruleGroupLabel(group)}: ${group.count}/${group.max}`);
+  return[main,...groups].join(' · ');
+}
 function renderRuleSummary(draws,eras,currentCount){
-  if(!eras.length)return'<div class="rule-era"><b>Текущая база</b>Исторические версии правил для этого источника не заявлены.</div>';
+  if(!eras.length)return`<div class="rule-era"><b>${escapeHtml(historyText('Текущая база'))}</b>${escapeHtml(historyText('Исторические версии правил для этого источника не заявлены.'))}</div>`;
   const blocks=eras.map(era=>{
     const count=draws.filter(draw=>ruleEraForDraw(draw,eras)?.id===era.id).length;
-    const range=escapeHtml(era.from)+(era.to?' — '+escapeHtml(era.to):' — сейчас');
-    return`<div class="rule-era"><b>${era.current?'Текущие правила':'Изменённые старые правила'} · ${escapeHtml(era.label)}</b>${range} · ${count} тиражей</div>`;
+    const range=`${formatHistoryDate(era.from)} — ${era.to?formatHistoryDate(era.to):historyText('сейчас')}`;
+    const status=historyText(era.current?'Текущие правила':'Старые правила');
+    return`<div class="rule-era"><b>${escapeHtml(status)} · ${escapeHtml(era.id)}</b>${escapeHtml(range)} · ${escapeHtml(ruleParameters(era))} · ${escapeHtml(historyText('{{0}} тиражей',count))}</div>`;
   }).join('');
-  return`<div class="rule-era"><b>Как используется архив</b>Показано ${draws.length} тиражей. Математические модели используют только ${currentCount} совместимых с сегодняшними правилами; старые эпохи считаются и показываются отдельно.</div>${blocks}`;
+  const summary=historyText('Показано {{0}} тиражей. Модели текущего формата используют {{1}} совместимых тиражей; статистика старых эпох рассчитывается отдельно.',draws.length,currentCount);
+  return`<div class="rule-era"><b>${escapeHtml(historyText('Как используется архив'))}</b>${escapeHtml(summary)}</div>${blocks}`;
 }
 
 // ── Canonical deletion policy (single source of truth for every platform) ──
@@ -2437,21 +2464,19 @@ function isOfficialDraw(d){
   const s=String(d.source||'').trim().toLowerCase();
   return s!==''&&s!=='user'&&s!=='manual'&&s!=='custom'&&s!=='вручную';
 }
-function canDeleteItem(item,ctx){
-  ctx=ctx||{};
+function canDeleteItem(item){
   if(!item)return false;
   if(isOfficialDraw(item))return false;                        // official draws: never deletable, on any platform
-  return ctx.currentDates?ctx.currentDates.has(item.date):(item.isUserOwned===true); // only user-owned entries
+  return item.isUserOwned===true||!String(item.source||'').trim(); // only user-owned entries, including legacy local rows
 }
 async function renderHistory(){
   const l=L(),pack=await loadFullHistory(cur),draws=pack.draws,eras=pack.eras;
-  document.getElementById('hist-title').textContent=`История (${draws.length} всего · ${pack.currentCount} по текущим правилам)`;
+  document.getElementById('hist-title').textContent=historyText('История ({{0}} всего · {{1}} по текущим правилам)',draws.length,pack.currentCount);
   const summary=document.getElementById('hist-rule-summary');
   if(summary)summary.innerHTML=renderRuleSummary(draws,eras,pack.currentCount);
   const c=document.getElementById('hist-list');
-  if(!draws.length){c.innerHTML='<div class="empty">📭 Тиражей нет</div>';return;}
+  if(!draws.length){c.innerHTML=`<div class="empty">📭 ${escapeHtml(historyText('Тиражей нет'))}</div>`;return;}
   c.innerHTML='';
-  const ms=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
   draws.forEach(d=>{
     const div=document.createElement('div');div.className='hist-item';
     let balls=d.main.map(n=>`<div class="hball ${l.cls}-m">${n}</div>`).join('');
@@ -2460,19 +2485,20 @@ async function renderHistory(){
       d.extraGroups.forEach(group=>{
         histSepCount++;
         histBallCount+=(group.numbers||[]).length;
-        balls+=`<div class="hist-sep">|</div><span class="hist-extra-label">${escapeHtml(group.label)}</span>`;
+        balls+=`<div class="hist-sep">|</div><span class="hist-extra-label">${escapeHtml(ruleGroupLabel(group))}</span>`;
         balls+=(group.numbers||[]).map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');
       });
     }else if(d.bonus&&d.bonus.length){histSepCount=1;histBallCount+=d.bonus.length;balls+=`<div class="hist-sep">|</div>`;balls+=d.bonus.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}
-    const[y,mo,dy]=d.date.split('-');
     const src=` · ${escapeHtml(drawLotteryName(d,cur))}`;
     const era=ruleEraForDraw(d,eras),isCurrent=era?.current??d.ruleEra!=='legacy';
-    const badge=era?`<span class="rule-badge ${isCurrent?'current':''}" title="${escapeHtml(era.label)}">${isCurrent?'текущие правила':'старые правила'}</span>`:'';
-    const canDelete=canDeleteItem(d,{currentDates:pack.currentDates});   // official draws → no delete control at all
+    const badgeLabel=historyText(isCurrent?'Текущие правила':'Старые правила');
+    const badgeTitle=era?`${era.id} · ${ruleParameters(era)}`:'';
+    const badge=era?`<span class="rule-badge ${isCurrent?'current':''}" title="${escapeHtml(badgeTitle)}">${escapeHtml(badgeLabel)}</span>`:'';
+    const canDelete=canDeleteItem(d);   // official draws → no delete control at all
     const action=canDelete?`<button class="btn-del" data-loto-event-click="delDraw('${d.date}')">🗑</button>`:'<span></span>';
     if(!canDelete)div.classList.add('no-action');
     const ballClass=histBallCount>=8?'hist-balls hist-many':'hist-balls';
-    div.innerHTML=`<div class="hist-main"><div class="hist-date">${dy} ${ms[+mo-1]} ${y}${src}${badge}</div><div class="${ballClass}" style="--hist-ball-count:${Math.max(1,histBallCount)};--hist-sep-count:${histSepCount}">${balls}</div></div>${action}`;
+    div.innerHTML=`<div class="hist-main"><div class="hist-date">${escapeHtml(formatHistoryDate(d.date))}${src}${badge}</div><div class="${ballClass}" style="--hist-ball-count:${Math.max(1,histBallCount)};--hist-sep-count:${histSepCount}">${balls}</div></div>${action}`;
     c.appendChild(div);
   });
   try{HIST_filter();}catch(e){}
@@ -2867,7 +2893,10 @@ async function _showPrizeAwaitingOrNotFound(gameId,date,outEl){
   try{const draws=await loadD(cur);known=!!(date&&draws.some(d=>d.date===date));}catch(e){}
   let lot=gameId||cur||'';try{lot=(L&&L().name)||lot;}catch(e){}
   const label=lot+(date?(' · '+date):'');
-  const msg=known?_ncText('nc.status.awaitingData'):_ncText('nc.notFound',label);
+  // A draw the notification points to may simply not be in our data yet — that is "awaiting
+  // the official result", never "not found" (which read as a bug to users). Known-but-no-prizes
+  // stays the more specific "awaiting prize data".
+  const msg=known?_ncText('nc.status.awaitingData'):_ncText('nc.status.awaiting');
   const banner=document.createElement('div');
   banner.className='prize-draw-card';
   banner.setAttribute('data-draw-date',date||'');
@@ -3000,25 +3029,25 @@ async function renderStats(){
   const freq=buildFreq(draws,'main',l.mB);
   const maxF=[...freq.entries()].sort((a,b)=>b[1]-a[1])[0];
   const minF=[...freq.entries()].sort((a,b)=>a[1]-b[1])[0];
-  const ms=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
-  const fmt=s=>{const[y,mo,d]=s.split('-');return`${d} ${ms[+mo-1]} ${y}`;};
   const eraStats=pack.eras.map(era=>{
     const rows=pack.draws.filter(draw=>ruleEraForDraw(draw,pack.eras)?.id===era.id);
     if(!rows.length)return'';
     const freq=new Map(Array.from({length:era.mainMax},(_,i)=>[i+1,0]));
     rows.forEach(draw=>draw.main.forEach(n=>freq.set(n,(freq.get(n)||0)+1)));
     const hot=[...freq.entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0]).slice(0,3).map(([n,v])=>`№${n} (${v}×)`).join(', ');
-    return`<div class="rule-era"><b>${era.current?'Текущая эпоха':'Старые правила'} · ${era.label}</b>${era.from}${era.to?' — '+era.to:' — сейчас'} · ${rows.length} тиражей<br>Чаще в этой эпохе: ${hot}</div>`;
+    const status=historyText(era.current?'Текущие правила':'Старые правила');
+    const range=`${formatHistoryDate(era.from)} — ${era.to?formatHistoryDate(era.to):historyText('сейчас')}`;
+    return`<div class="rule-era"><b>${escapeHtml(status)} · ${escapeHtml(era.id)}</b>${escapeHtml(range)} · ${escapeHtml(historyText('{{0}} тиражей',rows.length))}<br>${escapeHtml(historyText('Чаще в этой эпохе: {{0}}',hot))}</div>`;
   }).join('');
   c.innerHTML=`<div class="srow"><span>Тиражей текущих правил:</span><span>${draws.length}</span></div>
   <div class="srow"><span>Полный архив:</span><span>${pack.draws.length}</span></div>
-  <div class="srow"><span>Первый:</span><span>${fmt(draws[draws.length-1].date)}</span></div>
-  <div class="srow"><span>Последний:</span><span>${fmt(draws[0].date)}</span></div>
+  <div class="srow"><span>Первый:</span><span>${formatHistoryDate(draws[draws.length-1].date)}</span></div>
+  <div class="srow"><span>Последний:</span><span>${formatHistoryDate(draws[0].date)}</span></div>
   <div class="srow"><span>Среднее число:</span><span>${avg} (ожид. ${((l.mB+1)/2).toFixed(1)})</span></div>
   <div class="srow"><span>Самое частое:</span><span>№${maxF[0]} (${maxF[1]}×)</span></div>
   <div class="srow"><span>Самое редкое:</span><span>№${minF[0]} (${minF[1]}×)</span></div>
-  <div style="font-weight:900;font-size:13px;margin:14px 0 8px">Историческая статистика по версиям правил</div>
-  <div class="rule-summary">${eraStats||'<div class="rule-era">Исторические эпохи не найдены.</div>'}</div>`;
+  <div style="font-weight:900;font-size:13px;margin:14px 0 8px">${escapeHtml(historyText('Историческая статистика по версиям правил'))}</div>
+  <div class="rule-summary">${eraStats||`<div class="rule-era">${escapeHtml(historyText('Исторические эпохи не найдены.'))}</div>`}</div>`;
 }
 
 // ─── EXPORT/IMPORT ────────────────────────────
@@ -4176,7 +4205,7 @@ function notifyAllowed(){return localStorage.getItem('loto_notify')==='1'&&typeo
    saved_ticket_results category; loto_notify is kept mirrored so autoCheckFavorites still
    works as a local fallback while the app is open. */
 function NOTIF_lotList(){try{return Object.keys(LOTS);}catch(e){return[];}}
-/* selected_lotteries tri-state, shared with notification-center.js: [] = all, ['__none__'] = none, [ids...] = subset. The sentinel matches no real lottery, so the backend delivers nothing for it. */
+/* selected_lotteries tri-state, shared with notification-center.js: [] = all, ['__none__'] = none, [ids…] = subset. The sentinel matches no real lottery, so the backend delivers nothing for it. */
 var NOTIF_NONE='__none__';
 function NOTIF_selectedGames(sel){sel=sel||[];if(sel.indexOf(NOTIF_NONE)>=0)return[];const all=NOTIF_lotList();if(!sel.length)return all.slice();return all.filter(id=>sel.indexOf(id)>=0);}
 function NOTIF_canonLots(ids){const all=NOTIF_lotList();const uniq=all.filter(id=>ids.indexOf(id)>=0);if(!uniq.length)return[NOTIF_NONE];if(uniq.length===all.length)return[];return uniq;}

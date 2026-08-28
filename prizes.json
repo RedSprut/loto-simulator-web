@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-26",
+  "updatedAt": "2026-08-28",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
@@ -30917,6 +30917,52 @@
       }
     ],
     "vikinglotto": [
+      {
+        "date": "2026-08-26",
+        "lotteryId": "vikinglotto",
+        "currency": "NOK",
+        "jackpot": 152.4,
+        "payoutTiers": [
+          {
+            "match": "6+1",
+            "label": "6+1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "6+0",
+            "label": "6+0",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 50625,
+            "winners": 23
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 4600,
+            "winners": 104
+          },
+          {
+            "match": "4",
+            "label": "4",
+            "prizeAmount": 155,
+            "winners": 6984
+          },
+          {
+            "match": "3",
+            "label": "3",
+            "prizeAmount": 80,
+            "winners": 121688
+          }
+        ],
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/vikinglotto/resultater"
+      },
       {
         "date": "2026-08-19",
         "lotteryId": "vikinglotto",
@@ -81318,6 +81364,70 @@
     ],
     "powerball": [
       {
+        "date": "2026-08-26",
+        "lotteryId": "powerball",
+        "currency": "USD",
+        "jackpot": 98,
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 98000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 0
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 50000,
+            "winners": 5
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 100,
+            "winners": 173
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 100,
+            "winners": 429
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 7,
+            "winners": 11401
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 9108
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 72978
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 4,
+            "winners": 180538
+          }
+        ],
+        "source": "Powerball",
+        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-26&gc=powerball"
+      },
+      {
         "date": "2026-08-24",
         "lotteryId": "powerball",
         "currency": "USD",
@@ -82217,7 +82327,7 @@
         "date": "2026-07-22",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 570,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -82274,8 +82384,8 @@
             "winners": 334294
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-22&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-20",
@@ -85948,6 +86058,52 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-08-27",
+        "lotteryId": "superEnalotto",
+        "currency": "EUR",
+        "jackpot": 215.1,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 215100000,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 63296.43,
+            "winners": 3
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 406.33,
+            "winners": 477
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 27.4,
+            "winners": 21260
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 5.29,
+            "winners": 341695
+          }
+        ],
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/27-08-2026"
+      },
+      {
         "date": "2026-08-25",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
@@ -86595,7 +86751,7 @@
         "date": "2026-07-31",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 202.2,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "6",
@@ -86634,8 +86790,8 @@
             "winners": 355364
           }
         ],
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/31-07-2026"
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
       },
       {
         "date": "2026-07-30",
@@ -89006,6 +89162,70 @@
     ],
     "powerballAustralia": [
       {
+        "date": "2026-08-27",
+        "lotteryId": "powerballAustralia",
+        "currency": "AUD",
+        "jackpot": 0,
+        "payoutTiers": [
+          {
+            "match": "7+1",
+            "label": "Division 1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "7+0",
+            "label": "Division 2",
+            "prizeAmount": 426846.4,
+            "winners": 1
+          },
+          {
+            "match": "6+1",
+            "label": "Division 3",
+            "prizeAmount": 9598.95,
+            "winners": 55
+          },
+          {
+            "match": "6+0",
+            "label": "Division 4",
+            "prizeAmount": 541.8,
+            "winners": 850
+          },
+          {
+            "match": "5+1",
+            "label": "Division 5",
+            "prizeAmount": 189.95,
+            "winners": 1833
+          },
+          {
+            "match": "4+1",
+            "label": "Division 6",
+            "prizeAmount": 84.95,
+            "winners": 25513
+          },
+          {
+            "match": "5+0",
+            "label": "Division 7",
+            "prizeAmount": 50.8,
+            "winners": 33160
+          },
+          {
+            "match": "3+1",
+            "label": "Division 8",
+            "prizeAmount": 23,
+            "winners": 156345
+          },
+          {
+            "match": "2+1",
+            "label": "Division 9",
+            "prizeAmount": 13.85,
+            "winners": 445963
+          }
+        ],
+        "source": "The Lott",
+        "sourceUrl": "https://www.thelott.com/powerball/results"
+      },
+      {
         "date": "2026-08-20",
         "lotteryId": "powerballAustralia",
         "currency": "AUD",
@@ -89642,8 +89862,8 @@
             "winners": 546998
           }
         ],
-        "source": "The Lott",
-        "sourceUrl": "https://www.thelott.com/powerball/results"
+        "source": "Australia National Lottery / The Lott",
+        "sourceUrl": "https://australia.national-lottery.com/powerball/results-archive-2026"
       },
       {
         "date": "2026-06-11",
