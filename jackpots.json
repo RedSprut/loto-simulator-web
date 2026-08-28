@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-08-28T13:32:00.673Z",
+  "updated": "2026-08-28T17:34:45.758Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,7 +12,7 @@
       "lastDrawDate": "2026-08-22",
       "expectedLastDraw": "2026-08-22",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-28T13:32:00.673Z",
+      "updatedAt": "2026-08-28T17:34:45.758Z",
       "status": "fresh",
       "synced": true,
       "source": "norsk-tipping.no"
@@ -27,25 +27,21 @@
       "lastDrawDate": "2026-08-26",
       "expectedLastDraw": "2026-08-26",
       "nextDrawDate": "2026-09-02",
-      "updatedAt": "2026-08-28T13:32:00.673Z",
+      "updatedAt": "2026-08-28T17:34:45.758Z",
       "status": "fresh",
       "synced": true,
       "source": "norsk-tipping.no"
     },
     "euro": {
-      "amount": "108",
-      "prefix": "Ca. ",
-      "sub": "MILLIONER NOK",
-      "cur": "NOK",
       "currency": "NOK",
-      "display": "Ca. 108 MILLIONER NOK",
+      "cur": "NOK",
       "lastDrawDate": "2026-08-25",
       "expectedLastDraw": "2026-08-25",
       "nextDrawDate": "2026-08-28",
-      "updatedAt": "2026-08-28T13:32:00.673Z",
-      "status": "fresh",
+      "updatedAt": "2026-08-28T17:34:45.758Z",
+      "status": "unavailable",
       "synced": true,
-      "source": "norsk-tipping.no"
+      "source": null
     },
     "powerball": {
       "amount": "150",
@@ -57,7 +53,7 @@
       "lastDrawDate": "2026-08-26",
       "expectedLastDraw": "2026-08-26",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-28T13:32:00.673Z",
+      "updatedAt": "2026-08-28T17:34:45.758Z",
       "status": "fresh",
       "synced": true,
       "source": "powerball.com"
@@ -72,7 +68,7 @@
       "lastDrawDate": "2026-08-25",
       "expectedLastDraw": "2026-08-25",
       "nextDrawDate": "2026-08-28",
-      "updatedAt": "2026-08-28T13:32:00.673Z",
+      "updatedAt": "2026-08-28T17:34:45.758Z",
       "status": "fresh",
       "synced": true,
       "source": "megamillions.com"
@@ -87,7 +83,7 @@
       "lastDrawDate": "2026-08-25",
       "expectedLastDraw": "2026-08-25",
       "nextDrawDate": "2026-08-28",
-      "updatedAt": "2026-08-28T13:32:00.673Z",
+      "updatedAt": "2026-08-28T17:34:45.758Z",
       "status": "fresh",
       "synced": true,
       "source": "national-lottery.com"
@@ -102,7 +98,7 @@
       "lastDrawDate": "2026-08-27",
       "expectedLastDraw": "2026-08-27",
       "nextDrawDate": "2026-08-28",
-      "updatedAt": "2026-08-28T13:32:00.673Z",
+      "updatedAt": "2026-08-28T17:34:45.758Z",
       "status": "fresh",
       "synced": true,
       "source": "national-lottery.com"
@@ -117,7 +113,7 @@
       "lastDrawDate": "2026-08-25",
       "expectedLastDraw": "2026-08-25",
       "nextDrawDate": "2026-08-28",
-      "updatedAt": "2026-08-28T13:32:00.673Z",
+      "updatedAt": "2026-08-28T17:34:45.758Z",
       "status": "fresh",
       "synced": true,
       "source": "olg.ca"
@@ -132,7 +128,7 @@
       "lastDrawDate": "2026-08-27",
       "expectedLastDraw": "2026-08-27",
       "nextDrawDate": "2026-09-03",
-      "updatedAt": "2026-08-28T13:32:00.673Z",
+      "updatedAt": "2026-08-28T17:34:45.758Z",
       "status": "fresh",
       "synced": true,
       "source": "thelott.com"
