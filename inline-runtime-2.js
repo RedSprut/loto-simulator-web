@@ -109,6 +109,10 @@
       :hasEmailPending?'Ожидается подтверждение e-mail':'Гостевой режим · вход не требуется для Free';
 
     if($('acc-signin'))$('acc-signin').hidden=confirmed;
+    // Surface a pending Magic-Link callback result (expired / used / failed) in the sign-in card.
+    try{const am=window.LotoCommercial&&window.LotoCommercial.authMessage;
+      if(am&&am.text&&!confirmed)msg('acc-auth-msg',am.text,am.kind);
+    }catch(_e){}
 
     if($('acc-plan'))$('acc-plan').hidden=false;
     const badge=$('acc-plan-badge');
