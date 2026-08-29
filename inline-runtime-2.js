@@ -5,6 +5,41 @@
   const $=id=>document.getElementById(id);
   const T=v=>String(v==null?'':v);
   let magicSending=false,avatarBusy=false;
+  // Calendar state: shown month + tentative selection (committed only on «Готово»).
+  let calY,calM,calSelIso=null,calYearView=false;
+  const pad2=n=>String(n).padStart(2,'0');
+  const isoOf=(y,m,d)=>`${y}-${pad2(m+1)}-${pad2(d)}`;
+  function calRender(){
+    const loc=document.documentElement.lang||'ru';
+    const title=$('cal-title');
+    try{title.textContent=new Date(calY,calM,1).toLocaleDateString(loc,{month:'long',year:'numeric'});}catch(_e){title.textContent=`${calM+1}.${calY}`;}
+    const yv=$('cal-yearsel'),grid=$('cal-grid'),wd=$('cal-weekdays');
+    yv.hidden=!calYearView;grid.hidden=calYearView;wd.hidden=calYearView;
+    $('cal-prev').style.visibility=calYearView?'hidden':'';$('cal-next').style.visibility=calYearView?'hidden':'';
+    if(calYearView){
+      const now=new Date().getFullYear();let h='';
+      for(let y=now;y>=1920;y--)h+=`<button type="button" class="cal-yr${y===calY?' sel':''}" data-loto-event-click="AccountUI.calPickYear(${y})">${y}</button>`;
+      yv.innerHTML=h;return;
+    }
+    // localized weekday short names (Mon-first)
+    let wdh='';for(let i=1;i<=7;i++){const dd=new Date(2024,0,i);/*2024-01-01 is Monday*/wdh+=`<span>${dd.toLocaleDateString(loc,{weekday:'short'})}</span>`;}
+    wd.innerHTML=wdh;
+    const first=new Date(calY,calM,1);let start=(first.getDay()+6)%7; // Mon=0
+    const daysIn=new Date(calY,calM+1,0).getDate();
+    const prevDays=new Date(calY,calM,0).getDate();
+    const todayIso=isoOf(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+    let cells='';
+    for(let i=0;i<start;i++){const d=prevDays-start+1+i;cells+=`<button type="button" class="cal-day other" disabled>${d}</button>`;}
+    for(let d=1;d<=daysIn;d++){
+      const iso=isoOf(calY,calM,d);
+      const future=iso>todayIso;
+      const cls='cal-day'+(iso===calSelIso?' sel':'')+(iso===todayIso?' today':'');
+      cells+=`<button type="button" class="${cls}" ${future?'disabled':''} data-loto-event-click="AccountUI.calPickDay('${iso}')">${d}</button>`;
+    }
+    const rem=(7-((start+daysIn)%7))%7;
+    for(let i=1;i<=rem;i++)cells+=`<button type="button" class="cal-day other" disabled>${i}</button>`;
+    grid.innerHTML=cells;
+  }
 
   function fmtDate(iso){
     const t=Date.parse(iso||'');
@@ -52,8 +87,23 @@
     const name=(p&&p.displayName||'').trim();
     const nameEl=$('acc-name');if(nameEl){nameEl.textContent=name;nameEl.hidden=!name;}
     const dn=$('acc-displayname');if(dn&&document.activeElement!==dn)dn.value=name;
-    const bd=$('acc-birthday');if(bd&&document.activeElement!==bd)bd.value=(p&&p.birthday||'').slice(0,10);
+    setBirthdayValue((p&&p.birthday||'').slice(0,10)||null);
     maybeGreetBirthday(p);
+  }
+  // Birthday value lives in a hidden input (ISO YYYY-MM-DD or empty) with a localized display.
+  function fmtBirthdayDisplay(iso){
+    const t=Date.parse((iso||'')+'T12:00:00Z');
+    if(!iso||!Number.isFinite(t))return '';
+    const loc=document.documentElement.lang||'ru';
+    try{return new Date(t).toLocaleDateString(loc,{day:'numeric',month:'long',year:'numeric'});}
+    catch(_e){return iso;}
+  }
+  function setBirthdayValue(iso){
+    const inp=$('acc-birthday');if(inp)inp.value=iso||'';
+    const disp=$('acc-birthday-display'),btn=$('acc-birthday-btn');
+    const text=fmtBirthdayDisplay(iso);
+    if(disp)disp.textContent=text||'Не указан';
+    if(btn)btn.classList.toggle('empty',!text);
   }
   async function loadAvatar(force){
     const {user,confirmed}=accountState();
@@ -84,6 +134,24 @@
   function msg(elId,text,kind){
     const n=$(elId);if(!n)return;
     n.textContent=T(text);n.dataset.kind=kind||'info';n.hidden=!text;
+  }
+  // App Store / Google Play badges — Web only, ordered by platform, "Скоро" if no URL yet.
+  function renderStores(){
+    const el=$('acc-stores'),btns=$('acc-stores-btns');if(!el||!btns)return;
+    if(window.LotoNativeBilling&&window.LotoNativeBilling.isNative){el.hidden=true;return;} // not inside native apps
+    const cfg=window.LOTO_COMMERCIAL_CONFIG||{};
+    const appStore=cfg.appStoreUrl||'',googlePlay=cfg.googlePlayUrl||'';
+    const ua=navigator.userAgent||'';
+    const isIOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    const isAndroid=/Android/i.test(ua);
+    const apple=`<a class="store-badge${appStore?'':' soon'}" ${appStore?`href="${appStore}" target="_blank" rel="noopener"`:'aria-disabled="true" role="link"'}>`+
+      `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.9c0-2 1.6-3 1.7-3.1-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.2 2-1.4 2.4-.4 5.9 1 7.9.7 1 1.4 2 2.4 2s1.3-.6 2.5-.6 1.5.6 2.5.6 1.7-1 2.3-2c.7-1.1 1-2.2 1-2.3 0 0-1.9-.7-1.9-2.9ZM14.5 6.6c.5-.7.9-1.6.8-2.6-.8 0-1.8.5-2.3 1.2-.5.6-.9 1.5-.8 2.5.9.1 1.8-.5 2.3-1.1Z"/></svg>`+
+      `<span class="sb-txt"><span class="sb-small" data-i18n-ignore>Download on the</span><span class="sb-big" data-i18n-ignore>App Store</span></span>${appStore?'':'<span class="sb-soon">Скоро</span>'}</a>`;
+    const google=`<a class="store-badge${googlePlay?'':' soon'}" ${googlePlay?`href="${googlePlay}" target="_blank" rel="noopener"`:'aria-disabled="true" role="link"'}>`+
+      `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#00D3FF" d="M3.5 2.3 13.6 12 3.5 21.7c-.32-.18-.5-.55-.5-1V3.3c0-.45.18-.82.5-1Z"/><path fill="#FFCE00" d="m17.7 8.1 2.9 1.7c.9.52.9 1.98 0 2.5l-2.9 1.6L14.9 12l2.8-3.9Z"/><path fill="#00F076" d="M3.5 2.3c.32-.18.7-.2 1.03 0l10.37 6-2.3 2.3L3.5 2.3Z"/><path fill="#FF3A44" d="m12.6 13.4 2.3 2.3-10.37 6c-.33.2-.71.18-1.03 0l9.1-8.3Z"/></svg>`+
+      `<span class="sb-txt"><span class="sb-small" data-i18n-ignore>Get it on</span><span class="sb-big" data-i18n-ignore>Google Play</span></span>${googlePlay?'':'<span class="sb-soon">Скоро</span>'}</a>`;
+    btns.innerHTML=isAndroid?(google+apple):(apple+google); // iOS & desktop: App Store first; Android: Google Play first
+    el.hidden=false;
   }
 
   function accountState(){
@@ -195,6 +263,21 @@
     },
     async manage(){try{await window.LotoCommercial.accountPortal();}catch(_e){}},
     async restore(){try{await window.LotoCommercial.restorePurchase();}catch(_e){}},
+    openCalendar(){
+      const cur=(($('acc-birthday')||{}).value||'').slice(0,10);
+      calSelIso=/^\d{4}-\d{2}-\d{2}$/.test(cur)?cur:null;
+      const base=calSelIso?new Date(calSelIso+'T12:00:00Z'):new Date(1990,0,1);
+      calY=base.getUTCFullYear?base.getFullYear():base.getFullYear();calM=base.getMonth();calYearView=false;
+      calRender();
+      const ov=$('cal-ov');if(ov)ov.classList.add('show');
+    },
+    calNav(dir){calM+=dir;if(calM<0){calM=11;calY--;}else if(calM>11){calM=0;calY++;}calRender();},
+    calToggleYears(){calYearView=!calYearView;calRender();},
+    calPickYear(y){calY=y;calYearView=false;calRender();},
+    calPickDay(iso){calSelIso=iso;calRender();},
+    calClear(){calSelIso=null;setBirthdayValue(null);this.calClose();},
+    calClose(){const ov=$('cal-ov');if(ov)ov.classList.remove('show');},
+    calDone(){setBirthdayValue(calSelIso||null);this.calClose();},
     async saveData(){
       const name=(($('acc-displayname')||{}).value||'').trim().slice(0,60);
       const birthday=(($('acc-birthday')||{}).value||'').trim();
@@ -242,6 +325,7 @@
     });
     // Re-render on language switch so the localized dates follow the new locale.
     window.addEventListener('loto:languagechange',()=>render());
+    renderStores();
     render();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else wire();

@@ -2434,7 +2434,7 @@ async function renderHistory(){
       d.extraGroups.forEach(group=>{
         histSepCount++;
         histBallCount+=(group.numbers||[]).length;
-        balls+=`<div class="hist-sep">|</div><span class="hist-extra-label">${escapeHtml(ruleGroupLabel(group))}</span>`;
+        balls+=`<div class="hist-sep" role="separator" aria-label="${escapeHtml(ruleGroupLabel(group))}">|</div>`;
         balls+=(group.numbers||[]).map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');
       });
     }else if(d.bonus&&d.bonus.length){histSepCount=1;histBallCount+=d.bonus.length;balls+=`<div class="hist-sep">|</div>`;balls+=d.bonus.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}

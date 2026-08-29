@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="236c87e" data-build-ts="2026-08-29T19:30:54.682Z">
+<html lang="ru" data-build="e58ffa2" data-build-ts="2026-08-29T20:46:19.230Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=236c87e"></script>
+<script src="./boot-runtime.js?v=e58ffa2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2491,6 +2491,49 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
    was added to the header, leaving no room for the "fill at least N rows" title — hide it on
    phones. Desktop and tablets (≥700px) keep it. */
 @media (max-width:699px){#main-hdr .hdr-title{display:none}}
+/* Date button + custom calendar modal (replaces the tiny native date popup). */
+.acc-datebtn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:13px;border:1.5px solid var(--border);background:var(--bg3);color:var(--fg);font-size:15px;font-family:'Manrope',sans-serif;cursor:pointer;text-align:left}
+.acc-datebtn:focus-visible{outline:2px solid var(--hdr-a,var(--gold));outline-offset:2px}
+.acc-datebtn svg{width:20px;height:20px;flex-shrink:0;color:var(--hdr-a,var(--gold))}
+.acc-datebtn.empty{color:var(--sub)}
+.cal-ov{position:fixed;inset:0;z-index:580;background:rgba(6,8,14,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .18s}
+.cal-ov.show{opacity:1;pointer-events:all}
+.cal-box{width:100%;max-width:360px;max-height:92vh;max-height:min(92vh,92dvh);overflow-y:auto;background:var(--modal-bg);border:1px solid var(--border);border-radius:22px;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.5);transform:translateY(10px);transition:transform .22s cubic-bezier(.34,1.2,.5,1)}
+.cal-ov.show .cal-box{transform:translateY(0)}
+.cal-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.cal-nav{width:40px;height:40px;flex-shrink:0;border-radius:12px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-size:22px;line-height:1;cursor:pointer}
+.cal-nav:active{transform:scale(.94)}
+.cal-title{flex:1;min-width:0;font-family:'Unbounded',sans-serif;font-size:15px;font-weight:900;color:var(--fg);background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px;cursor:pointer;min-height:40px}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.cal-weekdays span{text-align:center;font-size:11px;font-weight:800;color:var(--sub2);padding:4px 0;text-transform:capitalize}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;border-radius:10px;border:none;background:transparent;color:var(--fg);font-size:14px;font-weight:700;font-family:'Manrope',sans-serif;cursor:pointer;min-height:38px}
+.cal-day:hover:not(:disabled){background:var(--bg3)}
+.cal-day.other{color:var(--sub);opacity:.45}
+.cal-day.sel{background:linear-gradient(135deg,var(--hdr-a,var(--gold)),var(--hdr-b,var(--gold2)));color:#fff;font-weight:900}
+.cal-day.today{box-shadow:inset 0 0 0 1.5px var(--hdr-a,var(--gold))}
+.cal-day:disabled{color:var(--sub);opacity:.3;cursor:default}
+.cal-yearsel{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:280px;overflow-y:auto;padding:2px}
+.cal-yearsel[hidden]{display:none}
+.cal-yr{padding:11px 4px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-size:14px;font-weight:800;cursor:pointer}
+.cal-yr.sel{background:linear-gradient(135deg,var(--hdr-a,var(--gold)),var(--hdr-b,var(--gold2)));color:#fff;border-color:transparent}
+.cal-foot{display:flex;align-items:center;gap:8px;margin-top:14px}
+.cal-foot-spacer{flex:1}
+.cal-done{background:linear-gradient(135deg,var(--hdr-a,var(--gold)),var(--hdr-b,var(--gold2)));color:#fff;border-color:transparent;font-weight:900}
+/* App Store / Google Play badges — Web only. */
+.acc-stores{margin-top:6px;text-align:center}
+.acc-stores[hidden]{display:none}
+.acc-stores-title{font-size:12.5px;font-weight:800;color:var(--sub2);margin-bottom:10px}
+.acc-stores-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.store-badge{display:inline-flex;align-items:center;gap:9px;min-width:170px;padding:9px 16px;border-radius:12px;background:#111;color:#fff;border:1px solid rgba(255,255,255,.18);text-decoration:none;font-family:'Manrope',sans-serif;transition:transform .1s,opacity .16s}
+:root:not([data-theme="dark"]) .store-badge{background:#000}
+.store-badge:active{transform:scale(.97)}
+.store-badge svg{width:26px;height:26px;flex-shrink:0}
+.store-badge .sb-txt{display:flex;flex-direction:column;line-height:1.15;text-align:left}
+.store-badge .sb-small{font-size:9.5px;font-weight:600;opacity:.9}
+.store-badge .sb-big{font-size:15px;font-weight:800;letter-spacing:.2px}
+.store-badge.soon{opacity:.55;cursor:default;pointer-events:none}
+.store-badge .sb-soon{margin-left:6px;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,.16)}
 </style>
 <!-- ЛИЧНЫЙ КАБИНЕТ -->
 <div class="acc-ov" id="account-ov" role="dialog" aria-modal="true" aria-labelledby="acc-title">
@@ -2551,7 +2594,11 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
         </label>
         <label class="acc-field">
           <span class="acc-field-lbl">День рождения</span>
-          <input type="date" id="acc-birthday" aria-label="День рождения">
+          <button type="button" class="acc-datebtn" id="acc-birthday-btn" data-loto-event-click="AccountUI.openCalendar()" aria-haspopup="dialog">
+            <span id="acc-birthday-display">Не указан</span>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </button>
+          <input type="hidden" id="acc-birthday">
         </label>
         <div class="acc-field-hint">В день рождения симулятор поздравит вас на вашем языке.</div>
         <button class="acc-btn acc-btn-soft wide" id="acc-savedata-btn" type="button" data-loto-event-click="AccountUI.saveData()">Сохранить</button>
@@ -2564,6 +2611,30 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
         <button class="acc-btn acc-btn-danger wide" id="acc-signout-btn" type="button" data-loto-event-click="AccountUI.signOut()" hidden>Выйти из аккаунта</button>
       </div>
       <div class="acc-note">PRO оплачивает только дополнительные программные функции. Loto Simulator не продаёт билеты, не принимает ставки и не гарантирует выигрыш.</div>
+      <div class="acc-stores" id="acc-stores" hidden>
+        <div class="acc-stores-title">Установить приложение</div>
+        <div class="acc-stores-btns" id="acc-stores-btns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- КАЛЕНДАРЬ ВЫБОРА ДАТЫ (день рождения) -->
+<div class="cal-ov" id="cal-ov" role="dialog" aria-modal="true" aria-label="Выбор даты">
+  <div class="cal-box">
+    <div class="cal-head">
+      <button type="button" class="cal-nav" id="cal-prev" data-loto-event-click="AccountUI.calNav(-1)" aria-label="Назад">‹</button>
+      <button type="button" class="cal-title" id="cal-title" data-loto-event-click="AccountUI.calToggleYears()" data-i18n-ignore></button>
+      <button type="button" class="cal-nav" id="cal-next" data-loto-event-click="AccountUI.calNav(1)" aria-label="Вперёд">›</button>
+    </div>
+    <div class="cal-weekdays" id="cal-weekdays" data-i18n-ignore></div>
+    <div class="cal-grid" id="cal-grid" data-i18n-ignore></div>
+    <div class="cal-yearsel" id="cal-yearsel" hidden data-i18n-ignore></div>
+    <div class="cal-foot">
+      <button type="button" class="acc-chip" data-loto-event-click="AccountUI.calClear()">Очистить</button>
+      <span class="cal-foot-spacer"></span>
+      <button type="button" class="acc-chip" data-loto-event-click="AccountUI.calClose()">Отмена</button>
+      <button type="button" class="acc-chip cal-done" data-loto-event-click="AccountUI.calDone()">Готово</button>
     </div>
   </div>
 </div>
@@ -2653,16 +2724,16 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=236c87e"></script>
-<script src="./commercial-config.js?v=236c87e"></script>
-<script src="./event-runtime.js?v=236c87e"></script>
-<script src="./auth-client.js?v=236c87e"></script>
-<script src="./native-loader.js?v=236c87e"></script>
-<script src="./i18n-catalog.js?v=236c87e"></script>
-<script src="./i18n-runtime.js?v=236c87e"></script>
-<script src="./app-runtime.js?v=236c87e"></script>
-<script src="./commercial-runtime.js?v=236c87e"></script>
-<script src="./inline-runtime-2.js?v=236c87e"></script>
+<script src="./version.js?v=e58ffa2"></script>
+<script src="./commercial-config.js?v=e58ffa2"></script>
+<script src="./event-runtime.js?v=e58ffa2"></script>
+<script src="./auth-client.js?v=e58ffa2"></script>
+<script src="./native-loader.js?v=e58ffa2"></script>
+<script src="./i18n-catalog.js?v=e58ffa2"></script>
+<script src="./i18n-runtime.js?v=e58ffa2"></script>
+<script src="./app-runtime.js?v=e58ffa2"></script>
+<script src="./commercial-runtime.js?v=e58ffa2"></script>
+<script src="./inline-runtime-2.js?v=e58ffa2"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -2809,9 +2880,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=236c87e"></script>
-<script src="./notifications-runtime.js?v=236c87e"></script>
-<script src="./pwa-runtime.js?v=236c87e"></script>
+<script src="./notification-center.js?v=e58ffa2"></script>
+<script src="./notifications-runtime.js?v=e58ffa2"></script>
+<script src="./pwa-runtime.js?v=e58ffa2"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -2822,7 +2893,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-3.js?v=236c87e"></script>
-<script src="./inline-runtime-4.js?v=236c87e"></script>
+<script src="./inline-runtime-3.js?v=e58ffa2"></script>
+<script src="./inline-runtime-4.js?v=e58ffa2"></script>
 </body>
 </html>
