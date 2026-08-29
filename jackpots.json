@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-08-29T08:07:47.888Z",
+  "updated": "2026-08-29T08:41:30.349Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,7 +12,9 @@
       "lastDrawDate": "2026-08-22",
       "expectedLastDraw": "2026-08-22",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T08:07:47.888Z",
+      "updatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceUpdatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "norsk-tipping.no"
@@ -27,7 +29,9 @@
       "lastDrawDate": "2026-08-26",
       "expectedLastDraw": "2026-08-26",
       "nextDrawDate": "2026-09-02",
-      "updatedAt": "2026-08-29T08:07:47.888Z",
+      "updatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceUpdatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "norsk-tipping.no"
@@ -42,7 +46,9 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T08:07:47.888Z",
+      "updatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceUpdatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "norsk-tipping.no"
@@ -57,7 +63,9 @@
       "lastDrawDate": "2026-08-26",
       "expectedLastDraw": "2026-08-26",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T08:07:47.888Z",
+      "updatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceUpdatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "powerball.com"
@@ -72,40 +80,40 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T08:07:47.888Z",
+      "updatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceUpdatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "megamillions.com"
     },
     "euromillions": {
-      "amount": "250",
+      "amount": "78",
       "prefix": "€",
       "sub": "MILLION",
       "cur": "EUR",
       "currency": "EUR",
-      "display": "€250 MILLION",
+      "display": "€78 MILLION",
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T08:07:47.888Z",
+      "updatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceUpdatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceNextDraw": "2026-09-01",
       "status": "fresh",
       "synced": true,
-      "source": "national-lottery.com"
+      "source": "fdj.fr"
     },
     "superenalotto": {
-      "amount": "217",
-      "prefix": "€",
-      "sub": "MILLION",
-      "cur": "EUR",
       "currency": "EUR",
-      "display": "€217 MILLION",
+      "cur": "EUR",
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T08:07:47.888Z",
-      "status": "fresh",
+      "updatedAt": "2026-08-29T08:41:30.349Z",
+      "status": "unavailable",
       "synced": true,
-      "source": "national-lottery.com"
+      "source": null
     },
     "lottomax": {
       "amount": "90",
@@ -117,7 +125,9 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T08:07:47.888Z",
+      "updatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceUpdatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "olg.ca"
@@ -132,7 +142,9 @@
       "lastDrawDate": "2026-08-27",
       "expectedLastDraw": "2026-08-27",
       "nextDrawDate": "2026-09-03",
-      "updatedAt": "2026-08-29T08:07:47.888Z",
+      "updatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceUpdatedAt": "2026-08-29T08:41:30.349Z",
+      "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "thelott.com"

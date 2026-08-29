@@ -772,17 +772,39 @@ async function fetchJackpots(){
 async function getJackpot(id){
   const j=await fetchJackpots();
   const e=j&&j.values&&j.values[id];
-  if(!e)return{status:'unavailable'};
-  /* Client freshness: when the next-draw date has passed, the amount is no longer safe
-     to label as the current NEXT jackpot. Keep the confirmed amount visible and let the
-     hero relabel it; do not collapse the card into the recurring "updating" state. */
+  if(!e)return{status:'unavailable',validForNext:false};
+  /* Client CORRECTNESS gate (items 4 & 5) — the file's own `status` is NOT trusted to
+     decide display. The stored amount is shown as the NEXT jackpot ONLY when BOTH hold:
+       (a) it is labelled for the SAME upcoming draw the client is counting down to
+           (e.nextDrawDate === the locally-computed next-draw date), AND
+       (b) it was fetched AFTER the last completed draw (sourceUpdatedAt > last-draw time).
+     This makes a fresh-LOOKING file carrying a stale amount (e.g. a pre-draw cap that
+     survived its draw) fail closed: the amount is demoted to "last confirmed" or hidden.
+     'updating' therefore never auto-shows a saved amount — it must still pass (a)+(b). */
+  let validForNext=false,updatedAfterNext=false;
+  try{
+    const l=LOTS[id];
+    if(l&&e.nextDrawDate&&e.lastDrawDate){
+      const tz=l.timeZone||Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const p=zonedParts(nextDraw(id).date,tz),pad=n=>String(n).padStart(2,'0');
+      const computedNext=`${p.year}-${pad(p.month)}-${pad(p.day)}`;
+      const fetchT=Date.parse(e.sourceUpdatedAt||e.updatedAt||j.updated||'');
+      const [hh,mm]=String(l.dl||'0:0').split(':').map(Number);
+      const li=e.lastDrawDate.split('-').map(Number),ni=e.nextDrawDate.split('-').map(Number);
+      const lastInstant=+zonedDateTimeToUtc(li[0],li[1],li[2],hh||0,mm||0,tz);
+      const nextInstant=+zonedDateTimeToUtc(ni[0],ni[1],ni[2],hh||0,mm||0,tz);
+      if(Number.isFinite(fetchT)){
+        validForNext=(e.nextDrawDate===computedNext)&&(fetchT>lastInstant)&&(e.status==='fresh'||e.status==='updating');
+        updatedAfterNext=fetchT>nextInstant;
+      }
+    }
+  }catch(_){}
+  /* Demote anything that fails the gate: keep a real amount visible as last-confirmed
+     (rollover-confirmed if it was re-fetched after the passed draw), else unavailable. */
   let status=e.status||'unavailable';
-  if(status==='fresh'&&e.nextDrawDate){
-    const nd=Date.parse(e.nextDrawDate+'T23:59:59Z'),upd=Date.parse(e.updatedAt||j.updated||'');
-    if(Number.isFinite(nd)&&Date.now()>nd+6*3600*1000)status=(Number.isFinite(upd)&&upd>nd)?'rollover-confirmed':'last-confirmed';
-  }
+  if(!validForNext)status=e.amount?(updatedAfterNext?'rollover-confirmed':'last-confirmed'):'unavailable';
   return{
-    status,amount:e.amount||null,
+    status,validForNext,amount:e.amount||null,
     txt:(e.prefix||'Ca. ')+(e.amount||''),
     sub:(e.sub||('MILLIONER '+(e.cur||'')))+(e.source?' · '+e.source:''),
     nextDrawDate:e.nextDrawDate,lastDrawDate:e.lastDrawDate,updated:j.updated,offline:j.offline===true,
@@ -808,11 +830,11 @@ async function renderHero(){
   if(my!==heroToken||myCur!==cur)return; /* защита от гонки при переключении игр */
   const potLbl=document.getElementById('hero-pot-lbl'),potEl=document.getElementById('hero-pot'),potSub=document.getElementById('hero-pot-sub');
   potLbl.textContent='Джекпот следующего тиража';
-  if(jp&&jp.amount&&(jp.status==='fresh'||jp.status==='updating')){
-    /* Official published amount for the NEXT draw. Shown for BOTH 'fresh' and 'updating':
-       'updating' means the results ARCHIVE is temporarily behind (e.g. a source that blocks
-       our fetcher), which must NEVER hide an already-published official jackpot. The
-       date/countdown come from nextDraw(cur), so last-draw and next-draw are never mixed. */
+  if(jp&&jp.amount&&jp.validForNext){
+    /* Official published amount VERIFIED for the NEXT draw (items 4 & 5): it is labelled
+       for the same upcoming draw the countdown targets AND was fetched after the last
+       completed draw. The date/countdown come from nextDraw(cur), so last-draw and
+       next-draw are never mixed, and a stale amount can never appear here. */
     potEl.textContent=jp.txt;
     potSub.textContent=jp.sub+(jp.offline?' · офлайн':'');
   }else if(jp&&(jp.status==='rollover-confirmed'||jp.status==='last-confirmed')&&jp.amount){
