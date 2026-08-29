@@ -85149,7 +85149,7 @@
         "date": "2026-08-21",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 49.3,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -85231,13 +85231,13 @@
           }
         ],
         "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results/21-08-2026"
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
       },
       {
         "date": "2026-08-18",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 37.3,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -85319,13 +85319,13 @@
           }
         ],
         "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results/18-08-2026"
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
       },
       {
         "date": "2026-08-14",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 28.3,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -85407,13 +85407,13 @@
           }
         ],
         "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results/14-08-2026"
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
       },
       {
         "date": "2026-08-11",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 17,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -85495,7 +85495,7 @@
           }
         ],
         "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results/11-08-2026"
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
       },
       {
         "date": "2026-08-07",

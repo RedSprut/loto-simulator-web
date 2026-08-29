@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-08-29T13:30:00.544Z",
+  "updated": "2026-08-29T13:38:25.163Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-08-22",
       "expectedLastDraw": "2026-08-22",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T13:30:00.544Z",
-      "sourceUpdatedAt": "2026-08-29T13:30:00.544Z",
+      "updatedAt": "2026-08-29T13:38:25.163Z",
+      "sourceUpdatedAt": "2026-08-29T13:38:25.163Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -29,8 +29,8 @@
       "lastDrawDate": "2026-08-26",
       "expectedLastDraw": "2026-08-26",
       "nextDrawDate": "2026-09-02",
-      "updatedAt": "2026-08-29T13:30:00.544Z",
-      "sourceUpdatedAt": "2026-08-29T13:30:00.544Z",
+      "updatedAt": "2026-08-29T13:38:25.163Z",
+      "sourceUpdatedAt": "2026-08-29T13:38:25.163Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -46,8 +46,8 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T13:30:00.544Z",
-      "sourceUpdatedAt": "2026-08-29T13:30:00.544Z",
+      "updatedAt": "2026-08-29T13:38:25.163Z",
+      "sourceUpdatedAt": "2026-08-29T13:38:25.163Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -63,8 +63,8 @@
       "lastDrawDate": "2026-08-26",
       "expectedLastDraw": "2026-08-26",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T13:30:00.544Z",
-      "sourceUpdatedAt": "2026-08-29T13:30:00.544Z",
+      "updatedAt": "2026-08-29T13:38:25.163Z",
+      "sourceUpdatedAt": "2026-08-29T13:38:25.163Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -80,8 +80,8 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T13:30:00.544Z",
-      "sourceUpdatedAt": "2026-08-29T13:30:00.544Z",
+      "updatedAt": "2026-08-29T13:38:25.163Z",
+      "sourceUpdatedAt": "2026-08-29T13:38:25.163Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -97,8 +97,8 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T13:30:00.544Z",
-      "sourceUpdatedAt": "2026-08-29T13:30:00.544Z",
+      "updatedAt": "2026-08-29T13:38:25.163Z",
+      "sourceUpdatedAt": "2026-08-29T13:38:25.163Z",
       "sourceNextDraw": "2026-09-01",
       "status": "fresh",
       "synced": true,
@@ -114,73 +114,19 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T13:30:00.544Z",
-      "sourceUpdatedAt": "2026-08-29T13:30:00.544Z",
+      "updatedAt": "2026-08-29T13:38:25.163Z",
+      "sourceUpdatedAt": "2026-08-29T13:38:25.163Z",
       "sourceNextDraw": "2026-08-29",
       "status": "fresh",
       "synced": true,
-      "source": "official backend",
-      "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-08-28&next=2026-08-29",
+      "source": "superenalotto.it risultati",
+      "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-28-agosto-2026",
       "extractedText": "jackpot sale fino a quota&nbsp;&lt;b>216,8 milioni di euro",
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-28-agosto-2026",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "superenalotto.it",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "superenalotto.it estrazioni",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/estrazioni",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "superenalotto.it archivio estrazioni",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/archivio-estrazioni/2026/agosto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "superenalotto.it bollettini ufficiali",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/archivio-estrazioni/bollettini",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "superenalotto.it news",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/news/risultati",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it ultima estrazione",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/superenalotto/ultima-estrazione",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it estrazioni",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/estrazioni/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it news",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/news/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "official backend",
           "ok": true,
-          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-08-28&next=2026-08-29"
+          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-28-agosto-2026"
         }
       ]
     },
@@ -194,8 +140,8 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T13:30:00.544Z",
-      "sourceUpdatedAt": "2026-08-29T13:30:00.544Z",
+      "updatedAt": "2026-08-29T13:38:25.163Z",
+      "sourceUpdatedAt": "2026-08-29T13:38:25.163Z",
       "sourceNextDraw": "2026-09-01",
       "status": "fresh",
       "synced": true,
@@ -224,8 +170,8 @@
       "lastDrawDate": "2026-08-27",
       "expectedLastDraw": "2026-08-27",
       "nextDrawDate": "2026-09-03",
-      "updatedAt": "2026-08-29T13:30:00.544Z",
-      "sourceUpdatedAt": "2026-08-29T13:30:00.544Z",
+      "updatedAt": "2026-08-29T13:38:25.163Z",
+      "sourceUpdatedAt": "2026-08-29T13:38:25.163Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
