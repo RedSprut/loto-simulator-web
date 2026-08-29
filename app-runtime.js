@@ -808,9 +808,11 @@ async function renderHero(){
   if(my!==heroToken||myCur!==cur)return; /* защита от гонки при переключении игр */
   const potLbl=document.getElementById('hero-pot-lbl'),potEl=document.getElementById('hero-pot'),potSub=document.getElementById('hero-pot-sub');
   potLbl.textContent='Джекпот следующего тиража';
-  if(jp&&jp.status==='fresh'&&jp.amount){
-    /* Actual published amount for the NEXT draw. The date/countdown next to it come
-       from nextDraw(cur), so last-draw and next-draw are never mixed. */
+  if(jp&&jp.amount&&(jp.status==='fresh'||jp.status==='updating')){
+    /* Official published amount for the NEXT draw. Shown for BOTH 'fresh' and 'updating':
+       'updating' means the results ARCHIVE is temporarily behind (e.g. a source that blocks
+       our fetcher), which must NEVER hide an already-published official jackpot. The
+       date/countdown come from nextDraw(cur), so last-draw and next-draw are never mixed. */
     potEl.textContent=jp.txt;
     potSub.textContent=jp.sub+(jp.offline?' · офлайн':'');
   }else if(jp&&(jp.status==='rollover-confirmed'||jp.status==='last-confirmed')&&jp.amount){
@@ -821,10 +823,11 @@ async function renderHero(){
     potEl.textContent=jp.txt;
     potSub.textContent='ожидается новая официальная сумма'+(jp.sub?' · '+jp.sub:'')+(jp.offline?' · офлайн':'');
   }else{
-    /* Source does not currently provide a confirmed amount. Odds are NOT a jackpot,
-       so they are not substituted here. */
+    /* No official amount available yet (operator has not published, or the source is down).
+       An honest, localized "awaiting official update" — never a permanent dash caused by a
+       stale loader. Odds are NOT a jackpot, so they are not substituted here. */
     potEl.textContent='—';
-    potSub.textContent='сумма пока недоступна';
+    potSub.textContent='ожидается официальное обновление';
   }
 }
 

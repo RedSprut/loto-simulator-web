@@ -467,6 +467,18 @@ export const DRUM_STRINGS = {
     pt: 'Limite de linhas atingido: {{0}}', pl: 'Osiągnięto limit wierszy: {{0}}', nl: 'Rijlimiet bereikt: {{0}}', et: 'Ridade limiit täis: {{0}}', lv: 'Sasniegts rindu limits: {{0}}', lt: 'Pasiektas eilučių limitas: {{0}}',
     uk: 'Досягнуто ліміту рядків: {{0}}',
   },
+  'bulk.allPresent': {
+    ru: 'Все выбранные комбинации уже на главном экране', en: 'All selected combinations are already on the home screen', no: 'Alle valgte kombinasjoner er allerede på hovedskjermen', sv: 'Alla valda kombinationer finns redan på startskärmen', da: 'Alle valgte kombinationer er allerede på startskærmen',
+    fi: 'Kaikki valitut yhdistelmät ovat jo aloitusnäytöllä', de: 'Alle ausgewählten Kombinationen sind bereits auf dem Startbildschirm', fr: 'Toutes les combinaisons sélectionnées sont déjà sur l’écran principal', es: 'Todas las combinaciones seleccionadas ya están en la pantalla principal', it: 'Tutte le combinazioni selezionate sono già nella schermata principale',
+    pt: 'Todas as combinações selecionadas já estão no ecrã principal', pl: 'Wszystkie wybrane kombinacje są już na ekranie głównym', nl: 'Alle geselecteerde combinaties staan al op het startscherm', et: 'Kõik valitud kombinatsioonid on juba avakuval', lv: 'Visas atlasītās kombinācijas jau ir sākuma ekrānā', lt: 'Visi pasirinkti deriniai jau yra pagrindiniame ekrane',
+    uk: 'Усі вибрані комбінації вже на головному екрані',
+  },
+  'bulk.mixed': {
+    ru: 'Добавлено: {{0}}, уже были: {{1}}', en: 'Added: {{0}}, already present: {{1}}', no: 'Lagt til: {{0}}, allerede til stede: {{1}}', sv: 'Tillagda: {{0}}, redan där: {{1}}', da: 'Tilføjet: {{0}}, allerede der: {{1}}',
+    fi: 'Lisätty: {{0}}, jo mukana: {{1}}', de: 'Hinzugefügt: {{0}}, bereits vorhanden: {{1}}', fr: 'Ajoutées : {{0}}, déjà présentes : {{1}}', es: 'Añadidas: {{0}}, ya presentes: {{1}}', it: 'Aggiunte: {{0}}, già presenti: {{1}}',
+    pt: 'Adicionadas: {{0}}, já presentes: {{1}}', pl: 'Dodano: {{0}}, już były: {{1}}', nl: 'Toegevoegd: {{0}}, al aanwezig: {{1}}', et: 'Lisatud: {{0}}, juba olemas: {{1}}', lv: 'Pievienotas: {{0}}, jau bija: {{1}}', lt: 'Pridėta: {{0}}, jau buvo: {{1}}',
+    uk: 'Додано: {{0}}, уже були: {{1}}',
+  },
 
   // ── Free-limit / PRO ─────────────────────────────────────────────────────
   'limit.title': {

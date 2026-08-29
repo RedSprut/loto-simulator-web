@@ -209,16 +209,21 @@
     try { if (appLot && appLot !== currentAppId()) selLot(appLot); } catch (e) {}
     closeDrum3D();                                          // back to the Simulator main screen
     try { clearGroupAnalysisState(); } catch (e) {}
-    var applied = 0, capped = false;
+    var applied = 0, already = 0, capped = false;
     for (var i = 0; i < (combos || []).length; i++) {
       var r = drumApplyToTopRows(combos[i], true);
       if (r === 'added') applied++;
+      else if (r === 'dup') already++;                 // already on the main screen — not a duplicate row
       else if (r === 'full') { capped = true; break; }
     }
     try { goToRows(); } catch (e) {}
     try { resetBanner(); } catch (e) {}
+    // Honest feedback: distinguish newly-added from already-present so the bulk button
+    // is never a silent no-op after the per-save auto-apply already placed some rows.
     try {
       if (capped) showFeedback(String(labels.limitTpl || '%N%').replace('%N%', MAX_ROWS), '', '⚠️', 3400);
+      else if (applied > 0 && already > 0) showFeedback(String(labels.mixedTpl || 'Добавлено %A%, уже были %B%').replace('%A%', applied).replace('%B%', already), '', '✅', 3000);
+      else if (applied === 0 && already > 0) showFeedback(String(labels.allPresentTpl || 'Все выбранные комбинации уже на главном экране'), '', 'ℹ️', 3000);
       else showFeedback(String(labels.addedTpl || '%N%').replace('%N%', applied), '', '✅', 2600);
     } catch (e) {}
   }

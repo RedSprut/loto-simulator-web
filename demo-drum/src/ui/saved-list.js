@@ -213,7 +213,10 @@ export class SavedList {
     // Pre-localized templates with a %N% placeholder the host fills with the ACTUAL
     // applied count (the host owns the real row cap), so feedback stays in the user's
     // language without the host needing the drum's i18n.
-    this.onBulkApply(lotteryId, combos, { addedTpl: t('bulk.added', '%N%'), limitTpl: t('bulk.rowLimit', '%N%') });
+    this.onBulkApply(lotteryId, combos, {
+      addedTpl: t('bulk.added', '%N%'), limitTpl: t('bulk.rowLimit', '%N%'),
+      allPresentTpl: t('bulk.allPresent'), mixedTpl: t('bulk.mixed', '%A%', '%B%'),
+    });
     this._clearSelection();
     this._close(); // panel + host handle switching to the Simulator screen
   }
