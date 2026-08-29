@@ -45,15 +45,41 @@
       const rm=$('acc-avatar-remove');if(rm)rm.hidden=true;
     }
   }
-  let loadedUid=null;
+  let loadedUid=null,profileCache=null;
+  function applyProfile(p){
+    profileCache=p||null;
+    setAvatar(p&&p.avatarUrl||null);
+    const name=(p&&p.displayName||'').trim();
+    const nameEl=$('acc-name');if(nameEl){nameEl.textContent=name;nameEl.hidden=!name;}
+    const dn=$('acc-displayname');if(dn&&document.activeElement!==dn)dn.value=name;
+    const bd=$('acc-birthday');if(bd&&document.activeElement!==bd)bd.value=(p&&p.birthday||'').slice(0,10);
+    maybeGreetBirthday(p);
+  }
   async function loadAvatar(force){
     const {user,confirmed}=accountState();
     const uid=confirmed?user.id:null;
-    if(!uid){loadedUid=null;setAvatar(null);return;}
-    if(!force&&uid===loadedUid)return; // avatar already loaded for this account
+    if(!uid){loadedUid=null;profileCache=null;setAvatar(null);const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}return;}
+    if(!force&&uid===loadedUid)return; // profile already loaded for this account
     loadedUid=uid;
-    try{const p=await (window.LotoAuth&&window.LotoAuth.getProfile&&window.LotoAuth.getProfile());setAvatar(p&&p.avatarUrl||null);}
-    catch(_e){loadedUid=null;}
+    try{const p=await (window.LotoAuth&&window.LotoAuth.getProfile&&window.LotoAuth.getProfile());applyProfile(p);
+      // Persist the current UI locale so a future birthday greeting can be in the right language.
+      try{const loc=document.documentElement.lang||'ru';if(p&&p.locale!==loc)window.LotoAuth.updateProfile({locale:loc}).catch(()=>{});}catch(_e2){}
+    }catch(_e){loadedUid=null;}
+  }
+  // In-app birthday greeting: when the signed-in user's birthday (month+day) is today, show a
+  // localized congratulation once per day. Fully client-side — no push infrastructure touched.
+  function maybeGreetBirthday(p){
+    try{
+      const b=p&&p.birthday;if(!b)return;
+      const now=new Date(),mm=String(now.getMonth()+1).padStart(2,'0'),dd=String(now.getDate()).padStart(2,'0');
+      if(b.slice(5,10)!==`${mm}-${dd}`)return;
+      const key='loto_bday_greeted_'+now.getFullYear();
+      if(localStorage.getItem(key))return;
+      localStorage.setItem(key,'1');
+      // Fixed, fully-localizable strings (no name interpolation, so the i18n observer
+      // translates them to the user's language).
+      if(typeof showFeedback==='function')showFeedback('С днём рождения! 🎂','Пусть сегодня удача будет на вашей стороне! 🎉','🎉',7000);
+    }catch(_e){}
   }
   function msg(elId,text,kind){
     const n=$(elId);if(!n)return;
@@ -119,7 +145,8 @@
     if($('acc-restore-btn'))$('acc-restore-btn').hidden=!(confirmed&&isNative());
     if($('acc-signout-btn'))$('acc-signout-btn').hidden=!confirmed;
     if($('acc-avatar-actions'))$('acc-avatar-actions').hidden=!confirmed;
-    if(!confirmed)setAvatar(null);
+    if($('acc-mydata'))$('acc-mydata').hidden=!confirmed;
+    if(!confirmed){setAvatar(null);const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}}
   }
 
   function avatarError(err){
@@ -164,7 +191,21 @@
     },
     async manage(){try{await window.LotoCommercial.accountPortal();}catch(_e){}},
     async restore(){try{await window.LotoCommercial.restorePurchase();}catch(_e){}},
-    async signOut(){try{await window.LotoCommercial.signOut();setAvatar(null);msg('acc-auth-msg','',null);msg('acc-avatar-msg','',null);render();}catch(_e){}},
+    async saveData(){
+      const name=(($('acc-displayname')||{}).value||'').trim().slice(0,60);
+      const birthday=(($('acc-birthday')||{}).value||'').trim();
+      const btn=$('acc-savedata-btn');if(btn)btn.disabled=true;
+      msg('acc-data-msg','Сохраняем…','info');
+      try{
+        const info=await window.LotoAuth.updateProfile({displayName:name||null,birthday:birthday||null,locale:document.documentElement.lang||'ru'});
+        applyProfile(info);
+        msg('acc-data-msg','Данные сохранены.','success');
+      }catch(err){
+        const c=String((err&&err.message)||err||'');
+        msg('acc-data-msg',/invalid_birthday/.test(c)?'Проверьте дату рождения.':/account_required/.test(c)?'Войдите в аккаунт, чтобы сохранить данные.':'Не удалось сохранить. Попробуйте ещё раз.','error');
+      }finally{if(btn)btn.disabled=false;}
+    },
+    async signOut(){try{await window.LotoCommercial.signOut();setAvatar(null);profileCache=null;const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}msg('acc-auth-msg','',null);msg('acc-avatar-msg','',null);msg('acc-data-msg','',null);render();}catch(_e){}},
   };
   window.AccountUI=AccountUI;
 

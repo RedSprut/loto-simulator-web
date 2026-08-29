@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="ef0ae7a" data-build-ts="2026-08-29T14:55:17.862Z">
+<html lang="ru" data-build="7cf8c47" data-build-ts="2026-08-29T18:14:34.859Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=ef0ae7a"></script>
+<script src="./boot-runtime.js?v=7cf8c47"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -2401,18 +2401,23 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 .acc-ov.show{opacity:1;pointer-events:all}
 .acc-screen{position:absolute;inset:0;display:flex;flex-direction:column;transform:translateY(14px);transition:transform .26s cubic-bezier(.34,1.2,.5,1)}
 .acc-ov.show .acc-screen{transform:translateY(0)}
-.acc-topbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 14px 12px;background:linear-gradient(180deg,var(--bg2),color-mix(in srgb,var(--bg2) 86%,transparent));border-bottom:1px solid var(--border);box-shadow:0 4px 18px rgba(0,0,0,.08)}
-.acc-back{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font-size:24px;line-height:1;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .16s,transform .1s}
+/* Topbar takes the ACTIVE lottery's colours (same gradient the app header uses), so the
+   cabinet matches whatever game the user plays (e.g. red for Norsk Lotto). */
+.acc-topbar{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top)) 14px 12px;color:#F9F2E7;background:
+  radial-gradient(130% 200% at 50% -80%,rgba(255,255,255,.16) 0,transparent 52%),
+  linear-gradient(100deg,var(--hdr-a,var(--gold)) 0%,var(--hdr-b,var(--gold2)) 52%,var(--hdr-c,var(--gold)) 100%);
+  border-bottom:1px solid rgba(255,255,255,.18);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.acc-back{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.14);color:#F9F2E7;font-size:24px;line-height:1;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:background .16s,transform .1s}
 .acc-back:active{transform:scale(.93)}
-.acc-back:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.acc-topbar-title{flex:1;min-width:0;font-family:'Unbounded',sans-serif;font-size:16px;font-weight:900;color:var(--fg);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acc-back:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.acc-topbar-title{flex:1;min-width:0;font-family:'Unbounded',sans-serif;font-size:16px;font-weight:900;color:#F9F2E7;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-shadow:0 2px 8px rgba(0,0,0,.3)}
 .acc-topbar-spacer{width:40px;flex-shrink:0}
 .acc-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:20px 16px calc(30px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:16px;width:100%;max-width:620px;margin:0 auto}
 
 .acc-hero{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:8px 4px 4px}
-.acc-avatar-wrap{position:relative;width:112px;height:112px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 12px 34px rgba(0,0,0,.18),inset 0 0 0 3px color-mix(in srgb,var(--gold) 28%,transparent)}
+.acc-avatar-wrap{position:relative;width:112px;height:112px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 12px 34px var(--game-glow,rgba(0,0,0,.18)),inset 0 0 0 3px color-mix(in srgb,var(--hdr-a,var(--gold)) 45%,transparent)}
 .acc-avatar{width:100%;height:100%;object-fit:cover;display:block}
-.acc-avatar-fallback svg{width:60px;height:60px;color:color-mix(in srgb,var(--gold) 70%,var(--sub))}
+.acc-avatar-fallback svg{width:60px;height:60px;color:color-mix(in srgb,var(--hdr-a,var(--gold)) 62%,var(--sub))}
 .acc-avatar-busy{position:absolute;inset:0;background:rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center}
 .acc-avatar-busy::after{content:'';width:30px;height:30px;border-radius:50%;border:3px solid rgba(255,255,255,.35);border-top-color:#fff;animation:acc-spin .8s linear infinite}
 .acc-avatar-busy[hidden]{display:none}
@@ -2422,7 +2427,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 .acc-avatar-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:2px}
 .acc-avatar-actions[hidden]{display:none}
 .acc-chip{font:800 12.5px 'Manrope',sans-serif;color:var(--fg);background:var(--bg3);border:1.5px solid var(--border);border-radius:999px;padding:9px 16px;min-height:40px;cursor:pointer;transition:border-color .16s,background .16s,transform .1s}
-.acc-chip:hover{border-color:var(--gold)}
+.acc-chip:hover{border-color:var(--hdr-a,var(--gold))}
 .acc-chip:active{transform:scale(.96)}
 .acc-chip.danger{color:#c0392b;border-color:color-mix(in srgb,#c0392b 40%,var(--border))}
 :root:not([data-theme="light"]) .acc-chip.danger{color:#ff8a8a}
@@ -2431,11 +2436,19 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 .acc-chip:disabled{opacity:.5;cursor:default}
 
 .acc-card{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:18px;box-shadow:var(--card-shadow)}
+.acc-plan{border-left:4px solid var(--hdr-a,var(--gold))}
 .acc-card-title{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:900;color:var(--fg);margin-bottom:6px}
 .acc-card-sub{font-size:13px;line-height:1.5;color:var(--sub2);margin-bottom:12px}
+.acc-field{display:block;margin-bottom:12px}
+.acc-field-lbl{display:block;font-size:12.5px;font-weight:700;color:var(--sub2);margin-bottom:6px}
+.acc-field input{width:100%;padding:12px 14px;border-radius:13px;border:1.5px solid var(--border);background:var(--bg3);color:var(--fg);font-size:15px;font-family:'Manrope',sans-serif}
+.acc-field input:focus{outline:none;border-color:var(--hdr-a,var(--gold))}
+.acc-field-hint{font-size:11.5px;line-height:1.5;color:var(--sub);margin:2px 0 12px}
+.acc-hero-name{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:900;color:var(--fg);line-height:1.25}
+.acc-hero-name[hidden]{display:none}
 .acc-auth-row{display:flex;gap:8px;flex-wrap:wrap}
 .acc-auth-row input{flex:1;min-width:150px;padding:13px 14px;border-radius:13px;border:1.5px solid var(--border);background:var(--bg3);color:var(--fg);font-size:15px;font-family:'Manrope',sans-serif}
-.acc-auth-row input:focus{outline:none;border-color:var(--gold)}
+.acc-auth-row input:focus{outline:none;border-color:var(--hdr-a,var(--gold))}
 .acc-plan-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .acc-plan-badge{font:900 12px 'Manrope',sans-serif;letter-spacing:.5px;padding:5px 12px;border-radius:999px;background:var(--bg3);color:var(--sub2);border:1.5px solid var(--border)}
 .acc-plan-badge.pro{background:linear-gradient(135deg,#F5CE7B,#B8860B);color:#231204;border-color:transparent;box-shadow:0 4px 14px rgba(184,134,11,.34)}
@@ -2474,6 +2487,10 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 [data-theme="dark"] .acc-msg[data-kind="error"]{color:#ff9a9a}
 .acc-note{font-size:11.5px;line-height:1.5;color:var(--sub);text-align:center;padding:4px 8px}
 @media (min-width:700px){.acc-avatar-wrap{width:128px;height:128px}.acc-scroll{padding-top:26px;gap:18px}}
+/* MOBILE ONLY (phones + Capacitor iOS/Android + mobile browsers, ≤699px): the profile icon
+   was added to the header, leaving no room for the "fill at least N rows" title — hide it on
+   phones. Desktop and tablets (≥700px) keep it. */
+@media (max-width:699px){#main-hdr .hdr-title{display:none}}
 </style>
 <!-- ЛИЧНЫЙ КАБИНЕТ -->
 <div class="acc-ov" id="account-ov" role="dialog" aria-modal="true" aria-labelledby="acc-title">
@@ -2490,6 +2507,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
           <span class="acc-avatar-fallback" id="acc-avatar-fallback" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 20c.9-4 3.9-6.2 7.5-6.2S18.6 16 19.5 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
           <span class="acc-avatar-busy" id="acc-avatar-busy" hidden aria-hidden="true"></span>
         </div>
+        <div class="acc-hero-name" id="acc-name" data-i18n-ignore hidden></div>
         <div class="acc-hero-email" id="acc-email" data-i18n-ignore>—</div>
         <div class="acc-hero-status" id="acc-status"></div>
         <div class="acc-avatar-actions" id="acc-avatar-actions" hidden>
@@ -2523,6 +2541,21 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
           <div class="acc-row" id="acc-row-renew" hidden><dt>Продление</dt><dd id="acc-r-renew">—</dd></div>
           <div class="acc-row" id="acc-row-source" hidden><dt>Источник доступа</dt><dd id="acc-r-source">—</dd></div>
         </dl>
+      </div>
+
+      <div class="acc-card acc-mydata" id="acc-mydata" hidden>
+        <div class="acc-card-title">Мои данные</div>
+        <label class="acc-field">
+          <span class="acc-field-lbl">Имя в профиле</span>
+          <input type="text" id="acc-displayname" maxlength="60" autocomplete="name" placeholder="Как к вам обращаться" aria-label="Имя в профиле">
+        </label>
+        <label class="acc-field">
+          <span class="acc-field-lbl">День рождения</span>
+          <input type="date" id="acc-birthday" aria-label="День рождения">
+        </label>
+        <div class="acc-field-hint">В день рождения симулятор поздравит вас на вашем языке.</div>
+        <button class="acc-btn acc-btn-soft wide" id="acc-savedata-btn" type="button" data-loto-event-click="AccountUI.saveData()">Сохранить</button>
+        <div class="acc-msg" id="acc-data-msg" aria-live="polite" hidden></div>
       </div>
 
       <div class="acc-actions">
@@ -2620,16 +2653,16 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=ef0ae7a"></script>
-<script src="./commercial-config.js?v=ef0ae7a"></script>
-<script src="./event-runtime.js?v=ef0ae7a"></script>
-<script src="./auth-client.js?v=ef0ae7a"></script>
-<script src="./native-loader.js?v=ef0ae7a"></script>
-<script src="./i18n-catalog.js?v=ef0ae7a"></script>
-<script src="./i18n-runtime.js?v=ef0ae7a"></script>
-<script src="./app-runtime.js?v=ef0ae7a"></script>
-<script src="./commercial-runtime.js?v=ef0ae7a"></script>
-<script src="./inline-runtime-2.js?v=ef0ae7a"></script>
+<script src="./version.js?v=7cf8c47"></script>
+<script src="./commercial-config.js?v=7cf8c47"></script>
+<script src="./event-runtime.js?v=7cf8c47"></script>
+<script src="./auth-client.js?v=7cf8c47"></script>
+<script src="./native-loader.js?v=7cf8c47"></script>
+<script src="./i18n-catalog.js?v=7cf8c47"></script>
+<script src="./i18n-runtime.js?v=7cf8c47"></script>
+<script src="./app-runtime.js?v=7cf8c47"></script>
+<script src="./commercial-runtime.js?v=7cf8c47"></script>
+<script src="./inline-runtime-2.js?v=7cf8c47"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -2776,9 +2809,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=ef0ae7a"></script>
-<script src="./notifications-runtime.js?v=ef0ae7a"></script>
-<script src="./pwa-runtime.js?v=ef0ae7a"></script>
+<script src="./notification-center.js?v=7cf8c47"></script>
+<script src="./notifications-runtime.js?v=7cf8c47"></script>
+<script src="./pwa-runtime.js?v=7cf8c47"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -2789,7 +2822,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-3.js?v=ef0ae7a"></script>
-<script src="./inline-runtime-4.js?v=ef0ae7a"></script>
+<script src="./inline-runtime-3.js?v=7cf8c47"></script>
+<script src="./inline-runtime-4.js?v=7cf8c47"></script>
 </body>
 </html>
