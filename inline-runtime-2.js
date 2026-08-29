@@ -226,8 +226,20 @@
 
   function wire(){
     const f=$('acc-avatar-file');if(f&&!f.__wired){f.__wired=1;f.addEventListener('change',e=>AccountUI.onFile(e));}
-    // Requirement 6: immediately reflect a fresh Magic-Link login / entitlement change.
-    window.addEventListener('loto:accesschange',()=>{render();loadAvatar();});
+    // Immediately reflect a fresh Magic-Link login / entitlement change, and open the cabinet
+    // straight after a successful sign-in (not the home screen).
+    window.addEventListener('loto:accesschange',()=>{
+      render();loadAvatar();
+      try{
+        const am=window.LotoCommercial&&window.LotoCommercial.authMessage;
+        const st=accountState();
+        if(am&&am.justConfirmed&&st.confirmed&&!window.__accAutoOpened){
+          window.__accAutoOpened=true;
+          const ov=document.getElementById('account-ov');
+          if(ov&&!ov.classList.contains('show'))window.openAccount();
+        }
+      }catch(_e){}
+    });
     // Re-render on language switch so the localized dates follow the new locale.
     window.addEventListener('loto:languagechange',()=>render());
     render();
