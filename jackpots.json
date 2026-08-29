@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-08-29T08:59:49.873Z",
+  "updated": "2026-08-29T10:24:10.183Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-08-22",
       "expectedLastDraw": "2026-08-22",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T08:59:49.873Z",
-      "sourceUpdatedAt": "2026-08-29T08:59:49.873Z",
+      "updatedAt": "2026-08-29T10:24:10.183Z",
+      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -29,8 +29,8 @@
       "lastDrawDate": "2026-08-26",
       "expectedLastDraw": "2026-08-26",
       "nextDrawDate": "2026-09-02",
-      "updatedAt": "2026-08-29T08:59:49.873Z",
-      "sourceUpdatedAt": "2026-08-29T08:59:49.873Z",
+      "updatedAt": "2026-08-29T10:24:10.183Z",
+      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -46,8 +46,8 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T08:59:49.873Z",
-      "sourceUpdatedAt": "2026-08-29T08:59:49.873Z",
+      "updatedAt": "2026-08-29T10:24:10.183Z",
+      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -63,8 +63,8 @@
       "lastDrawDate": "2026-08-26",
       "expectedLastDraw": "2026-08-26",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T08:59:49.873Z",
-      "sourceUpdatedAt": "2026-08-29T08:59:49.873Z",
+      "updatedAt": "2026-08-29T10:24:10.183Z",
+      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -80,8 +80,8 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T08:59:49.873Z",
-      "sourceUpdatedAt": "2026-08-29T08:59:49.873Z",
+      "updatedAt": "2026-08-29T10:24:10.183Z",
+      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -97,34 +97,99 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T08:59:49.873Z",
-      "sourceUpdatedAt": "2026-08-29T08:59:49.873Z",
+      "updatedAt": "2026-08-29T10:24:10.183Z",
+      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
       "sourceNextDraw": "2026-09-01",
       "status": "fresh",
       "synced": true,
       "source": "fdj.fr"
     },
     "superenalotto": {
-      "currency": "EUR",
+      "amount": "216.8",
+      "prefix": "€",
+      "sub": "MILLION",
       "cur": "EUR",
+      "currency": "EUR",
+      "display": "€216.8 MILLION",
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T08:59:49.873Z",
-      "status": "unavailable",
+      "updatedAt": "2026-08-29T10:24:10.183Z",
+      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
+      "sourceNextDraw": "2026-08-29",
+      "status": "fresh",
       "synced": true,
-      "source": null
+      "source": "superenalotto.it risultati",
+      "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-28-agosto-2026",
+      "sourceAttempts": [
+        {
+          "source": "superenalotto.it",
+          "ok": false,
+          "error": "HTTP 403"
+        },
+        {
+          "source": "superenalotto.it estrazioni",
+          "ok": false,
+          "error": "HTTP 403"
+        },
+        {
+          "source": "superenalotto.it risultati",
+          "ok": false,
+          "error": "HTTP 403"
+        },
+        {
+          "source": "superenalotto.it news",
+          "ok": false,
+          "error": "HTTP 403"
+        },
+        {
+          "source": "sisal.it ultima estrazione",
+          "ok": false,
+          "error": "HTTP 403"
+        },
+        {
+          "source": "sisal.it estrazioni",
+          "ok": false,
+          "error": "HTTP 403"
+        },
+        {
+          "source": "sisal.it news",
+          "ok": false,
+          "error": "HTTP 403"
+        },
+        {
+          "source": "superenalotto.it risultati",
+          "ok": true,
+          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-28-agosto-2026"
+        }
+      ]
     },
     "lottomax": {
-      "currency": "CAD",
+      "amount": "15",
+      "prefix": "$",
+      "sub": "MILLION CAD",
       "cur": "CAD",
+      "currency": "CAD",
+      "display": "$15 MILLION CAD",
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T08:59:49.873Z",
-      "status": "unavailable",
+      "updatedAt": "2026-08-29T10:24:10.183Z",
+      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
+      "sourceNextDraw": "2026-09-01",
+      "status": "fresh",
       "synced": true,
-      "source": null
+      "source": "wclc.com",
+      "sourceAttempts": [
+        {
+          "source": "olg.ca",
+          "ok": false
+        },
+        {
+          "source": "wclc.com",
+          "ok": true
+        }
+      ]
     },
     "powerballau": {
       "amount": "20",
@@ -136,8 +201,8 @@
       "lastDrawDate": "2026-08-27",
       "expectedLastDraw": "2026-08-27",
       "nextDrawDate": "2026-09-03",
-      "updatedAt": "2026-08-29T08:59:49.873Z",
-      "sourceUpdatedAt": "2026-08-29T08:59:49.873Z",
+      "updatedAt": "2026-08-29T10:24:10.183Z",
+      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
