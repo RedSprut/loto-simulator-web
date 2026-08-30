@@ -261,6 +261,29 @@ let groupAnalysisState={active:false,limit:0,total:0};
 function hasConfirmedPro(){
   try{return window.LotoCommercial?.access?.accessLevel==='pro';}catch(e){return false;}
 }
+// Shared async-state renderer: one branded look (⏳ + lottery name) for loading, plus
+// error / offline states with Retry. Lets every data section distinguish loading from empty
+// instead of flashing an "empty" placeholder while the first fetch is still in flight.
+const LotoState={
+  _tpl(cls,ico,title,sub,retry){
+    const btn=retry?`<button type="button" class="lstate-retry" data-i18n-ignore>${escapeHtml(appText('Повторить'))}</button>`:'';
+    return `<div class="lstate ${cls}"><div class="lstate-ico" aria-hidden="true">${ico}</div>`+
+      `<div class="lstate-title" data-i18n-ignore>${escapeHtml(title)}</div>`+
+      (sub?`<div class="lstate-sub" data-i18n-ignore>${escapeHtml(sub)}</div>`:'')+btn+`</div>`;
+  },
+  loading(el,gameId){
+    if(!el)return;
+    el.innerHTML=this._tpl('load','⏳',historyText('Загрузка · {{0}}',lotteryName(gameId||cur)),appText('Собираем тиражи…'),null);
+  },
+  error(el,onRetry){
+    if(!el)return;
+    const offline=(typeof navigator!=='undefined'&&navigator.onLine===false);
+    el.innerHTML=this._tpl('err',offline?'📡':'⚠️',
+      appText(offline?'Нет соединения':'Не удалось загрузить'),
+      appText(offline?'Проверьте интернет и повторите.':'Что-то пошло не так. Попробуйте ещё раз.'),!!onRetry);
+    if(onRetry){const b=el.querySelector('.lstate-retry');if(b)b.addEventListener('click',()=>onRetry());}
+  },
+};
 function groupAnalysisFreeLimit(){
   try{return Number(window.LotoCommercial?.access?.freeLimits?.groupAnalysisRows||window.LotoCommercial?.freeGroupAnalysisRows||3)||3;}catch(e){return 3;}
 }
@@ -2419,6 +2442,15 @@ function canDeleteItem(item){
   return item.isUserOwned===true||!String(item.source||'').trim(); // only user-owned entries, including legacy local rows
 }
 async function renderHistory(){
+  const c0=document.getElementById('hist-list');
+  const firstPaint=c0&&!c0.querySelector('.hist-item');
+  // Branded loading on first paint; a real fetch failure now shows an error/offline state
+  // with Retry instead of a misleading "no draws" empty. Cached loads (warm archive) skip
+  // straight through with no flicker.
+  try{
+    if(firstPaint&&!resultsArchiveJsonCache)LotoState.loading(c0,cur);
+    await fetchResultsJson(RESULTS_ARCHIVE_URL);
+  }catch(_err){ if(c0)LotoState.error(c0,()=>renderHistory()); return; }
   const l=L(),pack=await loadFullHistory(cur),draws=pack.draws,eras=pack.eras;
   document.getElementById('hist-title').textContent=historyText('История ({{0}} всего · {{1}} по текущим правилам)',draws.length,pack.currentCount);
   const summary=document.getElementById('hist-rule-summary');

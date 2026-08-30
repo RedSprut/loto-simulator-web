@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="fc8e05b" data-build-ts="2026-08-30T12:11:00.068Z">
+<html lang="ru" data-build="384ee16" data-build-ts="2026-08-30T12:37:12.263Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=fc8e05b"></script>
+<script src="./boot-runtime.js?v=384ee16"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1463,7 +1463,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 }
 </style>
 </head>
-<body>
+<body class="access-pending">
 
 <!-- Анимированный splash-прелоадер: три шара логотипа (8·18·3) вылетают с краёв и
      сходятся в центр. Показан поверх всего до готовности приложения, затем полностью
@@ -2586,6 +2586,20 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 .aved-busy.on{display:flex}
 .aved-busy::after{content:"";width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:var(--hdr-a,var(--gold));animation:aved-spin .8s linear infinite}
 @keyframes aved-spin{to{transform:rotate(360deg)}}
+/* Unified async states (loading · error · offline) — one branded look for every data section */
+.lstate{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:34px 18px;text-align:center;color:var(--sub2,#8b93a7)}
+.lstate-ico{font-size:34px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
+.lstate.load .lstate-ico{animation:lstate-flip 1.5s cubic-bezier(.6,.05,.4,.95) infinite}
+@keyframes lstate-flip{0%,58%{transform:rotate(0)}70%,100%{transform:rotate(180deg)}}
+.lstate-title{font-family:'Unbounded',sans-serif;font-size:13.5px;font-weight:800;color:var(--fg)}
+.lstate-sub{font-size:12.5px;max-width:270px;line-height:1.45}
+.lstate-retry{margin-top:5px;font:800 12.5px 'Manrope',sans-serif;color:var(--fg);background:var(--bg3);border:1.5px solid var(--border);border-radius:999px;padding:9px 20px;min-height:40px;cursor:pointer;transition:border-color .16s,transform .1s}
+.lstate-retry:active{transform:scale(.96)}
+.lstate-dots{display:inline-block;min-width:14px;text-align:left}
+/* No FREE-before-PRO flash: hide tier-dependent badges until the real access level resolves
+   (the initial state is a default "free" that flips to PRO once the backend responds). */
+body.access-pending .acc-plan-badge,body.access-pending #acc-r-tier,
+body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility:hidden}
 </style>
 <!-- ЛИЧНЫЙ КАБИНЕТ -->
 <div class="acc-ov" id="account-ov" role="dialog" aria-modal="true" aria-labelledby="acc-title">
@@ -2806,16 +2820,16 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=fc8e05b"></script>
-<script src="./commercial-config.js?v=fc8e05b"></script>
-<script src="./event-runtime.js?v=fc8e05b"></script>
-<script src="./auth-client.js?v=fc8e05b"></script>
-<script src="./native-loader.js?v=fc8e05b"></script>
-<script src="./i18n-catalog.js?v=fc8e05b"></script>
-<script src="./i18n-runtime.js?v=fc8e05b"></script>
-<script src="./app-runtime.js?v=fc8e05b"></script>
-<script src="./commercial-runtime.js?v=fc8e05b"></script>
-<script src="./inline-runtime-2.js?v=fc8e05b"></script>
+<script src="./version.js?v=384ee16"></script>
+<script src="./commercial-config.js?v=384ee16"></script>
+<script src="./event-runtime.js?v=384ee16"></script>
+<script src="./auth-client.js?v=384ee16"></script>
+<script src="./native-loader.js?v=384ee16"></script>
+<script src="./i18n-catalog.js?v=384ee16"></script>
+<script src="./i18n-runtime.js?v=384ee16"></script>
+<script src="./app-runtime.js?v=384ee16"></script>
+<script src="./commercial-runtime.js?v=384ee16"></script>
+<script src="./inline-runtime-2.js?v=384ee16"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -2962,9 +2976,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=fc8e05b"></script>
-<script src="./notifications-runtime.js?v=fc8e05b"></script>
-<script src="./pwa-runtime.js?v=fc8e05b"></script>
+<script src="./notification-center.js?v=384ee16"></script>
+<script src="./notifications-runtime.js?v=384ee16"></script>
+<script src="./pwa-runtime.js?v=384ee16"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -2975,7 +2989,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-3.js?v=fc8e05b"></script>
-<script src="./inline-runtime-4.js?v=fc8e05b"></script>
+<script src="./inline-runtime-3.js?v=384ee16"></script>
+<script src="./inline-runtime-4.js?v=384ee16"></script>
 </body>
 </html>
