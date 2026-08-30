@@ -2444,12 +2444,14 @@ function canDeleteItem(item){
 async function renderHistory(){
   const c0=document.getElementById('hist-list');
   const firstPaint=c0&&!c0.querySelector('.hist-item');
-  // Branded loading on first paint; a real fetch failure now shows an error/offline state
-  // with Retry instead of a misleading "no draws" empty. Cached loads (warm archive) skip
-  // straight through with no flicker.
+  // Branded loading on first paint; a real fetch failure of the PRIMARY results feed now shows
+  // an error/offline state with Retry instead of a misleading "no draws" empty. We probe
+  // results.json (the always-served recent-draws feed) — NOT the results archive, which is
+  // intentionally absent on the web build (older draws are supplementary) and must never turn
+  // history into an error. Cached loads skip straight through with no flicker.
   try{
-    if(firstPaint&&!resultsArchiveJsonCache)LotoState.loading(c0,cur);
-    await fetchResultsJson(RESULTS_ARCHIVE_URL);
+    if(firstPaint&&!resultsJsonCache)LotoState.loading(c0,cur);
+    await fetchResultsJson(RESULTS_JSON_URL);
   }catch(_err){ if(c0)LotoState.error(c0,()=>renderHistory()); return; }
   const l=L(),pack=await loadFullHistory(cur),draws=pack.draws,eras=pack.eras;
   document.getElementById('hist-title').textContent=historyText('История ({{0}} всего · {{1}} по текущим правилам)',draws.length,pack.currentCount);
