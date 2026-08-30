@@ -2,7 +2,7 @@
 // (the ca502cd placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-vca502cd';
+const CACHE_VERSION='loto-shell-auto-20260830-tkl69m';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
