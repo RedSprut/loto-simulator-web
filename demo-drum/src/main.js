@@ -226,9 +226,24 @@ async function main() {
     audio.reset(); draw.reset(); hud?.setPaused(false); hud?.setResults(draw.resultsByPool);
     warmAudio(); draw.start();
   }
+  // Stop — pause WITHOUT losing state: the unfinished draw stays paused and saved so it can be
+  // resumed later. Nothing is discarded; saved combinations / profile / account are untouched.
+  function stopDraw() {
+    saveUnfinished();
+    if (!paused) pauseDraw();
+    hud?.setPaused(true);
+  }
+  // Full reset — fully stop AND discard the unfinished draw, returning the 3D screen to its
+  // initial idle state. No new draw is started. Only the in-progress draw state is cleared;
+  // saved combinations / profile / account data are never touched.
+  function resetDraw() {
+    clearUnfinished();
+    paused = false; pausedAutomatically = false; pausedAt = 0; acc = 0;
+    audio.reset(); draw.reset(); hud?.setPaused(false); hud?.setResults(draw.resultsByPool);
+  }
   function offerResume() {
     if (!paused || !pausedAutomatically || hud?.resumePrompt) return;
-    hud?.showResumePrompt(drawnCount(), totalDrawnOf(draw.profile), resumeDraw, restartDraw);
+    hud?.showResumePrompt(drawnCount(), totalDrawnOf(draw.profile), resumeDraw, stopDraw, resetDraw);
   }
 
   const profileKey = GAME_PROFILES[params.get('profile')] ? params.get('profile') : DEFAULT_PROFILE;

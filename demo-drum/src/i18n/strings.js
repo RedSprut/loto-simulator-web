@@ -115,6 +115,14 @@ export const DRUM_STRINGS = {
     ru: 'Начать заново', en: 'Start over', no: 'Start på nytt', sv: 'Börja om', da: 'Start forfra', fi: 'Aloita alusta', de: 'Neu starten', fr: 'Recommencer', es: 'Empezar de nuevo', it: 'Ricomincia',
     pt: 'Recomeçar', pl: 'Zacznij od nowa', nl: 'Opnieuw beginnen', et: 'Alusta uuesti', lv: 'Sākt no jauna', lt: 'Pradėti iš naujo', uk: 'Почати заново',
   },
+  'resume.stop': {
+    ru: 'Остановить', en: 'Stop', no: 'Stopp', sv: 'Stoppa', da: 'Stop', fi: 'Pysäytä', de: 'Anhalten', fr: 'Arrêter', es: 'Detener', it: 'Ferma',
+    pt: 'Parar', pl: 'Zatrzymaj', nl: 'Stoppen', et: 'Peata', lv: 'Apturēt', lt: 'Sustabdyti', uk: 'Зупинити',
+  },
+  'resume.reset': {
+    ru: 'Полный сброс', en: 'Full reset', no: 'Full tilbakestilling', sv: 'Återställ helt', da: 'Nulstil helt', fi: 'Täysi nollaus', de: 'Vollständig zurücksetzen', fr: 'Réinitialiser', es: 'Restablecer todo', it: 'Azzera tutto',
+    pt: 'Repor tudo', pl: 'Pełny reset', nl: 'Volledig resetten', et: 'Lähtesta täielikult', lv: 'Pilnīga atiestatīšana', lt: 'Visiškas atstatymas', uk: 'Повне скидання',
+  },
 
   // ── Live status ──────────────────────────────────────────────────────────
   'status.mixing': {

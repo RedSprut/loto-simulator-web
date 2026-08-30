@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="1c48cca" data-build-ts="2026-08-30T12:49:33.712Z">
+<html lang="ru" data-build="ca502cd" data-build-ts="2026-08-30T13:33:41.191Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=1c48cca"></script>
+<script src="./boot-runtime.js?v=ca502cd"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -558,7 +558,11 @@ body[data-game="viking"] .bonus-col .nb.sb-viking{--ball:#183A91;--ball-hi:#8EAE
 /* история */
 .hist-item{position:relative;display:block;padding:12px 0;border-bottom:1px solid var(--hist-border)}
 .hist-main{min-width:0;overflow:visible}
+/* date+name and the rule label are one column (`.hist-head`); the rule sits on its own
+   full-width line below the name and never in the ball grid — see .hist-rule / .rule-badge. */
+.hist-head{min-width:0}
 .hist-date{font-size:15px;color:var(--sub);margin-bottom:8px;line-height:1.35}
+.hist-rule{display:block;width:100%;min-width:0;margin:2px 0 8px;line-height:1}
 .hist-balls{
   --hist-ball-count:7;
   --hist-sep-count:1;
@@ -571,7 +575,7 @@ body[data-game="viking"] .bonus-col .nb.sb-viking{--ball:#183A91;--ball-hi:#8EAE
 .rule-summary{display:grid;gap:8px;margin:8px 0 12px}
 .rule-era{padding:10px 11px;border:1px solid var(--border);border-radius:12px;background:var(--bg2);font-size:11.5px;color:var(--sub2);line-height:1.45}
 .rule-era b{display:block;color:var(--fg);font-size:12px;margin-bottom:2px}
-.rule-badge{display:inline-flex;align-items:center;margin-left:6px;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:800;vertical-align:1px;background:rgba(255,159,10,.14);color:#ff9f0a;border:1px solid rgba(255,159,10,.32)}
+.rule-badge{display:inline-flex;align-items:center;margin:0;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:800;vertical-align:baseline;background:rgba(255,159,10,.14);color:#ff9f0a;border:1px solid rgba(255,159,10,.32)}
 .rule-badge.current{background:rgba(52,199,89,.12);color:#34c759;border-color:rgba(52,199,89,.28)}
 .hist-extra-label{font-size:9px;font-weight:800;color:var(--sub2);margin-left:3px}
 .hist-sep{font-size:11px;opacity:.46;margin:0;flex:0 0 var(--hist-sep-slot);text-align:center}
@@ -1474,6 +1478,18 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
     <span class="ls-ball ls-b18"><span>18</span></span>
     <span class="ls-ball ls-b3"><span>3</span></span>
     <span class="ls-ball ls-b8"><span>8</span></span>
+  </div>
+</div>
+
+<!-- База тиражей ещё загружается: модальное окно поверх контента до готовности данных И
+     уровня доступа, чтобы холодный старт / перезагрузка не мигали «тиражей нет», пустым
+     экраном или FREE до PRO. При реальной ошибке загрузки — локализованная ошибка + «Повторить». -->
+<div id="db-loading" class="db-loading" role="status" aria-live="polite">
+  <div class="db-loading-card">
+    <div class="db-loading-ico" aria-hidden="true">⏳</div>
+    <div class="db-loading-title" id="db-loading-title">Загрузка базы тиражей</div>
+    <div class="db-loading-msg" id="db-loading-msg">Пожалуйста, подождите. Идёт загрузка базы всех тиражей.</div>
+    <button type="button" class="db-loading-retry" id="db-loading-retry" hidden>Повторить</button>
   </div>
 </div>
 
@@ -2600,6 +2616,23 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
    (the initial state is a default "free" that flips to PRO once the backend responds). */
 body.access-pending .acc-plan-badge,body.access-pending #acc-r-tier,
 body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility:hidden}
+/* Draws-database loading modal — covers content until the results feed loads AND the tier
+   resolves, so a cold start / reload never flashes "тиражей нет", an empty base, or FREE→PRO.
+   Sits just below the splash preloader (z 99999); revealed when the splash lifts if data is
+   still loading. */
+.db-loading{position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(120% 90% at 50% 35%,#161225,#0a0a12 72%);opacity:1;transition:opacity .38s ease}
+.db-loading.hidden{opacity:0;pointer-events:none}
+.db-loading-card{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;max-width:340px}
+.db-loading-ico{font-size:52px;line-height:1;filter:drop-shadow(0 3px 10px rgba(0,0,0,.35));animation:db-hourglass 1.8s cubic-bezier(.6,.05,.4,.95) infinite;transform-origin:50% 50%}
+@keyframes db-hourglass{0%{transform:rotate(0)}45%{transform:rotate(0)}55%,100%{transform:rotate(180deg)}}
+.db-loading.error .db-loading-ico{animation:none}
+.db-loading-title{font-family:'Unbounded',sans-serif;font-size:17px;font-weight:800;color:#fff}
+.db-loading-msg{font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.72)}
+.db-loading-retry{margin-top:6px;font:800 13px 'Manrope',sans-serif;color:#fff;background:rgba(255,255,255,.1);
+  border:1.5px solid rgba(255,255,255,.28);border-radius:999px;padding:11px 26px;min-height:44px;cursor:pointer;transition:transform .1s,background .16s}
+.db-loading-retry:active{transform:scale(.96)}
+.db-loading-retry[hidden]{display:none}
 </style>
 <!-- ЛИЧНЫЙ КАБИНЕТ -->
 <div class="acc-ov" id="account-ov" role="dialog" aria-modal="true" aria-labelledby="acc-title">
@@ -2820,16 +2853,16 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=1c48cca"></script>
-<script src="./commercial-config.js?v=1c48cca"></script>
-<script src="./event-runtime.js?v=1c48cca"></script>
-<script src="./auth-client.js?v=1c48cca"></script>
-<script src="./native-loader.js?v=1c48cca"></script>
-<script src="./i18n-catalog.js?v=1c48cca"></script>
-<script src="./i18n-runtime.js?v=1c48cca"></script>
-<script src="./app-runtime.js?v=1c48cca"></script>
-<script src="./commercial-runtime.js?v=1c48cca"></script>
-<script src="./inline-runtime-2.js?v=1c48cca"></script>
+<script src="./version.js?v=ca502cd"></script>
+<script src="./commercial-config.js?v=ca502cd"></script>
+<script src="./event-runtime.js?v=ca502cd"></script>
+<script src="./auth-client.js?v=ca502cd"></script>
+<script src="./native-loader.js?v=ca502cd"></script>
+<script src="./i18n-catalog.js?v=ca502cd"></script>
+<script src="./i18n-runtime.js?v=ca502cd"></script>
+<script src="./app-runtime.js?v=ca502cd"></script>
+<script src="./commercial-runtime.js?v=ca502cd"></script>
+<script src="./inline-runtime-2.js?v=ca502cd"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -2976,9 +3009,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=1c48cca"></script>
-<script src="./notifications-runtime.js?v=1c48cca"></script>
-<script src="./pwa-runtime.js?v=1c48cca"></script>
+<script src="./notification-center.js?v=ca502cd"></script>
+<script src="./notifications-runtime.js?v=ca502cd"></script>
+<script src="./pwa-runtime.js?v=ca502cd"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -2989,7 +3022,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-3.js?v=1c48cca"></script>
-<script src="./inline-runtime-4.js?v=1c48cca"></script>
+<script src="./inline-runtime-3.js?v=ca502cd"></script>
+<script src="./inline-runtime-4.js?v=ca502cd"></script>
 </body>
 </html>

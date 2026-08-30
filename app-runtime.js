@@ -284,6 +284,40 @@ const LotoState={
     if(onRetry){const b=el.querySelector('.lstate-retry');if(b)b.addEventListener('click',()=>onRetry());}
   },
 };
+
+// ── Draws-database loading gate ────────────────────────────────────────────
+// A full-screen modal stays up until BOTH the primary results feed has loaded AND the access
+// tier has resolved (window.__lotoTierResolved, set by the boot listener on the first
+// loto:accesschange). This guarantees a cold start / reload never flashes "тиражей нет", an
+// empty base, empty statistics, or FREE before PRO while Supabase is still resolving. A real
+// load failure shows a localized error + Retry (never a silent empty screen). One shared modal
+// for web/iOS/Android; strings come from the app catalog (all locales).
+(function(){
+  const el=document.getElementById('db-loading');if(!el)return;
+  const titleEl=document.getElementById('db-loading-title'),msgEl=document.getElementById('db-loading-msg'),retry=document.getElementById('db-loading-retry');
+  let done=false;
+  const setText=(t,m)=>{if(titleEl)titleEl.textContent=appText(t);if(msgEl)msgEl.textContent=appText(m);};
+  function hide(){if(done)return;done=true;el.classList.add('hidden');setTimeout(()=>{el.style.display='none';},420);}
+  function showError(){
+    el.classList.add('error');
+    const offline=(typeof navigator!=='undefined'&&navigator.onLine===false);
+    setText(offline?'Нет соединения':'Не удалось загрузить',
+      offline?'Проверьте интернет и повторите.':'Что-то пошло не так. Попробуйте ещё раз.');
+    if(retry)retry.hidden=false;
+  }
+  const tierReady=()=>!!window.__lotoTierResolved;
+  async function waitTier(maxMs){const t0=Date.now();while(!tierReady()&&Date.now()-t0<maxMs)await new Promise(r=>setTimeout(r,120));}
+  async function run(){
+    el.classList.remove('error');if(retry)retry.hidden=true;
+    setText('Загрузка базы тиражей','Пожалуйста, подождите. Идёт загрузка базы всех тиражей.');
+    try{await fetchResultsJson(RESULTS_JSON_URL);}      // primary draws database
+    catch(_e){showError();return;}
+    await waitTier(6000);                                // access tier (timeout so it never hangs)
+    hide();
+  }
+  if(retry)retry.addEventListener('click',run);
+  run();
+})();
 function groupAnalysisFreeLimit(){
   try{return Number(window.LotoCommercial?.access?.freeLimits?.groupAnalysisRows||window.LotoCommercial?.freeGroupAnalysisRows||3)||3;}catch(e){return 3;}
 }
@@ -2481,7 +2515,13 @@ async function renderHistory(){
     const action=canDelete?`<button class="btn-del" data-loto-event-click="delDraw('${d.date}')">🗑</button>`:'<span></span>';
     if(!canDelete)div.classList.add('no-action');
     const ballClass=histBallCount>=8?'hist-balls hist-many':'hist-balls';
-    div.innerHTML=`<div class="hist-main"><div class="hist-date">${escapeHtml(formatHistoryDate(d.date))}${src}${badge}</div><div class="${ballClass}" style="--hist-ball-count:${Math.max(1,histBallCount)};--hist-sep-count:${histSepCount}">${balls}</div></div>${action}`;
+    // Rule label ("Текущие/Старые правила") must sit on its OWN full-width line below the
+    // date+name — never inline to the right of the name and never inside the balls column —
+    // so it can't squeeze the ball grid and clip extra/bonus balls. `.hist-head` keeps the
+    // date + rule together as column 1 on desktop (where .hist-main is display:contents) and
+    // stacked above the balls on mobile (where .hist-main is a block).
+    const ruleLine=badge?`<div class="hist-rule">${badge}</div>`:'';
+    div.innerHTML=`<div class="hist-main"><div class="hist-head"><div class="hist-date">${escapeHtml(formatHistoryDate(d.date))}${src}</div>${ruleLine}</div><div class="${ballClass}" style="--hist-ball-count:${Math.max(1,histBallCount)};--hist-sep-count:${histSepCount}">${balls}</div></div>${action}`;
     c.appendChild(div);
   });
   try{HIST_filter();}catch(e){}

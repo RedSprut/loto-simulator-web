@@ -151,19 +151,27 @@ export class HUD {
     this.pauseBtn.setAttribute('aria-pressed', String(paused));
   }
 
-  showResumePrompt(count, total, onContinue, onRestart) {
+  // Three unambiguous actions for an unfinished draw (never mix "stop" with "full reset"):
+  //  • Continue (Продолжить) — resume the current draw where it left off;
+  //  • Stop (Остановить)     — pause WITHOUT losing state (the unfinished draw stays saved
+  //                            and can be resumed later; nothing is discarded);
+  //  • Full reset (Полный сброс) — fully stop AND discard: clears the saved state and returns
+  //                            the 3D screen to its initial idle state (no new draw is started).
+  showResumePrompt(count, total, onContinue, onStop, onReset) {
     this.resumePrompt?.remove();
     const overlay = document.createElement('div');
     overlay.className = 'dd-resume-overlay';
     overlay.setAttribute('role', 'dialog');
     overlay.setAttribute('aria-modal', 'true');
-    overlay.innerHTML = `<div class="dd-resume-card"><div class="dd-resume-title"></div><div class="dd-resume-actions"><button type="button" data-continue></button><button type="button" data-restart></button></div></div>`;
+    overlay.innerHTML = `<div class="dd-resume-card"><div class="dd-resume-title"></div><div class="dd-resume-actions"><button type="button" class="dd-resume-primary" data-continue></button><button type="button" data-stop></button><button type="button" class="dd-resume-danger" data-reset></button></div></div>`;
     overlay.querySelector('.dd-resume-title').textContent = t('resume.incomplete', count, total);
     const go = overlay.querySelector('[data-continue]');
-    const restart = overlay.querySelector('[data-restart]');
-    go.textContent = t('resume.continue'); restart.textContent = t('resume.restart');
+    const stop = overlay.querySelector('[data-stop]');
+    const reset = overlay.querySelector('[data-reset]');
+    go.textContent = t('resume.continue'); stop.textContent = t('resume.stop'); reset.textContent = t('resume.reset');
     go.onclick = () => { overlay.remove(); this.resumePrompt = null; onContinue?.(); };
-    restart.onclick = () => { overlay.remove(); this.resumePrompt = null; onRestart?.(); };
+    stop.onclick = () => { overlay.remove(); this.resumePrompt = null; onStop?.(); };
+    reset.onclick = () => { overlay.remove(); this.resumePrompt = null; onReset?.(); };
     this.root.appendChild(overlay);
     this.resumePrompt = overlay;
     setTimeout(() => go.focus(), 0);
