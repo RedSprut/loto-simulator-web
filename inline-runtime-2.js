@@ -5,6 +5,8 @@
   const $=id=>document.getElementById(id);
   const T=v=>String(v==null?'':v);
   let magicSending=false,avatarBusy=false;
+  // Avatar editor state (crop/move/zoom/rotate). avEd holds the loaded bitmap + transform.
+  const avEd={img:null,w:0,h:0,scale:1,minScale:1,rot:0,step:0,offx:0,offy:0,drag:null,pts:new Map(),pinch:null};
   // Calendar state: shown month + tentative selection (committed only on «Готово»).
   let calY,calM,calSelIso=null,calYearView=false;
   const pad2=n=>String(n).padStart(2,'0');
@@ -229,19 +231,134 @@
     return 'Не удалось сохранить фото. Попробуйте ещё раз.';
   }
 
+  // ── Avatar photo editor engine ────────────────────────────────────────────
+  const AV_INPUT_MAX=30*1024*1024; // generous input cap; the SAVED crop is a small JPEG
+  const AV_OUT=512;                // exported avatar square (px)
+  let avObjUrl=null;               // object URL to revoke on close
+  // Decode any picked file to a drawable bitmap. createImageBitmap covers JPG/PNG/WebP
+  // everywhere and HEIC where the engine supports it (iOS/Safari/WKWebView). Fallback to
+  // an <img> element + decode() for engines that only decode via the DOM.
+  async function avLoadBitmap(file){
+    try{return await createImageBitmap(file,{imageOrientation:'from-image'});}catch(_e){}
+    try{return await createImageBitmap(file);}catch(_e){}
+    if(avObjUrl){try{URL.revokeObjectURL(avObjUrl);}catch(_e){}}
+    avObjUrl=URL.createObjectURL(file);
+    const img=new Image();img.decoding='async';img.src=avObjUrl;
+    await img.decode(); // throws on formats this engine cannot render (e.g. HEIC on desktop Chrome)
+    return img;
+  }
+  function avStageSize(){const st=$('aved-stage');const dpr=Math.min(window.devicePixelRatio||1,2.5);
+    return {css:Math.max(120,(st&&st.clientWidth)||280),dpr};}
+  function avDraw(){
+    const cv=$('aved-canvas');if(!cv||!avEd.img)return;const ctx=cv.getContext('2d');const S=cv.width;
+    ctx.clearRect(0,0,S,S);
+    ctx.save();ctx.translate(S/2+avEd.offx,S/2+avEd.offy);ctx.rotate(avEd.rot);ctx.scale(avEd.scale,avEd.scale);
+    ctx.drawImage(avEd.img,-avEd.w/2,-avEd.h/2);ctx.restore();
+  }
+  // Keep the inscribed crop circle fully covered by the (rotated) image at all times.
+  function avClamp(){
+    const cv=$('aved-canvas');if(!cv)return;const R=cv.width/2;
+    const hx=Math.max(0,avEd.scale*avEd.w/2-R),hy=Math.max(0,avEd.scale*avEd.h/2-R);
+    const cn=Math.cos(-avEd.rot),sn=Math.sin(-avEd.rot);
+    let lx=avEd.offx*cn-avEd.offy*sn,ly=avEd.offx*sn+avEd.offy*cn;
+    lx=Math.max(-hx,Math.min(hx,lx));ly=Math.max(-hy,Math.min(hy,ly));
+    const cp=Math.cos(avEd.rot),sp=Math.sin(avEd.rot);
+    avEd.offx=lx*cp-ly*sp;avEd.offy=lx*sp+ly*cp;
+  }
+  function avApplyRot(){
+    const fine=Number(($('aved-rot')||{}).value||0);
+    avEd.rot=((avEd.step*90+fine)*Math.PI)/180;avClamp();avDraw();
+  }
+  function avSetScale(next){
+    const min=avEd.minScale,max=avEd.minScale*4;
+    next=Math.max(min,Math.min(max,next));
+    if(avEd.scale>0){const r=next/avEd.scale;avEd.offx*=r;avEd.offy*=r;}
+    avEd.scale=next;const z=$('aved-zoom');if(z)z.value=String(next/avEd.minScale);
+    avClamp();avDraw();
+  }
+  // Prove the stored avatar actually renders before claiming success — catches a broken
+  // upload (wrong Storage path, RLS denial, expired signed URL) which would otherwise show a
+  // false "updated". Gates on load (image is valid+decodable) and runs decode() best-effort;
+  // onerror → failure; a hard timeout also fails (never a false success, never a hung UI).
+  function avVerifyImage(url){
+    return new Promise((resolve,reject)=>{
+      const img=new Image();img.decoding='async';
+      let settled=false;const done=ok=>{if(settled)return;settled=true;ok?resolve():reject(new Error('decode_failed'));};
+      img.onload=()=>{try{if(img.decode){img.decode().then(()=>done(true)).catch(()=>done(true));return;}}catch(_e){}done(true);};
+      img.onerror=()=>done(false);
+      setTimeout(()=>done(false),12000);
+      img.src=url;
+    });
+  }
+  function avPointDist(){const v=[...avEd.pts.values()];return Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y);}
+  function avWire(){
+    const st=$('aved-stage');if(!st||st.__wired)return;st.__wired=1;
+    st.addEventListener('pointerdown',ev=>{st.setPointerCapture(ev.pointerId);avEd.pts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+      if(avEd.pts.size===2){avEd.pinch={d:avPointDist(),s:avEd.scale};avEd.drag=null;}
+      else{avEd.drag={x:ev.clientX,y:ev.clientY};}});
+    st.addEventListener('pointermove',ev=>{if(!avEd.pts.has(ev.pointerId))return;avEd.pts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+      if(avEd.pinch&&avEd.pts.size>=2){const d=avPointDist();if(avEd.pinch.d>0)avSetScale(avEd.pinch.s*(d/avEd.pinch.d));return;}
+      if(avEd.drag){const dpr=avEd.dpr||1;avEd.offx+=(ev.clientX-avEd.drag.x)*dpr;avEd.offy+=(ev.clientY-avEd.drag.y)*dpr;
+        avEd.drag={x:ev.clientX,y:ev.clientY};avClamp();avDraw();}});
+    const up=ev=>{avEd.pts.delete(ev.pointerId);if(avEd.pts.size<2)avEd.pinch=null;if(avEd.pts.size===0)avEd.drag=null;};
+    st.addEventListener('pointerup',up);st.addEventListener('pointercancel',up);
+    st.addEventListener('wheel',ev=>{ev.preventDefault();avSetScale(avEd.scale*(ev.deltaY<0?1.06:0.94));},{passive:false});
+    const z=$('aved-zoom');if(z)z.addEventListener('input',()=>avSetScale(avEd.minScale*Number(z.value)));
+    const r=$('aved-rot');if(r)r.addEventListener('input',avApplyRot);
+  }
+
   const AccountUI={
     pickAvatar(){const f=$('acc-avatar-file');if(f)f.click();},
     async onFile(e){
       const file=e.target.files&&e.target.files[0];e.target.value='';
       if(!file)return;
-      const lim=(window.LotoAuth&&window.LotoAuth.avatarLimits)||{maxBytes:5242880,mimeTypes:['image/jpeg','image/png','image/webp']};
-      if(!lim.mimeTypes.includes(file.type)){msg('acc-avatar-msg','Поддерживаются только JPG, PNG или WebP.','error');return;}
-      if(file.size>lim.maxBytes){msg('acc-avatar-msg','Файл слишком большой. Максимум 5 МБ.','error');return;}
-      if(avatarBusy)return;avatarBusy=true;
-      const b=$('acc-avatar-busy');if(b)b.hidden=false;msg('acc-avatar-msg','',null);
-      try{const info=await window.LotoAuth.uploadAvatar(file);setAvatar(info&&info.avatarUrl||null);msg('acc-avatar-msg','Фото профиля обновлено.','success');}
-      catch(err){msg('acc-avatar-msg',avatarError(err),'error');}
-      finally{avatarBusy=false;if(b)b.hidden=true;}
+      // Accept JPG/PNG/WebP/HEIC/HEIF (HEIC comes from iPhones). The crop is re-encoded to
+      // JPEG on save, so the stored avatar is always a small, universally-decodable image.
+      const okType=/^image\/(jpeg|png|webp|heic|heif)$/i.test(file.type||'')||/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name||'')||(file.type||'').startsWith('image/');
+      if(!okType){msg('acc-avatar-msg','Поддерживаются JPG, PNG, WebP или HEIC.','error');return;}
+      if(file.size>AV_INPUT_MAX){msg('acc-avatar-msg','Файл слишком большой. Максимум 30 МБ.','error');return;}
+      msg('acc-avatar-msg','',null);
+      let bmp;
+      try{bmp=await avLoadBitmap(file);}
+      catch(_e){msg('acc-avatar-msg','Не удалось открыть это изображение. Попробуйте JPG или PNG.','error');return;}
+      avEd.img=bmp;avEd.w=bmp.width||bmp.naturalWidth;avEd.h=bmp.height||bmp.naturalHeight;
+      avEd.rot=0;avEd.step=0;avEd.offx=0;avEd.offy=0;avEd.pts.clear();avEd.pinch=null;avEd.drag=null;
+      const ov=$('aved-ov');if(ov)ov.classList.add('show');
+      requestAnimationFrame(()=>{
+        const {css,dpr}=avStageSize();avEd.dpr=dpr;const S=Math.round(css*dpr);
+        const cv=$('aved-canvas');cv.width=S;cv.height=S;
+        avEd.minScale=S/Math.min(avEd.w,avEd.h);avEd.scale=avEd.minScale;
+        const z=$('aved-zoom');if(z)z.value='1';const r=$('aved-rot');if(r)r.value='0';
+        avWire();avClamp();avDraw();
+      });
+    },
+    avEdReset(){avEd.scale=avEd.minScale;avEd.rot=0;avEd.step=0;avEd.offx=0;avEd.offy=0;
+      const z=$('aved-zoom');if(z)z.value='1';const r=$('aved-rot');if(r)r.value='0';avDraw();},
+    avEdRotate90(){avEd.step=(avEd.step+1)%4;avApplyRot();},
+    avEdCancel(){const ov=$('aved-ov');if(ov)ov.classList.remove('show');
+      avEd.img=null;if(avObjUrl){try{URL.revokeObjectURL(avObjUrl);}catch(_e){}avObjUrl=null;}},
+    async avEdSave(){
+      if(avatarBusy||!avEd.img)return;avatarBusy=true;
+      const busy=$('aved-busy');if(busy)busy.classList.add('on');
+      const saveBtn=$('aved-save');if(saveBtn)saveBtn.disabled=true;
+      try{
+        // Render the cropped circle region to a fixed-size square, re-encoded as JPEG.
+        const S=$('aved-canvas').width,k=AV_OUT/S;const out=document.createElement('canvas');
+        out.width=AV_OUT;out.height=AV_OUT;const ctx=out.getContext('2d');
+        ctx.fillStyle='#12121a';ctx.fillRect(0,0,AV_OUT,AV_OUT);
+        ctx.save();ctx.translate(AV_OUT/2+avEd.offx*k,AV_OUT/2+avEd.offy*k);ctx.rotate(avEd.rot);
+        ctx.scale(avEd.scale*k,avEd.scale*k);ctx.drawImage(avEd.img,-avEd.w/2,-avEd.h/2);ctx.restore();
+        const blob=await new Promise((res,rej)=>out.toBlob(b=>b?res(b):rej(new Error('encode_failed')),'image/jpeg',0.9));
+        const outFile=new File([blob],'avatar.jpg',{type:'image/jpeg'});
+        const info=await window.LotoAuth.uploadAvatar(outFile);
+        const url=info&&info.avatarUrl||null;
+        // Success is claimed ONLY after the stored image actually loads/decodes.
+        if(url)await avVerifyImage(url);
+        setAvatar(url);
+        this.avEdCancel();
+        msg('acc-avatar-msg','Фото профиля обновлено.','success');
+      }catch(err){msg('acc-avatar-msg',avatarError(err),'error');}
+      finally{avatarBusy=false;if(busy)busy.classList.remove('on');if(saveBtn)saveBtn.disabled=false;}
     },
     async removeAvatar(){
       if(avatarBusy)return;avatarBusy=true;
