@@ -152,15 +152,17 @@ async function main() {
     p.then(() => syncAudioHud(audio.status())).catch(() => syncAudioHud(audio.status()));
   };
   const markAudioNeedsGesture = () => { audio.markNeedsUserUnlock(); syncAudioHud(audio.status()); };
-  document.addEventListener('visibilitychange', () => { if (document.hidden) markAudioNeedsGesture(); });
-  window.addEventListener('pagehide', markAudioNeedsGesture);
-
   const director = new CameraDirector(engine.camera);
   const stats = new FrameStats();
   const focus = new THREE.Vector3();
 
   let hud;
   let savePrompt = null; // assigned below; the onState hook only fires it after that
+  const DRAW_STORAGE_KEY = 'loto:drum:unfinished:v1';
+  let paused = false;
+  let pausedAt = 0;
+  let pausedAutomatically = false;
+  let acc = 0;
   const draw = new DrawController({ balls, drum, rotor, exit, camera: engine.camera }, {
     onLayout: (profile) => {
       // URL theme params describe ONLY the game the app embedded with; after a live
@@ -173,11 +175,61 @@ async function main() {
       branding.setGame(profile);
       audio.setGame(profile.id); // assign this game's acoustic profile (data-driven)
     },
-    onState: (s, w) => { hud?.setPhase(s, w); savePrompt?.onDrawState(s); },
-    onDraw: (value, poolId, results) => { hud?.setResults(results); hud?.setPhase(draw.state, value); },
+    onState: (s, w) => {
+      hud?.setPhase(s, w); savePrompt?.onDrawState(s);
+      if (s === State.COMPLETE) clearUnfinished();
+    },
+    onDraw: (value, poolId, results) => {
+      hud?.setResults(results); hud?.setPhase(draw.state, value); saveUnfinished();
+    },
     onDone: () => { setTimeout(() => hud?.sortResults(true), 350); }, // pause, then sort ascending
   });
   draw._debug = debug; // RESULT_REVEAL diagnostics in the headless harness
+
+  const isActiveDraw = () => draw.state !== State.IDLE && draw.state !== State.COMPLETE;
+  const drawnCount = () => Object.values(draw.resultsByPool || {}).reduce((sum, values) => sum + values.length, 0);
+  function saveUnfinished() {
+    try {
+      if (!isActiveDraw()) return;
+      localStorage.setItem(DRAW_STORAGE_KEY, JSON.stringify(draw.snapshot()));
+    } catch (e) { console.warn('[drum] unfinished draw could not be saved', e); }
+  }
+  function clearUnfinished() { try { localStorage.removeItem(DRAW_STORAGE_KEY); } catch (e) {} }
+  function readUnfinished() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(DRAW_STORAGE_KEY) || 'null');
+      return saved && saved.version === 1 && saved.profileId ? saved : null;
+    } catch (e) { clearUnfinished(); return null; }
+  }
+  function pauseDraw({ automatic = false } = {}) {
+    if (!isActiveDraw()) return false;
+    if (!paused) { paused = true; pausedAt = performance.now(); }
+    pausedAutomatically = pausedAutomatically || automatic;
+    acc = 0;
+    saveUnfinished();
+    audio.pause();
+    if (automatic) markAudioNeedsGesture();
+    hud?.setPaused(true);
+    return true;
+  }
+  function resumeDraw() {
+    if (!paused) return;
+    const shift = Math.max(0, performance.now() - pausedAt);
+    if (draw.winner?.ts) for (const key of Object.keys(draw.winner.ts)) if (Number.isFinite(draw.winner.ts[key])) draw.winner.ts[key] += shift;
+    paused = false; pausedAutomatically = false; pausedAt = 0; acc = 0; stats.last = performance.now();
+    hud?.setPaused(false);
+    if (audioLive) unlockAudioFromGesture();
+  }
+  function restartDraw() {
+    clearUnfinished();
+    paused = false; pausedAutomatically = false; pausedAt = 0; acc = 0;
+    audio.reset(); draw.reset(); hud?.setPaused(false); hud?.setResults(draw.resultsByPool);
+    warmAudio(); draw.start();
+  }
+  function offerResume() {
+    if (!paused || !pausedAutomatically || hud?.resumePrompt) return;
+    hud?.showResumePrompt(drawnCount(), totalDrawnOf(draw.profile), resumeDraw, restartDraw);
+  }
 
   const profileKey = GAME_PROFILES[params.get('profile')] ? params.get('profile') : DEFAULT_PROFILE;
   const initialProfileId = GAME_PROFILES[profileKey]?.id; // the embedded game; URL theme params belong only to it
@@ -186,18 +238,21 @@ async function main() {
     // Sound is OFF by default; a random tap must NEVER start audio (no hidden autoplay).
     onUserGesture: () => {},
     onStart: () => {
+      clearUnfinished();
       warmAudio(); // unlock + decode inside the gesture (iOS), still muted until the speaker tap
       draw.start(); hud.setResults(draw.resultsByPool); // clear the old row
       // First draw of this session with sound still off → one gentle, non-blocking hint.
       if (!soundHintShown && audio.status().muted) { soundHintShown = true; hud.showSoundOffHint(); }
     },
-    onReset: () => { audio.reset(); draw.reset(); },
+    onReset: () => { clearUnfinished(); paused = false; audio.reset(); draw.reset(); hud.setPaused(false); },
+    onPauseToggle: () => { if (paused) resumeDraw(); else pauseDraw(); },
     // The ONLY audio-enable path: an explicit tap on the speaker (a real user gesture).
     onUnlock: () => { startAudio(); },
     onMute: (m) => { audio.setMuted(m); },
     onQuality: (v) => { if (v === 'auto') quality.unlock(); else quality.lock(v); },
     onProfile: (key) => {
       if (!GAME_PROFILES[key]) return;
+      clearUnfinished(); paused = false;
       audio.reset();
       draw.loadProfile(GAME_PROFILES[key]);
       postToHost('DRUM_GAME_CHANGED', { game: GAME_PROFILES[key].id, key });
@@ -253,6 +308,34 @@ async function main() {
 
   draw.loadProfile(GAME_PROFILES[profileKey]);
 
+  const pending = readUnfinished();
+  if (pending) {
+    const entry = Object.entries(GAME_PROFILES).find(([, profile]) => profile.id === pending.profileId);
+    try {
+      if (!entry) throw new Error('Unknown saved profile');
+      draw.loadProfile(entry[1]);
+      draw.restore(pending);
+      hud.panel.querySelector('[data-profile]').value = entry[0];
+      hud.setResults(draw.resultsByPool);
+      paused = true; pausedAutomatically = true; pausedAt = performance.now(); acc = 0;
+      hud.setPaused(true);
+      offerResume();
+    } catch (e) {
+      console.warn('[drum] discarded invalid unfinished draw', e);
+      clearUnfinished(); draw.loadProfile(GAME_PROFILES[profileKey]);
+    }
+  }
+
+  const autoPause = () => pauseDraw({ automatic: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) autoPause(); else offerResume();
+  });
+  window.addEventListener('pagehide', autoPause);
+  window.addEventListener('beforeunload', autoPause);
+  window.addEventListener('blur', autoPause);
+  window.addEventListener('focus', offerResume);
+  document.addEventListener('freeze', autoPause);
+
   // Hidden read-only diagnostic (no UI): the current winner ball's on-screen NDC
   // bounding box + reveal state, so automated checks can confirm the ball is fully
   // framed with a safe margin and that the top number is published only after reveal.
@@ -302,6 +385,7 @@ async function main() {
   }
 
   function stepSim(dt) {
+    if (paused) return;
     balls.resetForces(); // clear last frame's forces so stale mixing forces can't linger
     draw.update(dt);     // kinematic targets + forces BEFORE the step
     if (getActiveForcePolicy(draw.state).wall) balls.applyWall(); // drum wall only while balls can reach it
@@ -352,10 +436,16 @@ async function main() {
 
   // ── Normal interactive loop (fixed-step physics, decoupled from FPS) ──
   const FIXED = 1 / 60;
-  let acc = 0, hudTick = 0;
+  let hudTick = 0;
   let readySent = false;
   function frame() {
     const dt = stats.tick();
+    if (paused) {
+      acc = 0;
+      engine.render();
+      requestAnimationFrame(frame);
+      return;
+    }
     acc += dt;
     let steps = 0;
     while (acc >= FIXED && steps < 5) { stepSim(FIXED); acc -= FIXED; steps++; }

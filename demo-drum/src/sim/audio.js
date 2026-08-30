@@ -237,6 +237,12 @@ export class AudioManager {
     return this.status();
   }
 
+  async pause() {
+    try { if (this.ctx?.state === 'running') await this.ctx.suspend(); } catch (e) { /* browser lifecycle may already suspend it */ }
+    this._emitStatus();
+    return this.status();
+  }
+
   markNeedsUserUnlock() {
     this.needsUserUnlock = true;
     this.enabled = false;

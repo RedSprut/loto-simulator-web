@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="8d1858d" data-build-ts="2026-08-30T08:40:15.672Z">
+<html lang="ru" data-build="fc8e05b" data-build-ts="2026-08-30T12:11:00.068Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=8d1858d"></script>
+<script src="./boot-runtime.js?v=fc8e05b"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -151,8 +151,8 @@ body.dark{
 /* ══ БАЗА ══ */
 /* Root canvas is the mobile browser chrome backdrop. Keep it neutral so Safari /
    Chrome top and bottom browser areas do not inherit per-lottery colours. */
-html{min-height:100%;background-color:var(--shell-bg,#160A12);background-image:none;background-attachment:fixed}
-body{font-family:'Manrope',-apple-system,BlinkMacSystemFont,sans-serif;min-height:100vh;max-width:430px;margin:0 auto;padding-bottom:88px;background:#160A12;color:var(--fg);transition:background .3s,color .3s;position:relative}
+html{min-height:100%;background-color:var(--shell-bg,#160A12);background-image:none;background-attachment:fixed;overflow-x:hidden}
+body{font-family:'Manrope',-apple-system,BlinkMacSystemFont,sans-serif;min-height:100vh;max-width:430px;margin:0 auto;padding-bottom:88px;background:#160A12;color:var(--fg);transition:background .3s,color .3s;position:relative;overflow-x:clip}
 body.ready{background:transparent}
 /* Бархатный занавес — сцена за интерфейсом */
 body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:
@@ -456,12 +456,12 @@ body[data-game="viking"] .bonus-col .nb.sb-viking{--ball:#183A91;--ball-hi:#8EAE
    (--hdr-a/-b/-c), gold border and glow — never a flat white/cream bar. Icons + labels
    are soft cream on the themed backdrop; the ACTIVE section uses an inner rounded
    pill/outline, shared by mobile Web and native bundles. */
-.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;display:flex;padding:6px 0 calc(10px + env(safe-area-inset-bottom));z-index:240;
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:6px 0 calc(10px + env(safe-area-inset-bottom));z-index:240;overflow:hidden;
   background:
     radial-gradient(130% 210% at 50% 165%,rgba(255,255,255,.12) 0,transparent 55%),
     linear-gradient(100deg,var(--hdr-a,var(--curtain-a)) 0%,var(--hdr-b,var(--curtain-a)) 52%,var(--hdr-c,var(--curtain-b)) 100%);
   border-top:1px solid rgba(233,180,76,.5);box-shadow:0 -8px 26px rgba(0,0,0,.34);transition:background .45s ease}
-.bn{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;border:none;background:transparent;min-height:48px;justify-content:center}
+.bn{position:relative;width:100%;min-width:0;max-width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 0;border:none;background:transparent;min-height:48px;justify-content:center;overflow:hidden}
 /* Active-route indicator: an inner rounded pill/outline plus gold icon/label. Driven
    by the .on class (selPage / openDrum3D), not static CSS. */
 .bn.on::after{content:'';position:absolute;inset:3px 7px;border-radius:14px;background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(233,180,76,.42),0 1px 6px rgba(0,0,0,.12);z-index:-1;pointer-events:none}
@@ -1015,8 +1015,8 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
   /* шапка — лента во всю ширину, контент по центру */
   .hdr{padding-left:max(16px,calc((100vw - 1760px)/2));padding-right:max(16px,calc((100vw - 1760px)/2))}
   /* навигация — плавающая «таблетка» */
-  .bnav{bottom:16px;width:auto;max-width:none;min-width:340px;border-radius:999px;border:1px solid rgba(233,180,76,.4);box-shadow:0 14px 44px rgba(0,0,0,.35);padding:5px 10px calc(5px + env(safe-area-inset-bottom)/2)}
-  .bn{flex:0 0 auto;flex-direction:row;gap:8px;padding:9px 22px;border-radius:999px;min-height:0}
+  .bnav{bottom:max(16px,env(safe-area-inset-bottom));width:min(560px,calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 32px));max-width:none;min-width:0;border-radius:999px;border:1px solid rgba(233,180,76,.4);box-shadow:0 14px 44px rgba(0,0,0,.35);padding:5px 10px}
+  .bn{width:100%;min-width:0;flex-direction:row;gap:8px;padding:9px 10px;border-radius:999px;min-height:0}
   .bn.on{background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(233,180,76,.35)}
   .bn.on::after{display:none}   /* desktop pill uses its own bg highlight, not the top bar */
   .bn-icon{font-size:19px}
@@ -1031,6 +1031,12 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
   .favorite-combos-card .hball{width:48px;height:48px;font-size:17px}
   .fav-name{font-size:16px;margin-bottom:13px}
   .fav-rowballs{--fav-ball-size:48px;gap:6px}
+}
+@media (orientation:landscape) and (max-height:520px){
+  body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+  .bnav{bottom:max(4px,env(safe-area-inset-bottom));width:min(560px,calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 20px));height:54px;min-height:54px;padding:3px 7px}
+  .bn{min-width:0;min-height:0;height:100%;padding:2px 4px;gap:1px}
+  .bn-icon svg{width:22px;height:22px}.bn-icon-3d svg{width:25px;height:25px}.bn-lbl{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 }
 
 /* ── ШИРОКИЙ БРАУЗЕР: единая центрированная рабочая область ── */
@@ -1683,6 +1689,10 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
       <button class="btn-exp" data-loto-event-click="saveFav()">⭐ Сохранить текущие ряды</button>
     </div>
   </div>
+  <section class="app-download" id="home-stores" hidden>
+    <div class="acc-stores-title">Установить приложение</div>
+    <div class="acc-stores-btns" id="home-stores-btns"></div>
+  </section>
 </div>
 
 <!-- ══ ANALYTICS PAGE ══ -->
@@ -1878,6 +1888,10 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
     <div class="card"><div class="card-t">Проверка математики</div><div id="math-check-out"><div class="empty">Нет данных</div></div></div>
     <div class="card"><div class="card-t">Статистика базы</div><div id="stats-out"><div class="empty">Нет данных</div></div></div>
   </div>
+  <section class="app-download" id="analytics-stores" hidden>
+    <div class="acc-stores-title">Установить приложение</div>
+    <div class="acc-stores-btns" id="analytics-stores-btns"></div>
+  </section>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -2537,6 +2551,12 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 .store-badge .sb-big{font-size:15px;font-weight:800;letter-spacing:.2px}
 .store-badge.soon{opacity:.55;cursor:default;pointer-events:none}
 .store-badge .sb-soon{margin-left:6px;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,.16)}
+.app-download{width:min(calc(100% - 28px),1120px);margin:22px auto 10px;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--bg2);box-shadow:var(--card-shadow);text-align:center}
+.app-download[hidden]{display:none}
+.app-download .acc-stores-title{font-size:15px;color:var(--fg)}
+.app-download .acc-stores-btns{display:flex;align-items:stretch;justify-content:center;gap:12px;flex-wrap:nowrap}
+.app-download .store-badge{min-width:0;width:min(240px,100%);justify-content:center}
+@media(max-width:520px){.app-download .acc-stores-btns{flex-direction:column;align-items:center}.app-download .store-badge{width:100%;max-width:280px}}
 /* Avatar photo editor (crop · move · zoom · rotate) */
 .aved-ov{position:fixed;inset:0;z-index:600;background:rgba(6,8,14,.62);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .18s}
 .aved-ov.show{opacity:1;pointer-events:all}
@@ -2786,16 +2806,16 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=8d1858d"></script>
-<script src="./commercial-config.js?v=8d1858d"></script>
-<script src="./event-runtime.js?v=8d1858d"></script>
-<script src="./auth-client.js?v=8d1858d"></script>
-<script src="./native-loader.js?v=8d1858d"></script>
-<script src="./i18n-catalog.js?v=8d1858d"></script>
-<script src="./i18n-runtime.js?v=8d1858d"></script>
-<script src="./app-runtime.js?v=8d1858d"></script>
-<script src="./commercial-runtime.js?v=8d1858d"></script>
-<script src="./inline-runtime-2.js?v=8d1858d"></script>
+<script src="./version.js?v=fc8e05b"></script>
+<script src="./commercial-config.js?v=fc8e05b"></script>
+<script src="./event-runtime.js?v=fc8e05b"></script>
+<script src="./auth-client.js?v=fc8e05b"></script>
+<script src="./native-loader.js?v=fc8e05b"></script>
+<script src="./i18n-catalog.js?v=fc8e05b"></script>
+<script src="./i18n-runtime.js?v=fc8e05b"></script>
+<script src="./app-runtime.js?v=fc8e05b"></script>
+<script src="./commercial-runtime.js?v=fc8e05b"></script>
+<script src="./inline-runtime-2.js?v=fc8e05b"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -2942,9 +2962,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=8d1858d"></script>
-<script src="./notifications-runtime.js?v=8d1858d"></script>
-<script src="./pwa-runtime.js?v=8d1858d"></script>
+<script src="./notification-center.js?v=fc8e05b"></script>
+<script src="./notifications-runtime.js?v=fc8e05b"></script>
+<script src="./pwa-runtime.js?v=fc8e05b"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -2955,7 +2975,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-3.js?v=8d1858d"></script>
-<script src="./inline-runtime-4.js?v=8d1858d"></script>
+<script src="./inline-runtime-3.js?v=fc8e05b"></script>
+<script src="./inline-runtime-4.js?v=fc8e05b"></script>
 </body>
 </html>

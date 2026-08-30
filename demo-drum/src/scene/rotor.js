@@ -167,6 +167,22 @@ export class Rotor {
     this.targetPrimary = 0; this.targetSecondary = 0;
   }
 
+  snapshot() {
+    return {
+      anglePrimary: this.anglePrimary, angleSecondary: this.angleSecondary,
+      speedPrimary: this.speedPrimary, speedSecondary: this.speedSecondary,
+      targetPrimary: this.targetPrimary, targetSecondary: this.targetSecondary,
+    };
+  }
+
+  restore(saved) {
+    if (!saved) return;
+    for (const key of ['anglePrimary', 'angleSecondary', 'speedPrimary', 'speedSecondary', 'targetPrimary', 'targetSecondary']) {
+      if (Number.isFinite(saved[key])) this[key] = saved[key];
+    }
+    this.update(0);
+  }
+
   update(dt) {
     const a = CONFIG.rotor.accel;
     this.speedPrimary = THREE.MathUtils.damp(this.speedPrimary, this.targetPrimary, a, dt);

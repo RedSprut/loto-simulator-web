@@ -139,8 +139,11 @@
   }
   // App Store / Google Play badges — Web only, ordered by platform, "Скоро" if no URL yet.
   function renderStores(){
-    const el=$('acc-stores'),btns=$('acc-stores-btns');if(!el||!btns)return;
-    if(window.LotoNativeBilling&&window.LotoNativeBilling.isNative){el.hidden=true;return;} // not inside native apps
+    const targets=[['acc-stores','acc-stores-btns'],['home-stores','home-stores-btns'],['analytics-stores','analytics-stores-btns']]
+      .map(([elId,btnId])=>({el:$(elId),btns:$(btnId)})).filter(x=>x.el&&x.btns);
+    if(!targets.length)return;
+    const native=!!((window.LotoNativeBilling&&window.LotoNativeBilling.isNative)||(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform()));
+    if(native){targets.forEach(x=>{x.el.hidden=true;x.btns.innerHTML='';});return;} // never render this block inside native apps
     const cfg=window.LOTO_COMMERCIAL_CONFIG||{};
     const appStore=cfg.appStoreUrl||'',googlePlay=cfg.googlePlayUrl||'';
     const ua=navigator.userAgent||'';
@@ -152,8 +155,8 @@
     const google=`<a class="store-badge${googlePlay?'':' soon'}" ${googlePlay?`href="${googlePlay}" target="_blank" rel="noopener"`:'aria-disabled="true" role="link"'}>`+
       `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#00D3FF" d="M3.5 2.3 13.6 12 3.5 21.7c-.32-.18-.5-.55-.5-1V3.3c0-.45.18-.82.5-1Z"/><path fill="#FFCE00" d="m17.7 8.1 2.9 1.7c.9.52.9 1.98 0 2.5l-2.9 1.6L14.9 12l2.8-3.9Z"/><path fill="#00F076" d="M3.5 2.3c.32-.18.7-.2 1.03 0l10.37 6-2.3 2.3L3.5 2.3Z"/><path fill="#FF3A44" d="m12.6 13.4 2.3 2.3-10.37 6c-.33.2-.71.18-1.03 0l9.1-8.3Z"/></svg>`+
       `<span class="sb-txt"><span class="sb-small" data-i18n-ignore>Get it on</span><span class="sb-big" data-i18n-ignore>Google Play</span></span>${googlePlay?'':'<span class="sb-soon">Скоро</span>'}</a>`;
-    btns.innerHTML=isAndroid?(google+apple):(apple+google); // iOS & desktop: App Store first; Android: Google Play first
-    el.hidden=false;
+    const badges=isAndroid?(google+apple):(apple+google); // iOS: App Store first; Android: Google Play first; desktop: both
+    targets.forEach(x=>{x.btns.innerHTML=badges;x.el.hidden=false;});
   }
 
   function accountState(){

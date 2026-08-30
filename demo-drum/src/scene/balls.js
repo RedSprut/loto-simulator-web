@@ -207,22 +207,79 @@ export class Balls {
     this.poolInfo.set(pool.id, { initial: numbers.length, min: pool.min, max: pool.max });
     if (!this.removedByPool.has(pool.id)) this.removedByPool.set(pool.id, 0);
     const home = this._layout(numbers.length);
-    numbers.forEach((value, i) => {
-      const color = colorFor(value, pool.colorSet);
-      const mat = new THREE.MeshPhysicalMaterial({
-        map: ballTexture(value, color), color: 0xffffff,
-        metalness: 0.02, roughness: 0.2, clearcoat: 1.0, clearcoatRoughness: 0.08, envMapIntensity: 1.0,
-      });
-      const mesh = new THREE.Mesh(this.geo, mat);
-      mesh.castShadow = true; mesh.receiveShadow = true;
-      addPoleStickers(mesh, value);
-      this.scene.add(mesh);
-      const p = home[i];
-      const { body, collider } = this.physics.addBall(p.x, p.y, p.z);
-      this._kick(body);
-      this.items.push({ id: ++_ballId, value, poolId: pool.id, colorSet: pool.colorSet, body, collider, mesh, drawn: false, parked: false, lifecycle: 'inside-drum', settledTime: 0, facingDot: 0, tracker: new BallMotionTracker(body) });
-    });
+    numbers.forEach((value, i) => this._createBall(pool.id, pool.colorSet, value, home[i], true));
     this._assertUnique(pool.id);
+    this.assertConservation();
+  }
+
+  _createBall(poolId, colorSet, value, position, kick = false) {
+    const color = colorFor(value, colorSet);
+    const mat = new THREE.MeshPhysicalMaterial({
+      map: ballTexture(value, color), color: 0xffffff,
+      metalness: 0.02, roughness: 0.2, clearcoat: 1.0, clearcoatRoughness: 0.08, envMapIntensity: 1.0,
+    });
+    const mesh = new THREE.Mesh(this.geo, mat);
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    addPoleStickers(mesh, value);
+    this.scene.add(mesh);
+    const p = position || { x: 0, y: 0, z: 0 };
+    const { body, collider } = this.physics.addBall(p.x, p.y, p.z);
+    if (kick) this._kick(body);
+    const item = { id: ++_ballId, value, poolId, colorSet, body, collider, mesh, drawn: false, parked: false, lifecycle: 'inside-drum', settledTime: 0, facingDot: 0, tracker: new BallMotionTracker(body) };
+    this.items.push(item);
+    return item;
+  }
+
+  /** JSON-safe physical snapshot used only for an unfinished draw. */
+  snapshot() {
+    const vec = (v) => ({ x: v.x, y: v.y, z: v.z });
+    const quat = (q) => ({ x: q.x, y: q.y, z: q.z, w: q.w });
+    return {
+      poolInfo: [...this.poolInfo.entries()],
+      removedByPool: [...this.removedByPool.entries()],
+      items: this.items.map((it) => ({
+        value: it.value, poolId: it.poolId, colorSet: it.colorSet,
+        drawn: !!it.drawn, parked: !!it.parked, lifecycle: it.lifecycle,
+        settledTime: it.settledTime || 0, facingDot: it.facingDot || 0,
+        resultPool: it.resultPool || null,
+        position: vec(it.body.translation()), rotation: quat(it.body.rotation()),
+        linvel: vec(it.body.linvel()), angvel: vec(it.body.angvel()),
+        bodyType: it.body.bodyType(), sleeping: it.body.isSleeping(),
+        meshPosition: vec(it.mesh.position), meshRotation: quat(it.mesh.quaternion),
+        tracker: it.tracker ? { ...it.tracker } : null,
+        ts: it.ts ? { ...it.ts } : null,
+        audioExit: !!it._audioExit, audioRack: !!it._audioRack,
+      })),
+    };
+  }
+
+  /** Rebuild the exact ball set and Rapier transforms from snapshot. */
+  restore(snapshot) {
+    if (!snapshot || !Array.isArray(snapshot.items)) throw new Error('Invalid ball snapshot');
+    this.removeAll();
+    this.poolInfo = new Map(snapshot.poolInfo || []);
+    this.removedByPool = new Map(snapshot.removedByPool || []);
+    const { RAPIER } = this.physics;
+    for (const saved of snapshot.items) {
+      const it = this._createBall(saved.poolId, saved.colorSet, saved.value, saved.position, false);
+      const b = it.body;
+      b.setTranslation(saved.position, false);
+      b.setRotation(saved.rotation, false);
+      b.setLinvel(saved.linvel, false);
+      b.setAngvel(saved.angvel, false);
+      if (saved.bodyType !== RAPIER.RigidBodyType.Dynamic) b.setBodyType(saved.bodyType, false);
+      if (saved.sleeping) b.sleep?.(); else b.wakeUp();
+      Object.assign(it, {
+        drawn: !!saved.drawn, parked: !!saved.parked, lifecycle: saved.lifecycle,
+        settledTime: saved.settledTime || 0, facingDot: saved.facingDot || 0,
+        resultPool: saved.resultPool || null,
+        _audioExit: !!saved.audioExit, _audioRack: !!saved.audioRack,
+        ts: saved.ts ? { ...saved.ts } : undefined,
+      });
+      if (saved.tracker) Object.assign(it.tracker, saved.tracker);
+      it.mesh.position.set(saved.meshPosition.x, saved.meshPosition.y, saved.meshPosition.z);
+      it.mesh.quaternion.set(saved.meshRotation.x, saved.meshRotation.y, saved.meshRotation.z, saved.meshRotation.w);
+    }
     this.assertConservation();
   }
 
