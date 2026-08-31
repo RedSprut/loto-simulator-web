@@ -29,6 +29,11 @@
       if(!btn){
         btn=document.createElement('button');btn.type='button';btn.textContent='✕';
         ov.appendChild(btn);
+      }else if(btn.parentElement!==ov){
+        /* A fixed descendant of a transformed/scrolling sheet is still tied to
+           that sheet. Move the existing affordance to the overlay root so it
+           remains fixed to the viewport while the sheet is swiped. */
+        ov.appendChild(btn);
       }
       btn.classList.add('modal-static-close');
       btn.setAttribute('aria-label',appText('Закрыть'));
