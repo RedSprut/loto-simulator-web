@@ -668,8 +668,8 @@ function initTheme(){
   if(saved==='dark'||(saved===null&&prefersDark)){applyDark();}
   else applyLight();
 }
-function applyDark(){document.body.classList.add('dark');document.getElementById('theme-btn').textContent='☀️';localStorage.setItem('loto_theme','dark');updateThemeColor();}
-function applyLight(){document.body.classList.remove('dark');document.getElementById('theme-btn').textContent='🌙';localStorage.setItem('loto_theme','light');updateThemeColor();}
+function applyDark(){document.body.classList.add('dark');document.documentElement.dataset.theme='dark';document.getElementById('theme-btn').textContent='☀️';localStorage.setItem('loto_theme','dark');updateThemeColor();}
+function applyLight(){document.body.classList.remove('dark');document.documentElement.dataset.theme='light';document.getElementById('theme-btn').textContent='🌙';localStorage.setItem('loto_theme','light');updateThemeColor();}
 function toggleDark(){document.body.classList.contains('dark')?applyLight():applyDark();}
 
 // ═══════════════════════════════════════════════
@@ -1719,12 +1719,16 @@ function buildCoverageWheel(pool,pick,rowCount){throw new Error('backend_only');
 
 function wheelCoverage(matrix,pool){throw new Error('backend_only');}
 
-async function buildWheelGenerated(rowCount){throw new Error('backend_only');}
+async function buildWheelGenerated(rowCount,sourceDraws){throw new Error('backend_only');}
 
 async function applyWheelMatrix(){
   if(GEN_BUSY&&!applyWheelMatrix._inner)return;
-  const count=getGenCount(),l=L(),draws=await loadD(cur);
-  const built=await withBusy('Колёсная матрица · '+count+' '+rowWord(count),()=>buildWheelGenerated(count));
+  const count=getGenCount(),l=L();
+  const built=await withBusy('Колёсная матрица · '+count+' '+rowWord(count),async()=>{
+    const draws=await loadD(cur);
+    const matrix=await buildWheelGenerated(count,draws);
+    return {...matrix,draws};
+  });
   if(!built)return;
   rows=filterGeneratedRows(built.rows,count,l,draws);
   if(!rows.length)rows=[nr()];
@@ -4841,8 +4845,9 @@ function QAB_save(withTime){
   if(d>days[m-1]){showCopyToast('В этом месяце нет такого дня');return;}
   let hh=null,mm=null;
   if(withTime){
-    const t=document.getElementById('qab-t').value;
-    if(!t){showCopyToast('Введи время или выбери «Время неизвестно»');return;}
+    const t=document.getElementById('qab-t').value.trim();
+    const tm=/^(?:[01]\d|2[0-3]):[0-5]\d$/.exec(t);
+    if(!tm){showCopyToast(appText('Введи время в формате --:-- или выбери «Время неизвестно»'));return;}
     [hh,mm]=t.split(':').map(Number);
   }
   localStorage.setItem('loto_birth',JSON.stringify({d,m,y,hh,mm}));
@@ -4888,6 +4893,16 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
   if(mEl)mEl.addEventListener('change',()=>{if(mEl.value)ys.focus();});
   if(ys)ys.addEventListener('change',()=>{if(ys.value&&tEl)tEl.focus();});
+  if(tEl)tEl.addEventListener('input',()=>{
+    const before=tEl.value;
+    const digits=before.replace(/\D/g,'').slice(0,4);
+    let formatted=digits.length>2?digits.slice(0,2)+':'+digits.slice(2):digits;
+    /* After entering the two hour digits, insert the separator and place the
+       caret in the minute segment. Empty state remains the visible --:-- hint. */
+    if(digits.length===2&&before.length<2+1&&!before.includes(':'))formatted+=':';
+    if(formatted!==before)tEl.value=formatted;
+    if(formatted.length===3&&tEl===document.activeElement){try{tEl.setSelectionRange(3,3);}catch(e){}}
+  });
 });
 
 
