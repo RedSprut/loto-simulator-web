@@ -33,6 +33,9 @@
       }
       if(btn.parentElement!==sheet||btn!==sheet.firstElementChild)sheet.insertBefore(btn,sheet.firstChild);
       btn.classList.add('modal-static-close');
+      sheet.classList.add('modal-has-static-close');
+      const clearance=sheet.querySelector(':scope > .if-hdr,:scope > .lang-title,:scope > .sg-header,:scope > .horo-ribbon')||btn.nextElementSibling;
+      if(clearance)clearance.classList.add('modal-static-close-clearance');
       btn.setAttribute('aria-label',appText('Закрыть'));
       if(id!=='mres-ov')btn.onclick=e=>{e.stopPropagation();close();};
     });

@@ -535,7 +535,13 @@ function showModelResult(result,model){
   const title=document.getElementById('mres-title');if(title)title.textContent='🎯 '+modelLabel(model);
   const sub=document.getElementById('mres-sub');if(sub)sub.textContent=list.length+' '+rowWord(list.length);
   const useBtn=document.querySelector('[data-mres-use]');
-  if(useBtn)useBtn.onclick=()=>{window.LotoModals?window.LotoModals.closeModal('mres-ov'):document.getElementById('mres-ov')?.classList.remove('show');applyBackendRows(mresRows,'🎯 '+modelLabel(model));};
+  if(useBtn)useBtn.onclick=async()=>{
+    await withTransferBusy(async()=>{
+      window.LotoModals?window.LotoModals.closeModal('mres-ov'):document.getElementById('mres-ov')?.classList.remove('show');
+      applyBackendRows(mresRows,'🎯 '+modelLabel(model));
+    });
+    goToRows({immediate:true});
+  };
   const judgeBtn=document.querySelector('[data-mres-judge]');
   if(judgeBtn)judgeBtn.onclick=()=>{window.judgeGeneratedRows?.(mresRows.map(r=>({main:[...r.main],bonus:[...r.bonus]})));};
   const closeBtn=document.querySelector('[data-mres-close]');
@@ -4109,10 +4115,13 @@ async function MATRIX_copy(btn){
   }
 }
 function MATRIX_close(){document.getElementById('matrix-ov').classList.remove('show');}
-function MATRIX_use(){
+async function MATRIX_use(){
   const st=CONS_state;if(!st||!st.matrix)return;
-  MATRIX_close();CONS_close();
-  setGeneratedRows(st.matrix,'Готово: '+st.matrix.length+' '+rowWord(st.matrix.length)+' · Итоговая матрица консенсуса · '+st.ctx.lotteryName+'.',true);
+  await withTransferBusy(async()=>{
+    MATRIX_close();CONS_close();
+    setGeneratedRows(st.matrix,'Готово: '+st.matrix.length+' '+rowWord(st.matrix.length)+' · Итоговая матрица консенсуса · '+st.ctx.lotteryName+'.',true);
+  });
+  goToRows({immediate:true});
 }
 function MATRIX_judge(){
   const st=CONS_state;
@@ -4225,25 +4234,49 @@ function SUP_open(src){
   else{const st=CONS_state;if(st&&st.matrix)srcRows=st.matrix.map(r=>({m:[...r.m],b:[...(r.b||[])]}));label=`Анализирую ${srcRows.length} ${rowWord(srcRows.length)} итоговой матрицы · ${l.short||l.name}`;}
   if(srcRows.length<2){showFeedback('Мало данных','Судье нужно минимум 2 заполненных ряда.','⚖️',3000);return;}
   const processingRows=prepareRowsForGroupAnalysis(srcRows,'judge');
-  SUP_state={src,srcRows:processingRows,n:Math.min(3,processingRows.length)};
-  document.getElementById('sup-src').textContent=label;
-  document.getElementById('sup-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===SUP_state.n?' on':'')+'" data-loto-event-click="SUP_setN('+n+',this)">'+n+'</button>').join('');
+  const total=processingRows.length;
+  SUP_state={src,srcRows:processingRows,n:Math.min(total>10?10:3,total),total,label};
+  SUP_renderSelection();
   document.getElementById('sup-result').innerHTML='';
   document.getElementById('sup-go').style.display='';
   document.getElementById('sup-ov').classList.add('show');
 }
-function SUP_setN(n,el){SUP_state.n=n;document.querySelectorAll('#sup-counts .pick-cnt').forEach(b=>b.classList.toggle('on',b===el));}
+function SUP_renderSelection(){
+  const st=SUP_state;if(!st)return;
+  document.getElementById('sup-src').textContent=st.label+' · '+appText('Для анализа выбрано')+': '+st.n+' / '+st.total;
+  const counts=document.getElementById('sup-counts');
+  if(st.total<=10){
+    counts.style.display='grid';counts.style.gridTemplateColumns='repeat(5,1fr)';
+    counts.innerHTML=Array.from({length:st.total},(_,i)=>i+1).map(n=>'<button class="pick-cnt'+(n===st.n?' on':'')+'" data-loto-event-click="SUP_setN('+n+',this)">'+n+'</button>').join('');
+  }else{
+    counts.style.display='block';
+    counts.innerHTML='<select class="gen-select" id="sup-count-select" aria-label="'+escapeHtml(appText('Сколько строк собрать'))+'" data-loto-event-change="SUP_setN(this.value,this)">'+
+      Array.from({length:st.total-1},(_,i)=>i+1).map(n=>'<option value="'+n+'"'+(n===st.n?' selected':'')+'>'+n+'</option>').join('')+
+      '<option value="'+st.total+'"'+(st.n===st.total?' selected':'')+'>'+escapeHtml(appText('Все строки'))+' ('+st.total+')</option></select>';
+  }
+}
+function SUP_setN(n,el){
+  const st=SUP_state;if(!st)return;
+  st.n=Math.max(1,Math.min(st.total,parseInt(n,10)||1));
+  document.querySelectorAll('#sup-counts .pick-cnt').forEach(b=>b.classList.toggle('on',+b.textContent===st.n));
+  document.getElementById('sup-src').textContent=st.label+' · '+appText('Для анализа выбрано')+': '+st.n+' / '+st.total;
+}
+function getSupSelectedRows(){
+  const st=SUP_state;if(!st||!Array.isArray(st.srcRows))return[];
+  return st.srcRows.slice(0,Math.max(1,Math.min(st.srcRows.length,parseInt(st.n,10)||1)));
+}
+window.getSupSelectedRows=getSupSelectedRows;
 function SUP_close(){document.getElementById('sup-ov').classList.remove('show');}
 async function SUP_go(){
   const st=SUP_state;if(!st)return;
   return withBusy('Генерация…',async()=>{
-  const l=L(),res=document.getElementById('sup-result');
+  const l=L(),res=document.getElementById('sup-result'),selectedRows=getSupSelectedRows();
   res.innerHTML='<div class="if-empty" style="padding:20px">⚖️ Судья взвешивает голоса рядов и структуру поля…</div>';
   await new Promise(r=>setTimeout(r,60));
   const ctx=await IF_ctx();
   /* голоса чисел в переданных рядах */
   const support=new Array(l.mB+1).fill(0),supB=new Array((l.bB||0)+1).fill(0);
-  st.srcRows.forEach(r=>{r.m.forEach(n=>{if(n>=1&&n<=l.mB)support[n]++;});(r.b||[]).forEach(n=>{if(l.bB&&n>=1&&n<=l.bB)supB[n]++;});});
+  selectedRows.forEach(r=>{r.m.forEach(n=>{if(n>=1&&n<=l.mB)support[n]++;});(r.b||[]).forEach(n=>{if(l.bB&&n>=1&&n<=l.bB)supB[n]++;});});
   /* сила поля по выбранному периоду */
   let A=null,Ab=null;
   if(ctx.currentDraws.length>=5){
@@ -4278,16 +4311,19 @@ async function SUP_go(){
   const issued=st.verdict;
   res.innerHTML='<div class="if-seclbl">Вердикт судьи · '+verdict.length+' '+rowWord(verdict.length)+'</div>'+
     issued.map((r,i)=>'<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>').join('')+
-    '<div class="if-note">Судья объединил голоса твоих рядов ('+st.srcRows.length+') со структурным баллом последних '+(ctx.currentDraws.length)+' тиражей и собрал разнообразный вердикт. Это исследовательские строки, а не прогноз.</div>'+
+    '<div class="if-note">'+appText('Выбрано рядов для голосования')+': '+selectedRows.length+' / '+st.total+'. '+appText('Это исследовательские строки, а не прогноз.')+'</div>'+
     '<button class="btn-draw '+l.cls+'" style="margin-top:10px" data-loto-event-click="SUP_use()">Использовать в симуляторе</button>'+
     '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="SUP_share()">📤 Поделиться вердиктом</button>';
   document.getElementById('sup-go').style.display='none';
   });
 }
-function SUP_use(){
+async function SUP_use(){
   const st=SUP_state;if(!st||!st.verdict)return;
-  SUP_close();try{MATRIX_close();CONS_close();}catch(e){}
-  setGeneratedRows(st.verdict,'Готово: '+st.verdict.length+' '+rowWord(st.verdict.length)+' · Верховный судья.',true);
+  await withTransferBusy(async()=>{
+    SUP_close();try{MATRIX_close();CONS_close();}catch(e){}
+    setGeneratedRows(st.verdict,'Готово: '+st.verdict.length+' '+rowWord(st.verdict.length)+' · Верховный судья.',true);
+  });
+  goToRows({immediate:true});
 }
 function SUP_share(){
   const st=SUP_state;if(!st||!st.verdict)return;
@@ -4737,10 +4773,13 @@ async function QA_go(){
     '<button class="btn-exp" style="margin-top:8px;border-color:#C9A55A;color:#F5CE7B" data-loto-event-click="HORO_open()">📜 Гороскоп на сегодня</button>'+
     '<button class="btn-exp" style="margin-top:8px;border-color:#6B4BA8;color:#E8DEFA" data-loto-event-click="QA_share()">📤 Поделиться со Вселенной</button>';
 }
-function QA_use(){
+async function QA_use(){
   const st=QA_state;if(!st||!st.rows)return;
-  QA_close();
-  setGeneratedRows(st.rows,'Готово: '+st.rows.length+' '+rowWord(st.rows.length)+' · Квантово-астральный режим.',true);
+  await withTransferBusy(async()=>{
+    QA_close();
+    setGeneratedRows(st.rows,'Готово: '+st.rows.length+' '+rowWord(st.rows.length)+' · Квантово-астральный режим.',true);
+  });
+  goToRows({immediate:true});
 }
 function QA_share(){
   const st=QA_state;if(!st||!st.rows)return;
@@ -4781,6 +4820,7 @@ async function QAB_clear(){
 }
 function QAB_open(){
   const b=QA_birth();
+  document.getElementById('qab-t').value='';
   document.getElementById('qab-clear').style.display=b?'':'none';
   if(b){
     document.getElementById('qab-d').value=b.d;
@@ -4998,7 +5038,9 @@ function GENN_go(){
 var GEN_BUSY=false,BUSY_t0=0,BUSY_timer=null;
 function BUSY_show(label){
   BUSY_t0=performance.now();
-  const raw=String(label||'Генерация…');
+  const raw=String(label==null?'Генерация…':label);
+  const silent=raw==='';
+  const box=document.querySelector('#busy-ov .busy-box');if(box)box.classList.toggle('busy-hourglass-only',silent);
   const loading=raw.startsWith('Загрузка');
   const title=loading?appText(raw):(raw.startsWith('Симуляция')?appText('Симуляция тиража…'):appText('Генерация…'));
   document.getElementById('busy-label').textContent=title;
@@ -5019,6 +5061,7 @@ async function BUSY_hide(){
   const shown=performance.now()-BUSY_t0;
   await new Promise(r=>setTimeout(r,Math.max(220,480-shown))); /* минимум показа — глазом видно */
   overlay.classList.remove('show');
+  const box=overlay.querySelector('.busy-box');if(box)box.classList.remove('busy-hourglass-only');
   const sub=document.getElementById('busy-sub');if(sub)sub.hidden=false;
 }
 async function withBusy(label,fn){
@@ -5027,6 +5070,12 @@ async function withBusy(label,fn){
   BUSY_show(label);
   try{return await fn();}
   finally{GEN_BUSY=false;await BUSY_hide();}
+}
+async function withTransferBusy(fn){
+  return withBusy('',async()=>{
+    await new Promise(resolve=>requestAnimationFrame(()=>resolve()));
+    return fn();
+  });
 }
 
 
@@ -5114,15 +5163,21 @@ async function ADV_judge(){
   JUDGE_render('adv');
   const mp=document.getElementById('adv-result');if(mp)try{mp.scrollIntoView({behavior:'smooth',block:'nearest'});}catch(e){}
 }
-function ADV_use(){
+async function ADV_use(){
   const st=ADV_state;if(!st||!st.rows)return;
-  ADV_close();closeSG();
-  setGeneratedRows(st.rows,'Набор «'+(ADV_NAMES[st.algo]||st.algo)+'» перенесён в симулятор. Это не прогноз. 🍀',true);
+  await withTransferBusy(async()=>{
+    ADV_close();closeSG();
+    setGeneratedRows(st.rows,'Набор «'+(ADV_NAMES[st.algo]||st.algo)+'» перенесён в симулятор. Это не прогноз. 🍀',true);
+  });
+  goToRows({immediate:true});
 }
-function ADV_useVerdict(){
+async function ADV_useVerdict(){
   const st=ADV_state;if(!st||!st.verdict)return;
-  ADV_close();closeSG();
-  setGeneratedRows(st.verdict.map(r=>({m:r.m,b:r.b})),'Вердикт судьи перенесён в билет. ⚖️🍀');
+  await withTransferBusy(async()=>{
+    ADV_close();closeSG();
+    setGeneratedRows(st.verdict.map(r=>({m:r.m,b:r.b})),'Вердикт судьи перенесён в билет. ⚖️🍀');
+  });
+  goToRows({immediate:true});
 }
 function ADV_share(){
   const st=ADV_state;if(!st||!st.rows)return;
@@ -5286,10 +5341,13 @@ async function SUPC_db(){
     '<button class="btn-draw '+l.cls+'" style="margin-top:12px" data-loto-event-click="SUPC_dbUse()">Использовать в билете</button>'+
     '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="SUPC_dbShare()">📤 Поделиться</button>';
 }
-function SUPC_dbUse(){
+async function SUPC_dbUse(){
   if(!window.SUPC_dbRows)return;
-  SUPC_close();closeSG();
-  setGeneratedRows(window.SUPC_dbRows,'Совет судьи по лидерам базы перенесён в билет. 📊🍀',true);
+  await withTransferBusy(async()=>{
+    SUPC_close();closeSG();
+    setGeneratedRows(window.SUPC_dbRows,'Совет судьи по лидерам базы перенесён в билет. 📊🍀',true);
+  });
+  goToRows({immediate:true});
 }
 function SUPC_dbShare(){
   if(!window.SUPC_dbRows)return;
@@ -5430,20 +5488,22 @@ function JUDGE_choiceText(meta){
   if(meta.active===meta.proposed)return`Твой выбор: применить все ${meta.active} ${meta.active===1?'изменение':'изменения'} судьи`;
   return`Твой выбор: применить ${meta.active} ${meta.active===1?'изменение':'изменения'} из ${meta.proposed}`;
 }
-function JUDGE_apply(ns){
+async function JUDGE_apply(ns){
   const st=JUDGE_state[ns];if(!st||!st.onApply)return;
   const proposed=st.plan.reduce((sum,p)=>sum+p.swaps.length,0);
   const active=st.plan.reduce((sum,p)=>sum+p.swaps.filter(s=>s.apply).length,0);
   // Close the sheet BEFORE applying the rows. Otherwise the rows are updated and
   // scrolled correctly underneath a still-visible Judge overlay (notably sup-ov),
   // which looks like a dead button to the user.
-  const mount=document.getElementById(st.mountId);
-  const overlay=mount&&mount.closest?mount.closest('[id$="-ov"]'):null;
-  if(overlay&&overlay.classList.contains('show')){
-    if(window.LotoModals)window.LotoModals.closeModal(overlay.id);
-    else overlay.classList.remove('show');
-  }
-  st.onApply(JUDGE_finalRows(ns),{active,proposed,partial:active>0&&active<proposed});
+  await withTransferBusy(async()=>{
+    const mount=document.getElementById(st.mountId);
+    const overlay=mount&&mount.closest?mount.closest('[id$="-ov"]'):null;
+    if(overlay&&overlay.classList.contains('show')){
+      if(window.LotoModals)window.LotoModals.closeModal(overlay.id);
+      else overlay.classList.remove('show');
+    }
+    st.onApply(JUDGE_finalRows(ns),{active,proposed,partial:active>0&&active<proposed});
+  });
   goToRows({immediate:true});
 }
 async function JUDGE_open(ns,rows,mountId,onApply,opts){
@@ -5520,10 +5580,13 @@ function PDX_renderRows(){
     '<div id="pdx-jmount" style="margin-top:6px"></div>'+
     '<button class="btn-exp" style="margin-top:10px" data-loto-event-click="PDX_go()">🔄 Пересобрать парадоксы</button>';
 }
-function PDX_use(){
+async function PDX_use(){
   const st=PDX_state;if(!st||!st.rows)return;
-  PDX_close();
-  setGeneratedRows(st.rows,'Парадоксы перенесены в билет. ♾️ Это исследование структуры, а не прогноз — вероятность тиража не меняется.',true);
+  await withTransferBusy(async()=>{
+    PDX_close();
+    setGeneratedRows(st.rows,'Парадоксы перенесены в билет. ♾️ Это исследование структуры, а не прогноз — вероятность тиража не меняется.',true);
+  });
+  goToRows({immediate:true});
 }
 function PDX_copy(btn){
   const st=PDX_state;if(!st||!st.rows)return;
