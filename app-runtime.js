@@ -1030,8 +1030,16 @@ function renderRows(){
   const dBo=drawBonusCount(l);
   rows.forEach((row,i)=>{
     const div=document.createElement('div');
-    div.className='ticket-row'+(i===act?' on-'+l.cls:'')+(groupAnalysisState.active&&i>=groupAnalysisState.limit?' analysis-locked':'');
-    div.onclick=()=>{act=i;renderSim();};
+    const has=row.m.length>0||row.b.length>0;
+    const locked=groupAnalysisState.active&&i>=groupAnalysisState.limit&&has;
+    div.className='ticket-row'+(i===act?' on-'+l.cls:'')+(locked?' analysis-locked':'');
+    if(!locked)div.onclick=()=>{act=i;renderSim();};
+    if(locked){
+      const label=appText('Доступно в PRO');
+      div.innerHTML=`<div class="rn">${i+1}</div><div class="analysis-pro-cover" aria-label="${escapeHtml(label)}"><span class="analysis-pro-cover-icon" aria-hidden="true">🔒</span><span>${escapeHtml(label)}</span></div>`;
+      c.appendChild(div);
+      return;
+    }
     let h=`<div class="rn">${i+1}</div><div class="rballs">`;
     for(let j=0;j<l.pM;j++){const n=row.m[j];h+=n!==undefined?`<div class="rb rb-m-${l.cls}">${n}</div>`:`<div class="rb rb-e-${l.cls}">·</div>`;}
     if(dBo>0){
@@ -1039,11 +1047,9 @@ function renderRows(){
       for(let j=0;j<dBo;j++){const n=row.b[j];h+=n!==undefined?`<div class="rb rb-b-${l.cls}">${n}</div>`:`<div class="rb rb-e-${l.cls}">·</div>`;}
     }
     h+='</div>';
-    const has=row.m.length>0||row.b.length>0;
     if(i===act&&has)h+=`<button class="ract back-${l.cls}" data-loto-event-click="event.stopPropagation();undo(${i})">←</button>`;
     else if(has)h+=`<button class="ract" data-loto-event-click="event.stopPropagation();clrRow(${i})">×</button>`;
     else h+=`<button class="ract" data-loto-event-click="event.stopPropagation();addRow()">+</button>`;
-    if(groupAnalysisState.active&&i>=groupAnalysisState.limit&&has)h+=`<div class="analysis-pro-badge">${appText('Доступно в PRO')}</div>`;
     div.innerHTML=h;c.appendChild(div);
   });
 }
@@ -1727,14 +1733,16 @@ async function applyWheelMatrix(){
 // ═══════════════════════════════════════════════
 //  DRAW + BANNER
 // ═══════════════════════════════════════════════
-function doDraw(){
-  const l=L();fillAll();
-  const dM=nextUniqueMain(l,'simulation'),dB=drawnBonusCount(l)>0?rnd(l.bB,drawnBonusCount(l)):[];
-  lastDraw={main:dM,bonus:dB};
-  showBanner(dM,dB);renderSim();
-  // track ROI: add spending
-  const spent=rows.filter(r=>r.m.length===l.pM).length*l.price;
-  const roi=loadROI();roi.spent+=spent;saveROI(roi);
+async function doDraw(){
+  return withBusy('Симуляция тиража…',async()=>{
+    const l=L();fillAll();
+    const dM=nextUniqueMain(l,'simulation'),dB=drawnBonusCount(l)>0?rnd(l.bB,drawnBonusCount(l)):[];
+    lastDraw={main:dM,bonus:dB};
+    showBanner(dM,dB);renderSim();
+    // track ROI: add spending
+    const spent=rows.filter(r=>r.m.length===l.pM).length*l.price;
+    const roi=loadROI();roi.spent+=spent;saveROI(roi);
+  });
 }
 
 function resetBanner(){
@@ -2097,12 +2105,14 @@ async function renderFavs(){
 }
 
 async function useFav(i){
-  const favs=await loadFav();
-  if(!favs[i])return;
-  rows=normalizeGeneratedRows(favs[i].rows,L());
-  act=0;renderSim();
-  goToRows();resetBanner();
-  showFeedback('Загружено','Комбинации из Избранного снова поставлены в симулятор.','✅');
+  return withBusy('Загрузка сохранённых комбинаций…',async()=>{
+    const favs=await loadFav();
+    if(!favs[i])return;
+    rows=normalizeGeneratedRows(favs[i].rows,L());
+    act=0;renderSim();
+    goToRows();resetBanner();
+    showFeedback('Загружено','Комбинации из Избранного снова поставлены в симулятор.','✅');
+  });
 }
 
 async function copyFav(i,btn){
@@ -3795,20 +3805,22 @@ async function IF_run(){
     IF_state=null;return;
   }
   body.innerHTML='<div class="if-empty">🧬 Анализирую структуру поля…</div>';
-  await new Promise(r=>setTimeout(r,60));
-  const A=IF_scores(ctx.currentDraws,'main',l.mB,l.pM);
-  const bonusCnt=drawBonusCount?drawBonusCount(l):(l.pBo||0);
-  const Ab=(l.bB&&bonusCnt)?IF_scores(ctx.currentDraws,'bonus',l.bB,bonusCnt):null;
-  const rows=ensureUniqueGeneratedRows(IF_buildRows(A,Ab,l,ctx),l);
-  const strongBalls=A.scores.filter(s=>s.score>=70).length;
-  const strongLinks=[...A.pairs.lift.values()].filter(p=>p.lift>=1.5&&p.obs>=2).length;
-  IF_state={ctx,A,Ab,rows,strongBalls,strongLinks,lot:cur,tab:'field'};
-  /* сохранить эксперимент локально */
-  try{localStorage.setItem('loto_if_exp',JSON.stringify({lottery:cur,window:ctx.selectedDrawWindow,drawsUsed:ctx.currentDraws.length,date:new Date().toISOString(),rows:rows.map(r=>({type:r.type,m:r.m,b:r.b,score:r.fieldScore}))}));}catch(e){}
-  const sum=[[ctx.currentDraws.length,'тиражей в анализе'],[rows.length,'строк создано'],[strongBalls,'сильных шаров'],[strongLinks,'сильных связей']];
-  document.getElementById('if-summary').innerHTML=sum.map(x=>'<div class="if-sumcard"><div class="if-sumv">'+x[0]+'</div><div class="if-suml">'+x[1]+'</div></div>').join('')+
-    '<div class="if-sumcard" style="grid-column:1/-1"><span class="if-status">'+A.entropy.status+'</span><div class="if-suml" style="margin-top:6px">'+A.entropy.desc+' Концентрация поля описывает структуру модели на выбранном историческом окне, а не уменьшение случайности будущего тиража.</div></div>';
-  IF_tab('field');
+  await withBusy('Генерация…',async()=>{
+    await new Promise(r=>setTimeout(r,60));
+    const A=IF_scores(ctx.currentDraws,'main',l.mB,l.pM);
+    const bonusCnt=drawBonusCount?drawBonusCount(l):(l.pBo||0);
+    const Ab=(l.bB&&bonusCnt)?IF_scores(ctx.currentDraws,'bonus',l.bB,bonusCnt):null;
+    const rows=ensureUniqueGeneratedRows(IF_buildRows(A,Ab,l,ctx),l);
+    const strongBalls=A.scores.filter(s=>s.score>=70).length;
+    const strongLinks=[...A.pairs.lift.values()].filter(p=>p.lift>=1.5&&p.obs>=2).length;
+    IF_state={ctx,A,Ab,rows,strongBalls,strongLinks,lot:cur,tab:'field'};
+    /* сохранить эксперимент локально */
+    try{localStorage.setItem('loto_if_exp',JSON.stringify({lottery:cur,window:ctx.selectedDrawWindow,drawsUsed:ctx.currentDraws.length,date:new Date().toISOString(),rows:rows.map(r=>({type:r.type,m:r.m,b:r.b,score:r.fieldScore}))}));}catch(e){}
+    const sum=[[ctx.currentDraws.length,'тиражей в анализе'],[rows.length,'строк создано'],[strongBalls,'сильных шаров'],[strongLinks,'сильных связей']];
+    document.getElementById('if-summary').innerHTML=sum.map(x=>'<div class="if-sumcard"><div class="if-sumv">'+x[0]+'</div><div class="if-suml">'+x[1]+'</div></div>').join('')+
+      '<div class="if-sumcard" style="grid-column:1/-1"><span class="if-status">'+A.entropy.status+'</span><div class="if-suml" style="margin-top:6px">'+A.entropy.desc+' Концентрация поля описывает структуру модели на выбранном историческом окне, а не уменьшение случайности будущего тиража.</div></div>';
+    IF_tab('field');
+  });
 }
 function IF_close(){document.getElementById('if-ov').classList.remove('show');}
 function IF_reset(){IF_state=null;}
@@ -4001,6 +4013,7 @@ function PICK_close(){document.getElementById('pick-ov').classList.remove('show'
 function CONS_candidateScore(row,st){throw new Error('backend_only');}
 async function PICK_go(){
   const st=CONS_state;if(!st)return;
+  return withBusy('Генерация…',async()=>{
   PICK_close();
   CONS_close();
   const body=document.getElementById('matrix-body');
@@ -4071,6 +4084,7 @@ async function PICK_go(){
       '<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b&&r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>'+
       '<div class="if-rowexp">Добавляет '+r.newPairs+' новых пар'+(i?' · пересечение с предыдущими: до '+r.overlapPrev+' чисел':'')+'</div></div>';
   }).join('');
+  });
 }
 function MATRIX_info(i){
   const r=CONS_state&&CONS_state.matrix&&CONS_state.matrix[i];
@@ -4215,6 +4229,7 @@ function SUP_setN(n,el){SUP_state.n=n;document.querySelectorAll('#sup-counts .pi
 function SUP_close(){document.getElementById('sup-ov').classList.remove('show');}
 async function SUP_go(){
   const st=SUP_state;if(!st)return;
+  return withBusy('Генерация…',async()=>{
   const l=L(),res=document.getElementById('sup-result');
   res.innerHTML='<div class="if-empty" style="padding:20px">⚖️ Судья взвешивает голоса рядов и структуру поля…</div>';
   await new Promise(r=>setTimeout(r,60));
@@ -4260,6 +4275,7 @@ async function SUP_go(){
     '<button class="btn-draw '+l.cls+'" style="margin-top:10px" data-loto-event-click="SUP_use()">Использовать в симуляторе</button>'+
     '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="SUP_share()">📤 Поделиться вердиктом</button>';
   document.getElementById('sup-go').style.display='none';
+  });
 }
 function SUP_use(){
   const st=SUP_state;if(!st||!st.verdict)return;
@@ -4695,7 +4711,9 @@ async function QA_go(){
   const res=document.getElementById('qa-result');
   res.innerHTML='<div class="if-empty" style="color:#C9B8E8;padding:22px">🔭 Запрашиваю квантовый поток и считаю положение Луны…</div>';
   const l=L();
-  const rows=ensureUniqueGeneratedRows(await QA_rows(st.n),l);
+  const generated=await withBusy('Генерация…',()=>QA_rows(st.n));
+  if(!generated)return;
+  const rows=ensureUniqueGeneratedRows(generated,l);
   st.rows=rows;
   const{ph,ms,zs,src,drawDate}=rows.meta;
   res.innerHTML=rows.map((r,ri)=>
@@ -4964,7 +4982,11 @@ function GENN_go(){
 var GEN_BUSY=false,BUSY_t0=0,BUSY_timer=null;
 function BUSY_show(label){
   BUSY_t0=performance.now();
-  document.getElementById('busy-label').textContent=label||'Генерация…';
+  const raw=String(label||'Генерация…');
+  const title=raw.startsWith('Симуляция')?appText('Симуляция тиража…'):appText('Генерация…');
+  document.getElementById('busy-label').textContent=title;
+  const sub=document.getElementById('busy-sub');
+  if(sub)sub.textContent=appText('Считаю по базе тиражей — секунду');
   const fill=document.getElementById('busy-fill');
   fill.style.width='4%';
   clearInterval(BUSY_timer);
@@ -5441,7 +5463,9 @@ async function PDX_go(){
   if(!data)return;
   let useBase=st.useBase;
   if(data.warn){useBase=false;showFeedback('Мало данных для базы','Для «с базой» нужно минимум 5 тиражей. Собираю парадоксы без базы — по чистой структуре.','♾️',3200);st.useBase=false;PDX_renderMode();}
-  st.rows=PDX_generate(st.n,useBase,l,data.draws);
+  const generated=await withBusy('Генерация…',()=>PDX_generate(st.n,useBase,l,data.draws));
+  if(!generated)return;
+  st.rows=generated;
   document.getElementById('pdx-go').style.display='none';
   PDX_renderRows();
 }
