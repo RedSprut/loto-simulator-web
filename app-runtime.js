@@ -5689,7 +5689,10 @@ async function JC_continue(){
 (function(){
   // The avatar editor is a nested account tool: it must not replace/close the account
   // overlay underneath it, otherwise a successful save returns to a vanished cabinet.
+  // Nested utility dialogs stay above their parent feature (birth-date editor
+  // over Quantum-Astral, confirmation over the editor) instead of replacing it.
   var TRANSIENT={'busy-ov':1,'aved-ov':1};
+  var NESTED={'qab-ov':1,'cc-ov':1};
   var CRITICAL={
     'cc-ov':1,'fb-ov':1,'prev-ov':1,'pro-ov':1,'mres-ov':1,'jc-ov':1,
     'cons-ov':1,'qa-ov':1,'adv-ov':1,'sup-ov':1,'pdx-ov':1,'matrix-ov':1,
@@ -5746,6 +5749,11 @@ async function JC_continue(){
       var candidate=document.activeElement;
       if(candidate&&candidate!==document.body&&!opened.contains(candidate))openers[opened.id]=candidate;
       else if(lastTrigger&&!opened.contains(lastTrigger))openers[opened.id]=lastTrigger;
+    }
+    /* Nested dialogs become the active focus/escape target but deliberately
+       leave their parent overlay mounted underneath. */
+    if(NESTED[opened.id]){
+      labelModal(opened);activeModal=opened.id;lockBody();focusInitial(opened);return;
     }
     guard=true;
     try{tops().forEach(function(el){

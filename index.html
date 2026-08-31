@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="0ee9d28" data-build-ts="2026-08-31T14:19:06.888Z">
+<html lang="ru" data-build="f241a3c" data-build-ts="2026-08-31T15:47:15.091Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=0ee9d28"></script>
+<script src="./boot-runtime.js?v=f241a3c"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,7 +14,7 @@
 <meta property="og:description" content="Lottery draw simulator and analytics tool. No ticket sales, bets, or guaranteed winnings.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://redsprut.github.io/loto-simulator-web/">
-<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=0ee9d28">
+<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=f241a3c">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary">
@@ -393,7 +393,14 @@ body.dark .gen-select{color-scheme:dark;background-image:url("data:image/svg+xml
 .filter-check input{margin-top:2px;transform:scale(1.15);accent-color:var(--gold)}
 .filter-check:has(input:checked){border-color:rgba(233,180,76,.62);background:linear-gradient(90deg,rgba(233,180,76,.1),transparent),var(--bg3)}
 .filter-mini{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.mini-inp{width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--inp-border);background:var(--inp-bg);color:var(--fg);font-size:16px;font-weight:700;outline:none}
+.mini-inp{width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--inp-border);background:var(--inp-bg);color:var(--fg);font-size:16px;font-weight:700;outline:none;color-scheme:light}
+body.dark .mini-inp{color-scheme:dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mini-inp{color-scheme:dark}}
+/* Native number steppers inherit a platform colour; force a readable contrast
+   on both WebKit (desktop/iOS) and Chromium shells. */
+.mini-inp[type="number"]::-webkit-inner-spin-button{opacity:1;filter:brightness(0)}
+body.dark .mini-inp[type="number"]::-webkit-inner-spin-button{filter:invert(1) brightness(1.8)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mini-inp[type="number"]::-webkit-inner-spin-button{filter:invert(1) brightness(1.8)}}
 
 /* ══ КОЛЁСНАЯ МАТРИЦА ══ */
 .wheel-box{background:var(--bg2);border:1.5px solid var(--border);border-radius:18px;padding:14px;margin-top:10px;box-shadow:var(--card-shadow)}
@@ -1482,14 +1489,14 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 }
 body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.cele-box)::-webkit-scrollbar{display:none}
 .cc-box,.cele-box{max-height:calc(100dvh - 40px)}
-/* MacBook и ПК: постоянно видимая внутренняя полоса для каждого длинного окна. */
-@media(hover:hover) and (pointer:fine){
-  body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box){overflow-y:scroll;scrollbar-gutter:stable;scrollbar-width:thin;scrollbar-color:var(--gold) rgba(233,180,76,.12)}
-  body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box)::-webkit-scrollbar{display:block;width:11px}
-  body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box)::-webkit-scrollbar-track{background:rgba(233,180,76,.1);border-radius:999px}
-  body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box)::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#F5CE7B,#B07E1F);border:2px solid transparent;border-radius:999px;background-clip:padding-box;min-height:44px}
-  #mres-ov .if-sheet{scrollbar-gutter:auto;scrollbar-width:none}
-  #mres-ov .if-sheet::-webkit-scrollbar{display:none}
+/* Скролл модальных карточек остаётся доступен свайпом/колёсиком, но декоративная
+   полоса не занимает место и не превращается в белую линию сбоку. */
+body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.cele-box,.cc-msg,.cal-box,.aved-box,.about-scroll,.acc-scroll){
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+}
+body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.cele-box,.cc-msg,.cal-box,.aved-box,.about-scroll,.acc-scroll)::-webkit-scrollbar{
+  width:0!important;height:0!important;display:none!important;background:transparent!important;
 }
 </style>
 </head>
@@ -2226,7 +2233,7 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 @media(max-width:699px){
   #prev-ov,#model-info-ov{align-items:stretch;padding:max(6px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left))}
   #prev-ov .pro-sheet,#model-info-ov .pro-sheet{border-radius:22px;max-height:100%;min-height:0;padding-top:calc(24px + env(safe-area-inset-top));padding-bottom:calc(18px + env(safe-area-inset-bottom))}
-  #prev-ov .pro-close,#model-info-ov .pro-close{position:fixed;top:max(12px,calc(env(safe-area-inset-top) + 8px));right:max(12px,calc(env(safe-area-inset-right) + 8px));width:44px;height:44px;z-index:4;background:#FFF8E8;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+  #prev-ov .pro-close,#model-info-ov .pro-close{width:44px;height:44px;z-index:4;background:#FFF8E8;box-shadow:0 4px 18px rgba(0,0,0,.35)}
   .prev-sheet{justify-content:flex-start}
   .prev-actions{position:sticky;bottom:calc(env(safe-area-inset-bottom) + 2px);padding-top:10px;background:linear-gradient(180deg,rgba(241,226,178,0),#F1E2B2 28%)}
 }
@@ -2237,8 +2244,8 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 }
 </style>
 <div class="pro-ov" id="model-info-ov" role="dialog" aria-modal="true" aria-labelledby="model-info-title">
-  <button type="button" class="pro-close" data-loto-event-click="closeModelDescription(true)" aria-label="Закрыть описание">✕</button>
   <div class="pro-sheet model-info-sheet">
+    <button type="button" class="pro-close" data-loto-event-click="closeModelDescription(true)" aria-label="Закрыть описание">✕</button>
     <div class="model-info-icon" id="model-info-icon">🧮</div>
     <div class="pro-title" id="model-info-title">Описание модели</div>
     <div class="model-info-copy" id="model-info-copy"></div>
@@ -2919,17 +2926,17 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=0ee9d28"></script>
-<script src="./commercial-config.js?v=0ee9d28"></script>
-<script src="./event-runtime.js?v=0ee9d28"></script>
-<script src="./auth-client.js?v=0ee9d28"></script>
-<script src="./native-loader.js?v=0ee9d28"></script>
-<script src="./i18n-catalog.js?v=0ee9d28"></script>
-<script src="./i18n-runtime.js?v=0ee9d28"></script>
-<script src="./app-runtime.js?v=0ee9d28"></script>
-<script src="./inline-runtime-2.js?v=0ee9d28"></script>
-<script src="./commercial-runtime.js?v=0ee9d28"></script>
-<script src="./inline-runtime-3.js?v=0ee9d28"></script>
+<script src="./version.js?v=f241a3c"></script>
+<script src="./commercial-config.js?v=f241a3c"></script>
+<script src="./event-runtime.js?v=f241a3c"></script>
+<script src="./auth-client.js?v=f241a3c"></script>
+<script src="./native-loader.js?v=f241a3c"></script>
+<script src="./i18n-catalog.js?v=f241a3c"></script>
+<script src="./i18n-runtime.js?v=f241a3c"></script>
+<script src="./app-runtime.js?v=f241a3c"></script>
+<script src="./inline-runtime-2.js?v=f241a3c"></script>
+<script src="./commercial-runtime.js?v=f241a3c"></script>
+<script src="./inline-runtime-3.js?v=f241a3c"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3076,9 +3083,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=0ee9d28"></script>
-<script src="./notifications-runtime.js?v=0ee9d28"></script>
-<script src="./pwa-runtime.js?v=0ee9d28"></script>
+<script src="./notification-center.js?v=f241a3c"></script>
+<script src="./notifications-runtime.js?v=f241a3c"></script>
+<script src="./pwa-runtime.js?v=f241a3c"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3089,7 +3096,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=0ee9d28"></script>
-<script src="./inline-runtime-5.js?v=0ee9d28"></script>
+<script src="./inline-runtime-4.js?v=f241a3c"></script>
+<script src="./inline-runtime-5.js?v=f241a3c"></script>
 </body>
 </html>

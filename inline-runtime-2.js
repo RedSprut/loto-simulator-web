@@ -20,12 +20,15 @@
     'ticket-ov':()=>window.TK_close?.(),
     'horo-ov':()=>window.HORO_close?.(),
     'qab-ov':()=>window.QAB_close?.(),
-    'jc-ov':()=>window.JC_close?.()
+    'jc-ov':()=>window.JC_close?.(),
+    'model-info-ov':()=>window.closeModelDescription?.(true),
+    'prev-ov':()=>window.LotoModals?.closeModal('prev-ov')||document.getElementById('prev-ov')?.classList.remove('show'),
+    'pro-ov':()=>window.PRO_close?.()
   };
   function install(){
     Object.entries(MODAL_CLOSES).forEach(([id,close])=>{
       const ov=document.getElementById(id);if(!ov)return;
-      const sheet=ov.querySelector(':scope > .if-sheet,:scope > .sg-sheet,:scope > .lang-box,:scope > .horo-sheet')||ov.firstElementChild;
+      const sheet=ov.querySelector(':scope > .if-sheet,:scope > .sg-sheet,:scope > .lang-box,:scope > .horo-sheet,:scope > .pro-sheet')||ov.firstElementChild;
       if(!sheet)return;
       let btn=Array.from(ov.querySelectorAll('button')).find(b=>b.textContent.trim()==='✕');
       if(!btn){
