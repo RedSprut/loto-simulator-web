@@ -82,7 +82,7 @@
       const rm=$('acc-avatar-remove');if(rm)rm.hidden=true;
     }
   }
-  let loadedUid=null,profileCache=null;
+  let loadedUid=null,profileCache=null,profileRequestSeq=0,avatarRevision=0;
   function applyProfile(p){
     profileCache=p||null;
     setAvatar(p&&p.avatarUrl||null);
@@ -110,13 +110,18 @@
   async function loadAvatar(force){
     const {user,confirmed}=accountState();
     const uid=confirmed?user.id:null;
-    if(!uid){loadedUid=null;profileCache=null;setAvatar(null);const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}return;}
+    if(!uid){profileRequestSeq++;loadedUid=null;profileCache=null;setAvatar(null);const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}return;}
     if(!force&&uid===loadedUid)return; // profile already loaded for this account
     loadedUid=uid;
-    try{const p=await (window.LotoAuth&&window.LotoAuth.getProfile&&window.LotoAuth.getProfile());applyProfile(p);
+    const requestSeq=++profileRequestSeq,revision=avatarRevision;
+    try{const p=await (window.LotoAuth&&window.LotoAuth.getProfile&&window.LotoAuth.getProfile());
+      // A profile request started before a successful upload/removal must never overwrite the
+      // newer stored avatar when its slower response arrives.
+      if(requestSeq!==profileRequestSeq||revision!==avatarRevision||accountState().user?.id!==uid)return;
+      applyProfile(p);
       // Persist the current UI locale so a future birthday greeting can be in the right language.
       try{const loc=document.documentElement.lang||'ru';if(p&&p.locale!==loc)window.LotoAuth.updateProfile({locale:loc}).catch(()=>{});}catch(_e2){}
-    }catch(_e){loadedUid=null;}
+    }catch(_e){if(requestSeq===profileRequestSeq)loadedUid=null;}
   }
   // In-app birthday greeting: when the signed-in user's birthday (month+day) is today, show a
   // localized congratulation once per day. Fully client-side — no push infrastructure touched.
@@ -238,7 +243,6 @@
   const AV_INPUT_MAX=30*1024*1024; // generous input cap; the SAVED crop is a small JPEG
   const AV_OUT=512;                // exported avatar square (px)
   let avObjUrl=null;               // object URL for the picked source file (revoked on close)
-  let avDisplayUrl=null;           // object URL of the SAVED crop, kept alive to show the avatar instantly
   // Decode any picked file to a drawable bitmap. createImageBitmap covers JPG/PNG/WebP
   // everywhere and HEIC where the engine supports it (iOS/Safari/WKWebView). Fallback to
   // an <img> element + decode() for engines that only decode via the DOM.
@@ -345,14 +349,13 @@
         // IS the success confirmation — anything less throws and is handled below (editor stays
         // open, localized error, retry possible).
         const info=await window.LotoAuth.uploadAvatar(outFile);
-        // Show the avatar immediately from the just-saved bytes — a same-origin object URL that
-        // is guaranteed to render (no network round-trip, no stale/empty cache). On reload,
-        // loadAvatar() fetches a fresh signed URL from Storage, and other devices get it via
-        // getProfile after sign-in. Keep the previous display URL from leaking.
-        try{if(avDisplayUrl)URL.revokeObjectURL(avDisplayUrl);}catch(_r){}
-        avDisplayUrl=URL.createObjectURL(blob);
-        setAvatar(avDisplayUrl);
-        if(info){profileCache={...(profileCache||{}),avatarUrl:info.avatarUrl||null,avatarPath:info.avatarPath||null,avatarUpdatedAt:info.avatarUpdatedAt||null};}
+        // Use only the URL returned after Supabase Storage + profile persistence. A temporary
+        // blob preview cannot survive navigation/reload and can be overwritten by a late
+        // getProfile response.
+        if(!info?.avatarUrl)throw new Error('avatar_url_missing');
+        avatarRevision++;profileRequestSeq++;
+        profileCache={...(profileCache||{}),avatarUrl:info.avatarUrl,avatarPath:info.avatarPath||null,avatarUpdatedAt:info.avatarUpdatedAt||null};
+        setAvatar(info.avatarUrl);
         this.avEdCancel();
         msg('acc-avatar-msg','Фото профиля обновлено.','success');
       }catch(err){msg('acc-avatar-msg',avatarError(err),'error');}
@@ -361,7 +364,7 @@
     async removeAvatar(){
       if(avatarBusy)return;avatarBusy=true;
       const b=$('acc-avatar-busy');if(b)b.hidden=false;msg('acc-avatar-msg','',null);
-      try{await window.LotoAuth.removeAvatar();setAvatar(null);msg('acc-avatar-msg','Фото профиля удалено.','success');}
+      try{await window.LotoAuth.removeAvatar();avatarRevision++;profileRequestSeq++;profileCache={...(profileCache||{}),avatarUrl:null,avatarPath:null};setAvatar(null);msg('acc-avatar-msg','Фото профиля удалено.','success');}
       catch(err){msg('acc-avatar-msg',avatarError(err),'error');}
       finally{avatarBusy=false;if(b)b.hidden=true;}
     },
@@ -416,18 +419,23 @@
         msg('acc-data-msg',/invalid_birthday/.test(c)?'Проверьте дату рождения.':/account_required/.test(c)?'Войдите в аккаунт, чтобы сохранить данные.':'Не удалось сохранить. Попробуйте ещё раз.','error');
       }finally{if(btn)btn.disabled=false;}
     },
-    async signOut(){try{await window.LotoCommercial.signOut();setAvatar(null);profileCache=null;const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}msg('acc-auth-msg','',null);msg('acc-avatar-msg','',null);msg('acc-data-msg','',null);render();}catch(_e){}},
+    async signOut(){try{await window.LotoCommercial.signOut();avatarRevision++;profileRequestSeq++;setAvatar(null);profileCache=null;loadedUid=null;const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}msg('acc-auth-msg','',null);msg('acc-avatar-msg','',null);msg('acc-data-msg','',null);render();}catch(_e){}},
   };
   window.AccountUI=AccountUI;
 
   window.openAccount=function(){
-    if(window.LotoModals)window.LotoModals.openModal('account-ov');else{const el=$('account-ov');if(el)el.classList.add('show');}
+    const el=$('account-ov');
+    if(el)el.__lotoClose=()=>{el.classList.remove('show');document.body.classList.remove('account-open');const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','false');};
+    document.body.classList.add('account-open');
+    if(window.LotoModals)window.LotoModals.openModal('account-ov');else if(el)el.classList.add('show');
     const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','true');
     render();loadAvatar(true);
     try{window.LotoCommercial&&window.LotoCommercial.refreshAccess&&window.LotoCommercial.refreshAccess();}catch(_e){}
   };
   window.closeAccount=function(){
-    if(window.LotoModals)window.LotoModals.closeModal('account-ov');else{const el=$('account-ov');if(el)el.classList.remove('show');}
+    const el=$('account-ov');
+    if(window.LotoModals)window.LotoModals.closeModal('account-ov');else if(el?.__lotoClose)el.__lotoClose('close');else if(el)el.classList.remove('show');
+    document.body.classList.remove('account-open');
     const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','false');
   };
 
