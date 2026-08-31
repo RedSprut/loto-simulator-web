@@ -3,6 +3,13 @@
    скрипт, поэтому build выносит его в boot-runtime.js (parser-blocking, исполняется
    раньше <body>). Скрытие/удаление splash — в IIFE в конце этого же скрипта. */
 document.documentElement.classList.add('loto-booting');
+/* No FREE-before-PRO flash: the body starts `access-pending` (tier badges hidden); reveal them
+   only once the real access level has resolved. refreshAccess() awaits the backend before its
+   first emit, so the first accesschange already carries the true tier. A timeout is a safety net
+   so badges never stay hidden if that event never fires. */
+(function(){var clr=function(){document.body&&document.body.classList.remove('access-pending');window.__lotoTierResolved=true;};
+  window.addEventListener('loto:accesschange',function h(){clr();window.removeEventListener('loto:accesschange',h);});
+  setTimeout(clr,6000);})();
 /* диагностический ловец: покажет любую ошибку прямо на экране */
 window.__bootErrors=[];
 window.onerror=function(msg,src,line,col,err){

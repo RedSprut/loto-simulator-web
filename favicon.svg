@@ -1,24 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Loto Simulator — шары 18, 8 и 3">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Loto Simulator — объёмные лотерейные шары 8, 18 и 3">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8b002b"/><stop offset="1" stop-color="#19000d"/></linearGradient>
-    <radialGradient id="gold" cx="31%" cy="24%" r="76%"><stop stop-color="#fff6a6"/><stop offset=".34" stop-color="#ffc51a"/><stop offset=".72" stop-color="#d98700"/><stop offset="1" stop-color="#7a3900"/></radialGradient>
-    <radialGradient id="rose" cx="31%" cy="24%" r="76%"><stop stop-color="#ffd3e2"/><stop offset=".38" stop-color="#ff2d73"/><stop offset="1" stop-color="#8f0038"/></radialGradient>
-    <radialGradient id="blue" cx="31%" cy="24%" r="76%"><stop stop-color="#bfe4ff"/><stop offset=".38" stop-color="#087cff"/><stop offset="1" stop-color="#00347f"/></radialGradient>
-    <filter id="shadow"><feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#000" flood-opacity=".5"/></filter>
+    <radialGradient id="bg" cx="50%" cy="43%" r="72%"><stop stop-color="#9d002f"/><stop offset=".5" stop-color="#4b001d"/><stop offset="1" stop-color="#160009"/></radialGradient>
+    <radialGradient id="gold" cx="29%" cy="20%" r="82%"><stop stop-color="#fff8b8"/><stop offset=".12" stop-color="#ffd829"/><stop offset=".55" stop-color="#f3a000"/><stop offset=".82" stop-color="#9a4a00"/><stop offset="1" stop-color="#402000"/></radialGradient>
+    <radialGradient id="red" cx="29%" cy="20%" r="82%"><stop stop-color="#ffe2ed"/><stop offset=".12" stop-color="#ff387d"/><stop offset=".56" stop-color="#d9004d"/><stop offset=".84" stop-color="#71002d"/><stop offset="1" stop-color="#280011"/></radialGradient>
+    <radialGradient id="blue" cx="29%" cy="20%" r="82%"><stop stop-color="#d8f1ff"/><stop offset=".12" stop-color="#259cff"/><stop offset=".56" stop-color="#075ed5"/><stop offset=".84" stop-color="#002f79"/><stop offset="1" stop-color="#00132f"/></radialGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="26" stdDeviation="25" flood-color="#000" flood-opacity=".58"/></filter>
   </defs>
-  <rect width="1024" height="1024" rx="218" fill="url(#bg)"/>
+  <rect width="1024" height="1024" rx="214" fill="url(#bg)"/>
+  <ellipse cx="512" cy="850" rx="390" ry="70" fill="#ff164f" opacity=".15"/>
   <g filter="url(#shadow)">
-    <circle cx="292" cy="670" r="202" fill="url(#rose)" stroke="#ff91bd" stroke-width="12"/>
-    <circle cx="732" cy="670" r="202" fill="url(#blue)" stroke="#72c1ff" stroke-width="12"/>
-    <circle cx="512" cy="376" r="246" fill="url(#gold)" stroke="#fff19b" stroke-width="15"/>
+    <circle cx="300" cy="676" r="214" fill="url(#red)"/>
+    <circle cx="724" cy="676" r="214" fill="url(#blue)"/>
+    <circle cx="512" cy="356" r="252" fill="url(#gold)"/>
   </g>
-  <circle cx="292" cy="670" r="112" fill="#fff5df" stroke="#9c1648" stroke-width="8"/>
-  <circle cx="732" cy="670" r="112" fill="#fff5df" stroke="#064da8" stroke-width="8"/>
-  <circle cx="512" cy="376" r="142" fill="#fff5df" stroke="#d88f00" stroke-width="10"/>
-  <g text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" fill="#210813">
-    <text x="292" y="724" font-size="150">18</text>
-    <text x="732" y="735" font-size="188">3</text>
-    <text x="512" y="462" font-size="250">8</text>
+  <g fill="#fff9ed"><circle cx="300" cy="676" r="111"/><circle cx="724" cy="676" r="111"/><circle cx="512" cy="356" r="137"/></g>
+  <g text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="900" fill="#12080d">
+    <text x="300" y="729" font-size="150">18</text><text x="724" y="741" font-size="188">3</text><text x="512" y="441" font-size="244">8</text>
   </g>
-  <circle cx="438" cy="252" r="30" fill="#fff" opacity=".62"/>
+  <g fill="#fff" opacity=".78">
+    <ellipse cx="430" cy="214" rx="55" ry="25" transform="rotate(-28 430 214)"/><ellipse cx="229" cy="564" rx="42" ry="18" transform="rotate(-34 229 564)"/><ellipse cx="650" cy="565" rx="42" ry="18" transform="rotate(-34 650 565)"/>
+  </g>
 </svg>

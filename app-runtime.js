@@ -53,6 +53,9 @@ let resultsArchiveJsonCache=null;
 let resultsJsonPending=null;
 let resultsArchiveJsonPending=null;
 let prizesJsonCache=null;
+const analyticsHistoryCache=new Map();
+const analyticsHistoryReady=new Set();
+let analyticsAccessLevel='';
 
 const LOTS={
   lotto:{id:'lotto',name:'LOTTO',short:'Lotto',region:'Norway',flag:'🇳🇴',activeClass:'ol',cls:'lotto',mB:34,pM:7,bB:34,pBo:0,offBo:1,price:5,currency:'NOK',minR:2,day:'Суббота',dl:'18:00',timeZone:'Europe/Oslo',tzLabel:'Oslo',res:'20:00 Oslo',combos:5379616,plm:'Velg 7 tall',plb:'',bonusName:'Tilleggstall',drawDays:[6],officialProvider:'norsk',officialSourceName:'Norsk Tipping',officialGame:'lotto',officialUrl:'https://www.norsk-tipping.no/lotteri/lotto/resultater',
@@ -203,13 +206,44 @@ function ruleEraForDraw(draw,eras=[]){
     ||null;
 }
 async function loadFullHistory(gameKey){
-  const current=await loadD(gameKey);
-  const archive=await loadArchivePackage(gameKey).catch(()=>({draws:[],eras:[],updatedAt:''}));
-  const merged=mergeDrawLists(archive.draws,current).merged;
-  const currentEra=(archive.eras||[]).find(era=>era.current||!era.to);
-  const currentCount=currentEra?merged.filter(draw=>ruleEraForDraw(draw,archive.eras)?.id===currentEra.id).length:current.length;
-  return{draws:merged,eras:archive.eras,updatedAt:archive.updatedAt,currentCount};
+  const options=arguments[1]||{};
+  const cacheKey=resolveConfigKey(gameKey)||gameKey;
+  if(options.force){analyticsHistoryCache.delete(cacheKey);analyticsHistoryReady.delete(cacheKey);}
+  if(analyticsHistoryCache.has(cacheKey))return analyticsHistoryCache.get(cacheKey);
+  const pending=(async()=>{
+    const current=await loadD(gameKey);
+    let archive;
+    try{archive=await loadArchivePackage(gameKey);}
+    catch(error){
+      if(window.LotoCommercial?.access?.accessLevel==='pro')throw error;
+      archive={draws:[],eras:[],updatedAt:'',restricted:true};
+    }
+    if(window.LotoCommercial?.access?.accessLevel==='pro'&&archive?.restricted)throw new Error('pro_archive_restricted');
+    const merged=mergeDrawLists(archive.draws,current).merged;
+    const currentEra=(archive.eras||[]).find(era=>era.current||!era.to);
+    const currentDraws=currentEra
+      ?merged.filter(draw=>ruleEraForDraw(draw,archive.eras)?.id===currentEra.id)
+      :merged;
+    return{
+      draws:merged,eras:archive.eras||[],updatedAt:archive.updatedAt||'',
+      currentCount:currentDraws.length,currentDraws,restricted:archive.restricted===true,
+    };
+  })();
+  analyticsHistoryCache.set(cacheKey,pending);
+  try{const pack=await pending;analyticsHistoryReady.add(cacheKey);return pack;}
+  catch(error){if(analyticsHistoryCache.get(cacheKey)===pending)analyticsHistoryCache.delete(cacheKey);analyticsHistoryReady.delete(cacheKey);throw error;}
 }
+function hasHydratedAnalyticsHistory(gameKey){return analyticsHistoryReady.has(resolveConfigKey(gameKey)||gameKey);}
+async function loadAnalyticsDraws(gameKey){
+  const pack=await loadFullHistory(gameKey);
+  return Array.isArray(pack.currentDraws)?pack.currentDraws:pack.draws;
+}
+function clearAnalyticsHistoryCache(){analyticsHistoryCache.clear();analyticsHistoryReady.clear();}
+window.addEventListener('loto:accesschange',event=>{
+  const next=event.detail?.access?.accessLevel||'free';
+  if(analyticsAccessLevel&&analyticsAccessLevel!==next)clearAnalyticsHistoryCache();
+  analyticsAccessLevel=next;
+});
 function analyzeData(gameKey,historicalData=[]){
   const cfg=getLotteryConfig(gameKey);
   if(!cfg)throw new Error(`Unknown lottery: ${gameKey}`);
@@ -261,6 +295,96 @@ let groupAnalysisState={active:false,limit:0,total:0};
 function hasConfirmedPro(){
   try{return window.LotoCommercial?.access?.accessLevel==='pro';}catch(e){return false;}
 }
+// Shared async-state renderer: one branded look (⏳ + lottery name) for loading, plus
+// error / offline states with Retry. Lets every data section distinguish loading from empty
+// instead of flashing an "empty" placeholder while the first fetch is still in flight.
+const LotoState={
+  _tpl(cls,ico,title,sub,retry){
+    const btn=retry?`<button type="button" class="lstate-retry" data-i18n-ignore>${escapeHtml(appText('Повторить'))}</button>`:'';
+    return `<div class="lstate ${cls}"><div class="lstate-ico" aria-hidden="true">${ico}</div>`+
+      `<div class="lstate-title" data-i18n-ignore>${escapeHtml(title)}</div>`+
+      (sub?`<div class="lstate-sub" data-i18n-ignore>${escapeHtml(sub)}</div>`:'')+btn+`</div>`;
+  },
+  loading(el,gameId){
+    if(!el)return;
+    el.innerHTML=this._tpl('load','⏳',historyText('Загрузка · {{0}}',lotteryName(gameId||cur)),appText('Собираем тиражи…'),null);
+  },
+  error(el,onRetry){
+    if(!el)return;
+    const offline=(typeof navigator!=='undefined'&&navigator.onLine===false);
+    el.innerHTML=this._tpl('err',offline?'📡':'⚠️',
+      appText(offline?'Нет соединения':'Не удалось загрузить'),
+      appText(offline?'Проверьте интернет и повторите.':'Что-то пошло не так. Попробуйте ещё раз.'),!!onRetry);
+    if(onRetry){const b=el.querySelector('.lstate-retry');if(b)b.addEventListener('click',()=>onRetry());}
+  },
+};
+
+// ── Draws-database loading gate ────────────────────────────────────────────
+// This gate is analytics-only. It opens synchronously before the analytics page can paint,
+// then waits for the real auth/access state, every protected archive page, state hydration and
+// a complete render of every analytics section. There is deliberately no time-based escape.
+(function(){
+  const el=document.getElementById('db-loading');if(!el)return;
+  const page=document.getElementById('pg-ana');
+  const titleEl=document.getElementById('db-loading-title'),msgEl=document.getElementById('db-loading-msg'),retry=document.getElementById('db-loading-retry');
+  let blocking=false,activeGame='',generation=0;
+  const setText=(title,message)=>{
+    if(titleEl)titleEl.textContent=appText(title);
+    if(msgEl)msgEl.textContent=appText(message);
+  };
+  function show(){
+    blocking=true;el.hidden=false;el.classList.remove('hidden','error');
+    if(retry)retry.hidden=true;
+    if(page){page.inert=true;page.setAttribute('aria-busy','true');}
+    document.body.classList.add('analytics-hydrating');
+    setText('Загрузка базы тиражей','Пожалуйста, подождите. Идёт загрузка базы всех тиражей.');
+    requestAnimationFrame(()=>{try{el.focus({preventScroll:true});}catch(_error){}});
+  }
+  function hide(){
+    blocking=false;el.hidden=true;el.classList.remove('error');
+    if(page){page.inert=false;page.removeAttribute('aria-busy');}
+    document.body.classList.remove('analytics-hydrating');
+  }
+  function showError(error){
+    blocking=true;el.hidden=false;el.classList.add('error');
+    const offline=typeof navigator!=='undefined'&&navigator.onLine===false;
+    setText(offline?'Нет соединения':'Не удалось загрузить полную базу тиражей',
+      offline?'Проверьте интернет и повторите.':'Проверьте соединение и повторите загрузку полной базы тиражей.');
+    if(retry){retry.hidden=false;retry.focus({preventScroll:true});}
+    console.error('analytics hydration failed',error);
+  }
+  async function hydrate(game,{force=false}={}){
+    const myGeneration=++generation;activeGame=game;show();
+    try{
+      const commercial=window.LotoCommercial;
+      if(!commercial||typeof commercial.whenReady!=='function')throw new Error('commercial_runtime_unavailable');
+      await commercial.whenReady();                         // auth bootstrap has completed
+      await commercial.refreshAccess({strict:true});        // authoritative PRO/access check
+      const isPro=commercial.access?.accessLevel==='pro';
+      setText(isPro?'Загрузка полной базы тиражей':'Загрузка доступной базы тиражей',
+        isPro?'Пожалуйста, подождите. Идёт загрузка полной базы тиражей.':'Пожалуйста, подождите. Идёт загрузка доступной базы тиражей.');
+      const pack=await loadFullHistory(game,{force});        // every API page + state write
+      if(!pack||!Array.isArray(pack.draws)||!pack.draws.length)throw new Error('empty_history');
+      if(commercial.access?.accessLevel==='pro'&&pack.restricted)throw new Error('pro_archive_restricted');
+      if(myGeneration!==generation||activeGame!==game)return false;
+      await renderCompleteAnalytics();                       // all analytics surfaces are current
+      if(myGeneration!==generation||activeGame!==game)return false;
+      hide();return true;
+    }catch(error){if(myGeneration===generation)showError(error);return false;}
+  }
+  function open(game,{force=false}={}){
+    if(!force&&typeof hasHydratedAnalyticsHistory==='function'&&hasHydratedAnalyticsHistory(game)){
+      void renderAna();return Promise.resolve(true);
+    }
+    return hydrate(game,{force});
+  }
+  function blockBack(event){if(!blocking)return;event?.preventDefault?.();event?.stopImmediatePropagation?.();}
+  document.addEventListener('keydown',event=>{if(blocking&&(event.key==='Escape'||event.key==='Esc'))blockBack(event);},true);
+  document.addEventListener('backbutton',blockBack,true);
+  window.addEventListener('loto:nativeback',blockBack,true);
+  if(retry)retry.addEventListener('click',()=>hydrate(activeGame||cur,{force:true}));
+  window.LotoAnalyticsGate={open,retry:()=>hydrate(activeGame||cur,{force:true}),get blocking(){return blocking;}};
+})();
 function groupAnalysisFreeLimit(){
   try{return Number(window.LotoCommercial?.access?.freeLimits?.groupAnalysisRows||window.LotoCommercial?.freeGroupAnalysisRows||3)||3;}catch(e){return 3;}
 }
@@ -353,6 +477,38 @@ function renderBackendJudge(result,mountId,target,handlers){
 // existing Верховный судья (Judge), which keeps its own per-feature access budget.
 const MODEL_LABELS={freq:'горячие числа',bal:'комбинированный анализ',man:'сегментный охват',rnd:'pure random',markov:'цепи Маркова',gauss:'Гаусс · ЦПТ',delta:'интервальная модель Δ',bayes:'Байес · Дирихле',overdue:'gap-анализ',phys:'физическая модель лототрона',chaos:'детерминированный хаос',quantum:'квантовый коллапс',paradox:'система парадоксов',consensus:'консенсус моделей',qastro:'квантово-астрологическая модель',wheel:'колёсная матрица','world-hot':'мировой горячий профиль','world-mix':'мировой комбинированный профиль'};
 const modelLabel=model=>MODEL_LABELS[model]||model||'модель';
+const MODEL_INFO_FALLBACKS={
+  wheel:'Комбинаторная матрица строит ряды с заданным покрытием пар выбранных чисел.',
+  paradox:'Система парадоксов превращает контринтуитивные свойства случайных комбинаций в исследовательские ряды.',
+};
+let describedModel='';
+function showSelectedModelDescription(model){
+  const overlay=document.getElementById('model-info-ov');if(!overlay)return;
+  const option=document.querySelector(`#direct-algo option[value="${CSS.escape(String(model||''))}"]`);
+  const card=document.getElementById('al-'+model);
+  const name=(card?.querySelector('.sg-algo-name')?.textContent||option?.textContent||modelLabel(model)).trim();
+  const copy=(card?.querySelector('.sg-algo-desc')?.textContent||MODEL_INFO_FALLBACKS[model]||'Математическая модель исследует структуру прошлых данных, но не предсказывает будущий тираж.').trim();
+  const icon=(card?.querySelector('.sg-algo-icon')?.textContent||option?.textContent?.match(/^[^\p{L}\p{N}]+/u)?.[0]||'🧮').trim();
+  describedModel=String(model||'');
+  document.getElementById('model-info-title').textContent=appText(name);
+  document.getElementById('model-info-copy').textContent=appText(copy);
+  document.getElementById('model-info-icon').textContent=icon||'🧮';
+  overlay.querySelector('.pro-close')?.setAttribute('aria-label',appText('Закрыть описание'));
+  const action=overlay.querySelector('.model-info-actions button');if(action)action.textContent=appText('Закрыть описание');
+  const fine=overlay.querySelector('.prev-fine');if(fine)fine.textContent=appText('Математическая модель не предсказывает будущий независимый тираж.');
+  overlay.__lotoClose=reason=>closeModelDescription(reason!=='replace');
+  if(window.LotoModals)window.LotoModals.openModal('model-info-ov');else overlay.classList.add('show');
+  overlay.querySelector('.pro-sheet')?.scrollTo(0,0);
+}
+function closeModelDescription(showAccess=false){
+  const overlay=document.getElementById('model-info-ov');
+  const model=describedModel;
+  describedModel='';
+  if(overlay){overlay.__lotoClose=null;overlay.classList.remove('show');}
+  if(showAccess&&model)queueMicrotask(()=>window.LotoCommercial?.showModelAccessAfterDescription?.(model));
+}
+window.showSelectedModelDescription=showSelectedModelDescription;
+window.closeModelDescription=closeModelDescription;
 let mresRows=[];
 function showModelResult(result,model){
   const list=(Array.isArray(result)?result:[]).map(r=>({main:[...(r.main||r.m||[])],bonus:[...(r.bonus||r.b||[])]})).filter(r=>r.main.length);
@@ -400,6 +556,7 @@ function showPreviewResultStatus(message){
 }
 window.showPreviewResultStatus=showPreviewResultStatus;
 function clearProtectedHistoryView(){
+  clearAnalyticsHistoryCache();
   Object.keys(drawsCache||{}).forEach(key=>{drawsCache[key]=[];});
   const freeLimit=Number(window.LOTO_COMMERCIAL_CONFIG?.freeRecentDrawsByGame?.[resolveConfigKey(cur)]||0);
   loadHistoricalResults(cur).then(recent=>{
@@ -457,6 +614,7 @@ async function loadD(id){
   }catch(e){ console.error('loadD failed',e); drawsCache[id]=drawsCache[id]||[]; return drawsCache[id]; }
 }
 async function saveD(id,arr){
+  analyticsHistoryCache.delete(resolveConfigKey(id)||id);analyticsHistoryReady.delete(resolveConfigKey(id)||id);
   drawsCache[id]=arr; // optimistic local update so UI never freezes
   try{ await withTimeout(storageSet(KEY(id),JSON.stringify(arr),true)); }
   catch(e){ console.error('Storage save failed',e); showFeedback('Не сохранилось в общую базу','Таймаут хранилища. Данные остались только на этом экране; перезагрузка может их сбросить.','⚠️',4200); }
@@ -521,10 +679,15 @@ function selPage(p){
   document.getElementById('bn-'+p).classList.add('on');
   const shell=document.getElementById('lot-nav-shell');
   if(shell)shell.hidden=p!=='sim';
-  if(p==='ana'){updateAnaHdr();renderAna();}
+  if(p==='ana'){
+    updateAnaHdr();
+    if(window.LotoAnalyticsGate)window.LotoAnalyticsGate.open(cur);
+    else renderAna();
+  }
   else{updateHdr();}
 }
 function bottomNavRoute(p){
+  if(document.getElementById('account-ov')?.classList.contains('show'))closeAccount();
   if(p==='drum3d'){if(typeof openDrum3D==='function')openDrum3D();return;}
   if(document.body.classList.contains('drum3d-open')){
     if(typeof closeDrum3D!=='function')return;
@@ -534,6 +697,7 @@ function bottomNavRoute(p){
   selPage(p);
 }
 async function handleBack(){
+  if(window.LotoAnalyticsGate?.blocking)return;
   if(curPage==='ana')selPage('sim');
   else if(await customConfirm('Сбросить ряды?')){initRows();renderSim();resetBanner();}
 }
@@ -825,7 +989,11 @@ function selLot(id){
   clearWheelStatus();
   updateGenCountUI();
   updateOfficialControls();
-  if(curPage==='ana'){updateAnaHdr();renderAna();}
+  if(curPage==='ana'){
+    updateAnaHdr();
+    if(window.LotoAnalyticsGate)window.LotoAnalyticsGate.open(cur);
+    else renderAna();
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1978,6 +2146,16 @@ async function renderAna(){
   if(curAT==='man'){renderCombinationAnalysis();await renderMathCheck();await renderStats();}
 }
 
+async function renderCompleteAnalytics(){
+  updateAnaHdr();buildInpFields();
+  await renderHistory();
+  await renderFreq();await renderSugg();await renderPairs();
+  await renderChi();
+  renderComparison();renderROI();await renderJackpotChart();
+  await renderPrizes();
+  renderCombinationAnalysis();await renderMathCheck();await renderStats();
+}
+
 function buildInpFields(){
   const l=L();
   const dBo=drawBonusCount(l);
@@ -2419,6 +2597,17 @@ function canDeleteItem(item){
   return item.isUserOwned===true||!String(item.source||'').trim(); // only user-owned entries, including legacy local rows
 }
 async function renderHistory(){
+  const c0=document.getElementById('hist-list');
+  const firstPaint=c0&&!c0.querySelector('.hist-item');
+  // Branded loading on first paint; a real fetch failure of the PRIMARY results feed now shows
+  // an error/offline state with Retry instead of a misleading "no draws" empty. We probe
+  // results.json (the always-served recent-draws feed) — NOT the results archive, which is
+  // intentionally absent on the web build (older draws are supplementary) and must never turn
+  // history into an error. Cached loads skip straight through with no flicker.
+  try{
+    if(firstPaint&&!resultsJsonCache)LotoState.loading(c0,cur);
+    await fetchResultsJson(RESULTS_JSON_URL);
+  }catch(_err){ if(c0)LotoState.error(c0,()=>renderHistory()); return; }
   const l=L(),pack=await loadFullHistory(cur),draws=pack.draws,eras=pack.eras;
   document.getElementById('hist-title').textContent=historyText('История ({{0}} всего · {{1}} по текущим правилам)',draws.length,pack.currentCount);
   const summary=document.getElementById('hist-rule-summary');
@@ -2434,7 +2623,7 @@ async function renderHistory(){
       d.extraGroups.forEach(group=>{
         histSepCount++;
         histBallCount+=(group.numbers||[]).length;
-        balls+=`<div class="hist-sep">|</div><span class="hist-extra-label">${escapeHtml(ruleGroupLabel(group))}</span>`;
+        balls+=`<div class="hist-sep" role="separator" aria-label="${escapeHtml(ruleGroupLabel(group))}">|</div>`;
         balls+=(group.numbers||[]).map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');
       });
     }else if(d.bonus&&d.bonus.length){histSepCount=1;histBallCount+=d.bonus.length;balls+=`<div class="hist-sep">|</div>`;balls+=d.bonus.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}
@@ -2447,7 +2636,13 @@ async function renderHistory(){
     const action=canDelete?`<button class="btn-del" data-loto-event-click="delDraw('${d.date}')">🗑</button>`:'<span></span>';
     if(!canDelete)div.classList.add('no-action');
     const ballClass=histBallCount>=8?'hist-balls hist-many':'hist-balls';
-    div.innerHTML=`<div class="hist-main"><div class="hist-date">${escapeHtml(formatHistoryDate(d.date))}${src}${badge}</div><div class="${ballClass}" style="--hist-ball-count:${Math.max(1,histBallCount)};--hist-sep-count:${histSepCount}">${balls}</div></div>${action}`;
+    // Rule label ("Текущие/Старые правила") must sit on its OWN full-width line below the
+    // date+name — never inline to the right of the name and never inside the balls column —
+    // so it can't squeeze the ball grid and clip extra/bonus balls. `.hist-head` keeps the
+    // date + rule together as column 1 on desktop (where .hist-main is display:contents) and
+    // stacked above the balls on mobile (where .hist-main is a block).
+    const ruleLine=badge?`<div class="hist-rule">${badge}</div>`:'';
+    div.innerHTML=`<div class="hist-main"><div class="hist-head"><div class="hist-date">${escapeHtml(formatHistoryDate(d.date))}${src}</div>${ruleLine}</div><div class="${ballClass}" style="--hist-ball-count:${Math.max(1,histBallCount)};--hist-sep-count:${histSepCount}">${balls}</div></div>${action}`;
     c.appendChild(div);
   });
   try{HIST_filter();}catch(e){}
@@ -2528,7 +2723,7 @@ function fmtInt(n){return Math.round(n).toLocaleString(appLocale());}
 function fmtChance(n){return n>=1000000?(n/1000000).toFixed(n>=10000000?0:1).replace('.',',')+' млн':fmtInt(n);}
 
 async function renderFreq(){
-  const l=L(),draws=await loadD(cur);
+  const l=L(),draws=await loadAnalyticsDraws(cur);
   const dBo=drawBonusCount(l);
   const analysis=analyzeData(cur,draws);
   const mf=analysis.mainFrequency;
@@ -2596,7 +2791,7 @@ function renderFChart(elId,freq,maxN,total,cls){
 }
 
 async function renderSugg(){
-  const l=L(),draws=await loadD(cur),c=document.getElementById('sugg-out');
+  const l=L(),draws=await loadAnalyticsDraws(cur),c=document.getElementById('sugg-out');
   document.getElementById('sugg-warn').style.display='none';
   if(draws.length<10){c.innerHTML='<div class="empty">Нужно мин. 10 тиражей</div>';return;}
   document.getElementById('sugg-warn').style.display='';
@@ -2613,7 +2808,7 @@ async function renderSugg(){
 
 // ─── PAIR ANALYSIS ────────────────────────────
 async function renderPairs(){
-  const l=L(),draws=await loadD(cur),c=document.getElementById('pair-out');
+  const l=L(),draws=await loadAnalyticsDraws(cur),c=document.getElementById('pair-out');
   if(draws.length<10){c.innerHTML='<div class="empty">Нужно мин. 10 тиражей</div>';return;}
   // Build co-occurrence for top 15 numbers
   const freq=buildFreq(draws,'main',l.mB);
@@ -2646,7 +2841,7 @@ async function renderPairs(){
 
 // ─── CHI2 ─────────────────────────────────────
 async function renderChi(){
-  const l=L(),draws=await loadD(cur),c=document.getElementById('chi-out');
+  const l=L(),draws=await loadAnalyticsDraws(cur),c=document.getElementById('chi-out');
   if(draws.length<10){c.innerHTML='<div class="empty">Нужно мин. 10 тиражей</div>';return;}
   const freq=buildFreq(draws,'main',l.mB);
   const obs=[...freq.values()],tot=obs.reduce((s,v)=>s+v,0),exp=tot/l.mB;
@@ -2743,7 +2938,7 @@ async function renderPrizes(){
   const avgEl=document.getElementById('prize-avg-out');
   let publicRows=[],draws=[];
   try{
-    [publicRows,draws]=await Promise.all([loadPublicPrizes(cur),loadD(cur)]);
+    [publicRows,draws]=await Promise.all([loadPublicPrizes(cur),loadAnalyticsDraws(cur)]);
   }catch(err){
     outEl.innerHTML=`<div class="empty">Не удалось загрузить официальные призовые данные<br><small style="font-size:11px;color:var(--sub)">${escapePrizeHtml(err.message||String(err))}</small></div>`;
     avgEl.innerHTML='<div class="empty">Нет данных</div>';
@@ -2891,7 +3086,7 @@ window.revealUpcomingDraw=revealUpcomingDraw;
 // ─── JACKPOT CHART ────────────────────────────
 async function renderJackpotChart(){
   let all=[];
-  try{all=await loadPublicPrizes(cur);}catch{all=await loadD(cur);}
+  try{all=await loadPublicPrizes(cur);}catch{all=await loadAnalyticsDraws(cur);}
   const draws=all.filter(d=>d.jackpot).sort((a,b)=>a.date.localeCompare(b.date));
   const c=document.getElementById('jackpot-chart-out');
   if(!draws.length){c.innerHTML='<div class="empty">Официальные данные о джекпоте пока не опубликованы</div>';return;}
@@ -2940,7 +3135,7 @@ function renderCombinationAnalysis(){
 }
 
 async function renderMathCheck(){
-  const l=L(),draws=await loadD(cur),c=document.getElementById('math-check-out');
+  const l=L(),draws=await loadAnalyticsDraws(cur),c=document.getElementById('math-check-out');
   const archive=await loadArchivePackage(cur).catch(()=>({draws:[],eras:[]}));
   const computed=jackpotCombos(l);
   const packageRows=l.packagePrice&&l.minR>1?l.minR:1;
@@ -2971,7 +3166,7 @@ async function renderMathCheck(){
 }
 
 async function renderStats(){
-  const l=L(),draws=await loadD(cur),pack=await loadFullHistory(cur),c=document.getElementById('stats-out');
+  const l=L(),draws=await loadAnalyticsDraws(cur),pack=await loadFullHistory(cur),c=document.getElementById('stats-out');
   if(!draws.length){c.innerHTML='<div class="empty">Нет данных</div>';return;}
   const all=draws.flatMap(d=>d.main);
   const avg=(all.reduce((s,v)=>s+v,0)/all.length).toFixed(1);
@@ -4778,11 +4973,13 @@ function BUSY_show(label){
   document.getElementById('busy-ov').classList.add('show');
 }
 async function BUSY_hide(){
+  const overlay=document.getElementById('busy-ov');
+  if(!overlay?.classList.contains('show'))return;
   clearInterval(BUSY_timer);
   document.getElementById('busy-fill').style.width='100%';
   const shown=performance.now()-BUSY_t0;
   await new Promise(r=>setTimeout(r,Math.max(220,480-shown))); /* минимум показа — глазом видно */
-  document.getElementById('busy-ov').classList.remove('show');
+  overlay.classList.remove('show');
 }
 async function withBusy(label,fn){
   if(GEN_BUSY)return; /* двойной тап игнорируем — генерация уже идёт */
@@ -5360,7 +5557,9 @@ async function JC_continue(){
  * whenever an overlay gains .show, every other visible content overlay is
  * closed. busy-ov (loading spinner) is transient and may briefly overlay. */
 (function(){
-  var TRANSIENT={'busy-ov':1};
+  // The avatar editor is a nested account tool: it must not replace/close the account
+  // overlay underneath it, otherwise a successful save returns to a vanished cabinet.
+  var TRANSIENT={'busy-ov':1,'aved-ov':1};
   var CRITICAL={
     'cc-ov':1,'fb-ov':1,'prev-ov':1,'pro-ov':1,'mres-ov':1,'jc-ov':1,
     'cons-ov':1,'qa-ov':1,'adv-ov':1,'sup-ov':1,'pdx-ov':1,'matrix-ov':1,
