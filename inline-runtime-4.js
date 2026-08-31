@@ -230,6 +230,14 @@
 
   window.openDrum3D = function () {
     if (overlay) return;
+    // The account is a full-screen modal and lifts the shared bottom navigation.
+    // Always leave that modal through its normal close path before mounting the 3D
+    // overlay, otherwise its body lock/stacking state can hide the navigation dock.
+    var accountOverlay = document.getElementById('account-ov');
+    if (accountOverlay && accountOverlay.classList.contains('show')) {
+      try { if (typeof closeAccount === 'function') closeAccount(); }
+      catch (e) { accountOverlay.classList.remove('show'); document.body.classList.remove('account-open'); }
+    }
     var appId = currentAppId();
     var drumId = APP_TO_DRUM[appId] || 'eurojackpot';
     var p = new URLSearchParams({ profile: drumId, embed: '1' });
@@ -322,6 +330,6 @@
   };
   // Keyboard access for the central nav item (Enter / Space).
   document.addEventListener('keydown', function (e) {
-    if ((e.key === 'Enter' || e.key === ' ') && document.activeElement && document.activeElement.id === 'bn-drum3d') { e.preventDefault(); openDrum3D(); }
+    if ((e.key === 'Enter' || e.key === ' ') && document.activeElement && document.activeElement.id === 'bn-drum3d') { e.preventDefault(); bottomNavRoute('drum3d'); }
   });
 })();
