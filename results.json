@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-08-31T19:15:52.800Z",
-    "sourceFetchedAt": "2026-08-31T19:15:52.800Z",
+    "generatedAt": "2026-08-31T23:17:00.253Z",
+    "sourceFetchedAt": "2026-08-31T23:17:00.253Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "1b6688e76863a6ab",
     "updatedAt": "2026-08-31",
@@ -8804,49 +8804,49 @@
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": null,
+            "prizeAmount": 1000000,
             "winners": 2
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": null,
+            "prizeAmount": 10000,
             "winners": 11
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": null,
+            "prizeAmount": 599,
             "winners": 237
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": null,
+            "prizeAmount": 200,
             "winners": 735
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": null,
+            "prizeAmount": 10,
             "winners": 16610
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": null,
+            "prizeAmount": 10,
             "winners": 15508
           },
           {
             "match": "1+1",
             "label": "1+1",
-            "prizeAmount": null,
+            "prizeAmount": 4,
             "winners": 126838
           },
           {
             "match": "0+1",
             "label": "0+1",
-            "prizeAmount": null,
+            "prizeAmount": 2,
             "winners": 329560
           }
         ],

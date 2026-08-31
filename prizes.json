@@ -84190,49 +84190,49 @@
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": null,
+            "prizeAmount": 1000000,
             "winners": 2
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": null,
+            "prizeAmount": 10000,
             "winners": 11
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": null,
+            "prizeAmount": 599,
             "winners": 237
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": null,
+            "prizeAmount": 200,
             "winners": 735
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": null,
+            "prizeAmount": 10,
             "winners": 16610
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": null,
+            "prizeAmount": 10,
             "winners": 15508
           },
           {
             "match": "1+1",
             "label": "1+1",
-            "prizeAmount": null,
+            "prizeAmount": 4,
             "winners": 126838
           },
           {
             "match": "0+1",
             "label": "0+1",
-            "prizeAmount": null,
+            "prizeAmount": 2,
             "winners": 329560
           }
         ],
