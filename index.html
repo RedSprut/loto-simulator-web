@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="310639e" data-build-ts="2026-08-31T12:01:06.216Z">
+<html lang="ru" data-build="ad7d8f8" data-build-ts="2026-08-31T12:16:26.470Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=310639e"></script>
+<script src="./boot-runtime.js?v=ad7d8f8"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,7 +14,7 @@
 <meta property="og:description" content="Lottery draw simulator and analytics tool. No ticket sales, bets, or guaranteed winnings.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://redsprut.github.io/loto-simulator-web/">
-<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=310639e">
+<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=ad7d8f8">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary">
@@ -803,6 +803,10 @@ body.dark .gen-select{color-scheme:dark;appearance:none;-webkit-appearance:none;
 .mres-row{display:inline-flex;flex-direction:column;align-items:flex-start;max-width:100%}
 .mres-row .mres-rlabel{margin:0 0 7px 2px}
 .mres-row .mres-rballs{width:auto;justify-content:flex-start;margin:0}
+.mres-row .if-rball{width:clamp(46px,3vw,54px);height:clamp(46px,3vw,54px);font-size:clamp(15px,1.1vw,18px)}
+#mres-ov .if-hdr,#jc-ov .if-hdr{padding-right:56px}
+@media(max-width:380px){.mres-row .if-rball{width:42px;height:42px;font-size:15px}}
+@media(min-width:700px){#mres-ov.model-rows-long .if-sheet{height:92dvh}}
 /* Узнаваемая палитра текущей лотереи применяется ко всем основным результатам. */
 body[data-game] :is(.rb[class*="rb-m-"],.dball[class$="-m"],.mb:not([class*="miss-"])[class$="-m"],.hball[class$="-m"],.sg-cball[class$="-m"],.if-rball[class*="rb-m-"],.if-ball[class*="rb-m-"],.nb[class*="sm-"],.binp[class*="fm-"]){--ball:var(--gm);--ball-hi:var(--gm-hi);--ball-lo:var(--gm-lo);color:var(--gm-txt);text-shadow:0 1px 2px rgba(0,0,0,.34)}
 body[data-game] :is(.rb[class*="rb-b-"],.dball[class$="-b"],.mb:not([class*="miss-"])[class$="-b"],.hball[class$="-b"],.sg-cball[class$="-b"],.if-rball[class*="rb-b-"],.if-ball[class*="rb-b-"],.nb[class*="sb-"],.binp[class*="fb-"]){--ball:var(--gb);--ball-hi:var(--gb-hi);--ball-lo:var(--gb-lo);color:var(--gb-txt);text-shadow:0 1px 2px rgba(0,0,0,.28)}
@@ -1412,7 +1416,7 @@ body.sa-flight .win-banner,body.sa-flight .srow,body.sa-flight .ndb{box-shadow:n
 .busy-fill{height:100%;width:0%;border-radius:4px;background:linear-gradient(90deg,#E9B44C,#F5CE7B,#E9B44C);background-size:200% 100%;animation:busyShimmer 1.1s linear infinite;transition:width .25s ease}
 @keyframes busyShimmer{from{background-position:0% 0}to{background-position:200% 0}}
 .busy-sub{font-size:11.5px;color:var(--sub2);margin-top:9px}
-.modal-static-close{position:fixed!important;top:max(10px,calc(env(safe-area-inset-top,0px) + 8px));right:max(10px,calc(env(safe-area-inset-right,0px) + 8px));width:44px!important;height:44px!important;min-width:44px;min-height:44px;padding:0!important;margin:0!important;z-index:100000!important;display:flex;align-items:center;justify-content:center;border-radius:12px!important;background:var(--modal-bg)!important;color:var(--fg)!important;border:1.5px solid var(--gold)!important;box-shadow:0 6px 22px rgba(0,0,0,.42);font-size:18px;font-weight:900;line-height:1}
+.modal-static-close{position:sticky!important;top:0!important;right:auto!important;align-self:flex-end;float:right;width:44px!important;height:44px!important;min-width:44px;min-height:44px;padding:0!important;margin:0 0 -44px auto!important;z-index:100000!important;display:flex;align-items:center;justify-content:center;border-radius:12px!important;background:var(--modal-bg)!important;color:var(--fg)!important;border:1.5px solid var(--gold)!important;box-shadow:0 6px 22px rgba(0,0,0,.42);font-size:18px;font-weight:900;line-height:1}
 
 /* ══ СОВЕТ МОДЕЛИ ══ */
 .sg-adv{display:block;width:100%;margin-top:9px;padding:8px 10px;border-radius:10px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-size:11px;font-weight:900;cursor:pointer}
@@ -2909,17 +2913,17 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=310639e"></script>
-<script src="./commercial-config.js?v=310639e"></script>
-<script src="./event-runtime.js?v=310639e"></script>
-<script src="./auth-client.js?v=310639e"></script>
-<script src="./native-loader.js?v=310639e"></script>
-<script src="./i18n-catalog.js?v=310639e"></script>
-<script src="./i18n-runtime.js?v=310639e"></script>
-<script src="./app-runtime.js?v=310639e"></script>
-<script src="./inline-runtime-2.js?v=310639e"></script>
-<script src="./commercial-runtime.js?v=310639e"></script>
-<script src="./inline-runtime-3.js?v=310639e"></script>
+<script src="./version.js?v=ad7d8f8"></script>
+<script src="./commercial-config.js?v=ad7d8f8"></script>
+<script src="./event-runtime.js?v=ad7d8f8"></script>
+<script src="./auth-client.js?v=ad7d8f8"></script>
+<script src="./native-loader.js?v=ad7d8f8"></script>
+<script src="./i18n-catalog.js?v=ad7d8f8"></script>
+<script src="./i18n-runtime.js?v=ad7d8f8"></script>
+<script src="./app-runtime.js?v=ad7d8f8"></script>
+<script src="./inline-runtime-2.js?v=ad7d8f8"></script>
+<script src="./commercial-runtime.js?v=ad7d8f8"></script>
+<script src="./inline-runtime-3.js?v=ad7d8f8"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3066,9 +3070,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=310639e"></script>
-<script src="./notifications-runtime.js?v=310639e"></script>
-<script src="./pwa-runtime.js?v=310639e"></script>
+<script src="./notification-center.js?v=ad7d8f8"></script>
+<script src="./notifications-runtime.js?v=ad7d8f8"></script>
+<script src="./pwa-runtime.js?v=ad7d8f8"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3079,7 +3083,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=310639e"></script>
-<script src="./inline-runtime-5.js?v=310639e"></script>
+<script src="./inline-runtime-4.js?v=ad7d8f8"></script>
+<script src="./inline-runtime-5.js?v=ad7d8f8"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
-/* All math-model dialogs keep a viewport-fixed close affordance.  The button is
-   deliberately outside the scroll flow visually, so swiping the sheet never
-   moves it away from the user's reach. */
+/* All math-model dialogs keep their close affordance inside the modal card.
+   It is the first sticky child of the card's own scroller, so it remains in the
+   top-right corner while the user swipes long model/Judge results. */
 (function(){
   const MODAL_CLOSES={
     'sg-ov':()=>window.closeSG?.(),
@@ -25,16 +25,13 @@
   function install(){
     Object.entries(MODAL_CLOSES).forEach(([id,close])=>{
       const ov=document.getElementById(id);if(!ov)return;
+      const sheet=ov.querySelector(':scope > .if-sheet,:scope > .sg-sheet,:scope > .lang-box,:scope > .horo-sheet')||ov.firstElementChild;
+      if(!sheet)return;
       let btn=Array.from(ov.querySelectorAll('button')).find(b=>b.textContent.trim()==='✕');
       if(!btn){
         btn=document.createElement('button');btn.type='button';btn.textContent='✕';
-        ov.appendChild(btn);
-      }else if(btn.parentElement!==ov){
-        /* A fixed descendant of a transformed/scrolling sheet is still tied to
-           that sheet. Move the existing affordance to the overlay root so it
-           remains fixed to the viewport while the sheet is swiped. */
-        ov.appendChild(btn);
       }
+      if(btn.parentElement!==sheet||btn!==sheet.firstElementChild)sheet.insertBefore(btn,sheet.firstChild);
       btn.classList.add('modal-static-close');
       btn.setAttribute('aria-label',appText('Закрыть'));
       if(id!=='mres-ov')btn.onclick=e=>{e.stopPropagation();close();};

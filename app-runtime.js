@@ -514,6 +514,8 @@ function showModelResult(result,model){
   const list=(Array.isArray(result)?result:[]).map(r=>({main:[...(r.main||r.m||[])],bonus:[...(r.bonus||r.b||[])]})).filter(r=>r.main.length);
   if(!list.length){showFeedback('Нет результата','Модель не вернула допустимых рядов.','⚠️',3200);return false;}
   mresRows=list;
+  const resultOverlay=document.getElementById('mres-ov');
+  if(resultOverlay)resultOverlay.classList.toggle('model-rows-long',list.length>5);
   const cls=L().cls;const mount=document.getElementById('mres-rows');
   if(mount){
     mount.replaceChildren();
@@ -2105,14 +2107,19 @@ async function renderFavs(){
 }
 
 async function useFav(i){
-  return withBusy('Загрузка сохранённых комбинаций…',async()=>{
+  const loaded=await withBusy('Загрузка сохранённых комбинаций…',async()=>{
     const favs=await loadFav();
-    if(!favs[i])return;
+    if(!favs[i])return false;
     rows=normalizeGeneratedRows(favs[i].rows,L());
     act=0;renderSim();
-    goToRows();resetBanner();
-    showFeedback('Загружено','Комбинации из Избранного снова поставлены в симулятор.','✅');
+    resetBanner();
+    return true;
   });
+  if(!loaded)return;
+  // The loading overlay is gone before navigation. Move first, then open the
+  // confirmation so the modal manager records/restores the NEW (rows) position.
+  goToRows({immediate:true});
+  showFeedback('Загружено','Комбинации из Избранного снова поставлены в симулятор.','✅');
 }
 
 async function copyFav(i,btn){
@@ -4912,19 +4919,28 @@ function HORO_share(){
 
 
 /* ═══ После любой генерации/загрузки — на главный экран к рядам ═══ */
-function goToRows(){
+function goToRows(options){
   try{
+    const immediate=!!(options&&options.immediate);
     if(typeof curPage!=='undefined'&&curPage!=='sim'&&typeof selPage==='function')selPage('sim');
     const land=()=>{
       const el=document.getElementById('rows-c');
       if(!el)return;
       const top=el.getBoundingClientRect().top+(window.scrollY||0)-100;
-      window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+      window.scrollTo({top:Math.max(0,top),behavior:immediate?'auto':'smooth'});
     };
-    setTimeout(()=>{
-      land();
+    const flash=()=>{
       const el=document.getElementById('rows-c');
       if(el){el.classList.remove('rows-flash');void el.offsetWidth;el.classList.add('rows-flash');setTimeout(()=>el.classList.remove('rows-flash'),1800);}
+    };
+    if(immediate){
+      land();
+      requestAnimationFrame(()=>{land();flash();});
+      return;
+    }
+    setTimeout(()=>{
+      land();
+      flash();
     },150);
     setTimeout(land,700); /* докоррекция после закрытия листа и анимаций */
   }catch(e){}
@@ -4983,10 +4999,11 @@ var GEN_BUSY=false,BUSY_t0=0,BUSY_timer=null;
 function BUSY_show(label){
   BUSY_t0=performance.now();
   const raw=String(label||'Генерация…');
-  const title=raw.startsWith('Симуляция')?appText('Симуляция тиража…'):appText('Генерация…');
+  const loading=raw.startsWith('Загрузка');
+  const title=loading?appText(raw):(raw.startsWith('Симуляция')?appText('Симуляция тиража…'):appText('Генерация…'));
   document.getElementById('busy-label').textContent=title;
   const sub=document.getElementById('busy-sub');
-  if(sub)sub.textContent=appText('Считаю по базе тиражей — секунду');
+  if(sub){sub.hidden=loading;sub.textContent=loading?'':appText('Считаю по базе тиражей — секунду');}
   const fill=document.getElementById('busy-fill');
   fill.style.width='4%';
   clearInterval(BUSY_timer);
@@ -5002,6 +5019,7 @@ async function BUSY_hide(){
   const shown=performance.now()-BUSY_t0;
   await new Promise(r=>setTimeout(r,Math.max(220,480-shown))); /* минимум показа — глазом видно */
   overlay.classList.remove('show');
+  const sub=document.getElementById('busy-sub');if(sub)sub.hidden=false;
 }
 async function withBusy(label,fn){
   if(GEN_BUSY)return; /* двойной тап игнорируем — генерация уже идёт */
@@ -5416,7 +5434,17 @@ function JUDGE_apply(ns){
   const st=JUDGE_state[ns];if(!st||!st.onApply)return;
   const proposed=st.plan.reduce((sum,p)=>sum+p.swaps.length,0);
   const active=st.plan.reduce((sum,p)=>sum+p.swaps.filter(s=>s.apply).length,0);
+  // Close the sheet BEFORE applying the rows. Otherwise the rows are updated and
+  // scrolled correctly underneath a still-visible Judge overlay (notably sup-ov),
+  // which looks like a dead button to the user.
+  const mount=document.getElementById(st.mountId);
+  const overlay=mount&&mount.closest?mount.closest('[id$="-ov"]'):null;
+  if(overlay&&overlay.classList.contains('show')){
+    if(window.LotoModals)window.LotoModals.closeModal(overlay.id);
+    else overlay.classList.remove('show');
+  }
   st.onApply(JUDGE_finalRows(ns),{active,proposed,partial:active>0&&active<proposed});
+  goToRows({immediate:true});
 }
 async function JUDGE_open(ns,rows,mountId,onApply,opts){
   opts=opts||{};
