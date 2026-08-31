@@ -237,7 +237,8 @@
   // ── Avatar photo editor engine ────────────────────────────────────────────
   const AV_INPUT_MAX=30*1024*1024; // generous input cap; the SAVED crop is a small JPEG
   const AV_OUT=512;                // exported avatar square (px)
-  let avObjUrl=null;               // object URL to revoke on close
+  let avObjUrl=null;               // object URL for the picked source file (revoked on close)
+  let avDisplayUrl=null;           // object URL of the SAVED crop, kept alive to show the avatar instantly
   // Decode any picked file to a drawable bitmap. createImageBitmap covers JPG/PNG/WebP
   // everywhere and HEIC where the engine supports it (iOS/Safari/WKWebView). Fallback to
   // an <img> element + decode() for engines that only decode via the DOM.
@@ -278,20 +279,6 @@
     if(avEd.scale>0){const r=next/avEd.scale;avEd.offx*=r;avEd.offy*=r;}
     avEd.scale=next;const z=$('aved-zoom');if(z)z.value=String(next/avEd.minScale);
     avClamp();avDraw();
-  }
-  // Prove the stored avatar actually renders before claiming success — catches a broken
-  // upload (wrong Storage path, RLS denial, expired signed URL) which would otherwise show a
-  // false "updated". Gates on load (image is valid+decodable) and runs decode() best-effort;
-  // onerror → failure; a hard timeout also fails (never a false success, never a hung UI).
-  function avVerifyImage(url){
-    return new Promise((resolve,reject)=>{
-      const img=new Image();img.decoding='async';
-      let settled=false;const done=ok=>{if(settled)return;settled=true;ok?resolve():reject(new Error('decode_failed'));};
-      img.onload=()=>{try{if(img.decode){img.decode().then(()=>done(true)).catch(()=>done(true));return;}}catch(_e){}done(true);};
-      img.onerror=()=>done(false);
-      setTimeout(()=>done(false),12000);
-      img.src=url;
-    });
   }
   function avPointDist(){const v=[...avEd.pts.values()];return Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y);}
   function avWire(){
@@ -353,11 +340,19 @@
         ctx.scale(avEd.scale*k,avEd.scale*k);ctx.drawImage(avEd.img,-avEd.w/2,-avEd.h/2);ctx.restore();
         const blob=await new Promise((res,rej)=>out.toBlob(b=>b?res(b):rej(new Error('encode_failed')),'image/jpeg',0.9));
         const outFile=new File([blob],'avatar.jpg',{type:'image/jpeg'});
+        // Real persistence: uploadAvatar resolves ONLY after the file is stored in Supabase
+        // Storage AND the profiles row is written (both awaited server-side). That resolution
+        // IS the success confirmation — anything less throws and is handled below (editor stays
+        // open, localized error, retry possible).
         const info=await window.LotoAuth.uploadAvatar(outFile);
-        const url=info&&info.avatarUrl||null;
-        // Success is claimed ONLY after the stored image actually loads/decodes.
-        if(url)await avVerifyImage(url);
-        setAvatar(url);
+        // Show the avatar immediately from the just-saved bytes — a same-origin object URL that
+        // is guaranteed to render (no network round-trip, no stale/empty cache). On reload,
+        // loadAvatar() fetches a fresh signed URL from Storage, and other devices get it via
+        // getProfile after sign-in. Keep the previous display URL from leaking.
+        try{if(avDisplayUrl)URL.revokeObjectURL(avDisplayUrl);}catch(_r){}
+        avDisplayUrl=URL.createObjectURL(blob);
+        setAvatar(avDisplayUrl);
+        if(info){profileCache={...(profileCache||{}),avatarUrl:info.avatarUrl||null,avatarPath:info.avatarPath||null,avatarUpdatedAt:info.avatarUpdatedAt||null};}
         this.avEdCancel();
         msg('acc-avatar-msg','Фото профиля обновлено.','success');
       }catch(err){msg('acc-avatar-msg',avatarError(err),'error');}
@@ -370,16 +365,25 @@
       catch(err){msg('acc-avatar-msg',avatarError(err),'error');}
       finally{avatarBusy=false;if(b)b.hidden=true;}
     },
-    async sendMagic(){
+    register(){return this.sendMagic('register');},
+    signIn(){return this.sendMagic('login');},
+    // Both actions use the SAME passwordless email/Magic-Link flow; `mode` only decides whether a
+    // brand-new account may be created ("register") or the link is for an existing account only
+    // ("login"). Either way the callback signs the user into the SAME auth.users.id and restores
+    // their profile, photo and (server-side) PRO — a new device never forks a second account.
+    async sendMagic(mode){
       if(magicSending)return;
       const input=$('acc-email-input');const email=((input&&input.value)||'').trim();
       if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg('acc-auth-msg','Введите корректный e-mail.','error');return;}
-      magicSending=true;const btn=$('acc-magic-btn');if(btn)btn.disabled=true;
+      magicSending=true;
+      const rb=$('acc-register-btn'),lb=$('acc-login-btn');if(rb)rb.disabled=true;if(lb)lb.disabled=true;
       msg('acc-auth-msg','Отправляем ссылку…','info');
-      try{await window.LotoCommercial.sendMagicLink(email);
-        msg('acc-auth-msg','Ссылка для входа отправлена на указанный e-mail. Откройте её на этом устройстве.','success');}
+      try{await window.LotoCommercial.sendMagicLink(email,mode);
+        msg('acc-auth-msg',mode==='login'
+          ?'Ссылка для входа отправлена на указанный e-mail. Откройте её на этом устройстве.'
+          :'Ссылка для подтверждения отправлена на указанный e-mail. Откройте её на этом устройстве.','success');}
       catch(_err){msg('acc-auth-msg','Не удалось отправить ссылку. Проверьте адрес и попробуйте ещё раз.','error');}
-      finally{magicSending=false;if(btn)btn.disabled=false;}
+      finally{magicSending=false;if(rb)rb.disabled=false;if(lb)lb.disabled=false;}
     },
     async manage(){try{await window.LotoCommercial.accountPortal();}catch(_e){}},
     async restore(){try{await window.LotoCommercial.restorePurchase();}catch(_e){}},

@@ -310,9 +310,14 @@ const LotoState={
   async function run(){
     el.classList.remove('error');if(retry)retry.hidden=true;
     setText('Загрузка базы тиражей','Пожалуйста, подождите. Идёт загрузка базы всех тиражей.');
-    try{await fetchResultsJson(RESULTS_JSON_URL);}      // primary draws database
-    catch(_e){showError();return;}
+    try{
+      await fetchResultsJson(RESULTS_JSON_URL);          // primary draws database
+      await loadFullHistory(cur);                        // history for the current game (recent + archive)
+    }catch(_e){showError();return;}
     await waitTier(6000);                                // access tier (timeout so it never hangs)
+    // Re-render the current screen with the now-warm data BEFORE revealing, so no empty
+    // "0 тиражей" / "Тиражей нет" state is ever shown underneath the modal as it fades.
+    try{ if(curPage==='ana'&&typeof renderAna==='function')await renderAna(); }catch(_e2){}
     hide();
   }
   if(retry)retry.addEventListener('click',run);

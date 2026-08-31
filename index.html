@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="ca502cd" data-build-ts="2026-08-30T13:33:41.191Z">
+<html lang="ru" data-build="6186b54" data-build-ts="2026-08-31T06:46:25.665Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=ca502cd"></script>
+<script src="./boot-runtime.js?v=6186b54"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -570,6 +570,12 @@ body[data-game="viking"] .bonus-col .nb.sb-viking{--ball:#183A91;--ball-hi:#8EAE
   --hist-sep-slot:8px;
   --hist-gap:clamp(4px,1.2vw,12px);
   --hist-ball-size:clamp(40px,4vw,58px);
+  /* Count-aware fit: the exact ball size at which ALL balls + separators + gaps fit the row
+     width. .hball uses min(preferred, fit) so balls keep their normal size when there is room
+     and shrink ONLY when the group would otherwise overflow (e.g. Vikinglotto old rules =
+     6 + 2 + 1 = 9 balls with 2 separators). Universal — works for any lottery/era/count.
+     The 100% resolves against .hist-balls' content box where .hball uses the value. */
+  --hist-fit:calc((100% - (var(--hist-sep-count) * var(--hist-sep-slot)) - ((var(--hist-ball-count) + var(--hist-sep-count) - 1) * var(--hist-gap))) / var(--hist-ball-count) - 1px);
   display:flex;align-items:center;justify-content:space-between;gap:var(--hist-gap);width:100%;max-width:760px;flex-wrap:nowrap;white-space:nowrap;overflow:visible;padding:3px var(--hist-row-pad) 5px;margin:0 auto}
 .hist-balls.hist-many{--hist-ball-size:clamp(38px,3.6vw,54px);--hist-gap:clamp(3px,.9vw,8px)}
 .rule-summary{display:grid;gap:8px;margin:8px 0 12px}
@@ -579,7 +585,7 @@ body[data-game="viking"] .bonus-col .nb.sb-viking{--ball:#183A91;--ball-hi:#8EAE
 .rule-badge.current{background:rgba(52,199,89,.12);color:#34c759;border-color:rgba(52,199,89,.28)}
 .hist-extra-label{font-size:9px;font-weight:800;color:var(--sub2);margin-left:3px}
 .hist-sep{font-size:11px;opacity:.46;margin:0;flex:0 0 var(--hist-sep-slot);text-align:center}
-.hball{width:var(--hist-ball-size);height:var(--hist-ball-size);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(13px,5vw,25px);font-weight:800;flex:0 0 auto}
+.hball{width:min(var(--hist-ball-size),var(--hist-fit));height:min(var(--hist-ball-size),var(--hist-fit));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(13px,5vw,25px);font-weight:800;flex:0 0 auto}
 .hball.lotto-m{--ball:#cc2060;--ball-hi:#ef5a8a;--ball-lo:#7e0f3a;color:#fff}
 .hball.lotto-b{--ball:#F2ECE1;--ball-hi:#FFFFFF;--ball-lo:#B9AF9E;color:#141018;font-weight:800}
 .hball.viking-m{--ball:#1e3fbe;--ball-hi:#5a76e8;--ball-lo:#0e1f66;color:#fff}
@@ -936,14 +942,14 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
   #pg-ana #at-inp .hist-main{min-width:0}
   #pg-ana #at-inp .hist-date{padding-right:0}
   #pg-ana #at-inp .hist-balls{min-width:0}
-  #pg-ana #at-inp .hball{width:var(--hist-ball-size);height:var(--hist-ball-size);font-size:clamp(13px,5vw,25px)}
+  #pg-ana #at-inp .hball{width:min(var(--hist-ball-size),var(--hist-fit));height:min(var(--hist-ball-size),var(--hist-fit));font-size:clamp(13px,5vw,25px)}
   #pg-ana #at-inp .btn-del{position:relative;top:auto;right:auto;justify-self:center;align-self:center;width:36px;height:36px;margin:0}
   #pg-ana #at-inp .hist-item.no-action{grid-template-columns:minmax(0,1fr)}
   #pg-ana #at-inp .hist-item.no-action>span:last-child{display:none}
   #pg-ana #at-inp .hist-item.no-action .hist-extra-label{display:none}
   #pg-ana #at-inp .hist-item.no-action .hist-balls{--hist-gap:clamp(4px,1.35vw,7px)}
   #pg-ana #at-inp .hist-item.no-action .hist-sep{margin:0;min-width:var(--hist-sep-slot)}
-  #pg-ana #at-inp .hist-item.no-action .hball{width:var(--hist-ball-size);height:var(--hist-ball-size);font-size:clamp(13px,5vw,25px)}
+  #pg-ana #at-inp .hist-item.no-action .hball{width:min(var(--hist-ball-size),var(--hist-fit));height:min(var(--hist-ball-size),var(--hist-fit));font-size:clamp(13px,5vw,25px)}
   .btn-fav-use,.btn-fav-copy,.btn-fav-del{width:44px;height:44px;font-size:15px}
   .dball{width:clamp(29px,9vw,42px);height:clamp(29px,9vw,42px);min-width:clamp(29px,9vw,42px);min-height:clamp(29px,9vw,42px);aspect-ratio:1/1;flex:0 0 auto;font-size:clamp(12px,3.7vw,16px);line-height:1}
   .mb{width:clamp(30px,8.8vw,36px);height:clamp(30px,8.8vw,36px);font-size:clamp(11px,3.4vw,13.5px)}
@@ -996,11 +1002,11 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
      ball is not clipped. High enough specificity to win over the #pg-ana #at-inp base rule above. */
   #pg-ana #at-inp .hist-balls.hist-many,#pg-ana #at-inp .hist-item.no-action .hist-balls.hist-many{--hist-gap:clamp(2px,.7vw,3px);--hist-ball-size:clamp(23px,7.2vw,30px)}
   #pg-ana #at-inp .hist-sep{margin:0;min-width:var(--hist-sep-slot)}
-  #pg-ana #at-inp .hball{width:var(--hist-ball-size);height:var(--hist-ball-size);font-size:clamp(13px,5vw,25px)}
+  #pg-ana #at-inp .hball{width:min(var(--hist-ball-size),var(--hist-fit));height:min(var(--hist-ball-size),var(--hist-fit));font-size:clamp(13px,5vw,25px)}
   #pg-ana #at-inp .btn-del{width:32px;height:32px}
   #pg-ana #at-inp .hist-item.no-action .hist-balls{--hist-gap:clamp(2px,1vw,4px)}
   #pg-ana #at-inp .hist-item.no-action .hist-sep{min-width:var(--hist-sep-slot)}
-  #pg-ana #at-inp .hist-item.no-action .hball{width:var(--hist-ball-size);height:var(--hist-ball-size);font-size:clamp(13px,5vw,25px)}
+  #pg-ana #at-inp .hist-item.no-action .hball{width:min(var(--hist-ball-size),var(--hist-fit));height:min(var(--hist-ball-size),var(--hist-fit));font-size:clamp(13px,5vw,25px)}
 }
 @media (min-width:431px) and (max-width:699px) and (hover:hover) and (pointer:fine){
   .lot-scroll-btn{display:grid}
@@ -2480,6 +2486,9 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 .acc-hero-name{font-family:'Unbounded',sans-serif;font-size:18px;font-weight:900;color:var(--fg);line-height:1.25}
 .acc-hero-name[hidden]{display:none}
 .acc-auth-row{display:flex;gap:8px;flex-wrap:wrap}
+.acc-auth-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.acc-auth-btns .acc-btn{margin:0;width:100%}
+@media (max-width:360px){.acc-auth-btns{grid-template-columns:1fr}}
 .acc-auth-row input{flex:1;min-width:150px;padding:13px 14px;border-radius:13px;border:1.5px solid var(--border);background:var(--bg3);color:var(--fg);font-size:15px;font-family:'Manrope',sans-serif}
 .acc-auth-row input:focus{outline:none;border-color:var(--hdr-a,var(--gold))}
 .acc-plan-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -2616,12 +2625,12 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
    (the initial state is a default "free" that flips to PRO once the backend responds). */
 body.access-pending .acc-plan-badge,body.access-pending #acc-r-tier,
 body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility:hidden}
-/* Draws-database loading modal — covers content until the results feed loads AND the tier
-   resolves, so a cold start / reload never flashes "тиражей нет", an empty base, or FREE→PRO.
-   Sits just below the splash preloader (z 99999); revealed when the splash lifts if data is
-   still loading. */
-.db-loading{position:fixed;inset:0;z-index:99990;display:flex;align-items:center;justify-content:center;padding:24px;
-  background:radial-gradient(120% 90% at 50% 35%,#161225,#0a0a12 72%);opacity:1;transition:opacity .38s ease}
+/* Draws-database loading modal — covers the WHOLE screen (above header z260 and bottom-nav
+   z100003) until the results feed + history load AND the tier resolves, so a cold start /
+   reload never shows "0 тиражей", "тиражей нет", an empty base, or FREE→PRO underneath. Matte
+   glass: a darkened, blurred backdrop so nothing behind is legible. */
+.db-loading{position:fixed;inset:0;z-index:100004;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:rgba(9,9,17,.86);-webkit-backdrop-filter:blur(16px) saturate(.9);backdrop-filter:blur(16px) saturate(.9);opacity:1;transition:opacity .38s ease}
 .db-loading.hidden{opacity:0;pointer-events:none}
 .db-loading-card{display:flex;flex-direction:column;align-items:center;text-align:center;gap:14px;max-width:340px}
 .db-loading-ico{font-size:52px;line-height:1;filter:drop-shadow(0 3px 10px rgba(0,0,0,.35));animation:db-hourglass 1.8s cubic-bezier(.6,.05,.4,.95) infinite;transform-origin:50% 50%}
@@ -2665,7 +2674,10 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
         <div class="acc-card-sub">Без пароля: безопасная одноразовая ссылка придёт на e-mail. Бесплатным режимом можно пользоваться и без входа.</div>
         <div class="acc-auth-row">
           <input type="email" id="acc-email-input" autocomplete="email" inputmode="email" placeholder="name@example.com" aria-label="E-mail для входа">
-          <button class="acc-btn acc-btn-primary" id="acc-magic-btn" type="button" data-loto-event-click="AccountUI.sendMagic()">Получить ссылку</button>
+        </div>
+        <div class="acc-auth-btns">
+          <button class="acc-btn acc-btn-primary" id="acc-register-btn" type="button" data-loto-event-click="AccountUI.register()">Зарегистрироваться</button>
+          <button class="acc-btn acc-btn-soft" id="acc-login-btn" type="button" data-loto-event-click="AccountUI.signIn()">Войти</button>
         </div>
         <div class="acc-msg" id="acc-auth-msg" aria-live="polite" hidden></div>
       </div>
@@ -2853,16 +2865,16 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=ca502cd"></script>
-<script src="./commercial-config.js?v=ca502cd"></script>
-<script src="./event-runtime.js?v=ca502cd"></script>
-<script src="./auth-client.js?v=ca502cd"></script>
-<script src="./native-loader.js?v=ca502cd"></script>
-<script src="./i18n-catalog.js?v=ca502cd"></script>
-<script src="./i18n-runtime.js?v=ca502cd"></script>
-<script src="./app-runtime.js?v=ca502cd"></script>
-<script src="./commercial-runtime.js?v=ca502cd"></script>
-<script src="./inline-runtime-2.js?v=ca502cd"></script>
+<script src="./version.js?v=6186b54"></script>
+<script src="./commercial-config.js?v=6186b54"></script>
+<script src="./event-runtime.js?v=6186b54"></script>
+<script src="./auth-client.js?v=6186b54"></script>
+<script src="./native-loader.js?v=6186b54"></script>
+<script src="./i18n-catalog.js?v=6186b54"></script>
+<script src="./i18n-runtime.js?v=6186b54"></script>
+<script src="./app-runtime.js?v=6186b54"></script>
+<script src="./commercial-runtime.js?v=6186b54"></script>
+<script src="./inline-runtime-2.js?v=6186b54"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3009,9 +3021,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=ca502cd"></script>
-<script src="./notifications-runtime.js?v=ca502cd"></script>
-<script src="./pwa-runtime.js?v=ca502cd"></script>
+<script src="./notification-center.js?v=6186b54"></script>
+<script src="./notifications-runtime.js?v=6186b54"></script>
+<script src="./pwa-runtime.js?v=6186b54"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3022,7 +3034,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-3.js?v=ca502cd"></script>
-<script src="./inline-runtime-4.js?v=ca502cd"></script>
+<script src="./inline-runtime-3.js?v=6186b54"></script>
+<script src="./inline-runtime-4.js?v=6186b54"></script>
 </body>
 </html>
