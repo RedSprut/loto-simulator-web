@@ -3791,7 +3791,7 @@ function IF_getWin(){const v=parseInt(localStorage.getItem('loto_win')||'0');ret
 function IF_setWin(v){localStorage.setItem('loto_win',String(parseInt(v)||0));localStorage.removeItem('loto_range');IF_state=null;}
 function IF_getRange(){try{const r=JSON.parse(localStorage.getItem('loto_range'));return(r&&r.from&&r.to)?r:null;}catch(e){return null;}}
 function IF_setRange(from,to){localStorage.setItem('loto_range',JSON.stringify({from,to}));localStorage.setItem('loto_win','0');IF_state=null;}
-function IF_getScope(){const value=localStorage.getItem('loto_period_scope_'+cur);return['all','current','free'].includes(value)?value:'current';}
+function IF_getScope(){const value=localStorage.getItem('loto_period_scope_'+cur);if(['all','current','free'].includes(value))return value;/* No explicit choice yet: PRO defaults to the FULL base ('all', all available draws); FREE/guest to current rules. The user can switch afterwards. */try{return window.LotoCommercial?.access?.accessLevel==='pro'?'all':'current';}catch(_e){return 'current';}}
 function IF_setScope(value){localStorage.setItem('loto_period_scope_'+cur,['all','free'].includes(value)?value:'current');IF_state=null;}
 function IF_window(draws){
   if(!Array.isArray(draws))return[];

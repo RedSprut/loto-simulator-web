@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="60d795d" data-build-ts="2026-09-01T12:38:01.351Z">
+<html lang="ru" data-build="a6ea81d" data-build-ts="2026-09-01T13:54:06.176Z">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=60d795d"></script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
+<script src="./boot-runtime.js?v=a6ea81d"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,7 +14,7 @@
 <meta property="og:description" content="Lottery draw simulator and analytics tool. No ticket sales, bets, or guaranteed winnings.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://redsprut.github.io/loto-simulator-web/">
-<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=60d795d">
+<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=a6ea81d">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary">
@@ -965,7 +965,7 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
   .st{min-width:0}
   .hist-date{font-size:14px;margin-bottom:6px;padding-right:40px}
   .hist-balls{--hist-row-pad:4px;--hist-gap:clamp(4px,1.35vw,7px);--hist-ball-size:clamp(36px,9.7vw,42px);max-width:none}
-  .hist-balls.hist-many{--hist-ball-size:clamp(30px,8.2vw,37px);--hist-gap:clamp(2px,.8vw,4px)}
+  .hist-balls.hist-many{--hist-ball-size:clamp(30px,8.2vw,44px);--hist-gap:clamp(1px,.5vw,3px);--hist-sep-slot:5px}
   .hist-sep{margin:0}
   .btn-del{top:6px;width:32px;height:32px}
   #pg-ana #at-inp .hist-item{display:grid;grid-template-columns:minmax(0,1fr) 42px;align-items:center;column-gap:8px;padding:12px 0}
@@ -1030,7 +1030,7 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
   #pg-ana #at-inp .hist-balls{--hist-gap:clamp(2px,1vw,4px);--hist-ball-size:clamp(30px,9.2vw,36px)}
   /* Balls-heavy rows (>=8, e.g. Lotto Max 7+1) must shrink at narrow widths so the last bonus
      ball is not clipped. High enough specificity to win over the #pg-ana #at-inp base rule above. */
-  #pg-ana #at-inp .hist-balls.hist-many,#pg-ana #at-inp .hist-item.no-action .hist-balls.hist-many{--hist-gap:clamp(2px,.7vw,3px);--hist-ball-size:clamp(23px,7.2vw,30px)}
+  #pg-ana #at-inp .hist-balls.hist-many,#pg-ana #at-inp .hist-item.no-action .hist-balls.hist-many{--hist-gap:clamp(1px,.4vw,2px);--hist-ball-size:clamp(24px,7.6vw,38px);--hist-sep-slot:4px}
   #pg-ana #at-inp .hist-sep{margin:0;min-width:var(--hist-sep-slot)}
   #pg-ana #at-inp .hball{width:min(var(--hist-ball-size),var(--hist-fit));height:auto!important;aspect-ratio:1 / 1;font-size:clamp(13px,5vw,25px)}
   #pg-ana #at-inp .btn-del{width:32px;height:32px}
@@ -2936,17 +2936,17 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=60d795d"></script>
-<script src="./commercial-config.js?v=60d795d"></script>
-<script src="./event-runtime.js?v=60d795d"></script>
-<script src="./auth-client.js?v=60d795d"></script>
-<script src="./native-loader.js?v=60d795d"></script>
-<script src="./i18n-catalog.js?v=60d795d"></script>
-<script src="./i18n-runtime.js?v=60d795d"></script>
-<script src="./app-runtime.js?v=60d795d"></script>
-<script src="./inline-runtime-2.js?v=60d795d"></script>
-<script src="./commercial-runtime.js?v=60d795d"></script>
-<script src="./inline-runtime-3.js?v=60d795d"></script>
+<script src="./version.js?v=a6ea81d"></script>
+<script src="./commercial-config.js?v=a6ea81d"></script>
+<script src="./event-runtime.js?v=a6ea81d"></script>
+<script src="./auth-client.js?v=a6ea81d"></script>
+<script src="./native-loader.js?v=a6ea81d"></script>
+<script src="./i18n-catalog.js?v=a6ea81d"></script>
+<script src="./i18n-runtime.js?v=a6ea81d"></script>
+<script src="./app-runtime.js?v=a6ea81d"></script>
+<script src="./inline-runtime-2.js?v=a6ea81d"></script>
+<script src="./commercial-runtime.js?v=a6ea81d"></script>
+<script src="./inline-runtime-3.js?v=a6ea81d"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3093,9 +3093,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=60d795d"></script>
-<script src="./notifications-runtime.js?v=60d795d"></script>
-<script src="./pwa-runtime.js?v=60d795d"></script>
+<script src="./notification-center.js?v=a6ea81d"></script>
+<script src="./notifications-runtime.js?v=a6ea81d"></script>
+<script src="./pwa-runtime.js?v=a6ea81d"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3106,7 +3106,7 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=60d795d"></script>
-<script src="./inline-runtime-5.js?v=60d795d"></script>
+<script src="./inline-runtime-4.js?v=a6ea81d"></script>
+<script src="./inline-runtime-5.js?v=a6ea81d"></script>
 </body>
 </html>
