@@ -69,10 +69,8 @@
     const img=$('acc-avatar-img'),fb=$('acc-avatar-fallback');
     const himg=$('hdr-avatar-img'),hsil=$('hdr-avatar-silhouette');
     if(url){
-      if(img){img.src=url;img.hidden=false;}
-      if(fb)fb.style.display='none';
-      if(himg){himg.src=url;himg.hidden=false;}
-      if(hsil)hsil.style.display='none';
+      const load=(node,fallback)=>{if(!node)return;node.onload=()=>{node.hidden=false;if(fallback)fallback.style.display='none';};node.onerror=()=>{node.hidden=true;if(fallback)fallback.style.display='';};node.src=url;if(node.complete&&node.naturalWidth)node.onload();};
+      load(img,fb);load(himg,hsil);
       const rm=$('acc-avatar-remove');if(rm)rm.hidden=false;
     }else{
       if(img){img.hidden=true;img.removeAttribute('src');}
@@ -348,7 +346,10 @@
         // Storage AND the profiles row is written (both awaited server-side). That resolution
         // IS the success confirmation — anything less throws and is handled below (editor stays
         // open, localized error, retry possible).
-        const info=await window.LotoAuth.uploadAvatar(outFile);
+        const info=await withBusy('Загрузка фотографии…',async()=>{
+          BUSY_stage('Сохраняю фото профиля…');
+          return window.LotoAuth.uploadAvatar(outFile);
+        });
         // Use only the URL returned after Supabase Storage + profile persistence. A temporary
         // blob preview cannot survive navigation/reload and can be overwritten by a late
         // getProfile response.

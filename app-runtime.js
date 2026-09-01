@@ -236,7 +236,8 @@ async function loadFullHistory(gameKey){
 function hasHydratedAnalyticsHistory(gameKey){return analyticsHistoryReady.has(resolveConfigKey(gameKey)||gameKey);}
 async function loadAnalyticsDraws(gameKey){
   const pack=await loadFullHistory(gameKey);
-  return Array.isArray(pack.currentDraws)?pack.currentDraws:pack.draws;
+  const source=IF_getScope()==='all'?pack.draws:IF_getScope()==='free'?await loadD(gameKey):(Array.isArray(pack.currentDraws)?pack.currentDraws:pack.draws);
+  return IF_window(source);
 }
 function clearAnalyticsHistoryCache(){analyticsHistoryCache.clear();analyticsHistoryReady.clear();}
 window.addEventListener('loto:accesschange',event=>{
@@ -282,7 +283,7 @@ let rows=[],act=0,lastDraw=null,sgGen=[];
 let drawsCache=Object.fromEntries(Object.keys(LOTS).map(id=>[id,[]]));
 let favsCache=[];
 let wheelPools=Object.fromEntries(Object.keys(LOTS).map(id=>[id,[]]));
-let lifeRunning=false;
+let lifeRunning=false,lifeRunToken=0,lifeTimer=null;
 const MAX_ROWS=50;
 const WHEEL_POOL_MAX=18;
 const L=()=>LOTS[cur];
@@ -419,6 +420,7 @@ function getBackendActionContext(){
     count:Math.max(1,Math.min(MAX_ROWS,Number(getGenCount?.()||5))),
     rows:rows.filter(row=>Array.isArray(row.m)&&row.m.length===l.pM).map(row=>({main:[...row.m],bonus:[...(row.b||[])]})),
     pool:pool.slice(0,WHEEL_POOL_MAX),
+    analysisWindow:{scope:IF_getScope(),count:IF_getWin(),range:IF_getRange()},
   };
 }
 function applyBackendRows(result,label){
@@ -1451,7 +1453,7 @@ function PDX_generate(count,useBase,l,draws,applyFilters=false){throw new Error(
 
 async function generateFreeRowsByAlgo(algo,count){
   if(!['freq','bal','rnd','man'].includes(algo))throw new Error('backend_only_model');
-  const l=L(),draws=IF_window(await loadD(cur)),hasHist=draws.length>=5;
+  const l=L(),draws=await loadSelectedAnalysisDraws(cur),hasHist=draws.length>=5;
   const freq=buildFreq(draws,'main',l.mB);
   const sorted=[...freq.entries()].sort((a,b)=>b[1]-a[1]);
   const out=[];
@@ -1607,6 +1609,23 @@ async function renderWorldAnalysis(targetId='world-analysis-out'){
     <div class="world-chip-row">${top.map(([n,s])=>`<span class="world-chip">${n} · ${s.toFixed(1)}</span>`).join('')}</div>
     <div style="margin-top:8px">База: ${totals||'нет данных'} · нечётные/чётные: ${odd}/${even}</div>
   </div>`;
+}
+async function WORLD_open(targetId='world-analysis-out'){
+  const proceed=await customConfirm(
+    'Сравнивает реальные сохранённые в приложении архивы лотерей, нормализует числа к правилам выбранной игры и показывает структурный профиль. Источник и объём данных будут указаны в результате. Это анализ прошлых тиражей, а не прогноз.',
+    'Продолжить',
+    {title:'Анализ лото по миру',cancelLabel:'Отмена'}
+  );
+  if(!proceed)return;
+  try{
+    return await withBusy('Анализирую мировые данные…',async()=>{
+      BUSY_stage('Сопоставляю архивы лотерей…');
+      return renderWorldAnalysis(targetId);
+    });
+  }catch(_error){
+    showFeedback('Не удалось получить результат','Что-то пошло не так. Попробуйте ещё раз.','⚠️',4600);
+    return null;
+  }
 }
 
 // ═══════════════════════════════════════════════
@@ -1929,13 +1948,14 @@ function runLifeSim(){
   const ticket=rows.filter(r=>r.m.length===l.pM&&(l.pBo===0||r.b.length===l.pBo)).map(r=>({m:[...r.m],b:[...r.b]}));
   if(!ticket.length){if(out)out.textContent='Нет заполненных рядов для симуляции.';return;}
   lifeRunning=true;
+  const runToken=++lifeRunToken;
   const drawsPerWeek=Math.max(1,new Set(l.drawDays||[]).size);
   const drawsPerYear=52*drawsPerWeek,total=50*drawsPerYear,batch=50;
   let done=0,spent=0,won=0,best=0,hits=0;
   const wins=[],tierCnt={};
   const paint=(final)=>{
     const years=(done/drawsPerYear).toFixed(1),net=won-spent;
-    let html=`<div class="life-big">${final?'Итог 50 лет с этими числами':'Прошло '+years+' лет...'}</div>
+    let html=`<button type="button" class="life-close" data-loto-event-click="closeLifeSim()" aria-label="${appText('Закрыть')}">✕</button><div class="life-big">${final?'Итог 50 лет с этими числами':'Прошло '+years+' лет...'}</div>
       <div class="life-stats">
         <div class="life-stat"><span>Потрачено</span><b>${fmtInt(spent)} ${l.currency||'NOK'}</b></div>
         <div class="life-stat"><span>Выиграно</span><b>${fmtInt(won)} ${l.currency||'NOK'}</b></div>
@@ -1968,6 +1988,7 @@ function runLifeSim(){
     out.innerHTML=html;
   };
   const step=()=>{
+    if(runToken!==lifeRunToken)return;
     for(let x=0;x<batch&&done<total;x++,done++){
       const dM=rnd(l.mB,l.pM),dB=drawnBonusCount(l)>0?rnd(l.bB,drawnBonusCount(l)):[];
       spent+=ticket.length*l.price;
@@ -1977,17 +1998,24 @@ function runLifeSim(){
       });
     }
     paint(done>=total);
-    if(done<total)setTimeout(step,12);
+    if(done<total)lifeTimer=setTimeout(step,12);
     else{
-      lifeRunning=false;
+      lifeRunning=false;lifeTimer=null;
       const jack=wins.find(w=>w.lvl>=7);
       const big=wins.filter(w=>w.lvl>=6).sort((a,b)=>b.v-a.v)[0];
-      if(jack)setTimeout(()=>CELE_show('🏆 ДЖЕКПОТ ЗА 50 ЛЕТ!','На году '+Math.max(1,Math.round(jack.yr))+' эти числа взяли '+jack.name+'!\n+'+fmtInt(jack.v)+' '+(l.currency||'NOK')+'\nЖизнь изменилась бы навсегда. 🌟'),400);
-      else if(big)setTimeout(()=>CELE_show('💎 КРУПНЫЙ ПРИЗ В СИМУЛЯЦИИ','Год '+Math.max(1,Math.round(big.yr))+': '+big.name+' · +'+fmtInt(big.v)+' '+(l.currency||'NOK')+'\nЭто редкий случайный результат, а не прогноз. ✨'),400);
+      if(jack)setTimeout(()=>{if(runToken===lifeRunToken)CELE_show('🏆 ДЖЕКПОТ ЗА 50 ЛЕТ!','На году '+Math.max(1,Math.round(jack.yr))+' эти числа взяли '+jack.name+'!\n+'+fmtInt(jack.v)+' '+(l.currency||'NOK')+'\nЖизнь изменилась бы навсегда. 🌟');},400);
+      else if(big)setTimeout(()=>{if(runToken===lifeRunToken)CELE_show('💎 КРУПНЫЙ ПРИЗ В СИМУЛЯЦИИ','Год '+Math.max(1,Math.round(big.yr))+': '+big.name+' · +'+fmtInt(big.v)+' '+(l.currency||'NOK')+'\nЭто редкий случайный результат, а не прогноз. ✨');},400);
     }
   };
   paint(false);
   step();
+}
+function closeLifeSim(){
+  lifeRunToken++;
+  if(lifeTimer){clearTimeout(lifeTimer);lifeTimer=null;}
+  lifeRunning=false;
+  const out=document.getElementById('life-out');
+  if(out){out.innerHTML='';out.removeAttribute('style');}
 }
 
 // ═══════════════════════════════════════════════
@@ -3763,6 +3791,8 @@ function IF_getWin(){const v=parseInt(localStorage.getItem('loto_win')||'0');ret
 function IF_setWin(v){localStorage.setItem('loto_win',String(parseInt(v)||0));localStorage.removeItem('loto_range');IF_state=null;}
 function IF_getRange(){try{const r=JSON.parse(localStorage.getItem('loto_range'));return(r&&r.from&&r.to)?r:null;}catch(e){return null;}}
 function IF_setRange(from,to){localStorage.setItem('loto_range',JSON.stringify({from,to}));localStorage.setItem('loto_win','0');IF_state=null;}
+function IF_getScope(){const value=localStorage.getItem('loto_period_scope_'+cur);return['all','current','free'].includes(value)?value:'current';}
+function IF_setScope(value){localStorage.setItem('loto_period_scope_'+cur,['all','free'].includes(value)?value:'current');IF_state=null;}
 function IF_window(draws){
   if(!Array.isArray(draws))return[];
   const r=IF_getRange();
@@ -3770,11 +3800,18 @@ function IF_window(draws){
   const w=IF_getWin();
   return w>0?draws.slice(0,w):draws.slice();
 }
+async function IF_baseDraws(gameKey=cur){
+  const pack=await loadFullHistory(gameKey),scope=IF_getScope();
+  if(scope==='all'&&!pack.restricted)return pack.draws||[];
+  if(scope==='free')return loadD(gameKey);
+  return Array.isArray(pack.currentDraws)?pack.currentDraws:(pack.draws||[]);
+}
+async function loadSelectedAnalysisDraws(gameKey=cur){return IF_window(await IF_baseDraws(gameKey));}
 
 /* ── Сервис 2: LotteryAnalysisContext — единственная точка входа моделей ── */
 async function IF_ctx(){
   const l=L();
-  const all=await loadD(cur);
+  const all=await IF_baseDraws(cur);
   const draws=IF_window(all);
   return{
     lotteryId:cur,
@@ -4338,8 +4375,7 @@ function SUP_share(){
 async function PERIOD_range(){
   const from=document.getElementById('period-from').value,to=document.getElementById('period-to').value;
   if(!from||!to||from>to){showCopyToast('Укажи корректный диапазон: «от» раньше «до»');return;}
-  const cnt=IF_window(await loadD(cur)).length; /* предпросчёт по текущим значениям невозможен до set — считаем вручную */
-  const draws=await loadD(cur);
+  const draws=await IF_baseDraws(cur);
   const inRange=draws.filter(d=>d&&d.date&&d.date>=from&&d.date<=to).length;
   if(inRange<5){showCopyToast('В этом диапазоне только '+inRange+' тиражей — нужно минимум 5');return;}
   IF_setRange(from,to);CONS_reset();
@@ -4347,7 +4383,9 @@ async function PERIOD_range(){
   showCopyToast('🗓 Диапазон: '+from+' — '+to+' · '+inRange+' тиражей');
 }
 async function PERIOD_open(){
-  const l=L(),draws=await loadD(cur),n=draws.length;
+  const l=L(),pack=await loadFullHistory(cur),freeDraws=await loadD(cur),isPro=window.LotoCommercial?.access?.accessLevel==='pro'&&!pack.restricted;
+  const allDraws=isPro?(pack.draws||[]):freeDraws,currentDraws=isPro?(pack.currentDraws||[]):freeDraws;
+  const draws=IF_getScope()==='all'?allDraws:IF_getScope()==='free'?freeDraws:currentDraws,n=draws.length;
   /* заполняем границы дат из базы */
   if(n){
     const newest=draws[0].date,oldest=draws[n-1].date;
@@ -4357,12 +4395,20 @@ async function PERIOD_open(){
     pf.value=r?r.from:oldest;pt.value=r?r.to:newest;
   }
   const y=d=>{const now=Date.now();return draws.filter(x=>x&&x.date&&(now-new Date(x.date).getTime())<=d*365.25*24*3600*1000).length;};
-  const presets=[[0,'Вся база · '+n+' тиражей']];
+  const presets=[];
+  if(isPro){
+    presets.push(['all',appText('Вся история')+' · '+allDraws.length+' '+appText('тиражей')]);
+    presets.push(['current',appText('Текущие правила')+' · '+currentDraws.length+' '+appText('тиражей')]);
+  }
+  presets.push(['free',appText('FREE-период')+' · '+freeDraws.length+' '+appText('тиражей')]);
   [[1,'За 1 год'],[2,'За 2 года'],[3,'За 3 года']].forEach(([yy,lbl])=>{const c=y(yy);if(c>=10&&c<n)presets.push([c,lbl+' · '+c]);});
   [150,100,50].forEach(k=>{if(n>k)presets.push([k,'Последние '+k]);});
-  document.getElementById('period-note').textContent='Для '+(l.short||l.name)+' доступно '+n+' тиражей. Все модели, структурный анализ и консенсус будут считать по выбранному периоду.';
+  document.getElementById('period-note').textContent=appText('Выбранный набор данных')+': '+(l.short||l.name)+' · '+n+' '+appText('тиражей')+'. '+appText('Все модели, структурный анализ и консенсус используют этот период.');
   const curW=IF_getRange()?-1:IF_getWin();
-  document.getElementById('period-presets').innerHTML=presets.map(([v,lbl])=>'<div class="pick-mode'+(v===curW?' on':'')+'" data-loto-event-click="PERIOD_set('+v+')"><div class="pick-mode-t">'+lbl+'</div></div>').join('');
+  const scope=IF_getScope();
+  document.getElementById('period-presets').innerHTML=presets.map(([v,lbl])=>typeof v==='string'
+    ?'<div class="pick-mode'+(v===scope&&!IF_getRange()&&curW===0?' on':'')+'" data-loto-event-click="PERIOD_scope(\''+v+'\')"><div class="pick-mode-t">'+lbl+'</div></div>'
+    :'<div class="pick-mode'+(v===curW?' on':'')+'" data-loto-event-click="PERIOD_set('+v+')"><div class="pick-mode-t">'+lbl+'</div></div>').join('');
   document.getElementById('period-custom').max=n;
   document.getElementById('period-ov').classList.add('show');
 }
@@ -4373,13 +4419,19 @@ function PERIOD_set(v){
   PERIOD_refreshLabel();
   showCopyToast('🗓 Период: '+(v>0?'последние '+v+' тиражей':'вся база'));
 }
-function PERIOD_custom(){
+function PERIOD_scope(scope){
+  IF_setScope(scope);IF_setWin(0);CONS_reset();PERIOD_close();PERIOD_refreshLabel();
+  showCopyToast('🗓 '+appText(scope==='all'?'Вся история':scope==='current'?'Текущие правила':'FREE-период'));
+}
+async function PERIOD_custom(){
   const v=parseInt(document.getElementById('period-custom').value);
   if(!isFinite(v)||v<5){showCopyToast('Минимум 5 тиражей');return;}
+  const available=(await IF_baseDraws(cur)).length;
+  if(v>available){showCopyToast('Доступно только '+available+' тиражей');return;}
   PERIOD_set(v);
 }
 async function PERIOD_refreshLabel(){
-  const w=IF_getWin(),r=IF_getRange(),draws=await loadD(cur),n=draws.length;
+  const w=IF_getWin(),r=IF_getRange(),scope=IF_getScope(),draws=await IF_baseDraws(cur),n=draws.length;
   const btn=document.getElementById('if-win-btn'),note=document.getElementById('if-win-note');
   if(r){
     const cnt=draws.filter(d=>d&&d.date&&d.date>=r.from&&d.date<=r.to).length;
@@ -4387,8 +4439,9 @@ async function PERIOD_refreshLabel(){
     if(note)note.textContent=r.from+' — '+r.to+' · '+cnt+' тиражей';
     return;
   }
-  if(btn)btn.textContent=(w>0?w+' тиражей':'Вся база')+' ▾';
-  if(note)note.textContent=w>0?('Последние '+Math.min(w,n)+' из '+n+' доступных'):('Вся доступная база · '+n+' тиражей');
+  const scopeLabel=appText(scope==='all'?'Вся история':scope==='current'?'Текущие правила':'FREE-период');
+  if(btn)btn.textContent=(w>0?w+' тиражей':scopeLabel)+' ▾';
+  if(note)note.textContent=w>0?('Последние '+Math.min(w,n)+' из '+n+' доступных'):(scopeLabel+' · '+n+' тиражей');
 }
 
 /* ═══════════════ АВТОПРОВЕРКА БИЛЕТОВ + ПРАЗДНИК ═══════════════ */
@@ -5057,7 +5110,7 @@ function BUSY_show(label){
   const silent=raw==='';
   const box=document.querySelector('#busy-ov .busy-box');if(box)box.classList.toggle('busy-hourglass-only',silent);
   const loading=raw.startsWith('Загрузка');
-  const title=loading?appText(raw):(raw.startsWith('Симуляция')?appText('Симуляция тиража…'):appText('Генерация…'));
+  const title=raw?appText(raw):'';
   document.getElementById('busy-label').textContent=title;
   const sub=document.getElementById('busy-sub');
   if(sub){sub.hidden=loading;sub.textContent=loading?'':appText('Считаю по базе тиражей — секунду');}
@@ -5068,6 +5121,12 @@ function BUSY_show(label){
   BUSY_timer=setInterval(()=>{p=Math.min(90,p+(92-p)*0.16);fill.style.width=p.toFixed(0)+'%';},140);
   document.getElementById('busy-ov').classList.add('show');
 }
+function BUSY_stage(label){
+  const text=String(label||'');
+  const el=document.getElementById('busy-label');if(el&&text)el.textContent=appText(text);
+  const fill=document.getElementById('busy-fill');if(fill)fill.style.width='38%';
+}
+function BUSY_paint(){return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}
 async function BUSY_hide(){
   const overlay=document.getElementById('busy-ov');
   if(!overlay?.classList.contains('show'))return;
@@ -5083,14 +5142,11 @@ async function withBusy(label,fn){
   if(GEN_BUSY)return; /* двойной тап игнорируем — генерация уже идёт */
   GEN_BUSY=true;
   BUSY_show(label);
-  try{return await fn();}
+  try{await BUSY_paint();return await fn();}
   finally{GEN_BUSY=false;await BUSY_hide();}
 }
 async function withTransferBusy(fn){
-  return withBusy('',async()=>{
-    await new Promise(resolve=>requestAnimationFrame(()=>resolve()));
-    return fn();
-  });
+  return withBusy('',fn);
 }
 
 
@@ -5117,7 +5173,7 @@ async function ADV_open(algo){
   const days=Math.round((dd-new Date())/86400000);
   const when=days<=0?'сегодня':days===1?'завтра':'через '+days+' дн.';
   document.getElementById('adv-draw').innerHTML='🎯 Исследовательский набор для выбранной даты:<br><b>'+dd.toLocaleString(appLocale(),{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})+'</b> · '+when;
-  const draws=IF_window(await loadD(cur));
+  const draws=await loadSelectedAnalysisDraws(cur);
   document.getElementById('adv-sub').textContent=l.name+' · анализ по '+draws.length+' тиражам выбранного периода';
   document.getElementById('adv-counts').innerHTML=[1,2,3,4,5,6,7,8,9,10].map(n=>'<button class="pick-cnt'+(n===ADV_state.n?' on':'')+'" data-loto-event-click="ADV_setN('+n+',this)">'+n+'</button>').join('');
   document.getElementById('adv-result').innerHTML='';
@@ -5157,7 +5213,7 @@ async function ADV_judge(){
   const st=ADV_state;if(!st||!st.rows)return;
   const l=L();
   const data=await withBusy('Судья расследует…',async()=>{
-    const draws=IF_window(await loadD(cur));
+    const draws=await loadSelectedAnalysisDraws(cur);
     if(draws.length<5)return{err:'Мало данных: судье нужно минимум 5 тиражей.'};
     return{plan:JUDGE_plan(st.rows.map(r=>({m:r.m,b:r.b})),l,draws),drawsN:draws.length};
   });
@@ -5229,7 +5285,7 @@ async function SUPC_route(){
   if(zs===null){showCopyToast('⚖️ Сначала выберите знак зодиака');return;}
   const l=L();
   const data=await withBusy('Судья изучает вас и базу…',async()=>{
-    const draws=IF_window(await loadD(cur));
+    const draws=await loadSelectedAnalysisDraws(cur);
     let cv=0;
     if(draws.length>=5){
       const A=IF_scores(draws,'main',l.mB,l.pM);
@@ -5297,7 +5353,7 @@ function SUPC_kTuples(draws,k){
 async function SUPC_db(){
   const l=L();
   const data=await withBusy('Судья ищет лидеров базы…',async()=>{
-    const draws=IF_window(await loadD(cur));
+    const draws=await loadSelectedAnalysisDraws(cur);
     if(draws.length<10)return{err:'Нужно минимум 10 тиражей в выбранном периоде.'};
     const pairs=SUPC_kTuples(draws,2);
     const triples=SUPC_kTuples(draws,3);
@@ -5525,7 +5581,7 @@ async function JUDGE_open(ns,rows,mountId,onApply,opts){
   opts=opts||{};
   const l=L();
   const data=await withBusy('Судья изучает ряды…',async()=>{
-    const draws=IF_window(await loadD(cur));
+    const draws=await loadSelectedAnalysisDraws(cur);
     if(draws.length<5)return{err:'Судье нужно минимум 5 тиражей выбранного периода. Обнови результаты во вкладке «Аналитика» или расширь окно.'};
     return{plan:JUDGE_plan(rows,l,draws),drawsN:draws.length};
   });
@@ -5559,7 +5615,7 @@ function PDX_setN(n,el){PDX_state.n=n;document.querySelectorAll('#pdx-counts .pi
 async function PDX_go(){
   const st=PDX_state;if(!st)return;const l=L();
   const data=await withBusy('Собираю парадоксы…',async()=>{
-    const draws=IF_window(await loadD(cur));
+    const draws=await loadSelectedAnalysisDraws(cur);
     if(st.useBase&&draws.length<5)return{warn:true,draws};
     return{draws};
   });
@@ -5654,7 +5710,7 @@ async function JC_continue(){
   if(ov)ov.classList.remove('jc-intro-mode');
   document.getElementById('jc-mount').innerHTML='<div class="if-empty">'+escapeHtml(appText('Судья изучает твои ряды…'))+'</div>';
   const data=await withBusy('Судья изучает вашу комбинацию…',async()=>{
-    const draws=IF_window(await loadD(cur));
+    const draws=await loadSelectedAnalysisDraws(cur);
     if(draws.length<5)return{err:'Судье нужно минимум 5 тиражей выбранного периода. Обнови результаты во вкладке «Аналитика» или расширь окно анализа.'};
     return{plan:JUDGE_plan(good.map(r=>({m:r.m,b:r.b})),l,draws),drawsN:draws.length};
   });
