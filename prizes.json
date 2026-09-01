@@ -1,12 +1,52 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-08-29",
+  "updatedAt": "2026-09-01",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
   "access": "public-free",
   "games": {
     "lotto": [
+      {
+        "date": "2026-08-29",
+        "lotteryId": "lotto",
+        "currency": "NOK",
+        "jackpot": 2.6,
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 rette",
+            "prizeAmount": 2606950,
+            "winners": 5
+          },
+          {
+            "match": "6+1",
+            "label": "6 + 1 rette",
+            "prizeAmount": 167230,
+            "winners": 11
+          },
+          {
+            "match": "6",
+            "label": "6 rette",
+            "prizeAmount": 3925,
+            "winners": 491
+          },
+          {
+            "match": "5",
+            "label": "5 rette",
+            "prizeAmount": 120,
+            "winners": 17266
+          },
+          {
+            "match": "4",
+            "label": "4 rette",
+            "prizeAmount": 55,
+            "winners": 239909
+          }
+        ],
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/lotto/resultater"
+      },
       {
         "date": "2026-08-22",
         "lotteryId": "lotto",
@@ -81446,6 +81486,134 @@
     ],
     "powerball": [
       {
+        "date": "2026-08-31",
+        "lotteryId": "powerball",
+        "currency": "USD",
+        "jackpot": 134,
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 134000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 2
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 50000,
+            "winners": 9
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 100,
+            "winners": 217
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 100,
+            "winners": 521
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 7,
+            "winners": 13670
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 10982
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 79874
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 4,
+            "winners": 182495
+          }
+        ],
+        "source": "Powerball",
+        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-31&gc=powerball"
+      },
+      {
+        "date": "2026-08-29",
+        "lotteryId": "powerball",
+        "currency": "USD",
+        "jackpot": 119,
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 119000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 2
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 50000,
+            "winners": 6
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 100,
+            "winners": 245
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 100,
+            "winners": 603
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 7,
+            "winners": 16023
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 13569
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 110348
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 4,
+            "winners": 284153
+          }
+        ],
+        "source": "Powerball",
+        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-29&gc=powerball"
+      },
+      {
         "date": "2026-08-26",
         "lotteryId": "powerball",
         "currency": "USD",
@@ -82281,7 +82449,7 @@
         "date": "2026-07-27",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 638,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -82338,14 +82506,14 @@
             "winners": 355831
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-27&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-25",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 613,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -82402,8 +82570,8 @@
             "winners": 535498
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-25&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-22",
@@ -85149,7 +85317,7 @@
         "date": "2026-08-21",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 49.3,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -85231,13 +85399,13 @@
           }
         ],
         "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results/21-08-2026"
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
       },
       {
         "date": "2026-08-18",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 37.3,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -85319,13 +85487,13 @@
           }
         ],
         "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results/18-08-2026"
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
       },
       {
         "date": "2026-08-14",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 28.3,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -85407,13 +85575,13 @@
           }
         ],
         "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results/14-08-2026"
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
       },
       {
         "date": "2026-08-11",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 17,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -85495,7 +85663,7 @@
           }
         ],
         "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results/11-08-2026"
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
       },
       {
         "date": "2026-08-07",
@@ -86380,6 +86548,52 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-08-29",
+        "lotteryId": "superEnalotto",
+        "currency": "EUR",
+        "jackpot": 216.8,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 216829439.08,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 25847.21,
+            "winners": 8
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 295.52,
+            "winners": 713
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 24.57,
+            "winners": 25799
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 5,
+            "winners": 401819
+          }
+        ],
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/29-08-2026"
+      },
+      {
         "date": "2026-08-28",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
@@ -87027,7 +87241,7 @@
         "date": "2026-08-04",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 204.1,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "6",
@@ -87066,8 +87280,8 @@
             "winners": 284671
           }
         ],
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/04-08-2026"
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
       },
       {
         "date": "2026-08-01",
@@ -87991,6 +88205,70 @@
       }
     ],
     "lottoMax": [
+      {
+        "date": "2026-08-28",
+        "lotteryId": "lottoMax",
+        "currency": "CAD",
+        "jackpot": 0,
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 of 7",
+            "prizeAmount": null,
+            "winners": 0
+          },
+          {
+            "match": "6+1",
+            "label": "6 of 7 + Bonus",
+            "prizeAmount": null,
+            "winners": 0
+          },
+          {
+            "match": "6+0",
+            "label": "6 of 7",
+            "prizeAmount": 3649.9,
+            "winners": 37
+          },
+          {
+            "match": "5+1",
+            "label": "5 of 7 + Bonus",
+            "prizeAmount": 1097,
+            "winners": 80
+          },
+          {
+            "match": "5+0",
+            "label": "5 of 7",
+            "prizeAmount": 102.2,
+            "winners": 1928
+          },
+          {
+            "match": "4+1",
+            "label": "4 of 7 + Bonus",
+            "prizeAmount": 50.1,
+            "winners": 3276
+          },
+          {
+            "match": "4+0",
+            "label": "4 of 7",
+            "prizeAmount": 20,
+            "winners": 45496
+          },
+          {
+            "match": "3+1",
+            "label": "3 of 7 + Bonus",
+            "prizeAmount": 20,
+            "winners": 46855
+          },
+          {
+            "match": "3+0",
+            "label": "3 of 7",
+            "prizeAmount": null,
+            "winners": 474717
+          }
+        ],
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
+      },
       {
         "date": "2026-08-25",
         "lotteryId": "lottoMax",

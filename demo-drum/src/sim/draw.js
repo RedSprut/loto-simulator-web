@@ -107,6 +107,68 @@ export class DrawController {
 
   reset() { this.loadProfile(this.profile); }
 
+  /** JSON-safe state of an unfinished draw, including every physical ball. */
+  snapshot() {
+    const v = (p) => p ? { x: p.x, y: p.y, z: p.z } : null;
+    const q = (p) => p ? { x: p.x, y: p.y, z: p.z, w: p.w } : null;
+    return {
+      version: 1, profileId: this.profile?.id, savedAt: Date.now(), performanceAt: performance.now(),
+      state: this.state, timer: this.timer, groupIndex: this.groupIndex, idxInGroup: this.idxInGroup,
+      resultsByPool: JSON.parse(JSON.stringify(this.resultsByPool)),
+      lastWinnerValue: this._lastWinnerValue ?? null,
+      revealed: !!this._revealed, revealAt: this._revealAt || 0,
+      u: this._u || 0, pathPoints: this._path?.points?.map(v) || null,
+      rollQ: q(this._rollQ), prevP: v(this._prevP),
+      phaseIdx: this._phaseIdx || 0, phaseTimer: this._phaseTimer || 0,
+      mixActivity: this.mixActivity, stalledFor: this.stalledFor, warned: !!this._warned,
+      airTime: this.air.t || 0,
+      winner: this.winner ? { poolId: this.winner.poolId, value: this.winner.value } : null,
+      balls: this.balls.snapshot(), rotor: this.rotor.snapshot(),
+    };
+  }
+
+  restore(saved) {
+    if (!saved || saved.version !== 1 || saved.profileId !== this.profile?.id) throw new Error('Invalid draw snapshot');
+    this.balls.restore(saved.balls);
+    this.state = saved.state;
+    this.timer = saved.timer || 0;
+    this.groupIndex = saved.groupIndex || 0;
+    this.idxInGroup = saved.idxInGroup || 0;
+    this.resultsByPool = JSON.parse(JSON.stringify(saved.resultsByPool || {}));
+    this._lastWinnerValue = saved.lastWinnerValue ?? null;
+    this._revealed = !!saved.revealed;
+    this._revealAt = saved.revealAt || 0;
+    this._u = saved.u || 0;
+    this._path = Array.isArray(saved.pathPoints) ? new THREE.CatmullRomCurve3(saved.pathPoints.map((p) => new THREE.Vector3(p.x, p.y, p.z)), false, 'catmullrom', 0.5) : null;
+    if (saved.rollQ) this._rollQ.set(saved.rollQ.x, saved.rollQ.y, saved.rollQ.z, saved.rollQ.w);
+    if (saved.prevP) this._prevP.set(saved.prevP.x, saved.prevP.y, saved.prevP.z);
+    this._phaseIdx = saved.phaseIdx || 0;
+    this._phaseTimer = saved.phaseTimer || 0;
+    this.mixActivity = saved.mixActivity ?? 1;
+    this.stalledFor = saved.stalledFor || 0;
+    this._warned = !!saved.warned;
+    this.air.t = saved.airTime || 0;
+    this.winner = saved.winner ? this.balls.items.find((it) => it.poolId === saved.winner.poolId && it.value === saved.winner.value) || null : null;
+    const clockShift = performance.now() - (saved.performanceAt || performance.now());
+    for (const it of this.balls.items) if (it.ts) for (const key of Object.keys(it.ts)) if (Number.isFinite(it.ts[key])) it.ts[key] += clockShift;
+    this.rotor.restore(saved.rotor);
+    const settling = this.state === State.STOPPING || this.state === State.FINAL_SETTLING || this.state === State.COMPLETE;
+    this.rotor.setSolid(!settling);
+    if (this.state === State.FINAL_SETTLING) {
+      for (const it of this.balls.items) if (!it.parked) {
+        it.body.setLinearDamping?.(CONFIG.settle.damping);
+        it.body.setAngularDamping?.(CONFIG.settle.damping);
+        it.collider?.setRestitution?.(CONFIG.settle.restitution);
+        it.collider?.setFriction?.(CONFIG.settle.friction);
+      }
+    }
+    this.drum.setWallSolid(true);
+    if (this.state === State.CAPTURING) this.drum.openGate(); else this.drum.closeGate();
+    this.hooks.onState?.(this.state, this._lastWinnerValue ?? null);
+    this.hooks.onDraw?.(this._lastWinnerValue, this.currentPoolId, this.resultsByPool);
+    this.balls.assertConservation();
+  }
+
   /** The mixer (rotor phases + air field) — runs CONTINUOUSLY through every state
    *  of an active draw so the bed never goes calm between picks. */
   _driveMixer(dt, liftScale = 1) {

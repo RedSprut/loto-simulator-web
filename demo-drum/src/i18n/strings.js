@@ -94,6 +94,35 @@ export const DRUM_STRINGS = {
     et: 'Uus loosimine', lv: 'Jauna izloze', lt: 'Naujas traukimas',
     uk: 'Новий розіграш',
   },
+  'pause.pause': {
+    ru: 'Пауза', en: 'Pause', no: 'Pause', sv: 'Pausa', da: 'Pause', fi: 'Tauko', de: 'Pausieren', fr: 'Pause', es: 'Pausar', it: 'Pausa',
+    pt: 'Pausar', pl: 'Wstrzymaj', nl: 'Pauzeren', et: 'Peata', lv: 'Pauzēt', lt: 'Pristabdyti', uk: 'Пауза',
+  },
+  'pause.resume': {
+    ru: 'Продолжить', en: 'Resume', no: 'Fortsett', sv: 'Fortsätt', da: 'Fortsæt', fi: 'Jatka', de: 'Fortsetzen', fr: 'Reprendre', es: 'Continuar', it: 'Riprendi',
+    pt: 'Continuar', pl: 'Wznów', nl: 'Hervatten', et: 'Jätka', lv: 'Turpināt', lt: 'Tęsti', uk: 'Продовжити',
+  },
+  'resume.incomplete': {
+    ru: 'Незавершённый тираж: выпало {{0}} из {{1}}', en: 'Unfinished draw: {{0}} of {{1}} drawn', no: 'Uferdig trekning: {{0}} av {{1}} trukket', sv: 'Oavslutad dragning: {{0}} av {{1}} dragna', da: 'Uafsluttet trækning: {{0}} af {{1}} trukket', fi: 'Keskeneräinen arvonta: {{0}}/{{1}} arvottu',
+    de: 'Unvollständige Ziehung: {{0}} von {{1}} gezogen', fr: 'Tirage inachevé : {{0}} sur {{1}} tirés', es: 'Sorteo sin terminar: {{0}} de {{1}} extraídos', it: 'Estrazione incompleta: {{0}} di {{1}} estratti', pt: 'Sorteio inacabado: {{0}} de {{1}} extraídos', pl: 'Niedokończone losowanie: wylosowano {{0}} z {{1}}',
+    nl: 'Onvoltooide trekking: {{0}} van {{1}} getrokken', et: 'Lõpetamata loosimine: loositud {{0}}/{{1}}', lv: 'Nepabeigta izloze: izkritušas {{0}} no {{1}}', lt: 'Nebaigtas traukimas: ištraukta {{0}} iš {{1}}', uk: 'Незавершений розіграш: випало {{0}} з {{1}}',
+  },
+  'resume.continue': {
+    ru: 'Продолжить', en: 'Continue', no: 'Fortsett', sv: 'Fortsätt', da: 'Fortsæt', fi: 'Jatka', de: 'Fortsetzen', fr: 'Continuer', es: 'Continuar', it: 'Continua',
+    pt: 'Continuar', pl: 'Kontynuuj', nl: 'Doorgaan', et: 'Jätka', lv: 'Turpināt', lt: 'Tęsti', uk: 'Продовжити',
+  },
+  'resume.restart': {
+    ru: 'Начать заново', en: 'Start over', no: 'Start på nytt', sv: 'Börja om', da: 'Start forfra', fi: 'Aloita alusta', de: 'Neu starten', fr: 'Recommencer', es: 'Empezar de nuevo', it: 'Ricomincia',
+    pt: 'Recomeçar', pl: 'Zacznij od nowa', nl: 'Opnieuw beginnen', et: 'Alusta uuesti', lv: 'Sākt no jauna', lt: 'Pradėti iš naujo', uk: 'Почати заново',
+  },
+  'resume.stop': {
+    ru: 'Остановить', en: 'Stop', no: 'Stopp', sv: 'Stoppa', da: 'Stop', fi: 'Pysäytä', de: 'Anhalten', fr: 'Arrêter', es: 'Detener', it: 'Ferma',
+    pt: 'Parar', pl: 'Zatrzymaj', nl: 'Stoppen', et: 'Peata', lv: 'Apturēt', lt: 'Sustabdyti', uk: 'Зупинити',
+  },
+  'resume.reset': {
+    ru: 'Полный сброс', en: 'Full reset', no: 'Full tilbakestilling', sv: 'Återställ helt', da: 'Nulstil helt', fi: 'Täysi nollaus', de: 'Vollständig zurücksetzen', fr: 'Réinitialiser', es: 'Restablecer todo', it: 'Azzera tutto',
+    pt: 'Repor tudo', pl: 'Pełny reset', nl: 'Volledig resetten', et: 'Lähtesta täielikult', lv: 'Pilnīga atiestatīšana', lt: 'Visiškas atstatymas', uk: 'Повне скидання',
+  },
 
   // ── Live status ──────────────────────────────────────────────────────────
   'status.mixing': {

@@ -27,6 +27,7 @@
 }
 
 * { box-sizing: border-box; }
+html.dd-paused *, html.dd-paused *::before, html.dd-paused *::after { animation-play-state: paused !important; }
 html, body {
   margin: 0; height: 100%; width: 100%;
   background: var(--bg); color: var(--text);
@@ -65,6 +66,7 @@ html, body {
   position: absolute; top: calc(10px + var(--safe-t)); left: calc(12px + var(--safe-l));
   display: flex; gap: 8px; flex-wrap: wrap;
   font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 700;
+  pointer-events: none;
 }
 .dd-meters span {
   background: var(--panel); border: 1px solid var(--stroke); color: var(--sub);
@@ -202,6 +204,45 @@ html, body {
   width: 30px; height: 3px; border-radius: 2px; background: #ff4d4d;
   transform: translate(-50%, -50%) rotate(-45deg);
   box-shadow: 0 0 0 1.5px rgba(0,0,0,.4);
+}
+.dd-pause {
+  position: absolute; right: calc(116px + var(--safe-r)); top: calc(8px + var(--safe-t));
+  width: 46px; height: 46px; min-width: 44px; min-height: 44px; border-radius: 50%;
+  display: grid; place-items: center; padding: 0;
+  font: 800 20px/1 system-ui, sans-serif; color: var(--text);
+  background: var(--panel); border: 1px solid var(--stroke);
+  backdrop-filter: blur(12px); cursor: pointer;
+  transition: filter .12s ease, transform .12s ease, box-shadow .15s ease;
+}
+.dd-pause:hover { filter: brightness(1.12); }
+.dd-pause:active { transform: scale(.94); }
+.dd-pause[aria-pressed="true"] { border-color: var(--gold); box-shadow: 0 4px 18px var(--g-glow); }
+.dd-pause:focus-visible { outline: 2px solid color-mix(in srgb,var(--gold) 82%,white); outline-offset: 2px; }
+.dd-pause[hidden] { display: none; }
+
+.dd-resume-overlay {
+  position: fixed; inset: 0; z-index: 60; display: grid; place-items: center;
+  padding: max(16px,var(--safe-t)) max(16px,var(--safe-r)) max(16px,var(--safe-b)) max(16px,var(--safe-l));
+  background: rgba(3,4,9,.72); backdrop-filter: blur(12px);
+}
+.dd-resume-card {
+  width: min(92vw,430px); padding: 22px; border-radius: 22px;
+  background: rgba(18,21,34,.96); border: 1px solid var(--stroke);
+  box-shadow: 0 24px 70px rgba(0,0,0,.58); text-align: center;
+}
+.dd-resume-title { font-size: 17px; line-height: 1.45; font-weight: 850; }
+.dd-resume-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+.dd-resume-actions button {
+  min-width: 0; min-height: 46px; padding: 10px 12px; border-radius: 13px;
+  border: 1px solid var(--stroke); background: var(--panel); color: var(--text);
+  font: 800 14px/1.2 system-ui,sans-serif; cursor: pointer;
+}
+/* Continue is the primary action (spans the top row); Stop + Full-reset share the row below. */
+.dd-resume-actions [data-continue] { grid-column: 1 / -1; background: linear-gradient(160deg,var(--g-primary),var(--g-secondary)); border-color: var(--gold); }
+.dd-resume-actions .dd-resume-danger { background: rgba(255,90,90,.12); border-color: rgba(255,90,90,.42); color: #ff9a9a; }
+@media (max-width: 360px), (max-height: 430px) and (orientation: landscape) {
+  .dd-resume-actions { grid-template-columns: 1fr; }
+  .dd-resume-card { padding: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .dd-mute.is-playing { animation: none; }

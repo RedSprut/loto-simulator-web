@@ -58,6 +58,13 @@ export class HUD {
     };
     this._syncSoundButton();
 
+    this.pauseBtn = document.createElement('button');
+    this.pauseBtn.className = 'dd-pause';
+    this.pauseBtn.type = 'button';
+    this.pauseBtn.textContent = '⏸';
+    this.pauseBtn.hidden = true;
+    this.pauseBtn.onclick = () => this.h.onPauseToggle?.();
+
     this.panel = document.createElement('div');
     this.panel.className = 'dd-panel hidden';
     const profileOptions = Object.entries(GAME_PROFILES)
@@ -94,7 +101,7 @@ export class HUD {
     this.panel.querySelector('[data-q]').onchange = (e) => this.h.onQuality?.(e.target.value);
     this.panel.querySelector('[data-reset]').onclick = () => { this._closePanel(); this.h.onReset?.(); };
 
-    this.root.append(this.gameHead, this.results, this.startBtn, this.muteBtn, this.setBtn, this.panel);
+    this.root.append(this.gameHead, this.results, this.startBtn, this.pauseBtn, this.muteBtn, this.setBtn, this.panel);
     this.root.addEventListener('pointerdown', () => this.h.onUserGesture?.(), { capture: true });
 
     // Localize every static string now, and re-localize live when the host app
@@ -129,8 +136,45 @@ export class HUD {
     const cl = this.panel.querySelector('[data-close]'); if (cl) cl.setAttribute('aria-label', t('settings.close'));
     this.panel.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
     this._syncSoundButton();
+    this.setPaused(!!this._paused);
     this.setPhase(this._state ?? State.IDLE, this._winner);
     if (this._profile) this._relabelGroups(this._profile);
+  }
+
+  setPaused(paused) {
+    this._paused = !!paused;
+    document.documentElement.classList.toggle('dd-paused', this._paused);
+    this.pauseBtn.textContent = paused ? '▶' : '⏸';
+    const label = t(paused ? 'pause.resume' : 'pause.pause');
+    this.pauseBtn.setAttribute('aria-label', label);
+    this.pauseBtn.setAttribute('title', label);
+    this.pauseBtn.setAttribute('aria-pressed', String(paused));
+  }
+
+  // Three unambiguous actions for an unfinished draw (never mix "stop" with "full reset"):
+  //  • Continue (Продолжить) — resume the current draw where it left off;
+  //  • Stop (Остановить)     — pause WITHOUT losing state (the unfinished draw stays saved
+  //                            and can be resumed later; nothing is discarded);
+  //  • Full reset (Полный сброс) — fully stop AND discard: clears the saved state and returns
+  //                            the 3D screen to its initial idle state (no new draw is started).
+  showResumePrompt(count, total, onContinue, onStop, onReset) {
+    this.resumePrompt?.remove();
+    const overlay = document.createElement('div');
+    overlay.className = 'dd-resume-overlay';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.innerHTML = `<div class="dd-resume-card"><div class="dd-resume-title"></div><div class="dd-resume-actions"><button type="button" class="dd-resume-primary" data-continue></button><button type="button" data-stop></button><button type="button" class="dd-resume-danger" data-reset></button></div></div>`;
+    overlay.querySelector('.dd-resume-title').textContent = t('resume.incomplete', count, total);
+    const go = overlay.querySelector('[data-continue]');
+    const stop = overlay.querySelector('[data-stop]');
+    const reset = overlay.querySelector('[data-reset]');
+    go.textContent = t('resume.continue'); stop.textContent = t('resume.stop'); reset.textContent = t('resume.reset');
+    go.onclick = () => { overlay.remove(); this.resumePrompt = null; onContinue?.(); };
+    stop.onclick = () => { overlay.remove(); this.resumePrompt = null; onStop?.(); };
+    reset.onclick = () => { overlay.remove(); this.resumePrompt = null; onReset?.(); };
+    this.root.appendChild(overlay);
+    this.resumePrompt = overlay;
+    setTimeout(() => go.focus(), 0);
   }
 
   // Settings panel open/close — one visible panel, X (or Escape / browser Back)
@@ -326,6 +370,7 @@ export class HUD {
   setPhase(state, winner) {
     this._state = state; this._winner = winner;   // remembered so _applyStrings() can re-localize live
     const b = this.startBtn;
+    this.pauseBtn.hidden = state === State.IDLE || state === State.COMPLETE;
     switch (state) {
       case State.IDLE: b.textContent = t('action.start'); b.disabled = false; break;
       case State.STARTUP:

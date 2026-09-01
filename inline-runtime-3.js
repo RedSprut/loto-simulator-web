@@ -1,327 +1,465 @@
-(function () {
-  // App game id (body[data-game]) → drum canonical profile id (results.json key).
-  // Kept in lock-step with the canonical registry by scripts/audit-drum-games.mjs.
-  var APP_TO_DRUM = {
-    lotto: 'lotto', viking: 'vikinglotto', euro: 'eurojackpot', powerball: 'powerball',
-    mega: 'megaMillions', euromillions: 'euroMillions', superenalotto: 'superEnalotto',
-    lottomax: 'lottoMax', powerballau: 'powerballAustralia'
-  };
-  if (Object.keys(APP_TO_DRUM).length !== 9) console.error('3D drum: expected 9 game mappings, got ' + Object.keys(APP_TO_DRUM).length);
-  var DRUM_TO_APP = {}; for (var _appId in APP_TO_DRUM) DRUM_TO_APP[APP_TO_DRUM[_appId]] = _appId;
-
-  var css = 'html.drum-overlay-open{--drum-nav-height:64px;--drum-nav-bottom:6px;--drum-nav-gap:6px}' +
-    '@media (max-width:699px){html.drum-overlay-open .bnav{--nav-dock-height:64px;--nav-icon-box:32px;--nav-icon-size:30px;--nav-dice-size:31px;--nav-label-height:15px;--nav-item-gap:1px;--nav-indicator-inset-x:4px;--nav-indicator-inset-y:4px;z-index:100003;box-sizing:border-box;left:50%;right:auto;bottom:calc(env(safe-area-inset-bottom,0px) + var(--drum-nav-bottom));width:min(406px,calc(var(--nav-visual-width,100vw) - env(safe-area-inset-left,0px) - env(safe-area-inset-right,0px) - 24px));max-width:none;min-width:0;height:var(--drum-nav-height);min-height:var(--drum-nav-height);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:4px 8px;border:1px solid color-mix(in srgb,var(--gm-hi,#fff) 42%,transparent);border-radius:999px;align-items:stretch;overflow:hidden;box-shadow:0 14px 36px rgba(0,0,0,.44);transition:none}' +
-    'html.drum-overlay-open .bnav .bn{width:100%;height:100%;min-height:0;gap:var(--nav-item-gap);padding:0 3px}' +
-    'html.drum-overlay-open .bnav .bn-lbl{font-size:11.5px}' +
-    'html.drum-overlay-open .bnav #bn-drum3d{gap:0;padding:1px 2px 2px}' +
-    'html.drum-overlay-open .bnav #bn-drum3d .bn-lbl{font-size:10.6px;line-height:1.02;text-align:center;white-space:normal;overflow-wrap:anywhere;max-width:100%}}' +
-    '@media (min-width:700px){html.drum-overlay-open .bnav{z-index:100003;transition:none}}' +
-    '#drum3d-overlay{position:fixed;inset:0;z-index:100000;background:#05060c;display:flex}' +
-    '#drum3d-frame{flex:1;width:100%;height:100%;border:0;display:block}' +
-    '#drum3d-back{position:absolute;top:calc(8px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));z-index:100001;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(10,12,22,.55);color:#fff;font-size:26px;line-height:1;cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}' +
-    'body.drum3d-open{overflow:hidden}' +
-    // When the PRO paywall is opened from inside the drum, lift it (and its scrim) ABOVE
-    // the drum overlay (z 100000) + docked nav (z 100003) so it is actually visible; the
-    // drum iframe stays alive underneath so isPro/limit can be pushed back without reload.
-    'body.drum3d-paywall .pro-ov{z-index:100010}';
-  var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
-
-  var overlay = null, popHandler = null, prevActiveBn = 'bn-sim', langHandler = null;
-  var msgHandler = null;
-  function cssVar(n) { try { return getComputedStyle(document.body).getPropertyValue(n).trim(); } catch (e) { return ''; } }
-  function currentAppId() { return document.body.getAttribute('data-game') || 'euro'; }
-
-  // Diagnostics: window.__DRUM_INTEGRATION_DIAGNOSTICS__ (safe, read-only) so the
-  // deployed build can be inspected directly — is the button present/visible, which
-  // game/route is passed, is exactly one iframe alive. Also drives the settings badge.
-  function drumDiag() {
-    var btn = document.getElementById('btn-draw-3d');
-    var r = btn ? btn.getBoundingClientRect() : null;
-    var vis = !!(btn && r && r.width > 0 && r.height > 0 && getComputedStyle(btn).visibility !== 'hidden' && btn.offsetParent !== null);
-    var f = document.getElementById('drum3d-frame');
-    var d = {
-      buildSha: document.documentElement.getAttribute('data-build') || 'dev',
-      buttonFound: !!btn,
-      buttonVisible: vis,
-      buttonRect: r ? { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) } : null,
-      selectedGameId: currentAppId(),
-      embeddedRoute: f ? f.getAttribute('src') : null,
-      overlayOpen: !!overlay,
-      iframeCount: document.querySelectorAll('#drum3d-frame').length
-    };
-    window.__DRUM_INTEGRATION_DIAGNOSTICS__ = d;
-    return d;
-  }
-  window.drumDiag = drumDiag;
-  try { drumDiag(); } catch (e) {}
-
-  // ── Saved-combination bridge (drum iframe → host's REAL storage) ────────────
-  // The drum posts combinations; the HOST persists them through the app's existing
-  // favorites store (local for a guest, account-synced for a signed-in user) and its
-  // real FREE limit + PRO paywall. No second storage system, no client PRO flag.
-  function postToDrum(payload) {
-    var f = document.getElementById('drum3d-frame');
-    if (!f || !f.contentWindow) return;
-    try { f.contentWindow.postMessage(payload, location.origin); } catch (e) {}
-  }
-  function drumFreeLimit() {
-    try { return Number((window.LotoCommercial.access.freeLimits || {}).savedCombinations) || 3; } catch (e) { return 3; }
-  }
-  function drumIsPro() {
-    try { return window.LotoCommercial.access.accessLevel === 'pro'; } catch (e) { return false; }
-  }
-  function drumComboToFav(combo) {
-    var appLot = DRUM_TO_APP[combo.lotteryId] || combo.lotteryId || currentAppId();
-    var dateStr = ''; try { dateStr = new Date(combo.date || Date.now()).toLocaleDateString(typeof appLocale === 'function' ? appLocale() : undefined); } catch (e) {}
-    return {
-      name: (combo.lotteryName || '') + (dateStr ? ' · ' + dateStr : '') + ' · 3D',
-      rows: [{ m: (combo.main || []).slice(), b: (combo.additional || []).slice() }],
-      lot: appLot,
-      source: combo.source || '3d-drum',
-      resultId: combo.resultId || '',
-      // Faithful copy of the drawn additional balls (e.g. Norsk Lotto tilleggstall),
-      // preserved separately because renderFavs() normalizes some games' rows and drops
-      // a non-picked bonus from rows[].b — this keeps the drum panel showing the exact draw.
-      add: (combo.additional || []).slice(),
-      date: combo.date || new Date().toISOString(),
-      id: combo.resultId || ('d' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)),
-    };
-  }
-  async function drumFavoritesSnapshot() {
-    var favs = [];
-    try { favs = (await loadFav()) || []; } catch (e) { favs = []; }
-    var list = favs.map(function (f, i) {
-      var row = (f.rows && f.rows[0]) || { m: [], b: [] };
-      var extra = (row.b && row.b.length) ? row.b.slice() : ((f.add || []).slice());
-      return {
-        id: f.id || ('h' + i), lotteryId: APP_TO_DRUM[f.lot] || f.lot || '',
-        lotteryName: f.name || '', main: (row.m || []).slice(), additional: extra,
-        date: f.date || '', source: f.source || '', resultId: f.resultId || '',
-      };
-    });
-    return { limit: drumFreeLimit(), isPro: drumIsPro(), list: list };
-  }
-  function pushDrumFavorites() {
-    drumFavoritesSnapshot().then(function (snap) { postToDrum(Object.assign({ type: 'APP_FAVORITES' }, snap)); });
-  }
-  async function handleDrumSave(combo) {
-    var favs = []; try { favs = (await loadFav()) || []; } catch (e) { favs = []; }
-    if (combo.resultId && favs.some(function (f) { return f.resultId === combo.resultId; })) {
-      postToDrum({ type: 'APP_SAVE_RESULT', status: 'duplicate' }); pushDrumFavorites(); return;
+/* Личный кабинет — единый источник для Web/iOS/Android. Читает реальные данные из
+   window.LotoCommercial (Supabase access-state / entitlements) и window.LotoAuth
+   (Supabase Auth + Storage). Строки на русском переводятся рантайм-наблюдателем i18n. */
+(function(){
+  const $=id=>document.getElementById(id);
+  const T=v=>String(v==null?'':v);
+  let magicSending=false,avatarBusy=false;
+  // Avatar editor state (crop/move/zoom/rotate). avEd holds the loaded bitmap + transform.
+  const avEd={img:null,w:0,h:0,scale:1,minScale:1,rot:0,step:0,offx:0,offy:0,drag:null,pts:new Map(),pinch:null};
+  // Calendar state: shown month + tentative selection (committed only on «Готово»).
+  let calY,calM,calSelIso=null,calYearView=false;
+  const pad2=n=>String(n).padStart(2,'0');
+  const isoOf=(y,m,d)=>`${y}-${pad2(m+1)}-${pad2(d)}`;
+  function calRender(){
+    const loc=document.documentElement.lang||'ru';
+    const title=$('cal-title');
+    try{title.textContent=new Date(calY,calM,1).toLocaleDateString(loc,{month:'long',year:'numeric'});}catch(_e){title.textContent=`${calM+1}.${calY}`;}
+    const yv=$('cal-yearsel'),grid=$('cal-grid'),wd=$('cal-weekdays');
+    yv.hidden=!calYearView;grid.hidden=calYearView;wd.hidden=calYearView;
+    $('cal-prev').style.visibility=calYearView?'hidden':'';$('cal-next').style.visibility=calYearView?'hidden':'';
+    if(calYearView){
+      const now=new Date().getFullYear();let h='';
+      for(let y=now;y>=1920;y--)h+=`<button type="button" class="cal-yr${y===calY?' sel':''}" data-loto-event-click="AccountUI.calPickYear(${y})">${y}</button>`;
+      yv.innerHTML=h;return;
     }
-    if (!drumIsPro() && favs.length >= drumFreeLimit()) {
-      // Defence in depth — the drum pre-checks and shows replace/PRO; if it still asks
-      // to save at the limit, open the app's real saved-combinations paywall.
-      postToDrum({ type: 'APP_SAVE_RESULT', status: 'limit' });
-      try { window.LotoCommercial.openPaywall('saved_combinations'); } catch (e) {}
-      pushDrumFavorites(); return;
+    // localized weekday short names (Mon-first)
+    let wdh='';for(let i=1;i<=7;i++){const dd=new Date(2024,0,i);/*2024-01-01 is Monday*/wdh+=`<span>${dd.toLocaleDateString(loc,{weekday:'short'})}</span>`;}
+    wd.innerHTML=wdh;
+    const first=new Date(calY,calM,1);let start=(first.getDay()+6)%7; // Mon=0
+    const daysIn=new Date(calY,calM+1,0).getDate();
+    const prevDays=new Date(calY,calM,0).getDate();
+    const todayIso=isoOf(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+    let cells='';
+    for(let i=0;i<start;i++){const d=prevDays-start+1+i;cells+=`<button type="button" class="cal-day other" disabled>${d}</button>`;}
+    for(let d=1;d<=daysIn;d++){
+      const iso=isoOf(calY,calM,d);
+      const future=iso>todayIso;
+      const cls='cal-day'+(iso===calSelIso?' sel':'')+(iso===todayIso?' today':'');
+      cells+=`<button type="button" class="${cls}" ${future?'disabled':''} data-loto-event-click="AccountUI.calPickDay('${iso}')">${d}</button>`;
     }
-    favs.unshift(drumComboToFav(combo));
-    // FREE is already limited above; PRO keeps ALL combinations (no artificial cap),
-    // so a PRO user's 100s of saves are never truncated.
-    try { await saveFavs(drumIsPro() ? favs : favs.slice(0, 10)); } catch (e) {}
-    try { await renderFavs(); } catch (e) {}
-    postToDrum({ type: 'APP_SAVE_RESULT', status: 'saved' }); pushDrumFavorites();
-    try { drumApplyToTopRows(combo); } catch (e) {} // #3: also add to the top working rows
+    const rem=(7-((start+daysIn)%7))%7;
+    for(let i=1;i<=rem;i++)cells+=`<button type="button" class="cal-day other" disabled>${i}</button>`;
+    grid.innerHTML=cells;
   }
-  async function handleDrumReplace(oldId, combo) {
-    var favs = []; try { favs = (await loadFav()) || []; } catch (e) { favs = []; }
-    var idx = favs.findIndex(function (f, i) { return (f.id || ('h' + i)) === oldId; });
-    if (idx >= 0) favs.splice(idx, 1);
-    favs.unshift(drumComboToFav(combo));
-    try { await saveFavs(drumIsPro() ? favs : favs.slice(0, 10)); } catch (e) {}
-    try { await renderFavs(); } catch (e) {}
-    postToDrum({ type: 'APP_SAVE_RESULT', status: 'saved' }); pushDrumFavorites();
-    try { drumApplyToTopRows(combo); } catch (e) {} // #3: also add to the top working rows
+
+  function fmtDate(iso){
+    const t=Date.parse(iso||'');
+    if(!Number.isFinite(t))return '';
+    const loc=(document.documentElement.lang||'ru');
+    try{return new Date(t).toLocaleDateString(loc,{day:'numeric',month:'long',year:'numeric'});}
+    catch(_e){return new Date(t).toISOString().slice(0,10);}
   }
-  async function handleDrumRemove(id) {
-    try {
-      if (typeof customConfirm === 'function' && !(await customConfirm('Удалить из избранного?', 'Удалить', { title: 'Удалить комбинацию?' }))) {
-        pushDrumFavorites();
-        return;
-      }
-    } catch (e) {}
-    var favs = []; try { favs = (await loadFav()) || []; } catch (e) { favs = []; }
-    var idx = favs.findIndex(function (f, i) { return (f.id || ('h' + i)) === id; });
-    if (idx >= 0) { favs.splice(idx, 1); try { await saveFavs(favs); } catch (e) {} try { await renderFavs(); } catch (e) {} }
-    pushDrumFavorites();
+  function sourceLabel(src){
+    switch(String(src||'')){
+      case 'owner_lifetime':return 'Владелец · пожизненный доступ';
+      case 'apple':return 'Apple App Store';
+      case 'google':return 'Google Play';
+      case 'stripe':return 'Stripe';
+      case 'paddle':return 'Paddle';
+      case 'revenuecat':return 'RevenueCat';
+      case 'support':return 'Служба поддержки';
+      case 'developer':return 'Режим разработчика';
+      default:return 'Не определён';
+    }
   }
-  // #3: append a saved 3D combination to the main screen's TOP working rows using the
-  // app's own row model — never overwriting existing rows, deduped, capped by MAX_ROWS —
-  // so it's ready the instant the user leaves the drum (no yellow apply-button press).
-  // #2: open the app's EXISTING PRO paywall from inside the drum, visibly (above the
-  // drum overlay), keep the pending combination, and — after the real server-authoritative
-  // entitlement update — push the new isPro/limit to the iframe and save the pending once.
-  var pendingDrumCombo = null;
-  var drumAccessListener = null;
-  function openDrumPaywall(combo) {
-    pendingDrumCombo = combo || pendingDrumCombo || null;
-    try {
-      document.body.classList.add('drum3d-paywall'); // lift the paywall above the drum overlay
-      if (!drumAccessListener) {
-        drumAccessListener = function () {
-          try { pushDrumFavorites(); } catch (e) {}                 // new isPro/limit → iframe, no reload
-          if (pendingDrumCombo && drumIsPro()) {                    // real PRO confirmed → save the pending once
-            var c = pendingDrumCombo; pendingDrumCombo = null; handleDrumSave(c);
-          }
-        };
-        window.addEventListener('loto:accesschange', drumAccessListener);
-      }
-      // Clear a still-pending combo if the paywall is dismissed WITHOUT becoming PRO
-      // (no duplicate, no lost save — nothing was stored). PRO path already saved+cleared it.
-      var ov = document.getElementById('pro-ov');
-      if (ov) {
-        var mo = new MutationObserver(function () {
-          if (!ov.classList.contains('show')) {
-            mo.disconnect();
-            document.body.classList.remove('drum3d-paywall');
-            if (!drumIsPro()) pendingDrumCombo = null;
-          }
+  const isNative=()=>!!(window.LotoNativeBilling&&window.LotoNativeBilling.isNative);
+
+  function setAvatar(url){
+    const img=$('acc-avatar-img'),fb=$('acc-avatar-fallback');
+    const himg=$('hdr-avatar-img'),hsil=$('hdr-avatar-silhouette');
+    if(url){
+      const load=(node,fallback)=>{if(!node)return;node.onload=()=>{node.hidden=false;if(fallback)fallback.style.display='none';};node.onerror=()=>{node.hidden=true;if(fallback)fallback.style.display='';};node.src=url;if(node.complete&&node.naturalWidth)node.onload();};
+      load(img,fb);load(himg,hsil);
+      const rm=$('acc-avatar-remove');if(rm)rm.hidden=false;
+    }else{
+      if(img){img.hidden=true;img.removeAttribute('src');}
+      if(fb)fb.style.display='';
+      if(himg){himg.hidden=true;himg.removeAttribute('src');}
+      if(hsil)hsil.style.display='';
+      const rm=$('acc-avatar-remove');if(rm)rm.hidden=true;
+    }
+  }
+  let loadedUid=null,profileCache=null,profileRequestSeq=0,avatarRevision=0;
+  function applyProfile(p){
+    profileCache=p||null;
+    setAvatar(p&&p.avatarUrl||null);
+    const name=(p&&p.displayName||'').trim();
+    const nameEl=$('acc-name');if(nameEl){nameEl.textContent=name;nameEl.hidden=!name;}
+    const dn=$('acc-displayname');if(dn&&document.activeElement!==dn)dn.value=name;
+    setBirthdayValue((p&&p.birthday||'').slice(0,10)||null);
+    maybeGreetBirthday(p);
+  }
+  // Birthday value lives in a hidden input (ISO YYYY-MM-DD or empty) with a localized display.
+  function fmtBirthdayDisplay(iso){
+    const t=Date.parse((iso||'')+'T12:00:00Z');
+    if(!iso||!Number.isFinite(t))return '';
+    const loc=document.documentElement.lang||'ru';
+    try{return new Date(t).toLocaleDateString(loc,{day:'numeric',month:'long',year:'numeric'});}
+    catch(_e){return iso;}
+  }
+  function setBirthdayValue(iso){
+    const inp=$('acc-birthday');if(inp)inp.value=iso||'';
+    const disp=$('acc-birthday-display'),btn=$('acc-birthday-btn');
+    const text=fmtBirthdayDisplay(iso);
+    if(disp)disp.textContent=text||'Не указан';
+    if(btn)btn.classList.toggle('empty',!text);
+  }
+  async function loadAvatar(force){
+    const {user,confirmed}=accountState();
+    const uid=confirmed?user.id:null;
+    if(!uid){profileRequestSeq++;loadedUid=null;profileCache=null;setAvatar(null);const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}return;}
+    if(!force&&uid===loadedUid)return; // profile already loaded for this account
+    loadedUid=uid;
+    const requestSeq=++profileRequestSeq,revision=avatarRevision;
+    try{const p=await (window.LotoAuth&&window.LotoAuth.getProfile&&window.LotoAuth.getProfile());
+      // A profile request started before a successful upload/removal must never overwrite the
+      // newer stored avatar when its slower response arrives.
+      if(requestSeq!==profileRequestSeq||revision!==avatarRevision||accountState().user?.id!==uid)return;
+      applyProfile(p);
+      // Persist the current UI locale so a future birthday greeting can be in the right language.
+      try{const loc=document.documentElement.lang||'ru';if(p&&p.locale!==loc)window.LotoAuth.updateProfile({locale:loc}).catch(()=>{});}catch(_e2){}
+    }catch(_e){if(requestSeq===profileRequestSeq)loadedUid=null;}
+  }
+  // In-app birthday greeting: when the signed-in user's birthday (month+day) is today, show a
+  // localized congratulation once per day. Fully client-side — no push infrastructure touched.
+  function maybeGreetBirthday(p){
+    try{
+      const b=p&&p.birthday;if(!b)return;
+      const now=new Date(),mm=String(now.getMonth()+1).padStart(2,'0'),dd=String(now.getDate()).padStart(2,'0');
+      if(b.slice(5,10)!==`${mm}-${dd}`)return;
+      const key='loto_bday_greeted_'+now.getFullYear();
+      if(localStorage.getItem(key))return;
+      localStorage.setItem(key,'1');
+      // Fixed, fully-localizable strings (no name interpolation, so the i18n observer
+      // translates them to the user's language).
+      if(typeof showFeedback==='function')showFeedback('С днём рождения! 🎂','Пусть сегодня удача будет на вашей стороне! 🎉','🎉',7000);
+    }catch(_e){}
+  }
+  function msg(elId,text,kind){
+    const n=$(elId);if(!n)return;
+    n.textContent=T(text);n.dataset.kind=kind||'info';n.hidden=!text;
+  }
+  // App Store / Google Play badges — Web only, ordered by platform, "Скоро" if no URL yet.
+  function renderStores(){
+    const targets=[['acc-stores','acc-stores-btns'],['home-stores','home-stores-btns'],['analytics-stores','analytics-stores-btns']]
+      .map(([elId,btnId])=>({el:$(elId),btns:$(btnId)})).filter(x=>x.el&&x.btns);
+    if(!targets.length)return;
+    const native=!!((window.LotoNativeBilling&&window.LotoNativeBilling.isNative)||(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform()));
+    if(native){targets.forEach(x=>{x.el.hidden=true;x.btns.innerHTML='';});return;} // never render this block inside native apps
+    const cfg=window.LOTO_COMMERCIAL_CONFIG||{};
+    const appStore=cfg.appStoreUrl||'',googlePlay=cfg.googlePlayUrl||'';
+    const ua=navigator.userAgent||'';
+    const isIOS=/iPhone|iPad|iPod/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    const isAndroid=/Android/i.test(ua);
+    const apple=`<a class="store-badge${appStore?'':' soon'}" ${appStore?`href="${appStore}" target="_blank" rel="noopener"`:'aria-disabled="true" role="link"'}>`+
+      `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.9c0-2 1.6-3 1.7-3.1-.9-1.3-2.3-1.5-2.8-1.5-1.2-.1-2.3.7-2.9.7-.6 0-1.5-.7-2.5-.7-1.3 0-2.5.8-3.2 2-1.4 2.4-.4 5.9 1 7.9.7 1 1.4 2 2.4 2s1.3-.6 2.5-.6 1.5.6 2.5.6 1.7-1 2.3-2c.7-1.1 1-2.2 1-2.3 0 0-1.9-.7-1.9-2.9ZM14.5 6.6c.5-.7.9-1.6.8-2.6-.8 0-1.8.5-2.3 1.2-.5.6-.9 1.5-.8 2.5.9.1 1.8-.5 2.3-1.1Z"/></svg>`+
+      `<span class="sb-txt"><span class="sb-small" data-i18n-ignore>Download on the</span><span class="sb-big" data-i18n-ignore>App Store</span></span>${appStore?'':'<span class="sb-soon">Скоро</span>'}</a>`;
+    const google=`<a class="store-badge${googlePlay?'':' soon'}" ${googlePlay?`href="${googlePlay}" target="_blank" rel="noopener"`:'aria-disabled="true" role="link"'}>`+
+      `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#00D3FF" d="M3.5 2.3 13.6 12 3.5 21.7c-.32-.18-.5-.55-.5-1V3.3c0-.45.18-.82.5-1Z"/><path fill="#FFCE00" d="m17.7 8.1 2.9 1.7c.9.52.9 1.98 0 2.5l-2.9 1.6L14.9 12l2.8-3.9Z"/><path fill="#00F076" d="M3.5 2.3c.32-.18.7-.2 1.03 0l10.37 6-2.3 2.3L3.5 2.3Z"/><path fill="#FF3A44" d="m12.6 13.4 2.3 2.3-10.37 6c-.33.2-.71.18-1.03 0l9.1-8.3Z"/></svg>`+
+      `<span class="sb-txt"><span class="sb-small" data-i18n-ignore>Get it on</span><span class="sb-big" data-i18n-ignore>Google Play</span></span>${googlePlay?'':'<span class="sb-soon">Скоро</span>'}</a>`;
+    const badges=isAndroid?(google+apple):(apple+google); // iOS: App Store first; Android: Google Play first; desktop: both
+    targets.forEach(x=>{x.btns.innerHTML=badges;x.el.hidden=false;});
+  }
+
+  function accountState(){
+    const C=window.LotoCommercial;
+    const access=(C&&C.access)||{};
+    const user=(C&&C.user)||null;
+    const confirmed=!!(user&&user.id&&user.email&&!user.isAnonymous&&user.emailConfirmed===true);
+    const hasEmailPending=!!(user&&user.email&&!user.isAnonymous&&!confirmed);
+    return {access,user,confirmed,hasEmailPending};
+  }
+
+  function render(){
+    const {access,user,confirmed,hasEmailPending}=accountState();
+    const level=access.accessLevel||'free';
+    const sub=access.subscription||null;
+    const isPro=level==='pro';
+    const lifetime=!!(isPro&&sub&&sub.source==='owner_lifetime'&&!sub.expiresAt);
+
+    const dot=$('hdr-profile-dot');if(dot)dot.toggleAttribute('hidden',!confirmed);
+
+    if($('acc-email'))$('acc-email').textContent=confirmed?user.email:'';
+    if($('acc-status'))$('acc-status').textContent=confirmed?'Вход выполнен'
+      :hasEmailPending?'Ожидается подтверждение e-mail':'Гостевой режим · вход не требуется для Free';
+
+    if($('acc-signin'))$('acc-signin').hidden=confirmed;
+    // Surface a pending Magic-Link callback result (expired / used / failed) in the sign-in card.
+    try{const am=window.LotoCommercial&&window.LotoCommercial.authMessage;
+      if(am&&am.text&&!confirmed)msg('acc-auth-msg',am.text,am.kind);
+    }catch(_e){}
+
+    if($('acc-plan'))$('acc-plan').hidden=false;
+    const badge=$('acc-plan-badge');
+    if(badge){badge.textContent=isPro?'PRO':'FREE';badge.classList.toggle('pro',isPro);}
+    if($('acc-r-authstatus'))$('acc-r-authstatus').textContent=confirmed?'Вход выполнен'
+      :hasEmailPending?'E-mail не подтверждён':'Гостевой режим';
+    if($('acc-r-tier'))$('acc-r-tier').textContent=lifetime?'PRO пожизненный':isPro?'PRO активен':'Бесплатный (Free)';
+
+    const start=sub&&sub.startedAt?fmtDate(sub.startedAt):'';
+    if($('acc-row-start'))$('acc-row-start').hidden=!start;
+    if(start&&$('acc-r-start'))$('acc-r-start').textContent=start;
+
+    const endRow=$('acc-row-end');
+    if(endRow){
+      if(isPro){endRow.hidden=false;
+        $('acc-r-end').textContent=(lifetime||!sub||!sub.expiresAt)?'Без срока':fmtDate(sub.expiresAt);
+      }else endRow.hidden=true;
+    }
+    const renewRow=$('acc-row-renew');
+    if(renewRow){
+      if(lifetime){renewRow.hidden=false;const rd=$('acc-r-renew');rd.textContent='Не требуется — доступ навсегда';rd.className='ok';}
+      else if(isPro&&sub){renewRow.hidden=false;const rd=$('acc-r-renew');
+        if(sub.willRenew){rd.textContent='Автопродление включено';rd.className='ok';}
+        else{rd.textContent='Продление отключено — доступ до даты окончания';rd.className='warn';}
+      }else renewRow.hidden=true;
+    }
+    const srcRow=$('acc-row-source');
+    if(srcRow){
+      if(isPro){srcRow.hidden=false;$('acc-r-source').textContent=sourceLabel(sub&&sub.source);}
+      else srcRow.hidden=true;
+    }
+
+    if($('acc-manage-btn'))$('acc-manage-btn').hidden=!(confirmed&&isPro&&!lifetime);
+    if($('acc-restore-btn'))$('acc-restore-btn').hidden=!(confirmed&&isNative());
+    if($('acc-signout-btn'))$('acc-signout-btn').hidden=!confirmed;
+    if($('acc-avatar-actions'))$('acc-avatar-actions').hidden=!confirmed;
+    if($('acc-mydata'))$('acc-mydata').hidden=!confirmed;
+    if(!confirmed){setAvatar(null);const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}}
+  }
+
+  function avatarError(err){
+    const c=String((err&&err.message)||err||'');
+    if(/account_required/.test(c))return 'Войдите в аккаунт, чтобы загрузить фото.';
+    if(/invalid_format/.test(c))return 'Поддерживаются только JPG, PNG или WebP.';
+    if(/file_too_large/.test(c))return 'Файл слишком большой. Максимум 5 МБ.';
+    return 'Не удалось сохранить фото. Попробуйте ещё раз.';
+  }
+
+  // ── Avatar photo editor engine ────────────────────────────────────────────
+  const AV_INPUT_MAX=30*1024*1024; // generous input cap; the SAVED crop is a small JPEG
+  const AV_OUT=512;                // exported avatar square (px)
+  let avObjUrl=null;               // object URL for the picked source file (revoked on close)
+  // Decode any picked file to a drawable bitmap. createImageBitmap covers JPG/PNG/WebP
+  // everywhere and HEIC where the engine supports it (iOS/Safari/WKWebView). Fallback to
+  // an <img> element + decode() for engines that only decode via the DOM.
+  async function avLoadBitmap(file){
+    try{return await createImageBitmap(file,{imageOrientation:'from-image'});}catch(_e){}
+    try{return await createImageBitmap(file);}catch(_e){}
+    if(avObjUrl){try{URL.revokeObjectURL(avObjUrl);}catch(_e){}}
+    avObjUrl=URL.createObjectURL(file);
+    const img=new Image();img.decoding='async';img.src=avObjUrl;
+    await img.decode(); // throws on formats this engine cannot render (e.g. HEIC on desktop Chrome)
+    return img;
+  }
+  function avStageSize(){const st=$('aved-stage');const dpr=Math.min(window.devicePixelRatio||1,2.5);
+    return {css:Math.max(120,(st&&st.clientWidth)||280),dpr};}
+  function avDraw(){
+    const cv=$('aved-canvas');if(!cv||!avEd.img)return;const ctx=cv.getContext('2d');const S=cv.width;
+    ctx.clearRect(0,0,S,S);
+    ctx.save();ctx.translate(S/2+avEd.offx,S/2+avEd.offy);ctx.rotate(avEd.rot);ctx.scale(avEd.scale,avEd.scale);
+    ctx.drawImage(avEd.img,-avEd.w/2,-avEd.h/2);ctx.restore();
+  }
+  // Keep the inscribed crop circle fully covered by the (rotated) image at all times.
+  function avClamp(){
+    const cv=$('aved-canvas');if(!cv)return;const R=cv.width/2;
+    const hx=Math.max(0,avEd.scale*avEd.w/2-R),hy=Math.max(0,avEd.scale*avEd.h/2-R);
+    const cn=Math.cos(-avEd.rot),sn=Math.sin(-avEd.rot);
+    let lx=avEd.offx*cn-avEd.offy*sn,ly=avEd.offx*sn+avEd.offy*cn;
+    lx=Math.max(-hx,Math.min(hx,lx));ly=Math.max(-hy,Math.min(hy,ly));
+    const cp=Math.cos(avEd.rot),sp=Math.sin(avEd.rot);
+    avEd.offx=lx*cp-ly*sp;avEd.offy=lx*sp+ly*cp;
+  }
+  function avApplyRot(){
+    const fine=Number(($('aved-rot')||{}).value||0);
+    avEd.rot=((avEd.step*90+fine)*Math.PI)/180;avClamp();avDraw();
+  }
+  function avSetScale(next){
+    const min=avEd.minScale,max=avEd.minScale*4;
+    next=Math.max(min,Math.min(max,next));
+    if(avEd.scale>0){const r=next/avEd.scale;avEd.offx*=r;avEd.offy*=r;}
+    avEd.scale=next;const z=$('aved-zoom');if(z)z.value=String(next/avEd.minScale);
+    avClamp();avDraw();
+  }
+  function avPointDist(){const v=[...avEd.pts.values()];return Math.hypot(v[0].x-v[1].x,v[0].y-v[1].y);}
+  function avWire(){
+    const st=$('aved-stage');if(!st||st.__wired)return;st.__wired=1;
+    st.addEventListener('pointerdown',ev=>{st.setPointerCapture(ev.pointerId);avEd.pts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+      if(avEd.pts.size===2){avEd.pinch={d:avPointDist(),s:avEd.scale};avEd.drag=null;}
+      else{avEd.drag={x:ev.clientX,y:ev.clientY};}});
+    st.addEventListener('pointermove',ev=>{if(!avEd.pts.has(ev.pointerId))return;avEd.pts.set(ev.pointerId,{x:ev.clientX,y:ev.clientY});
+      if(avEd.pinch&&avEd.pts.size>=2){const d=avPointDist();if(avEd.pinch.d>0)avSetScale(avEd.pinch.s*(d/avEd.pinch.d));return;}
+      if(avEd.drag){const dpr=avEd.dpr||1;avEd.offx+=(ev.clientX-avEd.drag.x)*dpr;avEd.offy+=(ev.clientY-avEd.drag.y)*dpr;
+        avEd.drag={x:ev.clientX,y:ev.clientY};avClamp();avDraw();}});
+    const up=ev=>{avEd.pts.delete(ev.pointerId);if(avEd.pts.size<2)avEd.pinch=null;if(avEd.pts.size===0)avEd.drag=null;};
+    st.addEventListener('pointerup',up);st.addEventListener('pointercancel',up);
+    st.addEventListener('wheel',ev=>{ev.preventDefault();avSetScale(avEd.scale*(ev.deltaY<0?1.06:0.94));},{passive:false});
+    const z=$('aved-zoom');if(z)z.addEventListener('input',()=>avSetScale(avEd.minScale*Number(z.value)));
+    const r=$('aved-rot');if(r)r.addEventListener('input',avApplyRot);
+  }
+
+  const AccountUI={
+    pickAvatar(){const f=$('acc-avatar-file');if(f)f.click();},
+    async onFile(e){
+      const file=e.target.files&&e.target.files[0];e.target.value='';
+      if(!file)return;
+      // Accept JPG/PNG/WebP/HEIC/HEIF (HEIC comes from iPhones). The crop is re-encoded to
+      // JPEG on save, so the stored avatar is always a small, universally-decodable image.
+      const okType=/^image\/(jpeg|png|webp|heic|heif)$/i.test(file.type||'')||/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name||'')||(file.type||'').startsWith('image/');
+      if(!okType){msg('acc-avatar-msg','Поддерживаются JPG, PNG, WebP или HEIC.','error');return;}
+      if(file.size>AV_INPUT_MAX){msg('acc-avatar-msg','Файл слишком большой. Максимум 30 МБ.','error');return;}
+      msg('acc-avatar-msg','',null);
+      let bmp;
+      try{bmp=await avLoadBitmap(file);}
+      catch(_e){msg('acc-avatar-msg','Не удалось открыть это изображение. Попробуйте JPG или PNG.','error');return;}
+      avEd.img=bmp;avEd.w=bmp.width||bmp.naturalWidth;avEd.h=bmp.height||bmp.naturalHeight;
+      avEd.rot=0;avEd.step=0;avEd.offx=0;avEd.offy=0;avEd.pts.clear();avEd.pinch=null;avEd.drag=null;
+      const ov=$('aved-ov');if(ov)ov.classList.add('show');
+      requestAnimationFrame(()=>{
+        const {css,dpr}=avStageSize();avEd.dpr=dpr;const S=Math.round(css*dpr);
+        const cv=$('aved-canvas');cv.width=S;cv.height=S;
+        avEd.minScale=S/Math.min(avEd.w,avEd.h);avEd.scale=avEd.minScale;
+        const z=$('aved-zoom');if(z)z.value='1';const r=$('aved-rot');if(r)r.value='0';
+        avWire();avClamp();avDraw();
+      });
+    },
+    avEdReset(){avEd.scale=avEd.minScale;avEd.rot=0;avEd.step=0;avEd.offx=0;avEd.offy=0;
+      const z=$('aved-zoom');if(z)z.value='1';const r=$('aved-rot');if(r)r.value='0';avDraw();},
+    avEdRotate90(){avEd.step=(avEd.step+1)%4;avApplyRot();},
+    avEdCancel(){const ov=$('aved-ov');if(ov)ov.classList.remove('show');
+      avEd.img=null;if(avObjUrl){try{URL.revokeObjectURL(avObjUrl);}catch(_e){}avObjUrl=null;}},
+    async avEdSave(){
+      if(avatarBusy||!avEd.img)return;avatarBusy=true;
+      const busy=$('aved-busy');if(busy)busy.classList.add('on');
+      const saveBtn=$('aved-save');if(saveBtn)saveBtn.disabled=true;
+      try{
+        // Render the cropped circle region to a fixed-size square, re-encoded as JPEG.
+        const S=$('aved-canvas').width,k=AV_OUT/S;const out=document.createElement('canvas');
+        out.width=AV_OUT;out.height=AV_OUT;const ctx=out.getContext('2d');
+        ctx.fillStyle='#12121a';ctx.fillRect(0,0,AV_OUT,AV_OUT);
+        ctx.save();ctx.translate(AV_OUT/2+avEd.offx*k,AV_OUT/2+avEd.offy*k);ctx.rotate(avEd.rot);
+        ctx.scale(avEd.scale*k,avEd.scale*k);ctx.drawImage(avEd.img,-avEd.w/2,-avEd.h/2);ctx.restore();
+        const blob=await new Promise((res,rej)=>out.toBlob(b=>b?res(b):rej(new Error('encode_failed')),'image/jpeg',0.9));
+        const outFile=new File([blob],'avatar.jpg',{type:'image/jpeg'});
+        // Real persistence: uploadAvatar resolves ONLY after the file is stored in Supabase
+        // Storage AND the profiles row is written (both awaited server-side). That resolution
+        // IS the success confirmation — anything less throws and is handled below (editor stays
+        // open, localized error, retry possible).
+        const info=await withBusy('Загрузка фотографии…',async()=>{
+          BUSY_stage('Сохраняю фото профиля…');
+          return window.LotoAuth.uploadAvatar(outFile);
         });
-        mo.observe(ov, { attributes: true, attributeFilter: ['class'] });
-      }
-      window.LotoCommercial.openPaywall('saved_combinations');
-    } catch (e) { try { console.warn('openDrumPaywall failed', e); } catch (_e) {} }
-  }
-  function drumApplyToTopRows(combo, quiet) {
-    try {
-      var appLot = DRUM_TO_APP[combo.lotteryId] || combo.lotteryId;
-      if (appLot !== currentAppId()) return 'skip';        // never mix lotteries
-      var m = (combo.main || []).slice(), b = (combo.additional || []).slice();
-      if (!m.length) return 'skip';
-      var eq = function (x, y) { return x.length === y.length && x.every(function (v, i) { return v === y[i]; }); };
-      for (var i = 0; i < rows.length; i++) if (eq(rows[i].m, m) && eq(rows[i].b, b)) return 'dup'; // no duplicate row
-      var idx = -1;
-      for (var j = 0; j < rows.length; j++) if ((rows[j].m || []).length === 0 && (rows[j].b || []).length === 0) { idx = j; break; }
-      if (idx < 0) { if (rows.length >= MAX_ROWS) return 'full'; rows.push(nr()); idx = rows.length - 1; }
-      rows[idx].m = m; rows[idx].b = b; act = idx;
-      renderSim();
-      if (!quiet) { try { goToRows(); } catch (e) {} try { resetBanner(); } catch (e) {} }
-      return 'added';
-    } catch (e) { try { console.warn('drumApplyToTopRows failed', e); } catch (_e) {} return 'skip'; }
-  }
-  // #1: bulk-transfer selected saved combinations (one lottery) to the main screen —
-  // close the drum, switch to that lottery, append each combination (in order, deduped,
-  // capped by MAX_ROWS) and show a localized confirmation. No saved combos are removed.
-  function drumBulkApply(lotteryId, combos, labels) {
-    labels = labels || {};
-    var appLot = DRUM_TO_APP[lotteryId] || lotteryId;
-    try { if (appLot && appLot !== currentAppId()) selLot(appLot); } catch (e) {}
-    closeDrum3D();                                          // back to the Simulator main screen
-    try { clearGroupAnalysisState(); } catch (e) {}
-    var applied = 0, already = 0, capped = false;
-    for (var i = 0; i < (combos || []).length; i++) {
-      var r = drumApplyToTopRows(combos[i], true);
-      if (r === 'added') applied++;
-      else if (r === 'dup') already++;                 // already on the main screen — not a duplicate row
-      else if (r === 'full') { capped = true; break; }
-    }
-    try { goToRows(); } catch (e) {}
-    try { resetBanner(); } catch (e) {}
-    // Honest feedback: distinguish newly-added from already-present so the bulk button
-    // is never a silent no-op after the per-save auto-apply already placed some rows.
-    try {
-      if (capped) showFeedback(String(labels.limitTpl || '%N%').replace('%N%', MAX_ROWS), '', '⚠️', 3400);
-      else if (applied > 0 && already > 0) showFeedback(String(labels.mixedTpl || 'Добавлено %A%, уже были %B%').replace('%A%', applied).replace('%B%', already), '', '✅', 3000);
-      else if (applied === 0 && already > 0) showFeedback(String(labels.allPresentTpl || 'Все выбранные комбинации уже на главном экране'), '', 'ℹ️', 3000);
-      else showFeedback(String(labels.addedTpl || '%N%').replace('%N%', applied), '', '✅', 2600);
-    } catch (e) {}
-  }
+        // Use only the URL returned after Supabase Storage + profile persistence. A temporary
+        // blob preview cannot survive navigation/reload and can be overwritten by a late
+        // getProfile response.
+        if(!info?.avatarUrl)throw new Error('avatar_url_missing');
+        avatarRevision++;profileRequestSeq++;
+        profileCache={...(profileCache||{}),avatarUrl:info.avatarUrl,avatarPath:info.avatarPath||null,avatarUpdatedAt:info.avatarUpdatedAt||null};
+        setAvatar(info.avatarUrl);
+        this.avEdCancel();
+        msg('acc-avatar-msg','Фото профиля обновлено.','success');
+      }catch(err){msg('acc-avatar-msg',avatarError(err),'error');}
+      finally{avatarBusy=false;if(busy)busy.classList.remove('on');if(saveBtn)saveBtn.disabled=false;}
+    },
+    async removeAvatar(){
+      if(avatarBusy)return;avatarBusy=true;
+      const b=$('acc-avatar-busy');if(b)b.hidden=false;msg('acc-avatar-msg','',null);
+      try{await window.LotoAuth.removeAvatar();avatarRevision++;profileRequestSeq++;profileCache={...(profileCache||{}),avatarUrl:null,avatarPath:null};setAvatar(null);msg('acc-avatar-msg','Фото профиля удалено.','success');}
+      catch(err){msg('acc-avatar-msg',avatarError(err),'error');}
+      finally{avatarBusy=false;if(b)b.hidden=true;}
+    },
+    register(){return this.sendMagic('register');},
+    signIn(){return this.sendMagic('login');},
+    // Both actions use the SAME passwordless email/Magic-Link flow; `mode` only decides whether a
+    // brand-new account may be created ("register") or the link is for an existing account only
+    // ("login"). Either way the callback signs the user into the SAME auth.users.id and restores
+    // their profile, photo and (server-side) PRO — a new device never forks a second account.
+    async sendMagic(mode){
+      if(magicSending)return;
+      const input=$('acc-email-input');const email=((input&&input.value)||'').trim();
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){msg('acc-auth-msg','Введите корректный e-mail.','error');return;}
+      magicSending=true;
+      const rb=$('acc-register-btn'),lb=$('acc-login-btn');if(rb)rb.disabled=true;if(lb)lb.disabled=true;
+      msg('acc-auth-msg','Отправляем ссылку…','info');
+      try{await window.LotoCommercial.sendMagicLink(email,mode);
+        msg('acc-auth-msg',mode==='login'
+          ?'Ссылка для входа отправлена на указанный e-mail. Откройте её на этом устройстве.'
+          :'Ссылка для подтверждения отправлена на указанный e-mail. Откройте её на этом устройстве.','success');}
+      catch(_err){msg('acc-auth-msg','Не удалось отправить ссылку. Проверьте адрес и попробуйте ещё раз.','error');}
+      finally{magicSending=false;if(rb)rb.disabled=false;if(lb)lb.disabled=false;}
+    },
+    async manage(){try{await window.LotoCommercial.accountPortal();}catch(_e){}},
+    async restore(){try{await window.LotoCommercial.restorePurchase();}catch(_e){}},
+    openCalendar(){
+      const cur=(($('acc-birthday')||{}).value||'').slice(0,10);
+      calSelIso=/^\d{4}-\d{2}-\d{2}$/.test(cur)?cur:null;
+      const base=calSelIso?new Date(calSelIso+'T12:00:00Z'):new Date(1990,0,1);
+      calY=base.getUTCFullYear?base.getFullYear():base.getFullYear();calM=base.getMonth();calYearView=false;
+      calRender();
+      const ov=$('cal-ov');if(ov)ov.classList.add('show');
+    },
+    calNav(dir){calM+=dir;if(calM<0){calM=11;calY--;}else if(calM>11){calM=0;calY++;}calRender();},
+    calToggleYears(){calYearView=!calYearView;calRender();},
+    calPickYear(y){calY=y;calYearView=false;calRender();},
+    calPickDay(iso){calSelIso=iso;calRender();},
+    calClear(){calSelIso=null;setBirthdayValue(null);this.calClose();},
+    calClose(){const ov=$('cal-ov');if(ov)ov.classList.remove('show');},
+    calDone(){setBirthdayValue(calSelIso||null);this.calClose();},
+    async saveData(){
+      const name=(($('acc-displayname')||{}).value||'').trim().slice(0,60);
+      const birthday=(($('acc-birthday')||{}).value||'').trim();
+      const btn=$('acc-savedata-btn');if(btn)btn.disabled=true;
+      msg('acc-data-msg','Сохраняем…','info');
+      try{
+        const info=await window.LotoAuth.updateProfile({displayName:name||null,birthday:birthday||null,locale:document.documentElement.lang||'ru'});
+        applyProfile(info);
+        msg('acc-data-msg','Данные сохранены.','success');
+      }catch(err){
+        const c=String((err&&err.message)||err||'');
+        msg('acc-data-msg',/invalid_birthday/.test(c)?'Проверьте дату рождения.':/account_required/.test(c)?'Войдите в аккаунт, чтобы сохранить данные.':'Не удалось сохранить. Попробуйте ещё раз.','error');
+      }finally{if(btn)btn.disabled=false;}
+    },
+    async signOut(){try{await window.LotoCommercial.signOut();avatarRevision++;profileRequestSeq++;setAvatar(null);profileCache=null;loadedUid=null;const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}msg('acc-auth-msg','',null);msg('acc-avatar-msg','',null);msg('acc-data-msg','',null);render();}catch(_e){}},
+  };
+  window.AccountUI=AccountUI;
 
-  window.openDrum3D = function () {
-    if (overlay) return;
-    var appId = currentAppId();
-    var drumId = APP_TO_DRUM[appId] || 'eurojackpot';
-    var p = new URLSearchParams({ profile: drumId, embed: '1' });
-    var map = { hdrA: '--hdr-a', hdrB: '--hdr-b', hdrC: '--hdr-c', glow: '--game-glow', gm: '--gm', gb: '--gb' };
-    for (var k in map) { var v = cssVar(map[k]); if (v) p.set(k, v); }
-    try { var L = window.LOTS && window.LOTS[appId]; if (L && (L.short || L.name)) p.set('name', L.short || L.name); } catch (e) {}
-    // Pass the app's current locale so the embedded drum matches the app language.
-    try { var lang = localStorage.getItem('loto_lang') || document.documentElement.lang || 'ru'; if (lang) p.set('lang', lang); } catch (e) {}
-    p.set('navH', '64px'); p.set('navB', '6px'); p.set('navGap', '6px');
+  window.openAccount=function(){
+    const el=$('account-ov');
+    if(el)el.__lotoClose=()=>{el.classList.remove('show');document.body.classList.remove('account-open');const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','false');};
+    document.body.classList.add('account-open');
+    if(window.LotoModals)window.LotoModals.openModal('account-ov');else if(el)el.classList.add('show');
+    const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','true');
+    render();loadAvatar(true);
+    try{window.LotoCommercial&&window.LotoCommercial.refreshAccess&&window.LotoCommercial.refreshAccess();}catch(_e){}
+  };
+  window.closeAccount=function(){
+    const el=$('account-ov');
+    if(window.LotoModals)window.LotoModals.closeModal('account-ov');else if(el?.__lotoClose)el.__lotoClose('close');else if(el)el.classList.remove('show');
+    document.body.classList.remove('account-open');
+    const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','false');
+  };
 
-    // Mark the central nav item active while the overlay is open.
-    var navItem = document.getElementById('bn-drum3d');
-    if (navItem) { var curOn = document.querySelector('.bn.on'); prevActiveBn = curOn ? curOn.id : 'bn-sim'; document.querySelectorAll('.bn').forEach(function (x) { x.classList.remove('on'); }); navItem.classList.add('on'); }
-
-    overlay = document.createElement('div');
-    overlay.id = 'drum3d-overlay';
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-label', '3D-розыгрыш');
-    var frame = document.createElement('iframe');
-    frame.id = 'drum3d-frame'; frame.title = '3D-розыгрыш';
-    frame.setAttribute('allow', 'autoplay; fullscreen');
-    frame.src = './demo-drum/index.html?' + p.toString();
-    var back = document.createElement('button');
-    back.id = 'drum3d-back'; back.type = 'button'; back.textContent = '‹';
-    back.setAttribute('aria-label', 'Назад');
-    back.onclick = function () { history.back(); };
-    overlay.appendChild(frame); overlay.appendChild(back);
-    document.body.appendChild(overlay);
-    document.documentElement.classList.add('drum-overlay-open');
-    document.body.classList.add('drum3d-open');
-    history.pushState({ drum3d: 1 }, '');        // browser/Android back closes overlay, not the app
-    popHandler = function () { closeDrum3D(true); };
-    window.addEventListener('popstate', popHandler);
-    // Live language sync: if the user switches app language while the drum overlay is
-    // open, tell the iframe to re-localize its HUD in place (no draw restart / reset).
-    langHandler = function () { try { var lg = localStorage.getItem('loto_lang') || document.documentElement.lang; frame.contentWindow.postMessage({ type: 'loto:lang', lang: lg }, location.origin); } catch (e) {} };
-    window.addEventListener('loto:languagechange', langHandler);
-    msgHandler = function (e) {
-      var d = e.data; if (!d || d.source !== 'loto-drum') return;
-      if (d.type === 'DRUM_GAME_CHANGED') {
-        var nextApp = DRUM_TO_APP[d.game];
-        if (nextApp && nextApp !== currentAppId()) {
-          try { selLot(nextApp); } catch (err) {}
-          try { document.querySelectorAll('.bn').forEach(function (x) { x.classList.remove('on'); }); navItem.classList.add('on'); } catch (err2) {}
+  function wire(){
+    const f=$('acc-avatar-file');if(f&&!f.__wired){f.__wired=1;f.addEventListener('change',e=>AccountUI.onFile(e));}
+    // Immediately reflect a fresh Magic-Link login / entitlement change, and open the cabinet
+    // straight after a successful sign-in (not the home screen).
+    window.addEventListener('loto:accesschange',()=>{
+      render();loadAvatar();
+      try{
+        const am=window.LotoCommercial&&window.LotoCommercial.authMessage;
+        const st=accountState();
+        if(am&&am.justConfirmed&&st.confirmed&&!window.__accAutoOpened){
+          window.__accAutoOpened=true;
+          const ov=document.getElementById('account-ov');
+          if(ov&&!ov.classList.contains('show'))window.openAccount();
         }
-        try { pushDrumFavorites(); } catch (err3) {} // new game's favorites → drum snapshot
-      }
-      // Saved-combination bridge → the app's REAL favorites store + PRO paywall.
-      else if (d.type === 'DRUM_REQUEST_FAVORITES') { pushDrumFavorites(); }
-      else if (d.type === 'DRUM_SAVE_COMBINATION') { handleDrumSave(d.combo || {}); }
-      else if (d.type === 'DRUM_REPLACE_COMBINATION') { handleDrumReplace(d.oldId, d.combo || {}); }
-      else if (d.type === 'DRUM_REMOVE_COMBINATION') { handleDrumRemove(d.id); }
-      else if (d.type === 'DRUM_OPEN_PAYWALL') { openDrumPaywall(d.combo || null); }
-      // Real production engines on the exact saved rows. Close the drum overlay first so
-      // the Judge/Consensus UI is visible in the host; budgets/paywall are the app's own.
-      else if (d.type === 'DRUM_JUDGE_COMBINATION') {
-        var jc = d.combo || {}; closeDrum3D();
-        try { window.judgeGeneratedRows && window.judgeGeneratedRows([{ main: (jc.main || []).slice(), bonus: (jc.additional || []).slice() }]); } catch (err5) {}
-      }
-      else if (d.type === 'DRUM_CONSENSUS_COMBINATION') {
-        closeDrum3D();
-        try { if (typeof CONS_run === 'function') CONS_run(); } catch (err6) {}
-      }
-      else if (d.type === 'DRUM_BULK_APPLY') { drumBulkApply(d.lotteryId, d.combos || [], d.labels || {}); }
-    };
-    window.addEventListener('message', msgHandler);
-    setTimeout(function () { try { back.focus(); } catch (e) {} }, 0);
-    drumDiag();
-  };
-
-  window.closeDrum3D = function (fromPop) {
-    if (!overlay) return;
-    var f = document.getElementById('drum3d-frame');
-    if (f) { try { f.src = 'about:blank'; } catch (e) {} } // stop the drum render loop + free WebGL/Rapier
-    overlay.remove(); overlay = null;
-    document.body.classList.remove('drum3d-open');
-    document.documentElement.classList.remove('drum-overlay-open');
-    if (popHandler) { window.removeEventListener('popstate', popHandler); popHandler = null; }
-    if (langHandler) { window.removeEventListener('loto:languagechange', langHandler); langHandler = null; }
-    if (msgHandler) { window.removeEventListener('message', msgHandler); msgHandler = null; }
-    // Restore the active nav item to the page the user was on.
-    try {
-      document.querySelectorAll('.bn').forEach(function (x) { x.classList.remove('on'); });
-      var back = document.getElementById(prevActiveBn || 'bn-sim'); if (back) back.classList.add('on');
-      var focusEl = document.getElementById('bn-drum3d'); if (focusEl) focusEl.focus();
-    } catch (e) {}
-    if (!fromPop && history.state && history.state.drum3d) history.back();
-    drumDiag();
-  };
-  // Keyboard access for the central nav item (Enter / Space).
-  document.addEventListener('keydown', function (e) {
-    if ((e.key === 'Enter' || e.key === ' ') && document.activeElement && document.activeElement.id === 'bn-drum3d') { e.preventDefault(); openDrum3D(); }
-  });
+      }catch(_e){}
+    });
+    // Re-render on language switch so the localized dates follow the new locale.
+    window.addEventListener('loto:languagechange',()=>render());
+    renderStores();
+    render();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire,{once:true});else wire();
 })();

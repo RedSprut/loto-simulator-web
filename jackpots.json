@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-08-29T10:24:10.183Z",
+  "updated": "2026-09-01T10:23:47.035Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -9,11 +9,11 @@
       "cur": "NOK",
       "currency": "NOK",
       "display": "Ca. 14 MILLIONER NOK",
-      "lastDrawDate": "2026-08-22",
-      "expectedLastDraw": "2026-08-22",
-      "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T10:24:10.183Z",
-      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
+      "lastDrawDate": "2026-08-29",
+      "expectedLastDraw": "2026-08-29",
+      "nextDrawDate": "2026-09-05",
+      "updatedAt": "2026-09-01T10:23:47.035Z",
+      "sourceUpdatedAt": "2026-09-01T10:23:47.035Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -29,8 +29,8 @@
       "lastDrawDate": "2026-08-26",
       "expectedLastDraw": "2026-08-26",
       "nextDrawDate": "2026-09-02",
-      "updatedAt": "2026-08-29T10:24:10.183Z",
-      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
+      "updatedAt": "2026-09-01T10:23:47.035Z",
+      "sourceUpdatedAt": "2026-09-01T10:23:47.035Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -46,25 +46,25 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T10:24:10.183Z",
-      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
+      "updatedAt": "2026-09-01T10:23:47.035Z",
+      "sourceUpdatedAt": "2026-09-01T10:23:47.035Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "norsk-tipping.no"
     },
     "powerball": {
-      "amount": "119",
+      "amount": "146",
       "prefix": "$",
       "sub": "MILLION · ESTIMATED",
       "cur": "USD",
       "currency": "USD",
-      "display": "$119 MILLION · ESTIMATED",
-      "lastDrawDate": "2026-08-26",
-      "expectedLastDraw": "2026-08-26",
-      "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T10:24:10.183Z",
-      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
+      "display": "$146 MILLION · ESTIMATED",
+      "lastDrawDate": "2026-08-31",
+      "expectedLastDraw": "2026-08-31",
+      "nextDrawDate": "2026-09-02",
+      "updatedAt": "2026-09-01T10:23:47.035Z",
+      "sourceUpdatedAt": "2026-09-01T10:23:47.035Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -80,8 +80,8 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T10:24:10.183Z",
-      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
+      "updatedAt": "2026-09-01T10:23:47.035Z",
+      "sourceUpdatedAt": "2026-09-01T10:23:47.035Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -97,70 +97,36 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T10:24:10.183Z",
-      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
+      "updatedAt": "2026-09-01T10:23:47.035Z",
+      "sourceUpdatedAt": "2026-09-01T10:23:47.035Z",
       "sourceNextDraw": "2026-09-01",
       "status": "fresh",
       "synced": true,
       "source": "fdj.fr"
     },
     "superenalotto": {
-      "amount": "216.8",
+      "amount": "217.8",
       "prefix": "€",
       "sub": "MILLION",
       "cur": "EUR",
       "currency": "EUR",
-      "display": "€216.8 MILLION",
-      "lastDrawDate": "2026-08-28",
-      "expectedLastDraw": "2026-08-28",
-      "nextDrawDate": "2026-08-29",
-      "updatedAt": "2026-08-29T10:24:10.183Z",
-      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
-      "sourceNextDraw": "2026-08-29",
+      "display": "€217.8 MILLION",
+      "lastDrawDate": "2026-08-29",
+      "expectedLastDraw": "2026-08-29",
+      "nextDrawDate": "2026-09-01",
+      "updatedAt": "2026-09-01T10:23:47.035Z",
+      "sourceUpdatedAt": "2026-09-01T10:23:47.035Z",
+      "sourceNextDraw": "2026-09-01",
       "status": "fresh",
       "synced": true,
       "source": "superenalotto.it risultati",
-      "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-28-agosto-2026",
+      "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-29-agosto-2026",
+      "extractedText": "Jackpot disponibile per l'eventuale punto &quot;6&quot; arrivare a&nbsp;&lt;span>&lt;b>217,8 milioni di euro",
       "sourceAttempts": [
-        {
-          "source": "superenalotto.it",
-          "ok": false,
-          "error": "HTTP 403"
-        },
-        {
-          "source": "superenalotto.it estrazioni",
-          "ok": false,
-          "error": "HTTP 403"
-        },
-        {
-          "source": "superenalotto.it risultati",
-          "ok": false,
-          "error": "HTTP 403"
-        },
-        {
-          "source": "superenalotto.it news",
-          "ok": false,
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it ultima estrazione",
-          "ok": false,
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it estrazioni",
-          "ok": false,
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it news",
-          "ok": false,
-          "error": "HTTP 403"
-        },
         {
           "source": "superenalotto.it risultati",
           "ok": true,
-          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-28-agosto-2026"
+          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-29-agosto-2026"
         }
       ]
     },
@@ -174,20 +140,23 @@
       "lastDrawDate": "2026-08-28",
       "expectedLastDraw": "2026-08-28",
       "nextDrawDate": "2026-09-01",
-      "updatedAt": "2026-08-29T10:24:10.183Z",
-      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
+      "updatedAt": "2026-09-01T10:23:47.035Z",
+      "sourceUpdatedAt": "2026-09-01T10:23:47.035Z",
       "sourceNextDraw": "2026-09-01",
       "status": "fresh",
       "synced": true,
       "source": "wclc.com",
+      "sourceUrl": "https://www.wclc.com/",
       "sourceAttempts": [
         {
           "source": "olg.ca",
-          "ok": false
+          "ok": false,
+          "sourceUrl": "https://www.olg.ca/en/lottery/play-lotto-max-encore.html"
         },
         {
           "source": "wclc.com",
-          "ok": true
+          "ok": true,
+          "sourceUrl": "https://www.wclc.com/"
         }
       ]
     },
@@ -201,8 +170,8 @@
       "lastDrawDate": "2026-08-27",
       "expectedLastDraw": "2026-08-27",
       "nextDrawDate": "2026-09-03",
-      "updatedAt": "2026-08-29T10:24:10.183Z",
-      "sourceUpdatedAt": "2026-08-29T10:24:10.183Z",
+      "updatedAt": "2026-09-01T10:23:47.035Z",
+      "sourceUpdatedAt": "2026-09-01T10:23:47.035Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
