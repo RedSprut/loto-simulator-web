@@ -81486,6 +81486,70 @@
     ],
     "powerball": [
       {
+        "date": "2026-08-31",
+        "lotteryId": "powerball",
+        "currency": "USD",
+        "jackpot": 134,
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 134000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 2
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 50000,
+            "winners": 9
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 100,
+            "winners": 217
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 100,
+            "winners": 521
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 7,
+            "winners": 13670
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 10982
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 79874
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 4,
+            "winners": 182495
+          }
+        ],
+        "source": "Powerball",
+        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-31&gc=powerball"
+      },
+      {
         "date": "2026-08-29",
         "lotteryId": "powerball",
         "currency": "USD",
@@ -82385,7 +82449,7 @@
         "date": "2026-07-27",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 638,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -82442,8 +82506,8 @@
             "winners": 355831
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-27&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-25",
