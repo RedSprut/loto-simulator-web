@@ -106,6 +106,7 @@ function normalizeResultDraw(draw){
     main:uniqValid(draw.main||draw.numbers||draw.mainNumbers||[],Number.MAX_SAFE_INTEGER),
     bonus:uniqValid(draw.bonus||draw.extra||draw.extraBall||draw.extraNumbers||[],Number.MAX_SAFE_INTEGER),
     jackpot:draw.jackpot??null,
+    superStar:Number.isFinite(Number(draw.superStar))?Number(draw.superStar):null,
     payoutTiers:draw.payoutTiers||null,
     lotteryId:draw.lotteryId||'',
     lotteryName:draw.lotteryName||'',
