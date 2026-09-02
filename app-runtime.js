@@ -2682,6 +2682,10 @@ async function renderHistory(){
         balls+=(group.numbers||[]).map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');
       });
     }else if(d.bonus&&d.bonus.length){histSepCount=1;histBallCount+=d.bonus.length;balls+=`<div class="hist-sep">|</div>`;balls+=d.bonus.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}
+    // SuperEnalotto SuperStar — official gold extra number drawn alongside the 6 main + Jolly. Only
+    // SE draws carry `superStar`, so the presence check alone scopes it; shown after the Jolly with
+    // its own separator. Display-only — it is never added to main/bonus, so no model/analytics change.
+    if(d.superStar!=null){histSepCount++;histBallCount++;balls+=`<div class="hist-sep" role="separator" aria-label="SuperStar">★</div>`;balls+=`<div class="hball superstar" title="SuperStar">${escapeHtml(String(d.superStar))}</div>`;}
     const src=` · ${escapeHtml(drawLotteryName(d,cur))}`;
     const era=ruleEraForDraw(d,eras),isCurrent=era?.current??d.ruleEra!=='legacy';
     const badgeLabel=historyText(isCurrent?'Текущие правила':'Старые правила');
