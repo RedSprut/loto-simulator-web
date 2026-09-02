@@ -1501,7 +1501,7 @@ async function generateSelectedRows(){
   if(GEN_BUSY)return;
   const algo=document.getElementById('direct-algo')?.value||'freq';
   const requestedCount=getGenCount();
-  const gen=await withBusy('Генерация '+requestedCount+' '+rowWord(requestedCount),()=>generateRowsByAlgo(algo,requestedCount,{user:true}));
+  const gen=await withModelBusy('Генерирую математическую модель…',()=>generateRowsByAlgo(algo,requestedCount,{user:true}));
   // null/empty ⇒ the Trial/PRO flow was offered (>5 on FREE) or nothing to show — never a partial result.
   if(!gen?.length)return;
   const count=gen.length;
@@ -1744,7 +1744,7 @@ async function buildWheelGenerated(rowCount,sourceDraws){throw new Error('backen
 async function applyWheelMatrix(){
   if(GEN_BUSY&&!applyWheelMatrix._inner)return;
   const count=getGenCount(),l=L();
-  const built=await withBusy('Колёсная матрица · '+count+' '+rowWord(count),async()=>{
+  const built=await withModelBusy('Генерирую математическую модель…',async()=>{
     const draws=await loadD(cur);
     const matrix=await buildWheelGenerated(count,draws);
     return {...matrix,draws};
@@ -3465,7 +3465,7 @@ async function selAlgo(id){
   document.querySelectorAll('.sg-algo').forEach(a=>a.classList.remove('sel'));
   document.getElementById('al-'+id).classList.add('sel');
   const name=(document.querySelector('#al-'+id+' .sg-algo-name')||{}).textContent||'Модель';
-  const generated=await withBusy(name,generateCombos);
+  const generated=await withModelBusy(name,generateCombos);
   if(!generated)return;
   const useBtn=document.getElementById('sg-use');if(useBtn)useBtn.style.display='';
   const res=document.getElementById('sg-result');
@@ -3864,7 +3864,7 @@ async function IF_run(){
     IF_state=null;return;
   }
   body.innerHTML='<div class="if-empty">🧬 Анализирую структуру поля…</div>';
-  await withBusy('Генерация…',async()=>{
+  await withModelBusy('Генерирую математическую модель…',async()=>{
     await new Promise(r=>setTimeout(r,60));
     const A=IF_scores(ctx.currentDraws,'main',l.mB,l.pM);
     const bonusCnt=drawBonusCount?drawBonusCount(l):(l.pBo||0);
@@ -3989,6 +3989,7 @@ async function CONS_run(){
   }
   document.getElementById('cons-pick-btn').style.display='';
   body.innerHTML='<div class="if-empty">🧠 Модели создают исследовательские строки…</div>';
+  await withModelBusy('Генерирую математическую модель…',async()=>{
   await new Promise(r=>setTimeout(r,60));
   /* 1) строки всех базовых моделей */
   const modelRows=[];
@@ -4044,6 +4045,7 @@ async function CONS_run(){
     '<div class="if-note" style="margin-top:10px">Консенсус показывает согласие моделей на последних тиражах выбранной лотереи. Он не является вероятностью будущего тиража.</div>'+
     '<div class="if-seclbl" style="margin-top:16px">Роль Информационного поля</div>'+
     '<div class="if-note" style="margin-top:0">Структурный анализ сравнивает голоса моделей, связи между числами, повторы и разнообразие матрицы. Он помогает сформировать итоговый набор исследовательских строк, но не считается отдельным независимым голосом в Consensus Score и не прогнозирует выигрыш.</div>';
+  });
 }
 function CONS_close(){document.getElementById('cons-ov').classList.remove('show');}
 
@@ -4072,7 +4074,7 @@ function PICK_close(){document.getElementById('pick-ov').classList.remove('show'
 function CONS_candidateScore(row,st){throw new Error('backend_only');}
 async function PICK_go(){
   const st=CONS_state;if(!st)return;
-  return withBusy('Генерация…',async()=>{
+  return withModelBusy('Генерирую математическую модель…',async()=>{
   PICK_close();
   CONS_close();
   const body=document.getElementById('matrix-body');
@@ -4315,7 +4317,7 @@ window.getSupSelectedRows=getSupSelectedRows;
 function SUP_close(){document.getElementById('sup-ov').classList.remove('show');}
 async function SUP_go(){
   const st=SUP_state;if(!st)return;
-  return withBusy('Генерация…',async()=>{
+  return withModelBusy('Генерирую математическую модель…',async()=>{
   const l=L(),res=document.getElementById('sup-result'),selectedRows=getSupSelectedRows();
   res.innerHTML='<div class="if-empty" style="padding:20px">⚖️ Судья взвешивает голоса рядов и структуру поля…</div>';
   await new Promise(r=>setTimeout(r,60));
@@ -4816,7 +4818,7 @@ async function QA_go(){
   const res=document.getElementById('qa-result');
   res.innerHTML='<div class="if-empty" style="color:#C9B8E8;padding:22px">🔭 Запрашиваю квантовый поток и считаю положение Луны…</div>';
   const l=L();
-  const generated=await withBusy('Генерация…',()=>QA_rows(st.n));
+  const generated=await withModelBusy('Генерирую математическую модель…',()=>QA_rows(st.n));
   if(!generated)return;
   const rows=ensureUniqueGeneratedRows(generated,l);
   st.rows=rows;
@@ -5108,13 +5110,14 @@ function GENN_go(){
 
 
 /* ═══ Занятость генерации: песочные часы, прогресс, защита от двойного тапа ═══ */
-var GEN_BUSY=false,BUSY_t0=0,BUSY_timer=null;
-function BUSY_show(label){
+var GEN_BUSY=false,BUSY_t0=0,BUSY_timer=null,BUSY_minMs=480;
+function BUSY_show(label,options){
+  const opts=options||{};
   BUSY_t0=performance.now();
   const raw=String(label==null?'Генерация…':label);
   const silent=raw==='';
   const box=document.querySelector('#busy-ov .busy-box');if(box)box.classList.toggle('busy-hourglass-only',silent);
-  const loading=raw.startsWith('Загрузка');
+  const loading=raw.startsWith('Загрузка')&&!opts.keepSub;
   const title=raw?appText(raw):'';
   document.getElementById('busy-label').textContent=title;
   const sub=document.getElementById('busy-sub');
@@ -5138,17 +5141,21 @@ async function BUSY_hide(){
   clearInterval(BUSY_timer);
   document.getElementById('busy-fill').style.width='100%';
   const shown=performance.now()-BUSY_t0;
-  await new Promise(r=>setTimeout(r,Math.max(220,480-shown))); /* минимум показа — глазом видно */
+  await new Promise(r=>setTimeout(r,Math.max(220,BUSY_minMs-shown))); /* минимум показа — глазом видно */
   overlay.classList.remove('show');
   const box=overlay.querySelector('.busy-box');if(box)box.classList.remove('busy-hourglass-only');
   const sub=document.getElementById('busy-sub');if(sub)sub.hidden=false;
 }
-async function withBusy(label,fn){
+async function withBusy(label,fn,options){
   if(GEN_BUSY)return; /* двойной тап игнорируем — генерация уже идёт */
   GEN_BUSY=true;
-  BUSY_show(label);
+  BUSY_minMs=Math.max(0,Number(options&&options.minMs)||480);
+  BUSY_show(label,options);
   try{await BUSY_paint();return await fn();}
-  finally{GEN_BUSY=false;await BUSY_hide();}
+  finally{GEN_BUSY=false;await BUSY_hide();BUSY_minMs=480;}
+}
+async function withModelBusy(label,fn){
+  return withBusy(label||'Генерирую математическую модель…',fn,{minMs:900,keepSub:true});
 }
 async function withTransferBusy(fn){
   return withBusy('',fn);
@@ -5195,7 +5202,7 @@ function ADV_ballsHtml(r,l,swaps){
 async function ADV_go(){
   const st=ADV_state;if(!st)return;
   const l=L();
-  const rows=await withBusy((ADV_NAMES[st.algo]||st.algo)+' · совет',()=>generateRowsByAlgo(st.algo,st.n));
+  const rows=await withModelBusy(ADV_NAMES[st.algo]||'Генерирую математическую модель…',()=>generateRowsByAlgo(st.algo,st.n));
   if(!rows?.length)return;
   st.rows=ensureUniqueGeneratedRows(rows,l);st.verdict=null;
   const dd=QA_nextDrawDate();
@@ -5291,21 +5298,27 @@ async function SUPC_route(){
   const l=L();
   const data=await withBusy('Судья изучает вас и базу…',async()=>{
     const draws=await loadSelectedAnalysisDraws(cur);
-    let cv=0;
+    let cv=0,structured=false;
     if(draws.length>=5){
-      const A=IF_scores(draws,'main',l.mB,l.pM);
-      const sc=A.scores.map(x=>x.score||0);
+      /* Client-safe field-structure gauge for the astrological direction: the raw frequency
+         spread of the main balls over the selected period. The full IF_scores model is PRO /
+         backend-only (stripped to `throw backend_only` in production), so calling it here broke
+         «Через звёзды». `structured` = the field is measurably more uneven than pure chance
+         (Poisson baseline 1/√mean) — same "выражена / ровная" split, no backend needed. */
+      const f=buildFreq(draws,'main',l.mB);
+      const sc=rangeNums(l.mB).map(n=>f.get(n)||0);
       const mean=sc.reduce((a,b)=>a+b,0)/sc.length||1;
       cv=Math.sqrt(sc.reduce((a,b)=>a+(b-mean)*(b-mean),0)/sc.length)/mean;
+      structured=cv>(1/Math.sqrt(Math.max(1,mean)))*1.08;
     }
-    return{draws:draws.length,cv};
+    return{draws:draws.length,cv,structured};
   });
   if(!data)return;
   const elem=zs%4; /* стихия знака */
   const birth=QA_birth();
   const lp=birth?QA_lifePath(birth.d,birth.m,birth.y):null;
   const ph=QA_moonPhase(QA_nextDrawDate());
-  const structured=data.cv>0.28; /* поле выражено или ровное */
+  const structured=data.structured; /* поле выражено или ровное — по частотному разбросу */
   /* направление: стихия × состояние поля × луна/число судьбы */
   const routes={
     0:structured?['overdue','структура неравномерна — профиль огня выбрал числа с большим относительным пропуском']:['quantum','структура ровная — профиль огня выбрал квантовый коллапс'],
@@ -5627,7 +5640,7 @@ async function PDX_go(){
   if(!data)return;
   let useBase=st.useBase;
   if(data.warn){useBase=false;showFeedback('Мало данных для базы','Для «с базой» нужно минимум 5 тиражей. Собираю парадоксы без базы — по чистой структуре.','♾️',3200);st.useBase=false;PDX_renderMode();}
-  const generated=await withBusy('Генерация…',()=>PDX_generate(st.n,useBase,l,data.draws));
+  const generated=await withModelBusy('Генерирую математическую модель…',()=>PDX_generate(st.n,useBase,l,data.draws));
   if(!generated)return;
   st.rows=generated;
   document.getElementById('pdx-go').style.display='none';
