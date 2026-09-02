@@ -85284,6 +85284,94 @@
     ],
     "euroMillions": [
       {
+        "date": "2026-09-01",
+        "lotteryId": "euroMillions",
+        "currency": "EUR",
+        "jackpot": 78.1,
+        "payoutTiers": [
+          {
+            "match": "5+2",
+            "label": "5+2",
+            "prizeAmount": 78142304,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 88443,
+            "winners": 6
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 15503,
+            "winners": 8
+          },
+          {
+            "match": "4+2",
+            "label": "4+2",
+            "prizeAmount": 966,
+            "winners": 40
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 116,
+            "winners": 615
+          },
+          {
+            "match": "3+2",
+            "label": "3+2",
+            "prizeAmount": 49,
+            "winners": 1525
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 40,
+            "winners": 1317
+          },
+          {
+            "match": "2+2",
+            "label": "2+2",
+            "prizeAmount": 11,
+            "winners": 23344
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 10,
+            "winners": 28681
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 9,
+            "winners": 57831
+          },
+          {
+            "match": "1+2",
+            "label": "1+2",
+            "prizeAmount": 5,
+            "winners": 125435
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 5,
+            "winners": 412548
+          },
+          {
+            "match": "2+0",
+            "label": "2+0",
+            "prizeAmount": 4,
+            "winners": 810885
+          }
+        ],
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
+      },
+      {
         "date": "2026-08-28",
         "lotteryId": "euroMillions",
         "currency": "EUR",
@@ -85292,84 +85380,84 @@
           {
             "match": "5+2",
             "label": "5+2",
-            "prizeAmount": 69603021.9,
+            "prizeAmount": 69603022,
             "winners": 0
           },
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 109518.6,
+            "prizeAmount": 109519,
             "winners": 6
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 8532.1,
+            "prizeAmount": 8532,
             "winners": 18
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 629.42,
+            "prizeAmount": 629,
             "winners": 76
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 74.3,
+            "prizeAmount": 74,
             "winners": 1186
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 43.82,
+            "prizeAmount": 44,
             "winners": 2126
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 25.63,
+            "prizeAmount": 26,
             "winners": 2554
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 11.9,
+            "prizeAmount": 12,
             "winners": 27496
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 9.1,
+            "prizeAmount": 9,
             "winners": 40116
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 7.92,
+            "prizeAmount": 8,
             "winners": 85879
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 5.8,
+            "prizeAmount": 6,
             "winners": 141929
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 5.28,
+            "prizeAmount": 5,
             "winners": 490996
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 3.87,
+            "prizeAmount": 4,
             "winners": 1079861
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results/28-08-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-08-25",
@@ -85380,271 +85468,271 @@
           {
             "match": "5+2",
             "label": "5+2",
-            "prizeAmount": 59028812.1,
+            "prizeAmount": 59028812,
             "winners": 0
           },
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 505933.65,
+            "prizeAmount": 505934,
             "winners": 1
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 59122.51,
+            "prizeAmount": 59123,
             "winners": 2
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 1753.83,
+            "prizeAmount": 1754,
             "winners": 21
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 140.76,
+            "prizeAmount": 141,
             "winners": 482
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 53.89,
+            "prizeAmount": 54,
             "winners": 1331
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 49.12,
+            "prizeAmount": 49,
             "winners": 1026
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 12.35,
+            "prizeAmount": 12,
             "winners": 20402
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 12.92,
+            "prizeAmount": 13,
             "winners": 21761
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 10.78,
+            "prizeAmount": 11,
             "winners": 48566
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 5.68,
+            "prizeAmount": 6,
             "winners": 111653
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 5.93,
+            "prizeAmount": 6,
             "winners": 336743
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 4.32,
+            "prizeAmount": 4,
             "winners": 744518
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results/25-08-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-08-21",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 49.3,
         "payoutTiers": [
           {
             "match": "5+2",
             "label": "5+2",
-            "prizeAmount": 49336596.6,
+            "prizeAmount": 49336597,
             "winners": 0
           },
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 157317.39,
+            "prizeAmount": 157317,
             "winners": 4
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 18383.83,
+            "prizeAmount": 18384,
             "winners": 8
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 3272.06,
+            "prizeAmount": 3272,
             "winners": 14
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 129.03,
+            "prizeAmount": 129,
             "winners": 654
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 78.46,
+            "prizeAmount": 78,
             "winners": 1137
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 39.11,
+            "prizeAmount": 39,
             "winners": 1603
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 17.88,
+            "prizeAmount": 18,
             "winners": 17534
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 12.17,
+            "prizeAmount": 12,
             "winners": 28722
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 8.83,
+            "prizeAmount": 9,
             "winners": 73763
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 8.38,
+            "prizeAmount": 8,
             "winners": 94060
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 5.88,
+            "prizeAmount": 6,
             "winners": 422020
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 3.62,
+            "prizeAmount": 4,
             "winners": 1103731
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-08-18",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 37.3,
         "payoutTiers": [
           {
             "match": "5+2",
             "label": "5+2",
-            "prizeAmount": 37281624.5,
+            "prizeAmount": 37281625,
             "winners": 0
           },
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 235389.47,
+            "prizeAmount": 235389,
             "winners": 2
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 55014.4,
+            "prizeAmount": 55014,
             "winners": 2
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 3807.92,
+            "prizeAmount": 3808,
             "winners": 9
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 173.92,
+            "prizeAmount": 174,
             "winners": 363
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 75.5,
+            "prizeAmount": 75,
             "winners": 884
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 53.29,
+            "prizeAmount": 53,
             "winners": 880
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 16.65,
+            "prizeAmount": 17,
             "winners": 14080
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 14.55,
+            "prizeAmount": 15,
             "winners": 17979
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 11.01,
+            "prizeAmount": 11,
             "winners": 44238
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 7.69,
+            "prizeAmount": 8,
             "winners": 76664
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 6.36,
+            "prizeAmount": 6,
             "winners": 292322
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 4.18,
+            "prizeAmount": 4,
             "winners": 715142
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-08-14",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 28.3,
         "payoutTiers": [
           {
             "match": "5+2",
             "label": "5+2",
-            "prizeAmount": 28262870.8,
+            "prizeAmount": 28262871,
             "winners": 0
           },
           {
@@ -85656,78 +85744,78 @@
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 90666.11,
+            "prizeAmount": 90666,
             "winners": 8
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 1711.96,
+            "prizeAmount": 1712,
             "winners": 25
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 150.46,
+            "prizeAmount": 150,
             "winners": 524
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 67.65,
+            "prizeAmount": 68,
             "winners": 1232
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 52.29,
+            "prizeAmount": 52,
             "winners": 1120
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 14.6,
+            "prizeAmount": 15,
             "winners": 20059
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 13.84,
+            "prizeAmount": 14,
             "winners": 23608
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 10.99,
+            "prizeAmount": 11,
             "winners": 55317
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 6.09,
+            "prizeAmount": 6,
             "winners": 121007
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 6.37,
+            "prizeAmount": 6,
             "winners": 364011
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 4.55,
+            "prizeAmount": 5,
             "winners": 820610
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-08-11",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 17,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -85738,13 +85826,13 @@
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 112648.86,
+            "prizeAmount": 112649,
             "winners": 4
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 13163.95,
+            "prizeAmount": 13164,
             "winners": 8
           },
           {
@@ -85756,66 +85844,66 @@
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 128.29,
+            "prizeAmount": 128,
             "winners": 471
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 75.51,
+            "prizeAmount": 76,
             "winners": 846
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 43.92,
+            "prizeAmount": 44,
             "winners": 1022
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 17.06,
+            "prizeAmount": 17,
             "winners": 13152
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 12.01,
+            "prizeAmount": 12,
             "winners": 20835
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 9.51,
+            "prizeAmount": 10,
             "winners": 49002
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 7.88,
+            "prizeAmount": 8,
             "winners": 71638
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 5.61,
+            "prizeAmount": 6,
             "winners": 317094
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 3.91,
+            "prizeAmount": 4,
             "winners": 732437
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-08-07",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 111.1,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -85826,84 +85914,84 @@
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 112479.15,
+            "prizeAmount": 112479,
             "winners": 7
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 30669.6,
+            "prizeAmount": 30670,
             "winners": 6
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 2605.32,
+            "prizeAmount": 2605,
             "winners": 22
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 146.04,
+            "prizeAmount": 146,
             "winners": 723
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 78.6,
+            "prizeAmount": 79,
             "winners": 1420
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 42.28,
+            "prizeAmount": 42,
             "winners": 1855
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 19.31,
+            "prizeAmount": 19,
             "winners": 20313
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 13.11,
+            "prizeAmount": 13,
             "winners": 33369
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 10.17,
+            "prizeAmount": 10,
             "winners": 80063
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 8.61,
+            "prizeAmount": 9,
             "winners": 114617
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 6.33,
+            "prizeAmount": 6,
             "winners": 490858
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 4.33,
+            "prizeAmount": 4,
             "winners": 1156077
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-08-04",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 98.4,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -85914,441 +86002,441 @@
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 192409.41,
+            "prizeAmount": 192409,
             "winners": 3
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 22484.63,
+            "prizeAmount": 22485,
             "winners": 6
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 2101.02,
+            "prizeAmount": 2101,
             "winners": 20
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 163.3,
+            "prizeAmount": 163,
             "winners": 474
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 73.99,
+            "prizeAmount": 74,
             "winners": 1106
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 51.25,
+            "prizeAmount": 51,
             "winners": 1122
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 16.79,
+            "prizeAmount": 17,
             "winners": 17126
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 15.38,
+            "prizeAmount": 15,
             "winners": 20848
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 11.46,
+            "prizeAmount": 11,
             "winners": 52122
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 8.28,
+            "prizeAmount": 8,
             "winners": 87386
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 7.2,
+            "prizeAmount": 7,
             "winners": 316485
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 4.45,
+            "prizeAmount": 4,
             "winners": 824628
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-07-31",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 89.1,
         "payoutTiers": [
           {
             "match": "5+2",
             "label": "5+2",
-            "prizeAmount": 89099378.6,
+            "prizeAmount": 89099379,
             "winners": 0
           },
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 343065.54,
+            "prizeAmount": 343066,
             "winners": 2
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 20045.02,
+            "prizeAmount": 20045,
             "winners": 8
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 1314.43,
+            "prizeAmount": 1314,
             "winners": 38
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 116.17,
+            "prizeAmount": 116,
             "winners": 792
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 56.39,
+            "prizeAmount": 56,
             "winners": 1725
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 41.58,
+            "prizeAmount": 42,
             "winners": 1644
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 14.14,
+            "prizeAmount": 14,
             "winners": 24176
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 10.1,
+            "prizeAmount": 10,
             "winners": 37743
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 9.49,
+            "prizeAmount": 9,
             "winners": 74771
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 7.04,
+            "prizeAmount": 7,
             "winners": 122160
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 5.11,
+            "prizeAmount": 5,
             "winners": 529751
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 4.11,
+            "prizeAmount": 4,
             "winners": 1062178
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-07-28",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 78.1,
         "payoutTiers": [
           {
             "match": "5+2",
             "label": "5+2",
-            "prizeAmount": 78058188.9,
+            "prizeAmount": 78058189,
             "winners": 0
           },
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 522575.95,
+            "prizeAmount": 522576,
             "winners": 1
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 61067.3,
+            "prizeAmount": 61067,
             "winners": 2
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 1311.79,
+            "prizeAmount": 1312,
             "winners": 29
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 117.58,
+            "prizeAmount": 118,
             "winners": 596
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 73.35,
+            "prizeAmount": 73,
             "winners": 1010
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 34.57,
+            "prizeAmount": 35,
             "winners": 1506
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 18.17,
+            "prizeAmount": 18,
             "winners": 14328
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 11.59,
+            "prizeAmount": 12,
             "winners": 25052
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 7.85,
+            "prizeAmount": 8,
             "winners": 68880
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 8.9,
+            "prizeAmount": 9,
             "winners": 73599
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 5.88,
+            "prizeAmount": 6,
             "winners": 350687
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 3.46,
+            "prizeAmount": 3,
             "winners": 959974
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-07-24",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 69.6,
         "payoutTiers": [
           {
             "match": "5+2",
             "label": "5+2",
-            "prizeAmount": 69648920.8,
+            "prizeAmount": 69648921,
             "winners": 0
           },
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 645724.02,
+            "prizeAmount": 645724,
             "winners": 1
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 30183.27,
+            "prizeAmount": 30183,
             "winners": 5
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 2474.04,
+            "prizeAmount": 2474,
             "winners": 19
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 160.65,
+            "prizeAmount": 161,
             "winners": 539
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 72.25,
+            "prizeAmount": 72,
             "winners": 1267
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 48.33,
+            "prizeAmount": 48,
             "winners": 1331
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 16.54,
+            "prizeAmount": 17,
             "winners": 19442
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 13.12,
+            "prizeAmount": 13,
             "winners": 27343
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 10.4,
+            "prizeAmount": 10,
             "winners": 64240
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 7.74,
+            "prizeAmount": 8,
             "winners": 104580
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 6.01,
+            "prizeAmount": 6,
             "winners": 423659
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 4.16,
+            "prizeAmount": 4,
             "winners": 986232
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-07-21",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 59.3,
         "payoutTiers": [
           {
             "match": "5+2",
             "label": "5+2",
-            "prizeAmount": 59257959.7,
+            "prizeAmount": 59257960,
             "winners": 0
           },
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 250104.37,
+            "prizeAmount": 250104,
             "winners": 2
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 58453.51,
+            "prizeAmount": 58454,
             "winners": 2
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 1916.51,
+            "prizeAmount": 1917,
             "winners": 19
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 110.69,
+            "prizeAmount": 111,
             "winners": 606
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 57.93,
+            "prizeAmount": 58,
             "winners": 1224
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 43.33,
+            "prizeAmount": 43,
             "winners": 1150
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 14.22,
+            "prizeAmount": 14,
             "winners": 17520
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 10.54,
+            "prizeAmount": 11,
             "winners": 26369
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 8.92,
+            "prizeAmount": 9,
             "winners": 58007
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 6.97,
+            "prizeAmount": 7,
             "winners": 89922
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 5.4,
+            "prizeAmount": 5,
             "winners": 365439
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 3.8,
+            "prizeAmount": 4,
             "winners": 836260
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-07-17",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 49.7,
         "payoutTiers": [
           {
             "match": "5+2",
             "label": "5+2",
-            "prizeAmount": 49675416.9,
+            "prizeAmount": 49675417,
             "winners": 0
           },
           {
@@ -86360,160 +86448,160 @@
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 111131.46,
+            "prizeAmount": 111131,
             "winners": 7
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 2185.82,
+            "prizeAmount": 2186,
             "winners": 21
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 116.47,
+            "prizeAmount": 116,
             "winners": 726
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 77.8,
+            "prizeAmount": 78,
             "winners": 1149
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 37.41,
+            "prizeAmount": 37,
             "winners": 1679
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 19.29,
+            "prizeAmount": 19,
             "winners": 16279
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 11.12,
+            "prizeAmount": 11,
             "winners": 31505
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 8.61,
+            "prizeAmount": 9,
             "winners": 75769
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 9.14,
+            "prizeAmount": 9,
             "winners": 86415
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 5.62,
+            "prizeAmount": 6,
             "winners": 442664
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 3.76,
+            "prizeAmount": 4,
             "winners": 1065262
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-07-14",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 37.6,
         "payoutTiers": [
           {
             "match": "5+2",
             "label": "5+2",
-            "prizeAmount": 37595910.5,
+            "prizeAmount": 37595911,
             "winners": 0
           },
           {
             "match": "5+1",
             "label": "5+1",
-            "prizeAmount": 238156.46,
+            "prizeAmount": 238156,
             "winners": 2
           },
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 22264.43,
+            "prizeAmount": 22264,
             "winners": 5
           },
           {
             "match": "4+2",
             "label": "4+2",
-            "prizeAmount": 1444.75,
+            "prizeAmount": 1445,
             "winners": 24
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 136.77,
+            "prizeAmount": 137,
             "winners": 467
           },
           {
             "match": "3+2",
             "label": "3+2",
-            "prizeAmount": 77.97,
+            "prizeAmount": 78,
             "winners": 866
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 40.62,
+            "prizeAmount": 41,
             "winners": 1168
           },
           {
             "match": "2+2",
             "label": "2+2",
-            "prizeAmount": 18.57,
+            "prizeAmount": 19,
             "winners": 12776
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 12.97,
+            "prizeAmount": 13,
             "winners": 20400
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 9.85,
+            "prizeAmount": 10,
             "winners": 50012
           },
           {
             "match": "1+2",
             "label": "1+2",
-            "prizeAmount": 8.91,
+            "prizeAmount": 9,
             "winners": 66955
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 6.24,
+            "prizeAmount": 6,
             "winners": 301034
           },
           {
             "match": "2+0",
             "label": "2+0",
-            "prizeAmount": 4.02,
+            "prizeAmount": 4,
             "winners": 752440
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-07-10",
