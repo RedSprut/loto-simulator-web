@@ -210,7 +210,18 @@ async function loadFullHistory(gameKey){
   const options=arguments[1]||{};
   const cacheKey=resolveConfigKey(gameKey)||gameKey;
   if(options.force){analyticsHistoryCache.delete(cacheKey);analyticsHistoryReady.delete(cacheKey);}
-  if(analyticsHistoryCache.has(cacheKey))return analyticsHistoryCache.get(cacheKey);
+  if(analyticsHistoryCache.has(cacheKey)){
+    try{
+      const cachedPack=await analyticsHistoryCache.get(cacheKey);
+      /* A pack cached as FREE/restricted BEFORE PRO resolved must not stick once PRO is active.
+         This is why EuroJackpot (the default game, whose history loads at startup — potentially
+         before the backend confirms PRO) stayed on the FREE Period-Analysis table under active
+         PRO: the initial access resolution never cleared its cached restricted pack. Drop it and
+         fall through to reload the full archive; otherwise return the cache unchanged. */
+      if(!(window.LotoCommercial?.access?.accessLevel==='pro' && cachedPack && cachedPack.restricted)) return cachedPack;
+      analyticsHistoryCache.delete(cacheKey);analyticsHistoryReady.delete(cacheKey);
+    }catch(_e){analyticsHistoryCache.delete(cacheKey);analyticsHistoryReady.delete(cacheKey);}
+  }
   const pending=(async()=>{
     const current=await loadD(gameKey);
     let archive;
@@ -243,7 +254,10 @@ async function loadAnalyticsDraws(gameKey){
 function clearAnalyticsHistoryCache(){analyticsHistoryCache.clear();analyticsHistoryReady.clear();}
 window.addEventListener('loto:accesschange',event=>{
   const next=event.detail?.access?.accessLevel||'free';
-  if(analyticsAccessLevel&&analyticsAccessLevel!==next)clearAnalyticsHistoryCache();
+  /* Clear on the INITIAL resolution too (analyticsAccessLevel starts ''): the first free→pro
+     event must drop any history cached before PRO was confirmed, else EuroJackpot (default game)
+     keeps its pre-PRO restricted pack. */
+  if(analyticsAccessLevel!==next)clearAnalyticsHistoryCache();
   analyticsAccessLevel=next;
 });
 function analyzeData(gameKey,historicalData=[]){
