@@ -4410,7 +4410,15 @@ async function PERIOD_range(){
   showCopyToast('🗓 Диапазон: '+from+' — '+to+' · '+inRange+' тиражей');
 }
 async function PERIOD_open(){
-  const l=L(),pack=await loadFullHistory(cur),freeDraws=await loadD(cur),isPro=window.LotoCommercial?.access?.accessLevel==='pro'&&!pack.restricted;
+  const l=L();
+  let pack=await loadFullHistory(cur);
+  /* Guarantee the PRO menu is NEVER built from a restricted/FREE pack (the backend has the full
+     history — e.g. EuroJackpot = 986 draws). If PRO still sees a restricted pack (a stale pre-PRO
+     cache), force a fresh load of the full archive before rendering. */
+  if(window.LotoCommercial?.access?.accessLevel==='pro'&&pack.restricted){
+    try{pack=await loadFullHistory(cur,{force:true});}catch(_e){}
+  }
+  const freeDraws=await loadD(cur),isPro=window.LotoCommercial?.access?.accessLevel==='pro'&&!pack.restricted;
   const allDraws=isPro?(pack.draws||[]):freeDraws,currentDraws=isPro?(pack.currentDraws||[]):freeDraws;
   const draws=IF_getScope()==='all'?allDraws:IF_getScope()==='free'?freeDraws:currentDraws,n=draws.length;
   /* заполняем границы дат из базы */
