@@ -3680,6 +3680,12 @@ function customConfirm(msg,okLabel,options={}){
     if(okBtn)okBtn.textContent=appText(okText);
     if(closeBtn)closeBtn.setAttribute('aria-label',appText('Закрыть'));
     ov.__lotoClose=()=>ccAnswer(false);
+    // The confirm must sit ABOVE whatever modal triggered it (e.g. qab-ov z620 > cc-ov's static
+    // z500 hid the OK button, so «Удалить сохранённую дату» silently did nothing). Compute the
+    // top currently-open overlay and place cc-ov just above it, so its buttons are always clickable.
+    let ccTopZ=0;
+    document.querySelectorAll('[id$="-ov"].show').forEach(o=>{if(o===ov)return;const z=parseInt(getComputedStyle(o).zIndex,10);if(Number.isFinite(z)&&z>ccTopZ)ccTopZ=z;});
+    ov.style.zIndex=String(Math.max(500,ccTopZ+10));
     if(window.LotoModals)window.LotoModals.openModal('cc-ov');else ov.classList.add('show');
   });
 }
@@ -4925,10 +4931,10 @@ function QAB_save(withTime){
   if(document.getElementById('qa-ov').classList.contains('show'))QA_open();
 }
 function QA_refreshBirthUI(){
-  const el=document.getElementById('qa-birthval');
-  if(!el)return;
   const b=QA_birth();
-  el.textContent=b?(String(b.d).padStart(2,'0')+'.'+String(b.m).padStart(2,'0')+'.'+b.y+(b.hh!=null?' · '+String(b.hh).padStart(2,'0')+':'+String(b.mm).padStart(2,'0'):'')):'не указана';
+  const text=b?(String(b.d).padStart(2,'0')+'.'+String(b.m).padStart(2,'0')+'.'+b.y+(b.hh!=null?' · '+String(b.hh).padStart(2,'0')+':'+String(b.mm).padStart(2,'0'):'')):'не указана';
+  /* refresh EVERY birthline (QA generator + judge cabinet) so save/delete reflects at once */
+  ['qa-birthval','supc-birthval'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=text;});
 }
 
 

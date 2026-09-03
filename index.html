@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="7a640bb" data-build-ts="2026-09-02T14:21:25.350Z">
+<html lang="ru" data-build="54c1443" data-build-ts="2026-09-03T13:44:13.494Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=7a640bb"></script>
+<script src="./boot-runtime.js?v=54c1443"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,7 +14,7 @@
 <meta property="og:description" content="Lottery draw simulator and analytics tool. No ticket sales, bets, or guaranteed winnings.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://redsprut.github.io/loto-simulator-web/">
-<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=7a640bb">
+<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=54c1443">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary">
@@ -578,6 +578,15 @@ body.dark input[type="number"]::-webkit-inner-spin-button,body.dark input[type="
 
 /* история */
 .hist-item{position:relative;display:block;padding:12px 0;border-bottom:1px solid var(--hist-border)}
+/* iOS long-history scroll fix (item 4): the full PRO history renders thousands of rows and is not
+   virtualized, so momentum scrolling over that DOM used to blank out, drop balls and eventually
+   hang. content-visibility:auto skips rendering off-screen rows entirely (rendered only as they
+   enter the viewport) — light DOM, smooth momentum, no blank gaps. contain-intrinsic-size keeps
+   the scrollbar height correct; `auto` remembers each row's real size once measured. Desktop is
+   unaffected (same content, just deferred off-screen painting). Scoped to Analytics history +
+   prize rows only. */
+#pg-ana .hist-item{content-visibility:auto;contain-intrinsic-size:auto 76px}
+#pg-ana .prize-draw-card{content-visibility:auto;contain-intrinsic-size:auto 132px}
 .hist-main{min-width:0;overflow:visible}
 /* date+name and the rule label are one column (`.hist-head`); the rule sits on its own
    full-width line below the name and never in the ball grid — see .hist-rule / .rule-badge. */
@@ -597,8 +606,11 @@ body.dark input[type="number"]::-webkit-inner-spin-button,body.dark input[type="
      6 + 2 + 1 = 9 balls with 2 separators). Universal — works for any lottery/era/count.
      The 100% resolves against .hist-balls' content box where .hball uses the value. */
   --hist-fit:calc((100% - (var(--hist-sep-count) * var(--hist-sep-slot)) - ((var(--hist-ball-count) + var(--hist-sep-count) - 1) * var(--hist-gap))) / var(--hist-ball-count) - 1px);
-  display:flex;align-items:center;justify-content:space-between;gap:var(--hist-gap);width:100%;max-width:760px;flex-wrap:nowrap;white-space:nowrap;overflow:visible;padding:3px var(--hist-row-pad) 5px;margin:0 auto}
-.hist-balls.hist-many{--hist-ball-size:clamp(38px,3.6vw,54px);--hist-gap:clamp(3px,.9vw,8px)}
+  /* Balls keep their normal size (no --hist-fit shrink) and WRAP to a second row when the group
+     is too wide for the screen (e.g. Vikinglotto old rules on a narrow iPhone) — extra balls flow
+     to the next line at full size; the main/bonus separator keeps the two groups visually split. */
+  display:flex;align-items:center;justify-content:center;gap:var(--hist-gap);row-gap:calc(var(--hist-gap) + 3px);width:100%;max-width:760px;flex-wrap:wrap;overflow:visible;padding:3px var(--hist-row-pad) 5px;margin:0 auto}
+.hist-balls.hist-many{--hist-gap:clamp(3px,.9vw,8px)}
 .rule-summary{display:grid;gap:8px;margin:8px 0 12px}
 .rule-era{padding:10px 11px;border:1px solid var(--border);border-radius:12px;background:var(--bg2);font-size:11.5px;color:var(--sub2);line-height:1.45}
 .rule-era b{display:block;color:var(--fg);font-size:12px;margin-bottom:2px}
@@ -606,7 +618,7 @@ body.dark input[type="number"]::-webkit-inner-spin-button,body.dark input[type="
 .rule-badge.current{background:rgba(52,199,89,.12);color:#34c759;border-color:rgba(52,199,89,.28)}
 .hist-extra-label{font-size:9px;font-weight:800;color:var(--sub2);margin-left:3px}
 .hist-sep{font-size:11px;opacity:.46;margin:0;flex:0 0 var(--hist-sep-slot);text-align:center}
-.hball{width:min(var(--hist-ball-size),var(--hist-fit));height:min(var(--hist-ball-size),var(--hist-fit));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(13px,5vw,25px);font-weight:800;flex:0 0 auto}
+.hball{width:var(--hist-ball-size);height:var(--hist-ball-size);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(13px,5vw,25px);font-weight:800;flex:0 0 auto}
 /* A percentage-based fit expression has no reliable height containing block in flex rows
    (notably Safari/iPad), so using it for both dimensions turns spheres into eggs. The width
    remains count-aware; the aspect ratio derives the matching height from that width. */
@@ -975,21 +987,21 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
   .st{min-width:0}
   .hist-date{font-size:14px;margin-bottom:6px;padding-right:40px}
   .hist-balls{--hist-row-pad:4px;--hist-gap:clamp(4px,1.35vw,7px);--hist-ball-size:clamp(36px,9.7vw,42px);max-width:none}
-  .hist-balls.hist-many{--hist-ball-size:clamp(34px,8.6vw,46px);--hist-gap:clamp(1px,.35vw,3px);--hist-sep-slot:4px}
+  .hist-balls.hist-many{--hist-gap:clamp(1px,.35vw,3px);--hist-sep-slot:4px}
   .hist-sep{margin:0}
   .btn-del{top:6px;width:32px;height:32px}
   #pg-ana #at-inp .hist-item{display:grid;grid-template-columns:minmax(0,1fr) 42px;align-items:center;column-gap:8px;padding:12px 0}
   #pg-ana #at-inp .hist-main{min-width:0}
   #pg-ana #at-inp .hist-date{padding-right:0}
   #pg-ana #at-inp .hist-balls{min-width:0}
-  #pg-ana #at-inp .hball{width:min(var(--hist-ball-size),var(--hist-fit));height:auto!important;aspect-ratio:1 / 1;font-size:clamp(13px,5vw,25px)}
+  #pg-ana #at-inp .hball{width:var(--hist-ball-size);height:auto!important;aspect-ratio:1 / 1;font-size:clamp(13px,5vw,25px)}
   #pg-ana #at-inp .btn-del{position:relative;top:auto;right:auto;justify-self:center;align-self:center;width:36px;height:36px;margin:0}
   #pg-ana #at-inp .hist-item.no-action{grid-template-columns:minmax(0,1fr)}
   #pg-ana #at-inp .hist-item.no-action>span:last-child{display:none}
   #pg-ana #at-inp .hist-item.no-action .hist-extra-label{display:none}
   #pg-ana #at-inp .hist-item.no-action .hist-balls{--hist-gap:clamp(4px,1.35vw,7px)}
   #pg-ana #at-inp .hist-item.no-action .hist-sep{margin:0;min-width:var(--hist-sep-slot)}
-  #pg-ana #at-inp .hist-item.no-action .hball{width:min(var(--hist-ball-size),var(--hist-fit));height:auto!important;aspect-ratio:1 / 1;font-size:clamp(13px,5vw,25px)}
+  #pg-ana #at-inp .hist-item.no-action .hball{width:var(--hist-ball-size);height:auto!important;aspect-ratio:1 / 1;font-size:clamp(13px,5vw,25px)}
   .btn-fav-use,.btn-fav-copy,.btn-fav-del{width:44px;height:44px;font-size:15px}
   .dball{width:clamp(29px,9vw,42px);height:clamp(29px,9vw,42px);min-width:clamp(29px,9vw,42px);min-height:clamp(29px,9vw,42px);aspect-ratio:1/1;flex:0 0 auto;font-size:clamp(12px,3.7vw,16px);line-height:1}
   .mb{width:clamp(30px,8.8vw,36px);height:clamp(30px,8.8vw,36px);font-size:clamp(11px,3.4vw,13.5px)}
@@ -1040,13 +1052,13 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
   #pg-ana #at-inp .hist-balls{--hist-gap:clamp(2px,1vw,4px);--hist-ball-size:clamp(30px,9.2vw,36px)}
   /* Balls-heavy rows (>=8, e.g. Lotto Max 7+1) must shrink at narrow widths so the last bonus
      ball is not clipped. High enough specificity to win over the #pg-ana #at-inp base rule above. */
-  #pg-ana #at-inp .hist-balls.hist-many,#pg-ana #at-inp .hist-item.no-action .hist-balls.hist-many{--hist-gap:clamp(0px,.25vw,2px);--hist-ball-size:clamp(27px,8.2vw,40px);--hist-sep-slot:3px}
+  #pg-ana #at-inp .hist-balls.hist-many,#pg-ana #at-inp .hist-item.no-action .hist-balls.hist-many{--hist-gap:clamp(0px,.25vw,2px);--hist-sep-slot:3px}
   #pg-ana #at-inp .hist-sep{margin:0;min-width:var(--hist-sep-slot)}
-  #pg-ana #at-inp .hball{width:min(var(--hist-ball-size),var(--hist-fit));height:auto!important;aspect-ratio:1 / 1;font-size:clamp(13px,5vw,25px)}
+  #pg-ana #at-inp .hball{width:var(--hist-ball-size);height:auto!important;aspect-ratio:1 / 1;font-size:clamp(13px,5vw,25px)}
   #pg-ana #at-inp .btn-del{width:32px;height:32px}
   #pg-ana #at-inp .hist-item.no-action .hist-balls{--hist-gap:clamp(2px,1vw,4px)}
   #pg-ana #at-inp .hist-item.no-action .hist-sep{min-width:var(--hist-sep-slot)}
-  #pg-ana #at-inp .hist-item.no-action .hball{width:min(var(--hist-ball-size),var(--hist-fit));height:auto!important;aspect-ratio:1 / 1;font-size:clamp(13px,5vw,25px)}
+  #pg-ana #at-inp .hist-item.no-action .hball{width:var(--hist-ball-size);height:auto!important;aspect-ratio:1 / 1;font-size:clamp(13px,5vw,25px)}
 }
 @media (min-width:431px) and (max-width:699px) and (hover:hover) and (pointer:fine){
   .lot-scroll-btn{display:grid}
@@ -1147,7 +1159,7 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
   #pg-ana #at-inp .hist-main{display:contents}
   #pg-ana #at-inp .hist-date{margin:0;padding:0;font-weight:700}
   #pg-ana #at-inp .hist-balls{min-width:0;padding:4px var(--hist-row-pad);--hist-row-pad:10px;--hist-gap:clamp(10px,1.1vw,18px);--hist-ball-size:clamp(54px,4.2vw,66px);max-width:min(100%,880px)}
-  #pg-ana #at-inp .hist-balls.hist-many{--hist-ball-size:clamp(48px,3.7vw,60px);--hist-gap:clamp(7px,.8vw,14px)}
+  #pg-ana #at-inp .hist-balls.hist-many{--hist-gap:clamp(7px,.8vw,14px)}
   #pg-ana #at-inp .btn-del{position:static;justify-self:end}
   #pg-ana #at-inp .hist-item.no-action{grid-template-columns:minmax(170px,.65fr) minmax(0,1.35fr)}
   #pg-ana #at-inp .hist-item.no-action>span:last-child{display:none}
@@ -1352,7 +1364,10 @@ body.light .mb[class*="miss-"]{text-shadow:none}
 @media(min-width:700px){.pro-sheet{border-radius:26px}}
 .pro-crown{width:84px;height:84px;margin:2px auto 6px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;
   background:radial-gradient(circle at 32% 26%,#FBE7B2,#E9B44C 55%,#8A5E15);box-shadow:0 0 26px rgba(233,180,76,.55),inset 0 -6px 14px rgba(90,60,10,.35);text-shadow:0 2px 6px rgba(90,60,10,.5)}
-.pro-crown-icon{display:block;line-height:1;transform:translateY(5px)}
+/* Center the emoji glyph in the gold circle. Emoji render top-heavy in their line box, so nudge
+   DOWN by a size-relative fraction (em) — this centers BOTH the 84px/44px and the small 54px/30px
+   .pro-crown variants proportionally (a fixed px only centered one size). */
+.pro-crown-icon{display:block;line-height:1;transform:translateY(0.15em)}
 .pro-title{font-family:'Unbounded',sans-serif;font-weight:900;font-size:25px;text-align:center;background:linear-gradient(175deg,#9A6B15,#6B4A0E);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2px}
 .pro-tag{text-align:center;font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:#8A6B2E;margin-bottom:14px}
 .pro-sec{margin-top:16px}
@@ -2946,17 +2961,17 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=7a640bb"></script>
-<script src="./commercial-config.js?v=7a640bb"></script>
-<script src="./event-runtime.js?v=7a640bb"></script>
-<script src="./auth-client.js?v=7a640bb"></script>
-<script src="./native-loader.js?v=7a640bb"></script>
-<script src="./i18n-catalog.js?v=7a640bb"></script>
-<script src="./i18n-runtime.js?v=7a640bb"></script>
-<script src="./app-runtime.js?v=7a640bb"></script>
-<script src="./inline-runtime-2.js?v=7a640bb"></script>
-<script src="./commercial-runtime.js?v=7a640bb"></script>
-<script src="./inline-runtime-3.js?v=7a640bb"></script>
+<script src="./version.js?v=54c1443"></script>
+<script src="./commercial-config.js?v=54c1443"></script>
+<script src="./event-runtime.js?v=54c1443"></script>
+<script src="./auth-client.js?v=54c1443"></script>
+<script src="./native-loader.js?v=54c1443"></script>
+<script src="./i18n-catalog.js?v=54c1443"></script>
+<script src="./i18n-runtime.js?v=54c1443"></script>
+<script src="./app-runtime.js?v=54c1443"></script>
+<script src="./inline-runtime-2.js?v=54c1443"></script>
+<script src="./commercial-runtime.js?v=54c1443"></script>
+<script src="./inline-runtime-3.js?v=54c1443"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3103,9 +3118,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=7a640bb"></script>
-<script src="./notifications-runtime.js?v=7a640bb"></script>
-<script src="./pwa-runtime.js?v=7a640bb"></script>
+<script src="./notification-center.js?v=54c1443"></script>
+<script src="./notifications-runtime.js?v=54c1443"></script>
+<script src="./pwa-runtime.js?v=54c1443"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3116,8 +3131,8 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=7a640bb"></script>
-<script src="./inline-runtime-5.js?v=7a640bb"></script>
-<script src="./inline-runtime-6.js?v=7a640bb"></script>
+<script src="./inline-runtime-4.js?v=54c1443"></script>
+<script src="./inline-runtime-5.js?v=54c1443"></script>
+<script src="./inline-runtime-6.js?v=54c1443"></script>
 </body>
 </html>
