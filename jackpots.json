@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-09-03T16:40:37.058Z",
+  "updated": "2026-09-03T22:09:12.463Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-08-29",
       "expectedLastDraw": "2026-08-29",
       "nextDrawDate": "2026-09-05",
-      "updatedAt": "2026-09-03T16:40:37.058Z",
-      "sourceUpdatedAt": "2026-09-03T16:40:37.058Z",
+      "updatedAt": "2026-09-03T22:09:12.463Z",
+      "sourceUpdatedAt": "2026-09-03T22:09:12.463Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -29,8 +29,8 @@
       "lastDrawDate": "2026-09-02",
       "expectedLastDraw": "2026-09-02",
       "nextDrawDate": "2026-09-09",
-      "updatedAt": "2026-09-03T16:40:37.058Z",
-      "sourceUpdatedAt": "2026-09-03T16:40:37.058Z",
+      "updatedAt": "2026-09-03T22:09:12.463Z",
+      "sourceUpdatedAt": "2026-09-03T22:09:12.463Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -46,8 +46,8 @@
       "lastDrawDate": "2026-09-01",
       "expectedLastDraw": "2026-09-01",
       "nextDrawDate": "2026-09-04",
-      "updatedAt": "2026-09-03T16:40:37.058Z",
-      "sourceUpdatedAt": "2026-09-03T16:40:37.058Z",
+      "updatedAt": "2026-09-03T22:09:12.463Z",
+      "sourceUpdatedAt": "2026-09-03T22:09:12.463Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -63,8 +63,8 @@
       "lastDrawDate": "2026-09-02",
       "expectedLastDraw": "2026-09-02",
       "nextDrawDate": "2026-09-05",
-      "updatedAt": "2026-09-03T16:40:37.058Z",
-      "sourceUpdatedAt": "2026-09-03T16:40:37.058Z",
+      "updatedAt": "2026-09-03T22:09:12.463Z",
+      "sourceUpdatedAt": "2026-09-03T22:09:12.463Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -80,8 +80,8 @@
       "lastDrawDate": "2026-09-01",
       "expectedLastDraw": "2026-09-01",
       "nextDrawDate": "2026-09-04",
-      "updatedAt": "2026-09-03T16:40:37.058Z",
-      "sourceUpdatedAt": "2026-09-03T16:40:37.058Z",
+      "updatedAt": "2026-09-03T22:09:12.463Z",
+      "sourceUpdatedAt": "2026-09-03T22:09:12.463Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -97,79 +97,42 @@
       "lastDrawDate": "2026-09-01",
       "expectedLastDraw": "2026-09-01",
       "nextDrawDate": "2026-09-04",
-      "updatedAt": "2026-09-03T16:40:37.058Z",
-      "sourceUpdatedAt": "2026-09-03T16:40:37.058Z",
+      "updatedAt": "2026-09-03T22:09:12.463Z",
+      "sourceUpdatedAt": "2026-09-03T22:09:12.463Z",
       "sourceNextDraw": "2026-09-04",
       "status": "fresh",
       "synced": true,
       "source": "fdj.fr"
     },
     "superenalotto": {
-      "currency": "EUR",
+      "amount": "218.7",
+      "prefix": "€",
+      "sub": "MILLION",
       "cur": "EUR",
-      "lastDrawDate": "2026-09-01",
-      "expectedLastDraw": "2026-09-01",
-      "nextDrawDate": "2026-09-03",
-      "updatedAt": "2026-09-03T16:40:37.058Z",
-      "status": "unavailable",
+      "currency": "EUR",
+      "display": "€218.7 MILLION",
+      "lastDrawDate": "2026-09-03",
+      "expectedLastDraw": "2026-09-03",
+      "nextDrawDate": "2026-09-04",
+      "updatedAt": "2026-09-03T22:09:12.463Z",
+      "sourceUpdatedAt": "2026-09-03T22:09:12.463Z",
+      "sourceNextDraw": "2026-09-04",
+      "status": "fresh",
       "synced": true,
-      "source": null,
+      "source": "superenalotto.it",
+      "sourceUrl": "https://www.superenalotto.it/",
+      "extractedText": "Jackpot aumenta il suo valore in vista della prossima estrazione arrivando a 218,7 milioni di euro",
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
           "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-1-settembre-2026"
-        },
-        {
-          "source": "superenalotto.it",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/"
-        },
-        {
-          "source": "superenalotto.it estrazioni",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/estrazioni"
-        },
-        {
-          "source": "superenalotto.it archivio estrazioni",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/archivio-estrazioni/2026/settembre"
-        },
-        {
-          "source": "superenalotto.it bollettini ufficiali",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/archivio-estrazioni/bollettini"
-        },
-        {
-          "source": "superenalotto.it news",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/news/risultati"
-        },
-        {
-          "source": "superenalotto.net",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.net/"
-        },
-        {
-          "source": "sisal.it ultima estrazione",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/superenalotto/ultima-estrazione"
-        },
-        {
-          "source": "sisal.it estrazioni",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/estrazioni/superenalotto"
-        },
-        {
-          "source": "sisal.it news",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/news/superenalotto",
+          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-3-settembre-2026",
           "error": "HTTP 404"
         },
         {
-          "source": "official backend",
-          "ok": false,
-          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-09-01&next=2026-09-03"
+          "source": "superenalotto.it",
+          "ok": true,
+          "sourceUrl": "https://www.superenalotto.it/"
         }
       ]
     },
@@ -183,8 +146,8 @@
       "lastDrawDate": "2026-09-01",
       "expectedLastDraw": "2026-09-01",
       "nextDrawDate": "2026-09-04",
-      "updatedAt": "2026-09-03T16:40:37.058Z",
-      "sourceUpdatedAt": "2026-09-03T16:40:37.058Z",
+      "updatedAt": "2026-09-03T22:09:12.463Z",
+      "sourceUpdatedAt": "2026-09-03T22:09:12.463Z",
       "sourceNextDraw": "2026-09-04",
       "status": "fresh",
       "synced": true,
@@ -213,8 +176,8 @@
       "lastDrawDate": "2026-09-03",
       "expectedLastDraw": "2026-09-03",
       "nextDrawDate": "2026-09-10",
-      "updatedAt": "2026-09-03T16:40:37.058Z",
-      "sourceUpdatedAt": "2026-09-03T16:40:37.058Z",
+      "updatedAt": "2026-09-03T22:09:12.463Z",
+      "sourceUpdatedAt": "2026-09-03T22:09:12.463Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
