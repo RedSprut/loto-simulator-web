@@ -3544,6 +3544,36 @@ function openLangPicker(){
   document.getElementById('lang-ov').classList.add('show');
 }
 function closeLangPicker(){document.getElementById('lang-ov').classList.remove('show');}
+/* Optically centre each .pro-crown-icon emoji inside its gold circle. Emoji glyphs are NOT centred
+   inside their own em box (crown ink sits low, sparkle a touch off), and the offset differs per
+   platform emoji font (Apple Color Emoji vs Noto). So we render the actual glyph to a canvas with
+   its box-middle at the centre, scan the real ink bounds, and feed the residual offset back as
+   --crown-dx/--crown-dy px vars → the VISIBLE ink lands dead-centre on every device. Idempotent. */
+function centerCrownEmoji(el){
+  try{
+    const cs=getComputedStyle(el);const F=parseFloat(cs.fontSize)||44;const ch=(el.textContent||'').trim();
+    if(!ch)return;
+    const S=Math.ceil(F*2.4);const c=document.createElement('canvas');c.width=S;c.height=S;
+    const g=c.getContext('2d',{willReadFrequently:true});if(!g)return;
+    g.font=F+'px '+cs.fontFamily;g.textAlign='center';g.textBaseline='middle';
+    g.clearRect(0,0,S,S);g.fillText(ch,S/2,S/2);
+    const d=g.getImageData(0,0,S,S).data;
+    let minX=S,minY=S,maxX=-1,maxY=-1;
+    for(let y=0;y<S;y++)for(let x=0;x<S;x++){if(d[(y*S+x)*4+3]>16){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y;}}
+    if(maxX<0)return;
+    /* ink centre offset from the canvas centre (= box-middle) → move the glyph the opposite way */
+    const dx=-(((minX+maxX)/2)-S/2),dy=-(((minY+maxY)/2)-S/2);
+    el.style.setProperty('--crown-dx',dx.toFixed(2)+'px');
+    el.style.setProperty('--crown-dy',dy.toFixed(2)+'px');
+  }catch(_e){}
+}
+function centerAllCrowns(){document.querySelectorAll('.pro-crown-icon').forEach(centerCrownEmoji);}
+try{
+  if(document.readyState!=='loading')centerAllCrowns();else document.addEventListener('DOMContentLoaded',centerAllCrowns,{once:true});
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(centerAllCrowns);
+  setTimeout(centerAllCrowns,600);
+  window.centerAllCrowns=centerAllCrowns;
+}catch(_e){}
 async function selectLang(code){
   if(!LOCALE_CATALOG[code])return;
   curLang=code;
