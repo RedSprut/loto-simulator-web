@@ -270,6 +270,11 @@ window.addEventListener('loto:accesschange',event=>{
       localStorage.setItem('loto_pro_period_reset_v1','1');
       try{IF_state=null;}catch(_i){}
     }
+    /* A period label built BEFORE PRO resolved shows the FREE/'current' fallback from a restricted
+       pack (e.g. «Текущие правила · 30»). Now that PRO is confirmed, re-render it: the cache was
+       just cleared, so IF_baseDraws reloads the full archive and the label flips to the PRO default
+       «Вся история · N». Fire-and-forget; a no-op if the generator isn't mounted yet. */
+    try{if(typeof PERIOD_refreshLabel==='function')PERIOD_refreshLabel();}catch(_r){}
   }catch(_e){}}
 });
 function analyzeData(gameKey,historicalData=[]){
@@ -4429,7 +4434,10 @@ async function PERIOD_open(){
      ready. Previously the modal was shown only AFTER loadFullHistory finished, so for a big base
      (EuroJackpot = 986 draws) the button felt stuck and needed a second tap. */
   const ov=document.getElementById('period-ov'),presetsEl=document.getElementById('period-presets');
-  if(presetsEl)presetsEl.innerHTML='<div class="pick-mode"><div class="pick-mode-t">⏳</div></div>';
+  /* Show the ⏳ placeholder ONLY when the base isn't hydrated yet. In the normal flow the label
+     already preloaded the full archive, so the list renders in the same microtask and the window
+     opens directly as the full period picker — no intermediate empty ⏳ window. */
+  if(presetsEl&&!hasHydratedAnalyticsHistory(cur))presetsEl.innerHTML='<div class="pick-mode"><div class="pick-mode-t">⏳</div></div>';
   if(window.LotoModals)window.LotoModals.openModal('period-ov');else ov.classList.add('show');
   try{
   const l=L();
@@ -5819,7 +5827,7 @@ async function JC_continue(){
   // Nested utility dialogs stay above their parent feature (birth-date editor
   // over Quantum-Astral, confirmation over the editor) instead of replacing it.
   var TRANSIENT={'busy-ov':1,'aved-ov':1};
-  var NESTED={'qab-ov':1,'cc-ov':1};
+  var NESTED={'qab-ov':1,'cc-ov':1,'period-ov':1};
   var CRITICAL={
     'cc-ov':1,'fb-ov':1,'prev-ov':1,'pro-ov':1,'mres-ov':1,'jc-ov':1,
     'cons-ov':1,'qa-ov':1,'adv-ov':1,'sup-ov':1,'pdx-ov':1,'matrix-ov':1,
