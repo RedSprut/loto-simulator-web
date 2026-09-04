@@ -3519,6 +3519,10 @@ let rollTimers=[];
 /* ═══ МУЛЬТИЯЗЫЧНОСТЬ: страны всех лотерей каталога ═══ */
 const LOCALE_CATALOG=window.LOTO_I18N_CATALOG?.locales||{};
 const LANG_ORDER=Object.keys(LOCALE_CATALOG);
+/* Language-PICKER display order only: Українська first, Русский last, all others in their existing
+   catalog order. LANG_ORDER itself stays the raw catalog order (source of truth for flags/logic);
+   translations, flags, switching logic and count are untouched. */
+const LANG_PICKER_ORDER=['uk',...LANG_ORDER.filter(c=>c!=='uk'&&c!=='ru'),'ru'].filter(c=>LOCALE_CATALOG[c]);
 const LANG_FLAGS=Object.fromEntries(LANG_ORDER.map(code=>[code,LOCALE_CATALOG[code].flag]));
 let curLang=localStorage.getItem('loto_lang')||(navigator.language||'ru').slice(0,2);
 if(!LOCALE_CATALOG[curLang])curLang='en';
@@ -3531,7 +3535,7 @@ async function applyLang(){
 }
 function openLangPicker(){
   const grid=document.getElementById('lang-grid');
-  grid.innerHTML=LANG_ORDER.map(c=>
+  grid.innerHTML=LANG_PICKER_ORDER.map(c=>
     `<button class="lang-opt${c===curLang?' cur':''}" data-loto-event-click="selectLang('${c}')">
       <span class="lang-flag">${LANG_FLAGS[c]}</span>
       <span class="lang-name">${escapeHtml(LOCALE_CATALOG[c].name)}</span>

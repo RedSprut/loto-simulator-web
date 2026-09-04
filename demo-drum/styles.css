@@ -219,6 +219,18 @@ html, body {
 .dd-pause[aria-pressed="true"] { border-color: var(--gold); box-shadow: 0 4px 18px var(--g-glow); }
 .dd-pause:focus-visible { outline: 2px solid color-mix(in srgb,var(--gold) 82%,white); outline-offset: 2px; }
 .dd-pause[hidden] { display: none; }
+/* Mobile / small viewports: take Pause/Play OFF the top bar (where it crowded the game name +
+   mute/gear) and drop it to the bottom, on the SAME horizontal line as the primary status button
+   («Перемешивание…» / «Выбор шара…»), pinned to the right edge — clear of the drum, the status
+   button and the docked bottom nav. Same round 46px button + style; +3px lifts its 46px box so its
+   centre lines up with the 52px status button. Desktop (≥760px) keeps the original top-right spot. */
+@media (max-width: 759px) {
+  .dd-pause {
+    top: auto; left: auto;
+    right: calc(var(--safe-r) + 12px);
+    bottom: calc(var(--safe-b) + var(--drum-nav-bottom) + var(--drum-nav-height) + var(--drum-nav-gap) + 3px);
+  }
+}
 
 .dd-resume-overlay {
   position: fixed; inset: 0; z-index: 60; display: grid; place-items: center;

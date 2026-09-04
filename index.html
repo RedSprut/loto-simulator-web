@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="d7f0a1f" data-build-ts="2026-09-04T12:58:57.531Z">
+<html lang="ru" data-build="d423e47" data-build-ts="2026-09-04T13:31:05.976Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=d7f0a1f"></script>
+<script src="./boot-runtime.js?v=d423e47"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,7 +14,7 @@
 <meta property="og:description" content="Lottery draw simulator and analytics tool. No ticket sales, bets, or guaranteed winnings.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://redsprut.github.io/loto-simulator-web/">
-<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=d7f0a1f">
+<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=d423e47">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary">
@@ -1370,16 +1370,16 @@ body.light .mb[class*="miss-"]{text-shadow:none}
   background:radial-gradient(140% 70% at 20% 8%,rgba(120,80,20,.10),transparent 60%),radial-gradient(120% 60% at 85% 90%,rgba(120,80,20,.12),transparent 55%),radial-gradient(2px 2px at 28% 36%,rgba(90,60,20,.16) 50%,transparent 51%),radial-gradient(2px 2px at 72% 66%,rgba(90,60,20,.13) 50%,transparent 51%),linear-gradient(165deg,#F9F0D4,#F1E2B2 55%,#E9D69C);
   box-shadow:inset 0 0 0 3px rgba(138,107,46,.5),inset 0 0 0 5px rgba(251,243,220,.85),inset 0 0 0 7px rgba(138,107,46,.3),inset 0 0 60px rgba(140,100,30,.16),0 -18px 60px rgba(0,0,0,.5)}
 @media(min-width:700px){.pro-sheet{border-radius:26px}}
-.pro-crown{width:84px;height:84px;margin:2px auto 6px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;
+.pro-crown{width:84px;height:84px;margin:2px auto 6px;border-radius:50%;display:grid;place-items:center;font-size:44px;
   background:radial-gradient(circle at 32% 26%,#FBE7B2,#E9B44C 55%,#8A5E15);box-shadow:0 0 26px rgba(233,180,76,.55),inset 0 -6px 14px rgba(90,60,10,.35);text-shadow:0 2px 6px rgba(90,60,10,.5)}
-/* Center the emoji glyph in the gold circle. Emoji render top-heavy in their line box, so nudge
-   DOWN by a size-relative fraction (em) — this centers BOTH the 84px/44px and the small 54px/30px
-   .pro-crown variants proportionally (a fixed px only centered one size). */
-.pro-crown-icon{display:block;line-height:1;transform:translateY(0.15em)}
+/* Geometrically centre the emoji in the gold circle with grid place-items (same proven pattern as
+   .st-ic) — no manual em/px offset, so 👑/✨ sit dead-centre identically on every platform and at
+   both the 84px and 54px sizes. */
+.pro-crown-icon{display:block;line-height:1}
 .pro-title{font-family:'Unbounded',sans-serif;font-weight:900;font-size:25px;text-align:center;background:linear-gradient(175deg,#9A6B15,#6B4A0E);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2px}
 .pro-tag{text-align:center;font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:#8A6B2E;margin-bottom:14px}
 .pro-sec{margin-top:16px}
-.pro-sec-t{display:inline-block;font-family:'Unbounded',sans-serif;font-weight:900;font-size:14px;color:#5A3E0C;background:linear-gradient(160deg,rgba(233,180,76,.5),rgba(201,149,43,.25));padding:5px 14px;border-radius:20px;border:1.5px solid #C9A55A;margin-bottom:10px}
+.pro-sec-t{display:inline-flex;align-items:center;justify-content:center;line-height:1.15;font-family:'Unbounded',sans-serif;font-weight:900;font-size:14px;color:#5A3E0C;background:linear-gradient(160deg,rgba(233,180,76,.5),rgba(201,149,43,.25));padding:5px 14px;border-radius:20px;border:1.5px solid #C9A55A;margin-bottom:10px}
 .pro-li{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;line-height:1.5;color:#3E2C12;font-weight:600;margin:9px 2px}
 .pro-li .pro-ic{flex:0 0 auto;color:#9A6B15;font-weight:900;margin-top:1px}
 .pro-li b{color:#6B120C;font-weight:800}
@@ -2969,17 +2969,17 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=d7f0a1f"></script>
-<script src="./commercial-config.js?v=d7f0a1f"></script>
-<script src="./event-runtime.js?v=d7f0a1f"></script>
-<script src="./auth-client.js?v=d7f0a1f"></script>
-<script src="./native-loader.js?v=d7f0a1f"></script>
-<script src="./i18n-catalog.js?v=d7f0a1f"></script>
-<script src="./i18n-runtime.js?v=d7f0a1f"></script>
-<script src="./app-runtime.js?v=d7f0a1f"></script>
-<script src="./inline-runtime-2.js?v=d7f0a1f"></script>
-<script src="./commercial-runtime.js?v=d7f0a1f"></script>
-<script src="./inline-runtime-3.js?v=d7f0a1f"></script>
+<script src="./version.js?v=d423e47"></script>
+<script src="./commercial-config.js?v=d423e47"></script>
+<script src="./event-runtime.js?v=d423e47"></script>
+<script src="./auth-client.js?v=d423e47"></script>
+<script src="./native-loader.js?v=d423e47"></script>
+<script src="./i18n-catalog.js?v=d423e47"></script>
+<script src="./i18n-runtime.js?v=d423e47"></script>
+<script src="./app-runtime.js?v=d423e47"></script>
+<script src="./inline-runtime-2.js?v=d423e47"></script>
+<script src="./commercial-runtime.js?v=d423e47"></script>
+<script src="./inline-runtime-3.js?v=d423e47"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3126,9 +3126,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=d7f0a1f"></script>
-<script src="./notifications-runtime.js?v=d7f0a1f"></script>
-<script src="./pwa-runtime.js?v=d7f0a1f"></script>
+<script src="./notification-center.js?v=d423e47"></script>
+<script src="./notifications-runtime.js?v=d423e47"></script>
+<script src="./pwa-runtime.js?v=d423e47"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3139,8 +3139,8 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=d7f0a1f"></script>
-<script src="./inline-runtime-5.js?v=d7f0a1f"></script>
-<script src="./inline-runtime-6.js?v=d7f0a1f"></script>
+<script src="./inline-runtime-4.js?v=d423e47"></script>
+<script src="./inline-runtime-5.js?v=d423e47"></script>
+<script src="./inline-runtime-6.js?v=d423e47"></script>
 </body>
 </html>
