@@ -239,6 +239,7 @@ async function loadFullHistory(gameKey){
     return{
       draws:merged,eras:archive.eras||[],updatedAt:archive.updatedAt||'',
       currentCount:currentDraws.length,currentDraws,restricted:archive.restricted===true,
+      total:Number(archive.total)||merged.length,
     };
   })();
   analyticsHistoryCache.set(cacheKey,pending);
@@ -4423,8 +4424,9 @@ async function PERIOD_range(){
   const inRange=draws.filter(d=>d&&d.date&&d.date>=from&&d.date<=to).length;
   if(inRange<5){showCopyToast('В этом диапазоне только '+inRange+' тиражей — нужно минимум 5');return;}
   IF_setRange(from,to);CONS_reset();
-  PERIOD_close();PERIOD_refreshLabel();
-  showCopyToast('🗓 Диапазон: '+from+' — '+to+' · '+inRange+' тиражей');
+  await withBusy(appText('Загрузка')+': '+from+' — '+to+' · '+inRange+' '+appText('тиражей'),async()=>{await PERIOD_refreshLabel();});
+  PERIOD_close();
+  showCopyToast('🗓 '+from+' — '+to+' · '+inRange+' '+appText('тиражей'));
 }
 let PERIOD_opening=false;
 async function PERIOD_open(){
@@ -4463,40 +4465,73 @@ async function PERIOD_open(){
     pf.value=r?r.from:oldest;pt.value=r?r.to:newest;
   }
   const y=d=>{const now=Date.now();return baseDraws.filter(x=>x&&x.date&&(now-new Date(x.date).getTime())<=d*365.25*24*3600*1000).length;};
-  const presets=[];
+  const presets=[];   /* [value, label, locked] */
   if(isPro){
-    presets.push(['all',appText('Вся история')+' · '+allDraws.length+' '+appText('тиражей')]);
-    presets.push(['current',appText('Текущие правила')+' · '+currentDraws.length+' '+appText('тиражей')]);
+    presets.push(['all',appText('Вся история')+' · '+allDraws.length+' '+appText('тиражей'),false]);
+    presets.push(['current',appText('Текущие правила')+' · '+currentDraws.length+' '+appText('тиражей'),false]);
+    presets.push(['free',appText('FREE-период')+' · '+freeDraws.length+' '+appText('тиражей'),false]);
+    [[1,'За 1 год'],[2,'За 2 года'],[3,'За 3 года']].forEach(([yy,lbl])=>{const c=y(yy);if(c>=10&&c<bn)presets.push([c,appText(lbl)+' · '+c,false]);});
+    [150,100,50].forEach(k=>{if(bn>k)presets.push([k,appText('Последние')+' '+k,false]);});
+  }else{
+    /* FREE sees the SAME full table as PRO, but every PRO period is LOCKED → paywall; only the
+       FREE-период is usable. FREE should see what PRO unlocks, not a truncated table. Counts for
+       the locked rows use the full available total from metadata (pack.total) where known. */
+    const ft=Number(pack.total)||0;
+    presets.push(['all',appText('Вся история')+(ft?(' · '+ft+' '+appText('тиражей')):''),true]);
+    presets.push(['current',appText('Текущие правила'),true]);
+    presets.push(['free',appText('FREE-период')+' · '+freeDraws.length+' '+appText('тиражей'),false]);
+    [[1,'За 1 год'],[2,'За 2 года'],[3,'За 3 года']].forEach(([yy,lbl])=>presets.push(['pro',appText(lbl),true]));
+    [150,100,50].forEach(k=>{if(!ft||ft>k)presets.push(['pro',appText('Последние')+' '+k,true]);});
   }
-  presets.push(['free',appText('FREE-период')+' · '+freeDraws.length+' '+appText('тиражей')]);
-  [[1,'За 1 год'],[2,'За 2 года'],[3,'За 3 года']].forEach(([yy,lbl])=>{const c=y(yy);if(c>=10&&c<bn)presets.push([c,lbl+' · '+c]);});
-  [150,100,50].forEach(k=>{if(bn>k)presets.push([k,'Последние '+k]);});
   document.getElementById('period-note').textContent=appText('Выбранный набор данных')+': '+(l.short||l.name)+' · '+n+' '+appText('тиражей')+'. '+appText('Все модели, структурный анализ и консенсус используют этот период.');
   const curW=IF_getRange()?-1:IF_getWin();
   const scope=IF_getScope();
-  document.getElementById('period-presets').innerHTML=presets.map(([v,lbl])=>typeof v==='string'
-    ?'<div class="pick-mode'+(v===scope&&!IF_getRange()&&curW===0?' on':'')+'" data-loto-event-click="PERIOD_scope(\''+v+'\')"><div class="pick-mode-t">'+lbl+'</div></div>'
-    :'<div class="pick-mode'+(v===curW?' on':'')+'" data-loto-event-click="PERIOD_set('+v+')"><div class="pick-mode-t">'+lbl+'</div></div>').join('');
+  document.getElementById('period-presets').innerHTML=presets.map(([v,lbl,locked])=>{
+    if(locked)return '<div class="pick-mode" data-loto-event-click="PERIOD_lockedPro()" style="cursor:pointer"><div class="pick-mode-t">'+lbl+' <span style="font-size:10px;font-weight:800;color:var(--gold);letter-spacing:.3px;white-space:nowrap">🔒 PRO</span></div></div>';
+    return typeof v==='string'
+      ?'<div class="pick-mode'+(v===scope&&!IF_getRange()&&curW===0?' on':'')+'" data-loto-event-click="PERIOD_scope(\''+v+'\')"><div class="pick-mode-t">'+lbl+'</div></div>'
+      :'<div class="pick-mode'+(v===curW?' on':'')+'" data-loto-event-click="PERIOD_set('+v+')"><div class="pick-mode-t">'+lbl+'</div></div>';
+  }).join('');
   document.getElementById('period-custom').max=bn;
   }finally{PERIOD_opening=false;}
 }
 function PERIOD_close(){PERIOD_opening=false;document.getElementById('period-ov').classList.remove('show');}
-function PERIOD_set(v){
+/* Every period selection shows the shared ⏳ loading UI with a localized description of WHAT was
+   chosen (min visible flash via withBusy), then closes the picker and returns to the generator
+   (period-ov is nested, so the generator stays mounted). */
+async function PERIOD_set(v){
   IF_setWin(v);CONS_reset();
+  const n=(await IF_baseDraws(cur)).length;
+  const label=v>0
+    ?(appText('Загрузка')+': '+appText('последние')+' '+v+' '+appText('тиражей'))
+    :(appText('Загрузка')+': '+appText('Вся история')+' · '+n+' '+appText('тиражей'));
+  await withBusy(label,async()=>{await PERIOD_refreshLabel();});
   PERIOD_close();
-  PERIOD_refreshLabel();
-  showCopyToast('🗓 Период: '+(v>0?'последние '+v+' тиражей':'вся база'));
+  showCopyToast('🗓 '+(v>0?appText('последние')+' '+v+' '+appText('тиражей'):appText('вся база')));
 }
-function PERIOD_scope(scope){
-  IF_setScope(scope);IF_setWin(0);CONS_reset();PERIOD_close();PERIOD_refreshLabel();
-  showCopyToast('🗓 '+appText(scope==='all'?'Вся история':scope==='current'?'Текущие правила':'FREE-период'));
+async function PERIOD_scope(scope){
+  IF_setScope(scope);IF_setWin(0);CONS_reset();
+  const base=scope==='all'?appText('Вся история'):scope==='current'?appText('Текущие правила'):appText('FREE-период');
+  const n=(await IF_baseDraws(cur)).length;
+  await withBusy(appText('Загрузка')+': '+base+' · '+n+' '+appText('тиражей'),async()=>{await PERIOD_refreshLabel();});
+  PERIOD_close();
+  showCopyToast('🗓 '+base);
 }
 async function PERIOD_custom(){
   const v=parseInt(document.getElementById('period-custom').value);
   if(!isFinite(v)||v<5){showCopyToast('Минимум 5 тиражей');return;}
   const available=(await IF_baseDraws(cur)).length;
   if(v>available){showCopyToast('Доступно только '+available+' тиражей');return;}
-  PERIOD_set(v);
+  await PERIOD_set(v);
+}
+/* FREE tapped a PRO-only period: show the unified paywall confirm. «Остаться здесь» keeps the user
+   in the (nested) Period-Analysis table; «Перейти в PRO» opens the full paywall. Never applies. */
+async function PERIOD_lockedPro(){
+  const go=await customConfirm(
+    appText('Полная история доступна в PRO. Бесплатные расчёты используют официальное скользящее FREE-окно выбранной лотереи.'),
+    appText('Перейти в PRO'),
+    {title:appText('Эта функция доступна в PRO'),cancelLabel:appText('Остаться здесь')});
+  if(go){try{PERIOD_close();}catch(_e){}try{window.LotoCommercial?.openPaywall?.('full_history');}catch(_e){}}
 }
 async function PERIOD_refreshLabel(){
   const w=IF_getWin(),r=IF_getRange(),scope=IF_getScope(),draws=await IF_baseDraws(cur),n=draws.length;
