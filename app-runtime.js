@@ -259,6 +259,18 @@ window.addEventListener('loto:accesschange',event=>{
      keeps its pre-PRO restricted pack. */
   if(analyticsAccessLevel!==next)clearAnalyticsHistoryCache();
   analyticsAccessLevel=next;
+  /* The FIRST time PRO is confirmed on this device, drop any FREE-era Period-Analysis settings
+     (saved scope / window / range) so every one of the 9 lotteries opens on the PRO default
+     «Вся история» (scope 'all'). A stale saved 'free'/'current'/last-N/date-range must NOT
+     override the PRO default at first open. One-time (flagged): the user's own PRO choices
+     afterwards persist normally. */
+  if(next==='pro'){try{
+    if(!localStorage.getItem('loto_pro_period_reset_v1')){
+      Object.keys(localStorage).forEach(k=>{if(k==='loto_win'||k==='loto_range'||k.indexOf('loto_period_scope_')===0)localStorage.removeItem(k);});
+      localStorage.setItem('loto_pro_period_reset_v1','1');
+      try{IF_state=null;}catch(_i){}
+    }
+  }catch(_e){}}
 });
 function analyzeData(gameKey,historicalData=[]){
   const cfg=getLotteryConfig(gameKey);
@@ -4409,7 +4421,17 @@ async function PERIOD_range(){
   PERIOD_close();PERIOD_refreshLabel();
   showCopyToast('🗓 Диапазон: '+from+' — '+to+' · '+inRange+' тиражей');
 }
+let PERIOD_opening=false;
 async function PERIOD_open(){
+  if(PERIOD_opening)return;                 /* one tap only: ignore repeats while the base loads */
+  PERIOD_opening=true;
+  /* Open the modal INSTANTLY on the first tap with a loading state, then fill it once the base is
+     ready. Previously the modal was shown only AFTER loadFullHistory finished, so for a big base
+     (EuroJackpot = 986 draws) the button felt stuck and needed a second tap. */
+  const ov=document.getElementById('period-ov'),presetsEl=document.getElementById('period-presets');
+  if(presetsEl)presetsEl.innerHTML='<div class="pick-mode"><div class="pick-mode-t">⏳</div></div>';
+  if(window.LotoModals)window.LotoModals.openModal('period-ov');else ov.classList.add('show');
+  try{
   const l=L();
   let pack=await loadFullHistory(cur);
   /* Guarantee the PRO menu is NEVER built from a restricted/FREE pack (the backend has the full
@@ -4421,33 +4443,36 @@ async function PERIOD_open(){
   const freeDraws=await loadD(cur),isPro=window.LotoCommercial?.access?.accessLevel==='pro'&&!pack.restricted;
   const allDraws=isPro?(pack.draws||[]):freeDraws,currentDraws=isPro?(pack.currentDraws||[]):freeDraws;
   const draws=IF_getScope()==='all'?allDraws:IF_getScope()==='free'?freeDraws:currentDraws,n=draws.length;
-  /* заполняем границы дат из базы */
-  if(n){
-    const newest=draws[0].date,oldest=draws[n-1].date;
+  /* Presets + date bounds come from the FULL available base (PRO: all history; FREE: the free
+     window), NOT the currently-selected scope — otherwise selecting a small scope (e.g. 'free')
+     would hide «За N лет» / «Последние 150/100/50», truncating the menu. */
+  const baseDraws=isPro?allDraws:freeDraws,bn=baseDraws.length;
+  if(bn){
+    const newest=baseDraws[0].date,oldest=baseDraws[bn-1].date;
     const pf=document.getElementById('period-from'),pt=document.getElementById('period-to');
     pf.min=oldest;pf.max=newest;pt.min=oldest;pt.max=newest;
     const r=IF_getRange();
     pf.value=r?r.from:oldest;pt.value=r?r.to:newest;
   }
-  const y=d=>{const now=Date.now();return draws.filter(x=>x&&x.date&&(now-new Date(x.date).getTime())<=d*365.25*24*3600*1000).length;};
+  const y=d=>{const now=Date.now();return baseDraws.filter(x=>x&&x.date&&(now-new Date(x.date).getTime())<=d*365.25*24*3600*1000).length;};
   const presets=[];
   if(isPro){
     presets.push(['all',appText('Вся история')+' · '+allDraws.length+' '+appText('тиражей')]);
     presets.push(['current',appText('Текущие правила')+' · '+currentDraws.length+' '+appText('тиражей')]);
   }
   presets.push(['free',appText('FREE-период')+' · '+freeDraws.length+' '+appText('тиражей')]);
-  [[1,'За 1 год'],[2,'За 2 года'],[3,'За 3 года']].forEach(([yy,lbl])=>{const c=y(yy);if(c>=10&&c<n)presets.push([c,lbl+' · '+c]);});
-  [150,100,50].forEach(k=>{if(n>k)presets.push([k,'Последние '+k]);});
+  [[1,'За 1 год'],[2,'За 2 года'],[3,'За 3 года']].forEach(([yy,lbl])=>{const c=y(yy);if(c>=10&&c<bn)presets.push([c,lbl+' · '+c]);});
+  [150,100,50].forEach(k=>{if(bn>k)presets.push([k,'Последние '+k]);});
   document.getElementById('period-note').textContent=appText('Выбранный набор данных')+': '+(l.short||l.name)+' · '+n+' '+appText('тиражей')+'. '+appText('Все модели, структурный анализ и консенсус используют этот период.');
   const curW=IF_getRange()?-1:IF_getWin();
   const scope=IF_getScope();
   document.getElementById('period-presets').innerHTML=presets.map(([v,lbl])=>typeof v==='string'
     ?'<div class="pick-mode'+(v===scope&&!IF_getRange()&&curW===0?' on':'')+'" data-loto-event-click="PERIOD_scope(\''+v+'\')"><div class="pick-mode-t">'+lbl+'</div></div>'
     :'<div class="pick-mode'+(v===curW?' on':'')+'" data-loto-event-click="PERIOD_set('+v+')"><div class="pick-mode-t">'+lbl+'</div></div>').join('');
-  document.getElementById('period-custom').max=n;
-  document.getElementById('period-ov').classList.add('show');
+  document.getElementById('period-custom').max=bn;
+  }finally{PERIOD_opening=false;}
 }
-function PERIOD_close(){document.getElementById('period-ov').classList.remove('show');}
+function PERIOD_close(){PERIOD_opening=false;document.getElementById('period-ov').classList.remove('show');}
 function PERIOD_set(v){
   IF_setWin(v);CONS_reset();
   PERIOD_close();
