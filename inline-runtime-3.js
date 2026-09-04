@@ -224,6 +224,7 @@
     if($('acc-manage-btn'))$('acc-manage-btn').hidden=!(confirmed&&isPro&&!lifetime);
     if($('acc-restore-btn'))$('acc-restore-btn').hidden=!(confirmed&&isNative());
     if($('acc-signout-btn'))$('acc-signout-btn').hidden=!confirmed;
+    if($('acc-delete-btn'))$('acc-delete-btn').hidden=!confirmed;
     if($('acc-avatar-actions'))$('acc-avatar-actions').hidden=!confirmed;
     if($('acc-mydata'))$('acc-mydata').hidden=!confirmed;
     if(!confirmed){setAvatar(null);const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}}
@@ -421,6 +422,25 @@
       }finally{if(btn)btn.disabled=false;}
     },
     async signOut(){try{await window.LotoCommercial.signOut();avatarRevision++;profileRequestSeq++;setAvatar(null);profileCache=null;loadedUid=null;const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}msg('acc-auth-msg','',null);msg('acc-avatar-msg','',null);msg('acc-data-msg','',null);render();}catch(_e){}},
+    async deleteAccount(){
+      // Two explicit confirmations before an irreversible deletion. The first spells out exactly
+      // what is removed and warns that the store subscription must be cancelled separately.
+      const ok1=await customConfirm(
+        appText('Профиль, аватар, сохранённые комбинации и настройки будут удалены без возможности восстановления. Активную подписку нужно отменить отдельно в App Store или Google Play.'),
+        appText('Продолжить'),{title:appText('Удаление аккаунта'),cancelLabel:appText('Отмена')});
+      if(!ok1)return;
+      const ok2=await customConfirm(appText('Это действие необратимо. Удалить аккаунт навсегда?'),
+        appText('Удалить навсегда'),{title:appText('Подтверждение'),cancelLabel:appText('Отмена')});
+      if(!ok2)return;
+      try{
+        await window.LotoAuth.deleteAccount();                 // server deletes; identity from JWT only
+        try{await window.LotoCommercial.signOut();}catch(_e){}  // clear the commercial-runtime session
+        avatarRevision++;profileRequestSeq++;setAvatar(null);profileCache=null;loadedUid=null;
+        const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}
+        msg('acc-auth-msg','',null);msg('acc-avatar-msg','',null);msg('acc-data-msg','',null);render();
+        showFeedback(appText('Аккаунт удалён'),appText('Ваш аккаунт и связанные данные удалены.'),'✅');
+      }catch(_e){msg('acc-data-msg',appText('Не удалось удалить аккаунт. Попробуйте позже.'),'error');}
+    },
   };
   window.AccountUI=AccountUI;
 
