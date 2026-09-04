@@ -61,7 +61,9 @@ export class HUD {
     this.pauseBtn = document.createElement('button');
     this.pauseBtn.className = 'dd-pause';
     this.pauseBtn.type = 'button';
-    this.pauseBtn.textContent = '⏸';
+    // U+FE0E (text variation selector) forces the monochrome TEXT glyph so iOS renders the same
+    // clean pause/play as desktop instead of a colour emoji.
+    this.pauseBtn.textContent = '⏸︎';
     this.pauseBtn.hidden = true;
     this.pauseBtn.onclick = () => this.h.onPauseToggle?.();
 
@@ -144,7 +146,7 @@ export class HUD {
   setPaused(paused) {
     this._paused = !!paused;
     document.documentElement.classList.toggle('dd-paused', this._paused);
-    this.pauseBtn.textContent = paused ? '▶' : '⏸';
+    this.pauseBtn.textContent = paused ? '▶︎' : '⏸︎';
     const label = t(paused ? 'pause.resume' : 'pause.pause');
     this.pauseBtn.setAttribute('aria-label', label);
     this.pauseBtn.setAttribute('title', label);

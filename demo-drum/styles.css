@@ -210,6 +210,11 @@ html, body {
   width: 46px; height: 46px; min-width: 44px; min-height: 44px; border-radius: 50%;
   display: grid; place-items: center; padding: 0;
   font: 800 20px/1 system-ui, sans-serif; color: var(--text);
+  /* Force the SAME monochrome text glyph on every platform. Without this iOS (Safari + Chrome/
+     WebViews) renders ⏸/▶ as a colour EMOJI — the "grey/white" mobile button — while desktop shows
+     the clean text glyph. Desktop already renders as text, so this leaves the desktop button
+     unchanged and only makes mobile match it. Paired with a U+FE0E text selector in hud.js. */
+  font-variant-emoji: text; -webkit-font-feature-settings: normal;
   background: var(--panel); border: 1px solid var(--stroke);
   backdrop-filter: blur(12px); cursor: pointer;
   transition: filter .12s ease, transform .12s ease, box-shadow .15s ease;

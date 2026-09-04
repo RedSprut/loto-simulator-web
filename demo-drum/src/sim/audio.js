@@ -214,6 +214,44 @@ export class AudioManager {
       const s = this.ctx.createBufferSource();
       s.buffer = b; s.connect(this.ctx.destination); s.start(0);
     } catch (e) { /* ignore */ }
+    // iOS Chrome / iOS WebViews: a WebAudio-only unlock resumes the context (state:'running', so the
+    // UI shows "on") but the WebAudio output can stay routed to a SILENT media session until a real
+    // HTMLMediaElement has been played inside the gesture. Safari handles this implicitly; Chrome on
+    // iOS does not — hence "button on, no sound". Playing a short silent <audio> in the SAME gesture
+    // promotes the media session so the resumed WebAudio graph becomes audible. Harmless elsewhere.
+    this._htmlSessionUnlock();
+  }
+
+  _silentWavUrl() {
+    if (this._silentUrl) return this._silentUrl;
+    try {
+      const sr = 8000, n = 1600; // ~0.2s of 8-bit silence
+      const buf = new ArrayBuffer(44 + n), dv = new DataView(buf);
+      const wr = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+      wr(0, 'RIFF'); dv.setUint32(4, 36 + n, true); wr(8, 'WAVE'); wr(12, 'fmt ');
+      dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+      dv.setUint32(24, sr, true); dv.setUint32(28, sr, true); dv.setUint16(32, 1, true); dv.setUint16(34, 8, true);
+      wr(36, 'data'); dv.setUint32(40, n, true);
+      for (let i = 0; i < n; i++) dv.setUint8(44 + i, 128); // 8-bit PCM silence == 128
+      this._silentUrl = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+    } catch (e) { this._silentUrl = null; }
+    return this._silentUrl;
+  }
+
+  _htmlSessionUnlock() {
+    try {
+      if (!this._silentEl) {
+        const a = document.createElement('audio');
+        a.setAttribute('playsinline', ''); a.playsInline = true;
+        a.preload = 'auto'; a.loop = false; a.volume = 1; // audible but the clip is pure silence
+        const url = this._silentWavUrl(); if (!url) return;
+        a.src = url;
+        this._silentEl = a;
+      }
+      try { this._silentEl.currentTime = 0; } catch (e) {}
+      const p = this._silentEl.play();
+      if (p && p.catch) p.catch(() => {});
+    } catch (e) { /* no HTMLAudio → rely on the WebAudio unlock alone */ }
   }
 
   async resume() {

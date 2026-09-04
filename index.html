@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru" data-build="c017816" data-build-ts="2026-09-04T14:17:17.420Z">
+<html lang="ru" data-build="9135829" data-build-ts="2026-09-04T14:46:49.257Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=c017816"></script>
+<script src="./boot-runtime.js?v=9135829"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,7 +14,7 @@
 <meta property="og:description" content="Lottery draw simulator and analytics tool. No ticket sales, bets, or guaranteed winnings.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://redsprut.github.io/loto-simulator-web/">
-<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=c017816">
+<meta property="og:image" content="https://redsprut.github.io/loto-simulator-web/og-image-v2.png?v=9135829">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary">
@@ -1382,7 +1382,13 @@ body.light .mb[class*="miss-"]{text-shadow:none}
 .pro-title{font-family:'Unbounded',sans-serif;font-weight:900;font-size:25px;text-align:center;background:linear-gradient(175deg,#9A6B15,#6B4A0E);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:2px}
 .pro-tag{text-align:center;font-size:12px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:#8A6B2E;margin-bottom:14px}
 .pro-sec{margin-top:16px}
-.pro-sec-t{display:inline-flex;align-items:center;justify-content:center;line-height:1.15;font-family:'Unbounded',sans-serif;font-weight:900;font-size:14px;color:#5A3E0C;background:linear-gradient(160deg,rgba(233,180,76,.5),rgba(201,149,43,.25));padding:5px 14px;border-radius:20px;border:1.5px solid #C9A55A;margin-bottom:10px}
+.pro-sec-t{display:inline-flex;align-items:center;justify-content:center;gap:7px;line-height:1.15;font-family:'Unbounded',sans-serif;font-weight:900;font-size:14px;color:#5A3E0C;background:linear-gradient(160deg,rgba(233,180,76,.5),rgba(201,149,43,.25));padding:5px 14px;border-radius:20px;border:1.5px solid #C9A55A;margin-bottom:10px}
+/* Badge emoji + text as two flex items on one line: align-items:center puts the emoji's box centre
+   and the text's box centre on the SAME horizontal axis (the emoji no longer rides the text
+   baseline), with a fixed gap. flex:0 0 auto keeps the emoji from stretching; line-height:1 keeps
+   its box tight so centring is exact regardless of the translation length. */
+.pro-sec-t .pro-sec-ic{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;line-height:1;font-size:1.05em}
+.pro-sec-t .pro-sec-tx{display:inline-flex;align-items:center;line-height:1.15;min-width:0}
 .pro-li{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;line-height:1.5;color:#3E2C12;font-weight:600;margin:9px 2px}
 .pro-li .pro-ic{flex:0 0 auto;color:#9A6B15;font-weight:900;margin-top:1px}
 .pro-li b{color:#6B120C;font-weight:800}
@@ -1534,6 +1540,24 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   scrollbar-width:none
 }
 body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.cele-box)::-webkit-scrollbar{display:none}
+/* Large desktop with a real pointer: bring back a thin, unobtrusive gold scrollbar on the long
+   modal sheets so it is obvious they scroll. pointer:fine + min-width keep it OFF touch devices
+   (mobile browser, iOS/Android apps, native WebView), where the swipe-scroll + hidden bar above
+   still apply. The bar only appears when the sheet actually overflows (overflow-y:auto). Small
+   confirm/feedback dialogs (.fb-box/.cc-box/.cele-box) are deliberately excluded. */
+@media (min-width:1024px) and (pointer:fine){
+  body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet){
+    scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--gold) 62%,transparent) transparent;
+  }
+  body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet)::-webkit-scrollbar{display:block;width:10px}
+  body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet)::-webkit-scrollbar-track{background:transparent}
+  body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet)::-webkit-scrollbar-thumb{
+    background:color-mix(in srgb,var(--gold) 55%,transparent);border-radius:8px;border:2px solid transparent;background-clip:padding-box;
+  }
+  body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet)::-webkit-scrollbar-thumb:hover{
+    background:color-mix(in srgb,var(--gold) 82%,transparent);background-clip:padding-box;
+  }
+}
 .cc-box,.cele-box{max-height:calc(100dvh - 40px)}
 /* Скролл модальных карточек остаётся доступен свайпом/колёсиком, но декоративная
    полоса не занимает место и не превращается в белую линию сбоку. */
@@ -2326,14 +2350,14 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
     <div class="pro-preview" id="pro-preview"><b>Демонстрационный пример PRO — не расчёт по вашим данным</b><span>Полный результат появляется только после серверной проверки PRO.</span></div>
     <div class="pro-step" id="pro-plans-step">
       <div class="pro-sec">
-        <div class="pro-sec-t">✨ Постоянный Free</div>
+        <div class="pro-sec-t"><span class="pro-sec-ic">✨</span><span class="pro-sec-tx">Постоянный Free</span></div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>Симулятор всех <b>9 лотерей</b> без ограничений</span></div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>Официальное FREE-окно каждой игры — и все FREE-расчёты только по нему</span></div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>Проверка билета, базовая частота и случайный генератор</span></div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>Никаких ежедневных, еженедельных или месячных сбросов лимита</span></div>
       </div>
       <div class="pro-sec" id="pro-purchase-area">
-        <div class="pro-sec-t">👑 PRO · полная база</div>
+        <div class="pro-sec-t"><span class="pro-sec-ic">👑</span><span class="pro-sec-tx">PRO · полная база</span></div>
         <div class="pro-prices" id="pro-subscription-plans" aria-label="Срок подписки PRO">
           <button type="button" class="pro-price" data-plan="m1" aria-pressed="false" data-loto-event-click="LotoCommercial.selectPlan('m1')"><span class="pro-best" data-best hidden>выгодно</span><div class="pro-per">—</div><div class="pro-amt" data-amt>—</div><div class="pro-permonth" data-permonth></div></button>
           <button type="button" class="pro-price" data-plan="m3" aria-pressed="false" data-loto-event-click="LotoCommercial.selectPlan('m3')"><span class="pro-best" data-best hidden>выгодно</span><div class="pro-per">—</div><div class="pro-amt" data-amt>—</div><div class="pro-permonth" data-permonth></div></button>
@@ -2972,17 +2996,17 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=c017816"></script>
-<script src="./commercial-config.js?v=c017816"></script>
-<script src="./event-runtime.js?v=c017816"></script>
-<script src="./auth-client.js?v=c017816"></script>
-<script src="./native-loader.js?v=c017816"></script>
-<script src="./i18n-catalog.js?v=c017816"></script>
-<script src="./i18n-runtime.js?v=c017816"></script>
-<script src="./app-runtime.js?v=c017816"></script>
-<script src="./inline-runtime-2.js?v=c017816"></script>
-<script src="./commercial-runtime.js?v=c017816"></script>
-<script src="./inline-runtime-3.js?v=c017816"></script>
+<script src="./version.js?v=9135829"></script>
+<script src="./commercial-config.js?v=9135829"></script>
+<script src="./event-runtime.js?v=9135829"></script>
+<script src="./auth-client.js?v=9135829"></script>
+<script src="./native-loader.js?v=9135829"></script>
+<script src="./i18n-catalog.js?v=9135829"></script>
+<script src="./i18n-runtime.js?v=9135829"></script>
+<script src="./app-runtime.js?v=9135829"></script>
+<script src="./inline-runtime-2.js?v=9135829"></script>
+<script src="./commercial-runtime.js?v=9135829"></script>
+<script src="./inline-runtime-3.js?v=9135829"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3129,9 +3153,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=c017816"></script>
-<script src="./notifications-runtime.js?v=c017816"></script>
-<script src="./pwa-runtime.js?v=c017816"></script>
+<script src="./notification-center.js?v=9135829"></script>
+<script src="./notifications-runtime.js?v=9135829"></script>
+<script src="./pwa-runtime.js?v=9135829"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3142,8 +3166,8 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=c017816"></script>
-<script src="./inline-runtime-5.js?v=c017816"></script>
-<script src="./inline-runtime-6.js?v=c017816"></script>
+<script src="./inline-runtime-4.js?v=9135829"></script>
+<script src="./inline-runtime-5.js?v=9135829"></script>
+<script src="./inline-runtime-6.js?v=9135829"></script>
 </body>
 </html>
