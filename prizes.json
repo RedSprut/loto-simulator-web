@@ -85476,6 +85476,94 @@
     ],
     "euroMillions": [
       {
+        "date": "2026-09-04",
+        "lotteryId": "euroMillions",
+        "currency": "EUR",
+        "jackpot": 89.3,
+        "payoutTiers": [
+          {
+            "match": "5+2",
+            "label": "5+2",
+            "prizeAmount": 89319120,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 694559,
+            "winners": 1
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 18037,
+            "winners": 9
+          },
+          {
+            "match": "4+2",
+            "label": "4+2",
+            "prizeAmount": 1487,
+            "winners": 34
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 111,
+            "winners": 842
+          },
+          {
+            "match": "3+2",
+            "label": "3+2",
+            "prizeAmount": 66,
+            "winners": 1497
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 32,
+            "winners": 2188
+          },
+          {
+            "match": "2+2",
+            "label": "2+2",
+            "prizeAmount": 16,
+            "winners": 21219
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 10,
+            "winners": 36860
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 8,
+            "winners": 95645
+          },
+          {
+            "match": "1+2",
+            "label": "1+2",
+            "prizeAmount": 8,
+            "winners": 106642
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 6,
+            "winners": 496931
+          },
+          {
+            "match": "2+0",
+            "label": "2+0",
+            "prizeAmount": 3,
+            "winners": 1279265
+          }
+        ],
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
+      },
+      {
         "date": "2026-09-01",
         "lotteryId": "euroMillions",
         "currency": "EUR",
@@ -86711,7 +86799,7 @@
         "date": "2026-07-14",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 37.6,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -86792,8 +86880,8 @@
             "winners": 752440
           }
         ],
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
       },
       {
         "date": "2026-07-10",
@@ -86974,10 +87062,102 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-09-04",
+        "lotteryId": "superEnalotto",
+        "currency": "EUR",
+        "jackpot": 219.5,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 219500000,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 156649.12,
+            "winners": 1
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 447.58,
+            "winners": 357
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 32.46,
+            "winners": 14803
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 5.73,
+            "winners": 260187
+          }
+        ],
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/04-09-2026"
+      },
+      {
+        "date": "2026-09-03",
+        "lotteryId": "superEnalotto",
+        "currency": "EUR",
+        "jackpot": 218.7,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 218729808.81,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 28157.7,
+            "winners": 7
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 275.05,
+            "winners": 728
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 21.06,
+            "winners": 28670
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 5,
+            "winners": 426312
+          }
+        ],
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/03-09-2026"
+      },
+      {
         "date": "2026-09-01",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 217.8,
         "payoutTiers": [
           {
             "match": "6",
@@ -87016,14 +87196,14 @@
             "winners": 296125
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/01-09-2026"
       },
       {
         "date": "2026-08-29",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 216.8,
         "payoutTiers": [
           {
             "match": "6",
@@ -87062,14 +87242,14 @@
             "winners": 401819
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/29-08-2026"
       },
       {
         "date": "2026-08-28",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 215.9,
         "payoutTiers": [
           {
             "match": "6",
@@ -87108,14 +87288,14 @@
             "winners": 320491
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/28-08-2026"
       },
       {
         "date": "2026-08-27",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 215.1,
         "payoutTiers": [
           {
             "match": "6",
@@ -87154,14 +87334,14 @@
             "winners": 341695
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/27-08-2026"
       },
       {
         "date": "2026-08-25",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 214.2,
         "payoutTiers": [
           {
             "match": "6",
@@ -87200,14 +87380,14 @@
             "winners": 295811
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/25-08-2026"
       },
       {
         "date": "2026-08-22",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 213.3,
         "payoutTiers": [
           {
             "match": "6",
@@ -87246,14 +87426,14 @@
             "winners": 392780
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/22-08-2026"
       },
       {
         "date": "2026-08-21",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 212.4,
         "payoutTiers": [
           {
             "match": "6",
@@ -87292,14 +87472,14 @@
             "winners": 299144
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/21-08-2026"
       },
       {
         "date": "2026-08-20",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 211.7,
         "payoutTiers": [
           {
             "match": "6",
@@ -87338,14 +87518,14 @@
             "winners": 328489
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/20-08-2026"
       },
       {
         "date": "2026-08-18",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 210.8,
         "payoutTiers": [
           {
             "match": "6",
@@ -87384,14 +87564,14 @@
             "winners": 343165
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/18-08-2026"
       },
       {
         "date": "2026-08-17",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 210,
         "payoutTiers": [
           {
             "match": "6",
@@ -87430,14 +87610,14 @@
             "winners": 305416
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/17-08-2026"
       },
       {
         "date": "2026-08-14",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 209.2,
         "payoutTiers": [
           {
             "match": "6",
@@ -87476,14 +87656,14 @@
             "winners": 442440
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/14-08-2026"
       },
       {
         "date": "2026-08-13",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 208.5,
         "payoutTiers": [
           {
             "match": "6",
@@ -87522,14 +87702,14 @@
             "winners": 432757
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/13-08-2026"
       },
       {
         "date": "2026-08-11",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 207.5,
         "payoutTiers": [
           {
             "match": "6",
@@ -87568,8 +87748,8 @@
             "winners": 402707
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/11-08-2026"
       },
       {
         "date": "2026-08-08",
@@ -88681,7 +88861,7 @@
         "date": "2026-09-01",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -88738,14 +88918,14 @@
             "winners": 426779
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1266"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-08-28",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -88802,14 +88982,14 @@
             "winners": 474717
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1265"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-08-25",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -88866,14 +89046,14 @@
             "winners": 423106
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1264"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-08-21",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 55,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -88930,14 +89110,14 @@
             "winners": 683007
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1263"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-08-18",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 50,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -88994,14 +89174,14 @@
             "winners": 609561
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1262"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-08-14",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 40,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -89058,14 +89238,14 @@
             "winners": 555125
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1261"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-08-11",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 30,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -89122,14 +89302,14 @@
             "winners": 480946
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1260"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-08-07",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 25,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -89186,14 +89366,14 @@
             "winners": 505403
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1259"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-08-04",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 20,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -89250,14 +89430,14 @@
             "winners": 419582
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1258"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-07-31",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -89314,14 +89494,14 @@
             "winners": 478224
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1257"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-07-28",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -89378,14 +89558,14 @@
             "winners": 425840
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1256"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-07-24",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 25,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -89442,14 +89622,14 @@
             "winners": 519158
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1255"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-07-21",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 20,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -89506,14 +89686,14 @@
             "winners": 440385
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1254"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-07-17",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -89570,14 +89750,14 @@
             "winners": 460085
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1253"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-07-14",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -89634,8 +89814,8 @@
             "winners": 421030
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1252"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-07-10",
@@ -89698,8 +89878,8 @@
             "winners": 518665
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-07-07",
@@ -89762,8 +89942,8 @@
             "winners": 462868
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-07-03",
@@ -89826,8 +90006,8 @@
             "winners": 464313
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-06-30",
@@ -89890,8 +90070,8 @@
             "winners": 454642
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-06-26",
@@ -89954,8 +90134,8 @@
             "winners": 576419
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-06-23",
@@ -90018,8 +90198,8 @@
             "winners": 496487
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-06-19",
@@ -90082,8 +90262,8 @@
             "winners": 513788
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-06-16",
@@ -90146,8 +90326,8 @@
             "winners": 468665
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-06-12",
@@ -90210,8 +90390,8 @@
             "winners": 481387
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-06-09",
@@ -90274,8 +90454,8 @@
             "winners": 447387
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       },
       {
         "date": "2026-06-05",
@@ -90338,8 +90518,8 @@
             "winners": 500155
           }
         ],
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "source": "lottomaxnumbers.com",
+        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026"
       }
     ],
     "powerballAustralia": [
