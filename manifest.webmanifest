@@ -6,9 +6,10 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "categories": ["utilities", "entertainment"],
   "background_color": "#160a12",
   "theme_color": "#26121c",
-  "description": "Симулятор и математическая аналитика международных лотерей.",
+  "description": "Free lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball and more. Educational analysis only; not a lottery operator, no ticket sales.",
   "icons": [
     {
       "src": "icon-192.png?v=20260901b",
