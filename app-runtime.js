@@ -22,6 +22,7 @@ const LOTTERY_APP_KEYS={
   powerballAustralia:'powerballau'
 };
 const APP_LOTTERY_KEYS=Object.fromEntries(Object.entries(LOTTERY_APP_KEYS).map(([configKey,appKey])=>[appKey,configKey]));
+try{window.LOTO_APP_LOTTERY_KEYS=APP_LOTTERY_KEYS;}catch(_e){} // owner analytics: map app key → canonical lottery id
 // Native apps (iOS/Android via Capacitor) bundle a static results/prizes snapshot at
 // build time, so without this they show whatever was frozen at the last store build.
 // The web build stays fresh because its same-origin results.json is republished by the
