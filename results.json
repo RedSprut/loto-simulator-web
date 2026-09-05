@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-09-04",
+  "updatedAt": "2026-09-05",
   "generatedBy": "Loto Simulator secure public bundle",
   "rulesMode": "recent-free-only",
   "freeRecentDrawsByGame": {
@@ -15,20 +15,20 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-09-04T23:06:21.541Z",
-    "sourceFetchedAt": "2026-09-04T23:06:21.541Z",
+    "generatedAt": "2026-09-05T08:54:09.818Z",
+    "sourceFetchedAt": "2026-09-05T08:54:09.818Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "6ae8eea80b585a32",
-    "updatedAt": "2026-09-04",
+    "snapshotVersion": "1bbcfc48fec411e8",
+    "updatedAt": "2026-09-05",
     "latestDrawByGame": {
       "lotto": "2026-08-29",
       "vikinglotto": "2026-09-02",
       "eurojackpot": "2026-09-04",
       "powerball": "2026-09-02",
-      "megaMillions": "2026-09-01",
+      "megaMillions": "2026-09-04",
       "euroMillions": "2026-09-04",
       "superEnalotto": "2026-09-04",
-      "lottoMax": "2026-09-01",
+      "lottoMax": "2026-09-04",
       "powerballAustralia": "2026-09-03"
     },
     "recordCountByGame": {
@@ -36,10 +36,10 @@
       "vikinglotto": 274,
       "eurojackpot": 465,
       "powerball": 1397,
-      "megaMillions": 147,
+      "megaMillions": 148,
       "euroMillions": 1038,
       "superEnalotto": 4261,
-      "lottoMax": 41,
+      "lottoMax": 42,
       "powerballAustralia": 438
     },
     "sourceStatusByGame": {
@@ -52,13 +52,13 @@
       "vikinglotto": {
         "status": "ok",
         "source": "Viking-Lotto.net / Norsk Tipping",
-        "fetched": 759,
+        "fetched": 274,
         "merged": 274
       },
       "eurojackpot": {
         "status": "ok",
         "source": "Euro-Jackpot.net",
-        "fetched": 987,
+        "fetched": 465,
         "merged": 465
       },
       "powerball": {
@@ -70,31 +70,31 @@
       "megaMillions": {
         "status": "ok",
         "source": "NY Open Data / Mega Millions",
-        "fetched": 2533,
-        "merged": 147
+        "fetched": 2534,
+        "merged": 148
       },
       "euroMillions": {
         "status": "ok",
         "source": "Euro-Millions.com",
-        "fetched": 1978,
+        "fetched": 0,
         "merged": 1038
       },
       "superEnalotto": {
         "status": "ok",
         "source": "National-Lottery.com / Lottologia",
-        "fetched": 4261,
+        "fetched": 350,
         "merged": 4261
       },
       "lottoMax": {
         "status": "ok",
         "source": "WCLC",
-        "fetched": 174,
-        "merged": 41
+        "fetched": 106,
+        "merged": 42
       },
       "powerballAustralia": {
         "status": "ok",
         "source": "Australia National Lottery / The Lott",
-        "fetched": 1581,
+        "fetched": 10,
         "merged": 438
       }
     },
@@ -7929,6 +7929,83 @@
     ],
     "megaMillions": [
       {
+        "date": "2026-09-04",
+        "main": [
+          6,
+          26,
+          34,
+          59,
+          61
+        ],
+        "bonus": [
+          24
+        ],
+        "jackpot": 177,
+        "lotteryId": "megaMillions",
+        "source": "Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-09-04",
+        "drawId": "2026-09-04T00:00:00.000",
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 177000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 0
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 10000,
+            "winners": 6
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 599,
+            "winners": 118
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 200,
+            "winners": 312
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 10,
+            "winners": 7538
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 10,
+            "winners": 7266
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 59624
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 2,
+            "winners": 148437
+          }
+        ],
+        "currency": "USD",
+        "ruleVersion": "mega-70-24",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-09-01",
         "main": [
           1,
@@ -8769,83 +8846,6 @@
             "label": "0+1",
             "prizeAmount": 2,
             "winners": 436792
-          }
-        ],
-        "currency": "USD",
-        "ruleVersion": "mega-70-24",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-07-24",
-        "main": [
-          2,
-          5,
-          42,
-          44,
-          60
-        ],
-        "bonus": [
-          1
-        ],
-        "jackpot": 743,
-        "lotteryId": "megaMillions",
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-07-24",
-        "drawId": "2026-07-24T00:00:00.000",
-        "payoutTiers": [
-          {
-            "match": "5+1",
-            "label": "5+1",
-            "prizeAmount": 743000000,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "5+0",
-            "prizeAmount": 1000000,
-            "winners": 0
-          },
-          {
-            "match": "4+1",
-            "label": "4+1",
-            "prizeAmount": 10000,
-            "winners": 13
-          },
-          {
-            "match": "4+0",
-            "label": "4+0",
-            "prizeAmount": 599,
-            "winners": 272
-          },
-          {
-            "match": "3+1",
-            "label": "3+1",
-            "prizeAmount": 200,
-            "winners": 789
-          },
-          {
-            "match": "3+0",
-            "label": "3+0",
-            "prizeAmount": 10,
-            "winners": 19089
-          },
-          {
-            "match": "2+1",
-            "label": "2+1",
-            "prizeAmount": 10,
-            "winners": 17449
-          },
-          {
-            "match": "1+1",
-            "label": "1+1",
-            "prizeAmount": 4,
-            "winners": 135448
-          },
-          {
-            "match": "0+1",
-            "label": "0+1",
-            "prizeAmount": 2,
-            "winners": 327197
           }
         ],
         "currency": "USD",
@@ -11398,10 +11398,10 @@
         "bonus": [
           57
         ],
-        "jackpot": 219.5,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/04-09-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "ruleVersion": "superenalotto-6-90",
         "ruleEra": "current",
@@ -11459,10 +11459,10 @@
         "bonus": [
           9
         ],
-        "jackpot": 218.7,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/03-09-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "ruleVersion": "superenalotto-6-90",
         "ruleEra": "current",
@@ -11520,10 +11520,10 @@
         "bonus": [
           88
         ],
-        "jackpot": 217.8,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/01-09-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "payoutTiers": [
           {
@@ -11581,10 +11581,10 @@
         "bonus": [
           62
         ],
-        "jackpot": 216.8,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/29-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "payoutTiers": [
           {
@@ -11642,10 +11642,10 @@
         "bonus": [
           60
         ],
-        "jackpot": 215.9,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/28-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "payoutTiers": [
           {
@@ -11703,10 +11703,10 @@
         "bonus": [
           32
         ],
-        "jackpot": 215.1,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/27-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "payoutTiers": [
           {
@@ -11764,10 +11764,10 @@
         "bonus": [
           32
         ],
-        "jackpot": 214.2,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/25-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "ruleVersion": "superenalotto-6-90",
         "ruleEra": "current",
@@ -11825,10 +11825,10 @@
         "bonus": [
           82
         ],
-        "jackpot": 213.3,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/22-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "payoutTiers": [
           {
@@ -11886,10 +11886,10 @@
         "bonus": [
           42
         ],
-        "jackpot": 212.4,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/21-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "payoutTiers": [
           {
@@ -11947,10 +11947,10 @@
         "bonus": [
           77
         ],
-        "jackpot": 211.7,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/20-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "payoutTiers": [
           {
@@ -12008,10 +12008,10 @@
         "bonus": [
           70
         ],
-        "jackpot": 210.8,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/18-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "payoutTiers": [
           {
@@ -12069,10 +12069,10 @@
         "bonus": [
           29
         ],
-        "jackpot": 210,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/17-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "payoutTiers": [
           {
@@ -12130,10 +12130,10 @@
         "bonus": [
           49
         ],
-        "jackpot": 209.2,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/14-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "ruleVersion": "superenalotto-6-90",
         "ruleEra": "current",
@@ -12191,10 +12191,10 @@
         "bonus": [
           18
         ],
-        "jackpot": 208.5,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/13-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "ruleVersion": "superenalotto-6-90",
         "ruleEra": "current",
@@ -12252,10 +12252,10 @@
         "bonus": [
           90
         ],
-        "jackpot": 207.5,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/11-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "payoutTiers": [
           {
@@ -13205,6 +13205,85 @@
     ],
     "lottoMax": [
       {
+        "date": "2026-09-04",
+        "main": [
+          11,
+          12,
+          17,
+          34,
+          45,
+          48,
+          52
+        ],
+        "bonus": [
+          31
+        ],
+        "jackpot": 20,
+        "lotteryId": "lottoMax",
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1267",
+        "drawId": 1267,
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 of 7",
+            "prizeAmount": null,
+            "winners": 0
+          },
+          {
+            "match": "6+1",
+            "label": "6 of 7 + Bonus",
+            "prizeAmount": null,
+            "winners": 0
+          },
+          {
+            "match": "6+0",
+            "label": "6 of 7",
+            "prizeAmount": 6581.9,
+            "winners": 26
+          },
+          {
+            "match": "5+1",
+            "label": "5 of 7 + Bonus",
+            "prizeAmount": 1170.6,
+            "winners": 95
+          },
+          {
+            "match": "5+0",
+            "label": "5 of 7",
+            "prizeAmount": 126.3,
+            "winners": 1976
+          },
+          {
+            "match": "4+1",
+            "label": "4 of 7 + Bonus",
+            "prizeAmount": 63.9,
+            "winners": 3251
+          },
+          {
+            "match": "4+0",
+            "label": "4 of 7",
+            "prizeAmount": 20,
+            "winners": 46859
+          },
+          {
+            "match": "3+1",
+            "label": "3 of 7 + Bonus",
+            "prizeAmount": 20,
+            "winners": 47372
+          },
+          {
+            "match": "3+0",
+            "label": "3 of 7",
+            "prizeAmount": null,
+            "winners": 485810
+          }
+        ],
+        "currency": "CAD",
+        "ruleVersion": "lottomax-7-52",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-09-01",
         "main": [
           5,
@@ -13218,11 +13297,11 @@
         "bonus": [
           19
         ],
-        "jackpot": null,
+        "jackpot": 15,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1266",
+        "drawId": 1266,
         "ruleVersion": "lottomax-7-52",
         "ruleEra": "current",
         "payoutTiers": [
@@ -13297,11 +13376,11 @@
         "bonus": [
           29
         ],
-        "jackpot": null,
+        "jackpot": 10,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1265",
+        "drawId": 1265,
         "ruleVersion": "lottomax-7-52",
         "ruleEra": "current",
         "payoutTiers": [
@@ -13376,11 +13455,11 @@
         "bonus": [
           43
         ],
-        "jackpot": null,
+        "jackpot": 10,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1264",
+        "drawId": 1264,
         "payoutTiers": [
           {
             "match": "7",
@@ -13455,11 +13534,11 @@
         "bonus": [
           13
         ],
-        "jackpot": null,
+        "jackpot": 55,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1263",
+        "drawId": 1263,
         "payoutTiers": [
           {
             "match": "7",
@@ -13534,11 +13613,11 @@
         "bonus": [
           5
         ],
-        "jackpot": null,
+        "jackpot": 50,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1262",
+        "drawId": 1262,
         "payoutTiers": [
           {
             "match": "7",
@@ -13613,11 +13692,11 @@
         "bonus": [
           1
         ],
-        "jackpot": null,
+        "jackpot": 40,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1261",
+        "drawId": 1261,
         "payoutTiers": [
           {
             "match": "7",
@@ -13692,11 +13771,11 @@
         "bonus": [
           11
         ],
-        "jackpot": null,
+        "jackpot": 30,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1260",
+        "drawId": 1260,
         "payoutTiers": [
           {
             "match": "7",
@@ -13751,85 +13830,6 @@
             "label": "3 of 7",
             "prizeAmount": null,
             "winners": 480946
-          }
-        ],
-        "currency": "CAD",
-        "ruleVersion": "lottomax-7-52",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-08-07",
-        "main": [
-          6,
-          11,
-          23,
-          31,
-          35,
-          43,
-          48
-        ],
-        "bonus": [
-          9
-        ],
-        "jackpot": null,
-        "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
-        "payoutTiers": [
-          {
-            "match": "7",
-            "label": "7 of 7",
-            "prizeAmount": null,
-            "winners": 0
-          },
-          {
-            "match": "6+1",
-            "label": "6 of 7 + Bonus",
-            "prizeAmount": 72461.5,
-            "winners": 2
-          },
-          {
-            "match": "6+0",
-            "label": "6 of 7",
-            "prizeAmount": 7383.2,
-            "winners": 20
-          },
-          {
-            "match": "5+1",
-            "label": "5 of 7 + Bonus",
-            "prizeAmount": 813.2,
-            "winners": 118
-          },
-          {
-            "match": "5+0",
-            "label": "5 of 7",
-            "prizeAmount": 99.2,
-            "winners": 2171
-          },
-          {
-            "match": "4+1",
-            "label": "4 of 7 + Bonus",
-            "prizeAmount": 48.4,
-            "winners": 3706
-          },
-          {
-            "match": "4+0",
-            "label": "4 of 7",
-            "prizeAmount": 20,
-            "winners": 49382
-          },
-          {
-            "match": "3+1",
-            "label": "3 of 7 + Bonus",
-            "prizeAmount": 20,
-            "winners": 51163
-          },
-          {
-            "match": "3+0",
-            "label": "3 of 7",
-            "prizeAmount": null,
-            "winners": 505403
           }
         ],
         "currency": "CAD",
