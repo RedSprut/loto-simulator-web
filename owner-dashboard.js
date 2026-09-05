@@ -36,15 +36,24 @@
     countryScope: 'withdata', countrySearch: '', metric: 'users', busy: false, data: null, fromAccount: false
   };
   var built = false, ovEl = null;
-  var themePref = (function () { try { return W.localStorage.getItem('ow_theme') || 'system'; } catch (e) { return 'system'; } })();
+  var themePref = (function () {
+    try {
+      var v = W.localStorage.getItem('ow_theme') || 'system';
+      if (v === 'dark') v = 'system';                      // legacy value → System (which follows OS)
+      return (v === 'light' || v === 'blue' || v === 'system') ? v : 'system';
+    } catch (e) { return 'system'; }
+  })();
 
+  // Три темы: light, blue, system. System следует OS: system-dark → тёмная, system-light → светлая.
   function resolveTheme() {
-    if (themePref === 'light' || themePref === 'dark') return themePref;
-    try { return W.matchMedia && W.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch (e) { return 'dark'; }
+    if (themePref === 'light') return 'light';
+    if (themePref === 'blue') return 'blue';
+    try { return W.matchMedia && W.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch (e) { return 'light'; }
   }
   function palette() {
     var t = resolveTheme();
     if (t === 'light') return { grid: '#d9c7d3', axis: '#9a8391', label: '#8a7280', s1: '#b3255f', s2: '#2f6ff2', s3: '#e0912a', fc: '#c98a12' };
+    if (t === 'blue') return { grid: '#b6d4ef', axis: '#5a7fa6', label: '#3f6690', s1: '#1d4ed8', s2: '#0891b2', s3: '#7c3aed', fc: '#c2410c' };
     return { grid: '#3d2233', axis: '#7d6675', label: '#b79aac', s1: '#e2699e', s2: '#6fb7ff', s3: '#f5c451', fc: '#f5c451' };
   }
 
@@ -74,6 +83,8 @@
       // Theme tokens
       '#ow-ov{--bg:#0e0710;--card:#1a0e16;--card2:#160c13;--tx:#f3e9ef;--sub:#b79aac;--sub2:#9c8391;--bd:#33202e;--bd2:#3d2233;--accent:#7a2450;--accent2:#a5316b;--up:#5ad19a;--down:#f2789a;--stickb:#160c13}',
       '#ow-ov[data-ow-theme="light"]{--bg:#f6eef2;--card:#ffffff;--card2:#fbf4f8;--tx:#25141d;--sub:#6f5563;--sub2:#8a7280;--bd:#e7d3de;--bd2:#d9c1cf;--accent:#b3255f;--accent2:#8f1b4b;--up:#1a7f4b;--down:#c62a5a;--stickb:#fbf4f8}',
+      // Голубая — самостоятельная светло-голубая тема (не тёмная, не обычная светлая)
+      '#ow-ov[data-ow-theme="blue"]{--bg:#e8f2fc;--card:#ffffff;--card2:#d7e9fb;--tx:#0d2540;--sub:#3f6690;--sub2:#5a7fa6;--bd:#bcd7f2;--bd2:#9dc2ea;--accent:#1d4ed8;--accent2:#1e40af;--up:#0f7a4d;--down:#c62a5a;--stickb:#d7e9fb}',
       '#ow-ov{position:fixed;inset:0;z-index:2147483000;background:var(--bg);color:var(--tx);overflow:auto;-webkit-overflow-scrolling:touch;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:none}',
       '#ow-ov.show{display:block}', '#ow-ov *{box-sizing:border-box}',
       '.ow-wrap{max-width:1180px;margin:0 auto;padding:14px 14px calc(28px + env(safe-area-inset-bottom))}',
@@ -131,7 +142,7 @@
     var custom = state.preset === 'custom'
       ? '<input type="date" id="ow-from" value="' + esc(state.from) + '"><input type="date" id="ow-to" value="' + esc(state.to) + '">' : '';
     var themeSeg = '<span class="ow-seg" id="ow-theme">' +
-      ['light', 'dark', 'system'].map(function (t) { return '<button data-t="' + t + '" class="' + (themePref === t ? 'on' : '') + '">' + ({ light: 'Светлая', dark: 'Тёмная', system: 'Системная' }[t]) + '</button>'; }).join('') + '</span>';
+      ['light', 'blue', 'system'].map(function (t) { return '<button data-t="' + t + '" class="' + (themePref === t ? 'on' : '') + '">' + ({ light: 'Светлая', blue: 'Голубая', system: 'Системная' }[t]) + '</button>'; }).join('') + '</span>';
     return '<div class="ow-filters"><select id="ow-preset">' + presets + '</select>' + custom +
       '<select id="ow-platform">' + plats + '</select><select id="ow-lottery">' + lots + '</select>' +
       '<select id="ow-country">' + countryOpts + '</select>' + themeSeg + '</div>';
