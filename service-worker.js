@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the e7831e8 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 3ee7112 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-ve7831e8';
+const CACHE_VERSION='loto-shell-v3ee7112';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -93,6 +93,17 @@ self.addEventListener('fetch',event=>{
   }
   if(/\/(?:results|jackpots|prizes|commercial-metadata)\.json$/i.test(url.pathname)){
     event.respondWith(networkFirst(request,DATA_CACHE));
+    return;
+  }
+  // 3D-drum CODE (audio.js / main.js and the whole module graph) must NEVER be served
+  // stale: a cached old audio path is exactly "sound works in the standalone Demo but not
+  // here". These modules are imported without a ?v= cache-buster, so stale-while-revalidate
+  // (which also matches ignoreSearch and revalidates through the HTTP cache) could keep
+  // returning the previous audio implementation across deploys. Fetch them network-first
+  // with no-store when online; fall back to cache only offline. Heavy, rarely-changing
+  // vendor libs and audio sample assets stay stale-while-revalidate for load speed.
+  if(/\/demo-drum\//.test(url.pathname)&&!/\/demo-drum\/(?:vendor|assets)\//.test(url.pathname)){
+    event.respondWith(networkFirst(request,SHELL_CACHE));
     return;
   }
   event.respondWith(staleWhileRevalidate(request));
