@@ -250,8 +250,14 @@ async function main() {
   const initialProfileId = GAME_PROFILES[profileKey]?.id; // the embedded game; URL theme params belong only to it
 
   hud = new HUD(document.getElementById('hud'), {
-    // Sound is OFF by default; a random tap must NEVER start audio (no hidden autoplay).
-    onUserGesture: () => {},
+    // Sound is OFF by default, but the AudioContext must be RESUMED inside a real user
+    // gesture or Chrome never lets it run — and here the drum lives in an <iframe>, where
+    // Chrome only honours a resume() issued during an in-iframe activation. So, exactly
+    // like the working standalone Demo, resume the context on the FIRST pointerdown on the
+    // HUD (capture phase, before any button handler). Resuming while MUTED keeps master
+    // gain at 0 — still no audible sound until the speaker tap, so "sound off by default"
+    // is preserved; it only guarantees the context is truly running when the user unmutes.
+    onUserGesture: () => { unlockAudioFromGesture(); },
     onStart: () => {
       clearUnfinished();
       warmAudio(); // unlock + decode inside the gesture (iOS), still muted until the speaker tap
@@ -263,7 +269,9 @@ async function main() {
     onPauseToggle: () => { if (paused) resumeDraw(); else pauseDraw(); },
     // The ONLY audio-enable path: an explicit tap on the speaker (a real user gesture).
     onUnlock: () => { startAudio(); },
-    onMute: (m) => { audio.setMuted(m); },
+    // Match the Demo: toggling mute also resumes inside the gesture, so unmuting always
+    // lands on a genuinely running context (Chrome/iframe) and sound starts immediately.
+    onMute: (m) => { audio.setMuted(m); unlockAudioFromGesture(); },
     onQuality: (v) => { if (v === 'auto') quality.unlock(); else quality.lock(v); },
     onProfile: (key) => {
       if (!GAME_PROFILES[key]) return;
