@@ -60,17 +60,33 @@
   function locale() {
     try { return (document.documentElement.lang || (navigator.language || 'en')).slice(0, 5); } catch (e) { return 'en'; }
   }
-  function region() { // coarse ISO-2 hint from locale region subtag, e.g. en-GB → GB. Not IP.
+  // Coarse device class + browser from the User-Agent (NOT a fingerprint; no IDs, no hashing).
+  // Country is intentionally NOT derived here — the server resolves it from the IP (locale ≠ location).
+  function deviceClass() {
     try {
-      var l = navigator.language || '';
-      var m = l.split('-')[1];
-      if (m && /^[A-Za-z]{2}$/.test(m)) return m.toUpperCase();
-    } catch (e) {}
-    return null;
+      var ua = navigator.userAgent || '';
+      if (/\biPad\b/.test(ua) || (/\bMacintosh\b/.test(ua) && navigator.maxTouchPoints > 1)) return 'tablet';
+      if (/\bTablet\b/.test(ua) || (/\bAndroid\b/.test(ua) && !/\bMobile\b/.test(ua))) return 'tablet';
+      if (/Mobi|iPhone|iPod|\bAndroid\b.*\bMobile\b|Windows Phone/.test(ua)) return 'mobile';
+      return 'desktop';
+    } catch (e) { return null; }
+  }
+  function browserName() {
+    try {
+      var ua = navigator.userAgent || '';
+      if (/\bEdg\//.test(ua)) return 'edge';
+      if (/\bFirefox\/|\bFxiOS\//.test(ua)) return 'firefox';
+      if (/\bChrome\/|\bCriOS\/|\bChromium\//.test(ua) && !/\bEdg\//.test(ua) && !/\bOPR\//.test(ua)) return 'chrome';
+      if (/\bSafari\//.test(ua) && /\bVersion\//.test(ua)) return 'safari';
+      if (/\biPhone\b|\biPad\b/.test(ua) && !/\bCriOS\/|\bFxiOS\//.test(ua)) return 'safari';
+      return 'other';
+    } catch (e) { return null; }
   }
   var buildEl = document.documentElement;
   var appVersion = (buildEl.getAttribute('data-build') || 'dev');
   var appBuild = (buildEl.getAttribute('data-build-ts') || '');
+  var DEVICE_CLASS = deviceClass();
+  var BROWSER = browserName();
 
   // App internal lottery key (e.g. 'euro') → canonical id (e.g. 'eurojackpot'). Kept in lockstep
   // with the app registry via window.LOTO_APP_LOTTERY_KEYS (exposed by index.html).
@@ -103,6 +119,8 @@
         locale: locale(),
         session_id: sessionId || installId, // fallback: never null
         install_id: installId,
+        device_class: DEVICE_CLASS,
+        browser: BROWSER,
         event_ts: new Date().toISOString()
       };
       var q = readQueue();
@@ -140,7 +158,7 @@
       if (token) headers['Authorization'] = 'Bearer ' + token;
       var resp = await fetch(ENDPOINT, {
         method: 'POST', headers: headers, keepalive: true,
-        body: JSON.stringify({ install_id: installId, region: region(), events: batch })
+        body: JSON.stringify({ install_id: installId, events: batch })
       });
       if (resp && resp.ok) {
         var ids = {}; batch.forEach(function (e) { ids[e.event_id] = 1; });

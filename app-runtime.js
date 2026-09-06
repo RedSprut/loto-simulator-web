@@ -2704,6 +2704,10 @@ async function renderHistory(){
   const c=document.getElementById('hist-list');
   if(!draws.length){c.innerHTML=`<div class="empty">📭 ${escapeHtml(historyText('Тиражей нет'))}</div>`;return;}
   c.innerHTML='';
+  // Build the full base into a detached fragment and insert it ONCE — a single reflow instead of
+  // thousands of live appendChild mutations. With content-visibility:auto on .hist-item this keeps
+  // the huge PRO base light on memory and avoids the mid-build churn that could crash mobile.
+  const histFrag=document.createDocumentFragment();
   draws.forEach(d=>{
     const div=document.createElement('div');div.className='hist-item';
     let balls=d.main.map(n=>`<div class="hball ${l.cls}-m">${n}</div>`).join('');
@@ -2736,8 +2740,9 @@ async function renderHistory(){
     // stacked above the balls on mobile (where .hist-main is a block).
     const ruleLine=badge?`<div class="hist-rule">${badge}</div>`:'';
     div.innerHTML=`<div class="hist-main"><div class="hist-head"><div class="hist-date">${escapeHtml(formatHistoryDate(d.date))}${src}</div>${ruleLine}</div><div class="${ballClass}" style="--hist-ball-count:${Math.max(1,histBallCount)};--hist-sep-count:${histSepCount}">${balls}</div></div>${action}`;
-    c.appendChild(div);
+    histFrag.appendChild(div);
   });
+  c.appendChild(histFrag);
   try{HIST_filter();}catch(e){}
 }
 
@@ -4774,31 +4779,33 @@ document.addEventListener('DOMContentLoaded',()=>{
     SA_stop();
     const btn=document.getElementById('sa-btn');
     const doc=document.documentElement;
-    const full=Math.max(doc.scrollHeight,document.body.scrollHeight);
-    const maxTop=Math.max(0,full-window.innerHeight);
-    const from=window.scrollY||doc.scrollTop||0;
-    const to=btn&&btn.dataset.dir==='down'?maxTop:0;
-    const dist=Math.abs(to-from);
-    if(dist<2)return;
-    /* постоянная крейсерская скорость: мобильный рендер успевает рисовать */
-    const V=3.0;                       /* px за мс ≈ 3000 px/с */
-    const ramp=260;                    /* мс мягкого разгона и торможения */
-    const dur=Math.max(600,Math.min(12000,dist/V+ramp));
-    const t0=performance.now();
-    const pos=t=>{                     /* трапеция скорости: разгон-крейсер-торможение */
-      if(dur<=2*ramp){const x=t/dur;return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;}
-      const a=ramp/dur, plateau=1-2*a, vNorm=1/(plateau+a);
-      const x=t/dur;
-      if(x<a)return vNorm*(x*x)/(2*a);
-      if(x>1-a){const y=1-x;return 1-vNorm*(y*y)/(2*a);}
-      return vNorm*(x-a/2);
-    };
-    document.body.classList.add('sa-flight'); /* лёгкая графика на время полёта */
+    const goingDown=!btn||btn.dataset.dir!=='up';
+    /* Constant cruise, but the target (bottom/top) is RECOMPUTED every frame from the LIVE
+       scrollHeight. The full PRO base is content-visibility:auto, so its height is only an estimate
+       until rows are painted; a target captured once would land among not-yet-rendered rows (blank
+       gaps) and never reach the true end. Per-frame travel is also capped to ~1.2 viewports so we
+       never outrun rendering — this prevents the blank rows AND the paint-burst crash/reload. */
+    const V=3.0;                                   /* px/ms ≈ 3000 px/s cruise */
+    const cap=()=>Math.max(300,window.innerHeight*1.2);
+    let last=performance.now(),settle=0,guard=0;
+    document.body.classList.add('sa-flight');
     const step=now=>{
-      const t=Math.min(dur,now-t0);
-      window.scrollTo(0,from+(to-from)*pos(t));
-      if(t<dur)saAnim=requestAnimationFrame(step);
-      else{saAnim=0;document.body.classList.remove('sa-flight');saUpd();}
+      const dtms=Math.min(48,now-last);last=now;
+      const full=Math.max(doc.scrollHeight,document.body.scrollHeight);
+      const maxTop=Math.max(0,full-window.innerHeight);
+      const cur=window.scrollY||doc.scrollTop||0;
+      const target=goingDown?maxTop:0;
+      const remaining=target-cur;
+      if(Math.abs(remaining)<=1.5){
+        /* At the live edge: wait a few frames for content-visibility to finish sizing (scrollHeight
+           may still grow) before declaring done, so "down" truly reaches the end of the full base. */
+        if(++settle>=4){saAnim=0;document.body.classList.remove('sa-flight');saUpd();return;}
+      }else settle=0;
+      const move=Math.sign(remaining)*Math.min(Math.abs(remaining),V*dtms,cap());
+      window.scrollTo(0,cur+move);
+      /* Hard safety stop (≈20s) so a pathological layout can never spin the rAF loop forever. */
+      if(++guard>1200){saAnim=0;document.body.classList.remove('sa-flight');saUpd();return;}
+      saAnim=requestAnimationFrame(step);
     };
     saAnim=requestAnimationFrame(step);
   };

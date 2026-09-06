@@ -1,12 +1,52 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-05",
+  "updatedAt": "2026-09-06",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
   "access": "public-free",
   "games": {
     "lotto": [
+      {
+        "date": "2026-09-05",
+        "lotteryId": "lotto",
+        "currency": "NOK",
+        "jackpot": 3.5,
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 rette",
+            "prizeAmount": 3462405,
+            "winners": 4
+          },
+          {
+            "match": "6+1",
+            "label": "6 + 1 rette",
+            "prizeAmount": 65150,
+            "winners": 30
+          },
+          {
+            "match": "6",
+            "label": "6 rette",
+            "prizeAmount": 3840,
+            "winners": 533
+          },
+          {
+            "match": "5",
+            "label": "5 rette",
+            "prizeAmount": 105,
+            "winners": 20377
+          },
+          {
+            "match": "4",
+            "label": "4 rette",
+            "prizeAmount": 50,
+            "winners": 283975
+          }
+        ],
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/lotto/resultater"
+      },
       {
         "date": "2026-08-29",
         "lotteryId": "lotto",
@@ -81696,6 +81736,70 @@
     ],
     "powerball": [
       {
+        "date": "2026-09-05",
+        "lotteryId": "powerball",
+        "currency": "USD",
+        "jackpot": 175,
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 175000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 1
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 50000,
+            "winners": 11
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 100,
+            "winners": 253
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 100,
+            "winners": 713
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 7,
+            "winners": 17647
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 15500
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 125810
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 4,
+            "winners": 322276
+          }
+        ],
+        "source": "Powerball",
+        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-05&gc=powerball"
+      },
+      {
         "date": "2026-09-02",
         "lotteryId": "powerball",
         "currency": "USD",
@@ -82595,7 +82699,7 @@
         "date": "2026-08-01",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 719,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -82652,8 +82756,8 @@
             "winners": 690259
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-01&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-29",
@@ -87126,10 +87230,56 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-09-05",
+        "lotteryId": "superEnalotto",
+        "currency": "EUR",
+        "jackpot": 220.5,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 220488458.44,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 214992.87,
+            "winners": 1
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 338.18,
+            "winners": 645
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 26.83,
+            "winners": 24533
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 5.29,
+            "winners": 386764
+          }
+        ],
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/05-09-2026"
+      },
+      {
         "date": "2026-09-04",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 219.5,
         "payoutTiers": [
           {
             "match": "6",
@@ -87168,14 +87318,14 @@
             "winners": 260187
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/04-09-2026"
       },
       {
         "date": "2026-09-03",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 218.7,
         "payoutTiers": [
           {
             "match": "6",
@@ -87214,14 +87364,14 @@
             "winners": 426312
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/03-09-2026"
       },
       {
         "date": "2026-09-01",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 217.8,
         "payoutTiers": [
           {
             "match": "6",
@@ -87260,14 +87410,14 @@
             "winners": 296125
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/01-09-2026"
       },
       {
         "date": "2026-08-29",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 216.8,
         "payoutTiers": [
           {
             "match": "6",
@@ -87306,14 +87456,14 @@
             "winners": 401819
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/29-08-2026"
       },
       {
         "date": "2026-08-28",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 215.9,
         "payoutTiers": [
           {
             "match": "6",
@@ -87352,14 +87502,14 @@
             "winners": 320491
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/28-08-2026"
       },
       {
         "date": "2026-08-27",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 215.1,
         "payoutTiers": [
           {
             "match": "6",
@@ -87398,14 +87548,14 @@
             "winners": 341695
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/27-08-2026"
       },
       {
         "date": "2026-08-25",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 214.2,
         "payoutTiers": [
           {
             "match": "6",
@@ -87444,14 +87594,14 @@
             "winners": 295811
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/25-08-2026"
       },
       {
         "date": "2026-08-22",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 213.3,
         "payoutTiers": [
           {
             "match": "6",
@@ -87490,14 +87640,14 @@
             "winners": 392780
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/22-08-2026"
       },
       {
         "date": "2026-08-21",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 212.4,
         "payoutTiers": [
           {
             "match": "6",
@@ -87536,14 +87686,14 @@
             "winners": 299144
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/21-08-2026"
       },
       {
         "date": "2026-08-20",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 211.7,
         "payoutTiers": [
           {
             "match": "6",
@@ -87582,14 +87732,14 @@
             "winners": 328489
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/20-08-2026"
       },
       {
         "date": "2026-08-18",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 210.8,
         "payoutTiers": [
           {
             "match": "6",
@@ -87628,14 +87778,14 @@
             "winners": 343165
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/18-08-2026"
       },
       {
         "date": "2026-08-17",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 210,
         "payoutTiers": [
           {
             "match": "6",
@@ -87674,14 +87824,14 @@
             "winners": 305416
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/17-08-2026"
       },
       {
         "date": "2026-08-14",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 209.2,
         "payoutTiers": [
           {
             "match": "6",
@@ -87720,14 +87870,14 @@
             "winners": 442440
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/14-08-2026"
       },
       {
         "date": "2026-08-13",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 208.5,
         "payoutTiers": [
           {
             "match": "6",
@@ -87766,8 +87916,8 @@
             "winners": 432757
           }
         ],
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/13-08-2026"
       },
       {
         "date": "2026-08-11",

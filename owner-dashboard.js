@@ -32,7 +32,7 @@
     ['proSessions', 'PRO-сессии'], ['purchases', 'Покупки'], ['conversion', 'Конверсия %']
   ];
   var state = {
-    preset: 'today', from: '', to: '', platform: 'all', lottery: 'all', country: 'all',
+    preset: 'today', from: '', to: '', platform: 'all', lottery: 'all', country: 'all', device: 'all', browser: 'all',
     countryScope: 'withdata', countrySearch: '', metric: 'users', busy: false, data: null, fromAccount: false
   };
   var built = false, ovEl = null;
@@ -139,13 +139,18 @@
     var lots = ['all'].concat(LOTTERIES.map(function (l) { return l[0]; })).map(function (l) { return opt(l, l === 'all' ? 'Все лотереи' : LOT_LABEL[l], state.lottery); }).join('');
     var countryOpts = opt('all', 'Все страны', state.country) + opt('__none__', 'Не определено', state.country) +
       LIB.countryList().map(function (c) { return opt(c.code, c.name, state.country); }).join('');
+    var devs = [['all', 'Все устройства'], ['mobile', 'Мобильные'], ['tablet', 'Планшеты'], ['desktop', 'Десктоп'], ['__none__', 'Не определено']]
+      .map(function (x) { return opt(x[0], x[1], state.device); }).join('');
+    var brs = [['all', 'Все браузеры'], ['safari', 'Safari'], ['chrome', 'Chrome'], ['firefox', 'Firefox'], ['edge', 'Edge'], ['other', 'Другие'], ['__none__', 'Не определено']]
+      .map(function (x) { return opt(x[0], x[1], state.browser); }).join('');
     var custom = state.preset === 'custom'
       ? '<input type="date" id="ow-from" value="' + esc(state.from) + '"><input type="date" id="ow-to" value="' + esc(state.to) + '">' : '';
     var themeSeg = '<span class="ow-seg" id="ow-theme">' +
       ['light', 'blue', 'system'].map(function (t) { return '<button data-t="' + t + '" class="' + (themePref === t ? 'on' : '') + '">' + ({ light: 'Светлая', blue: 'Голубая', system: 'Системная' }[t]) + '</button>'; }).join('') + '</span>';
     return '<div class="ow-filters"><select id="ow-preset">' + presets + '</select>' + custom +
       '<select id="ow-platform">' + plats + '</select><select id="ow-lottery">' + lots + '</select>' +
-      '<select id="ow-country">' + countryOpts + '</select>' + themeSeg + '</div>';
+      '<select id="ow-country">' + countryOpts + '</select><select id="ow-device">' + devs + '</select>' +
+      '<select id="ow-browser">' + brs + '</select>' + themeSeg + '</div>';
   }
 
   function card(k, v, delta) {
@@ -196,20 +201,36 @@
     if (!d) { ovEl.innerHTML = '<div class="ow-wrap">' + head + filtersHtml() + '<div class="ow-empty">Загрузка…</div></div>'; wire(); return; }
     var s = d.summary || {}, prev = d.previous || {};
     var conv = (s.users ? (s.confirmedPurchases / s.users * 100) : 0);
+    var convBase = s.confirmedPurchases; // conversion denominator = unique users
     var summary = '<div class="ow-sec">' + esc(PRESET_LABEL[state.preset]) + ' · Europe/Oslo</div><div class="ow-grid">' +
-      card('Пользователи', num(s.users), LIB.pctChange(s.users, prev.users)) +
-      card('Новые', num(s.newUsers)) +
+      card('Уникальные пользователи', num(s.users), LIB.pctChange(s.users, prev.users)) +
+      card('Авторизованные', num(s.authenticatedUsers)) +
+      card('Анонимные', num(s.anonymousVisitors)) +
+      card('Устройства', num(s.devices)) +
       card('Сессии', num(s.sessions), LIB.pctChange(s.sessions, prev.sessions)) +
+      card('Новые', num(s.newUsers)) +
       card('Регистрации', num(s.registrations), LIB.pctChange(s.registrations, prev.registrations)) +
-      card('FREE', num(s.freeSessions)) + card('PRO', num(s.proSessions), LIB.pctChange(s.proSessions, prev.proSessions)) +
+      card('FREE-сессии', num(s.freeSessions)) + card('PRO-сессии', num(s.proSessions), LIB.pctChange(s.proSessions, prev.proSessions)) +
       card('Покупки', num(s.confirmedPurchases), LIB.pctChange(s.confirmedPurchases, prev.confirmedPurchases)) +
       card('Выручка', d.revenue && d.revenue.grossRevenue != null ? num(d.revenue.grossRevenue) : 'Нет данных') +
-      card('Конверсия', conv.toFixed(2) + '%') + '</div>';
+      card('Конверсия', conv.toFixed(2) + '%') + '</div>' +
+      '<div class="ow-note">Уникальные = Авторизованные (по user_id, один аккаунт = 1 на всех устройствах) + Анонимные (по install_id). IP не используется как идентификатор.</div>';
 
     var p = d.platforms || {};
-    var plat = '<div class="ow-sec">Платформы</div><div class="ow-platcards">' +
-      ['web', 'ios', 'android'].map(function (k) { var pv = p[k] || {}; return '<div class="ow-card"><div class="ow-k">' + PLATFORM_LABEL[k] + '</div><div class="ow-v">' + num(pv.sessions) + '</div><div class="ow-d ow-stable">' + num(pv.users) + ' польз. · ' + num(pv.registrations) + ' рег.</div></div>'; }).join('') +
-      '<div class="ow-card"><div class="ow-k">Всего</div><div class="ow-v">' + num(s.sessions) + '</div><div class="ow-d ow-stable">' + num(s.users) + ' польз.</div></div></div>';
+    var plat = '<div class="ow-sec">Платформы (охват)</div><div class="ow-platcards">' +
+      ['web', 'ios', 'android'].map(function (k) { var pv = p[k] || {}; return '<div class="ow-card"><div class="ow-k">' + PLATFORM_LABEL[k] + '</div><div class="ow-v">' + num(pv.users) + '</div><div class="ow-d ow-stable">' + num(pv.devices) + ' устр. · ' + num(pv.sessions) + ' сес.</div></div>'; }).join('') +
+      '<div class="ow-card"><div class="ow-k">Всего уникальных</div><div class="ow-v">' + num(s.users) + '</div><div class="ow-d ow-stable">' + num(s.devices) + ' устр. · ' + num(s.sessions) + ' сес.</div></div></div>' +
+      '<div class="ow-note">Один пользователь может присутствовать в нескольких платформах (охват), но в «Всего уникальных» считается один раз.</div>';
+
+    // Устройства (класс) + Браузеры
+    function breakdownCards(obj, labels) {
+      var keys = Object.keys(labels);
+      return '<div class="ow-platcards">' + keys.map(function (k) {
+        var o = (obj && obj[k]) || {}; return '<div class="ow-card"><div class="ow-k">' + labels[k] + '</div><div class="ow-v">' + num(o.devices) + '</div><div class="ow-d ow-stable">' + num(o.users) + ' польз. · ' + num(o.sessions) + ' сес.</div></div>';
+      }).join('') + '</div>';
+    }
+    var devSec = '<div class="ow-sec">Устройства</div>' + breakdownCards(d.deviceClasses, { mobile: 'Мобильные', tablet: 'Планшеты', desktop: 'Десктоп', unknown: 'Не определено' });
+    var brSec = '<div class="ow-sec">Браузеры</div>' + breakdownCards(d.browsers, { safari: 'Safari', chrome: 'Chrome', firefox: 'Firefox', edge: 'Edge', other: 'Другие', unknown: 'Не определено' });
 
     // Динамика with metric selector
     var ms = metricSeries(d.timeseries || [], state.metric).map(function (x) { return { bucket: x.bucket, val: x.val }; });
@@ -290,7 +311,7 @@
         '<div class="ow-note">Модель: экспоненциальное сглаживание Хольта (тренд), интервал ~95%. Детерминированно, без выдуманных чисел.</div>';
     }
 
-    ovEl.innerHTML = '<div class="ow-wrap">' + head + filtersHtml() + summary + plat + chart + lotTable + modelTable + cTable + revenue + funnel + forecastHtml +
+    ovEl.innerHTML = '<div class="ow-wrap">' + head + filtersHtml() + summary + plat + devSec + brSec + chart + lotTable + modelTable + cTable + revenue + funnel + forecastHtml +
       '<div class="ow-note">Время сервера: ' + esc((d.serverTime || '').slice(0, 19)) + ' UTC · агрегация в Europe/Oslo · единое ядро Web+iOS+Android</div></div>';
     wire();
   }
@@ -304,6 +325,8 @@
     on('ow-platform', 'change', function (e) { state.platform = e.target.value; load(); });
     on('ow-lottery', 'change', function (e) { state.lottery = e.target.value; load(); });
     on('ow-country', 'change', function (e) { state.country = e.target.value; load(); });
+    on('ow-device', 'change', function (e) { state.device = e.target.value; load(); });
+    on('ow-browser', 'change', function (e) { state.browser = e.target.value; load(); });
     on('ow-metric', 'change', function (e) { state.metric = e.target.value; render(); });
     var seg = document.getElementById('ow-theme'); if (seg) seg.querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { themePref = b.getAttribute('data-t'); try { W.localStorage.setItem('ow_theme', themePref); } catch (e) {} render(); }); });
     var cs = document.getElementById('ow-cscope'); if (cs) cs.querySelectorAll('button').forEach(function (b) { b.addEventListener('click', function () { state.countryScope = b.getAttribute('data-s'); render(); }); });
@@ -314,7 +337,7 @@
     if (state.busy) return; state.busy = true;
     try {
       var r = LIB.osloRange(state.preset, Date.now(), state.from, state.to);
-      var params = { from: r.from, to: r.to, prev_from: r.prevFrom, prev_to: r.prevTo, bucket: r.bucket, platform: state.platform, lottery: state.lottery, country: state.country };
+      var params = { from: r.from, to: r.to, prev_from: r.prevFrom, prev_to: r.prevTo, bucket: r.bucket, platform: state.platform, lottery: state.lottery, country: state.country, device: state.device, browser: state.browser };
       if (!state.data) render();
       var resp = await api({ params: params });
       if (resp.status === 403) { denied(); return; }
