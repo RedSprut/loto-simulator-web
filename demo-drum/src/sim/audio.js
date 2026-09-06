@@ -50,15 +50,9 @@ export class AudioManager {
     this.mechBuffer = null;         // optional clean rotor/drum recording (looped, quiet)
     this.dir = PROFILE_DIR[DEFAULT_PROFILE];
 
-    this.MAX_VOICES = 4;            // shared pool for ambient COLLISION chatter (may drop)
+    this.MAX_VOICES = 4;
     this.activeVoices = 0;
     this.lastHitAt = 0;
-    // Per-drawn-ball lifecycle sounds get their OWN voices so they are NEVER dropped by
-    // the collision pool / debounce / a busy previous voice — every ball is guaranteed
-    // its exit + rack sound. A generous cap only guards against a pathological runaway.
-    this.eventVoices = 0;
-    this.MAX_EVENT_VOICES = 16;
-    this.ballSoundsPlayed = 0;      // hidden diagnostic: total guaranteed ball sounds played
 
     this.mech = null;               // {src, gain} once a mechanism recording exists
     this._bindContext(this.ctx);
@@ -87,21 +81,6 @@ export class AudioManager {
     this.master.connect(this.limiter);
     this.limiter.connect(this.listener.getInput());
 
-    // Hidden diagnostic tap AFTER the master graph (no UI, no audible effect): an
-    // AnalyserNode confirms a real, non-zero signal actually reaches the output during
-    // genuine drum events. It only reads what already flows to the destination.
-    this.analyser = this.ctx.createAnalyser();
-    this.analyser.fftSize = 256;
-    this.limiter.connect(this.analyser);
-    // Chrome only "pulls" an AnalyserNode that reaches the destination; route it through a
-    // MUTED gain to a real sink so the diagnostic reads the true signal everywhere (this
-    // adds NO audible output — gain is 0 — and does not change the actual audio path).
-    this._analyserSink = this.ctx.createGain();
-    this._analyserSink.gain.value = 0;
-    this.analyser.connect(this._analyserSink);
-    this._analyserSink.connect(this.ctx.destination);
-    this._peakBuf = new Uint8Array(this.analyser.fftSize);
-
     this.ctx.onstatechange = () => {
       if (this.ctx.state !== 'running') {
         this.enabled = false;
@@ -112,29 +91,6 @@ export class AudioManager {
   }
 
   _emitStatus() { this.onStatusChange?.(this.status()); }
-
-  /** Hidden diagnostic: peak deviation (0..128) of the live output signal. >0 during a
-   *  real drum event proves audio is actually reaching audioContext.destination. */
-  peakLevel() {
-    if (!this.analyser) return 0;
-    try {
-      this.analyser.getByteTimeDomainData(this._peakBuf);
-      let peak = 0;
-      for (let i = 0; i < this._peakBuf.length; i++) { const d = Math.abs(this._peakBuf[i] - 128); if (d > peak) peak = d; }
-      return peak;
-    } catch (e) { return 0; }
-  }
-
-  /** Hidden diagnostic snapshot (no UI): decoded buffer counts per bank + graph state. */
-  diag() {
-    const banks = {};
-    for (const [dir, b] of Object.entries(this.banks)) banks[dir] = { ballBall: b.ballBall.length, ballWall: b.ballWall.length, exit: b.exit.length, rack: b.rack.length };
-    return {
-      state: this.ctx?.state, enabled: this.enabled, muted: this.muted, needsUserUnlock: this.needsUserUnlock,
-      loaded: this.loaded, dir: this.dir, banks, decodeErrors: this._decodeErrors || 0,
-      masterGain: this.master ? this.master.gain.value : null, activeVoices: this.activeVoices, peak: this.peakLevel(),
-    };
-  }
 
   status() {
     const running = this.ctx?.state === 'running' && !this.needsUserUnlock;
@@ -214,44 +170,6 @@ export class AudioManager {
       const s = this.ctx.createBufferSource();
       s.buffer = b; s.connect(this.ctx.destination); s.start(0);
     } catch (e) { /* ignore */ }
-    // iOS Chrome / iOS WebViews: a WebAudio-only unlock resumes the context (state:'running', so the
-    // UI shows "on") but the WebAudio output can stay routed to a SILENT media session until a real
-    // HTMLMediaElement has been played inside the gesture. Safari handles this implicitly; Chrome on
-    // iOS does not — hence "button on, no sound". Playing a short silent <audio> in the SAME gesture
-    // promotes the media session so the resumed WebAudio graph becomes audible. Harmless elsewhere.
-    this._htmlSessionUnlock();
-  }
-
-  _silentWavUrl() {
-    if (this._silentUrl) return this._silentUrl;
-    try {
-      const sr = 8000, n = 1600; // ~0.2s of 8-bit silence
-      const buf = new ArrayBuffer(44 + n), dv = new DataView(buf);
-      const wr = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
-      wr(0, 'RIFF'); dv.setUint32(4, 36 + n, true); wr(8, 'WAVE'); wr(12, 'fmt ');
-      dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
-      dv.setUint32(24, sr, true); dv.setUint32(28, sr, true); dv.setUint16(32, 1, true); dv.setUint16(34, 8, true);
-      wr(36, 'data'); dv.setUint32(40, n, true);
-      for (let i = 0; i < n; i++) dv.setUint8(44 + i, 128); // 8-bit PCM silence == 128
-      this._silentUrl = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
-    } catch (e) { this._silentUrl = null; }
-    return this._silentUrl;
-  }
-
-  _htmlSessionUnlock() {
-    try {
-      if (!this._silentEl) {
-        const a = document.createElement('audio');
-        a.setAttribute('playsinline', ''); a.playsInline = true;
-        a.preload = 'auto'; a.loop = false; a.volume = 1; // audible but the clip is pure silence
-        const url = this._silentWavUrl(); if (!url) return;
-        a.src = url;
-        this._silentEl = a;
-      }
-      try { this._silentEl.currentTime = 0; } catch (e) {}
-      const p = this._silentEl.play();
-      if (p && p.catch) p.catch(() => {});
-    } catch (e) { /* no HTMLAudio → rely on the WebAudio unlock alone */ }
   }
 
   async resume() {
@@ -374,42 +292,18 @@ export class AudioManager {
     try { src.start(); } catch (e) { this.activeVoices--; }
   }
 
-  /** Dedicated voice for a GUARANTEED per-ball lifecycle sound. Unlike _voice() it is
-   *  never blocked by the collision pool / debounce and always gets a FRESH source, so
-   *  no ball is left silent because a previous sound was still playing. */
-  _eventVoice(buffer, gain, rate, bus = this.master) {
-    if (!buffer || !this._canPlay() || this.muted || this.eventVoices >= this.MAX_EVENT_VOICES) return false;
-    const src = this.ctx.createBufferSource();
-    src.buffer = buffer; src.playbackRate.value = rate;
-    const g = this.ctx.createGain(); g.gain.value = gain;
-    src.connect(g); g.connect(bus);
-    this.eventVoices++; this.ballSoundsPlayed++;
-    src.onended = () => { this.eventVoices--; try { src.disconnect(); g.disconnect(); } catch (e) {} };
-    try { src.start(); this.lastHitAt = this.ctx.currentTime; return true; } catch (e) { this.eventVoices--; return false; }
-  }
-
-  // ── GUARANTEED discrete drawn-ball sounds (bound to each ball's animation lifecycle
-  //    in main.js, one-shot per ballId). Two sounds per ball: 'exit' (drops out of the
-  //    drum) + 'rack' (touches the tray). Never gated by the collision pool. Same timbre
-  //    and muffled level as before; falls back to the rack sample if a bank is empty. ──
+  // ── Discrete drawn-ball events (bound to real lifecycle/physics in main.js) ──
   ballEvent(type) {
     const bank = this._bank();
-    if (!this._canPlay() || this.muted || !bank) return false;
-    const pick = (arr) => (arr && arr.length) ? arr[(Math.random() * arr.length) | 0] : null;
-    if (type === 'exit') {
-      const buf = pick(bank.exit) || pick(bank.ballWall) || pick(bank.rack);
-      return this._eventVoice(buf, 0.5, rnd(0.98, 1.03));
-    }
-    if (type === 'rack') {
-      const buf = pick(bank.rack) || pick(bank.exit);
-      return this._eventVoice(buf, 0.8, rnd(0.98, 1.02));
-    }
-    return false;
+    if (!this._canPlay() || this.muted || !bank) return;
+    if (type === 'exit') return; // no added falling/exit sound for now
+    else if (type === 'rack' && bank.rack.length) this._voice(bank.rack[(Math.random() * bank.rack.length) | 0], 0.8, rnd(0.98, 1.02));
+    else if (type === 'stop' && bank.rack.length) this._voice(bank.rack[0], 0.4, rnd(1.0, 1.04));
   }
 
-  /** Hidden diagnostic snapshot for the "no ball left silent" audit (no UI). */
-  ballAudioDiag() { return { ballSoundsPlayed: this.ballSoundsPlayed, eventVoices: this.eventVoices }; }
-  resetBallAudioCounter() { this.ballSoundsPlayed = 0; }
+  // Integration shim: main.js calls this on warm-up. The Demo has no ball-sound counter,
+  // so this is a harmless no-op kept only so the existing call site needs no change.
+  resetBallAudioCounter() {}
 
   // ── Cleanup ─────────────────────────────────────────────────────────────────
   reset() { if (this.started && this.mech) this._ramp(this.mech.gain.gain, 0, 0.25); }
