@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the 3ee7112 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 400ddf8 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-v3ee7112';
+const CACHE_VERSION='loto-shell-v400ddf8';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -154,12 +154,19 @@ self.addEventListener('notificationclick',event=>{
   const target='./index.html?'+params.toString();
   event.waitUntil((async()=>{
     const all=await self.clients.matchAll({type:'window',includeUncontrolled:true});
-    for(const client of all){
-      if('focus'in client){
-        client.postMessage({type:'LOTO_PUSH_OPEN',data:data});
-        return client.focus();
-      }
+    // If a Loto Simulator tab is already open: focus it FIRST (bring to front), then hand it
+    // the deep-link so the in-app center navigates to the exact lottery/screen. A click must
+    // never be a no-op that just dismisses the toast (the reported macOS bug).
+    const client=all.find(c=>'focus'in c);
+    if(client){
+      try{await client.focus();}catch(e){}
+      try{client.postMessage({type:'LOTO_PUSH_OPEN',data:data});}catch(e){}
+      // If the focused tab is not on the app itself, drive it to the deep-link URL so the
+      // cold-start router (n_dest/n_lot/n_type/n_draw) opens the right place.
+      try{ if('navigate'in client && !/index\.html($|\?)|\/$/.test(client.url)) await client.navigate(target); }catch(e){}
+      return;
     }
+    // No open tab → open the app straight at the deep-link URL (routed on cold start).
     if(self.clients.openWindow)return self.clients.openWindow(target);
   })());
 });
