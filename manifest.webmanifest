@@ -2,7 +2,7 @@
   "name": "Loto Simulator",
   "short_name": "Loto",
   "id": "./",
-  "lang": "ru",
+  "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

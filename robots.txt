@@ -1,0 +1,6 @@
+# Loto Simulator — lottery statistics, simulation & number generator (educational).
+# Indexing is allowed; JS/CSS/assets must stay crawlable so the SPA renders for bots.
+User-agent: *
+Allow: /
+
+Sitemap: https://redsprut.github.io/loto-simulator-web/sitemap.xml
