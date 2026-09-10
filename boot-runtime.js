@@ -27,7 +27,13 @@ window.onerror=function(msg,src,line,col,err){
   return false;
 };
 window.addEventListener('unhandledrejection',function(e){
-  window.onerror(String(e.reason&&e.reason.message||e.reason||'promise rejection'),'',0,0);
+  var r=e&&e.reason;
+  /* Magic-link / OAuth callback failures (expired · already-used · invalid link) are a normal
+     user scenario, especially now that native deep-links feed the callback URL into the auth
+     flow; that flow already shows a localized message. Don't ALSO trip the raw diagnostic
+     error banner for this one handled case (every other error still surfaces). */
+  if(r&&(r.name==='AuthCallbackError'||r.__isAuthCallbackError)){try{e.preventDefault();}catch(_e){}return;}
+  window.onerror(String(r&&r.message||r||'promise rejection'),'',0,0);
 });
 /* Скрыть splash после появления приложения. Основной путь ждёт явную отметку
    готовности первого стабильного кадра; fail-open остаётся только для ошибок

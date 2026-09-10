@@ -2167,7 +2167,7 @@ async function renderFavs(){
       if(row.b&&row.b.length>0){balls+=`<div class="fav-sep" aria-hidden="true">|</div>`;balls+=row.b.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}
       rowsH+=`<div class="fav-rowballs">${balls}</div>`;
     });
-    div.innerHTML=`<div class="fav-main"><div class="fav-name">${fav.name}</div><div class="fav-rows">${rowsH}</div></div>
+    div.innerHTML=`<div class="fav-main"><div class="fav-name">${escapeHtml(fav.name)}</div><div class="fav-rows">${rowsH}</div></div>
       <div class="fav-actions">
         <button class="btn-fav-use" title="Загрузить" aria-label="Загрузить" data-loto-event-click="useFav(${favIndex})">▶</button>
         <button class="btn-fav-copy" title="Копировать" aria-label="Копировать" data-loto-event-click="copyFav(${favIndex},this)">📋</button>
