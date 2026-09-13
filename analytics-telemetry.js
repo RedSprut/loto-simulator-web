@@ -261,7 +261,18 @@
     scheduleFlush(1500);
   }
 
-  W.LotoTelemetry = { track: track, flush: flush, _installId: installId };
+  // Structured exception capture. event-runtime.js (and any future caller) invokes
+  // window.LotoTelemetry.captureException(error, context); previously this method did not
+  // exist on the object, so the optional-chain guarded only the object and the call threw
+  // "captureException is not a function", surfacing a red runtime banner in production.
+  // Records a first-class client_error event through the existing pipeline (respecting the
+  // ENABLED flag inside track) and never throws.
+  function captureException(error, context) {
+    try { track('client_error', { context: (context == null ? 'unknown' : String(context)).slice(0, 64) }); } catch (e) {}
+    try { if (W.console && typeof W.console.warn === 'function') W.console.warn('[loto] captured exception', context || '', error); } catch (e) {}
+  }
+
+  W.LotoTelemetry = { track: track, flush: flush, captureException: captureException, _installId: installId };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();
 })();
