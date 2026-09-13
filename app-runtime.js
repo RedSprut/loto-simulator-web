@@ -3487,10 +3487,12 @@ function nextDraw(lotId){
     if(cand<=now){base=new Date(Date.UTC(base.getUTCFullYear(),base.getUTCMonth(),base.getUTCDate()+7));cand=zonedDateTimeToUtc(base.getUTCFullYear(),base.getUTCMonth()+1,base.getUTCDate(),hh,mm,tz);}
     if(!nd||cand<nd)nd=cand;
   }
-  const p=zonedParts(nd,tz),ms=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'],dn=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
   const mins=Math.max(0,Math.ceil((nd-now)/60000)),dLeft=Math.floor(mins/1440),hLeft=Math.floor((mins%1440)/60),mLeft=mins%60;
   const left=(dLeft?dLeft+' д. ':'')+(hLeft?hLeft+' ч. ':'')+(!dLeft&&mLeft?mLeft+' мин.':'');
-  return{date:nd,dateStr:`${dn[p.weekday]}, ${p.day} ${ms[p.month-1]} ${p.year}`,countdown:'⏳ До дедлайна: '+left.trim(),timeLabel:scheduleTime(l)};
+  // Draw date in the game's timezone, formatted in the ACTIVE app locale — never a hardcoded
+  // Russian month/weekday (that leaked "Сб, 19 сен 2026" into every non-Russian UI language).
+  const dateStr=new Intl.DateTimeFormat(appLocale(),{weekday:'short',day:'numeric',month:'short',year:'numeric',timeZone:tz}).format(nd);
+  return{date:nd,dateStr,countdown:'⏳ До дедлайна: '+left.trim(),timeLabel:scheduleTime(l)};
 }
 
 async function openSG(){
@@ -3548,7 +3550,14 @@ const LANG_FLAGS=Object.fromEntries(LANG_ORDER.map(code=>[code,LOCALE_CATALOG[co
 let curLang=localStorage.getItem('loto_lang')||(navigator.language||'ru').slice(0,2);
 if(!LOCALE_CATALOG[curLang])curLang='en';
 const APP_LOCALES={ru:'ru-RU',en:'en-GB',no:'nb-NO',sv:'sv-SE',da:'da-DK',fi:'fi-FI',de:'de-DE',fr:'fr-FR',es:'es-ES',it:'it-IT',pt:'pt-PT',pl:'pl-PL',nl:'nl-NL',et:'et-EE',lv:'lv-LV',lt:'lt-LT',uk:'uk-UA'};
-function appLocale(){return APP_LOCALES[curLang]||'en-GB';}
+// The active UI language is the single source of truth for ALL locale-dependent formatting
+// (dates, numbers, currency). Prefer the live i18n language, then <html lang>, then curLang, so a
+// stale curLang or the device/browser/OS locale can never leak a foreign locale into formatting.
+function appLocale(){
+  let lang;
+  try{lang=(window.LotoI18n&&window.LotoI18n.language)||document.documentElement.lang||curLang;}catch(_e){lang=curLang;}
+  return APP_LOCALES[lang]||APP_LOCALES[curLang]||'en-GB';
+}
 async function applyLang(){
   document.documentElement.lang=curLang;
   if(window.LotoI18n)await window.LotoI18n.setLanguage(curLang);
@@ -3609,6 +3618,9 @@ async function selectLang(code){
     updateHdr();
     renderSavedDrawOptions();
   }
+  // Refresh date-bearing elements that are rendered outside the screen renderers (they format via
+  // appLocale and would otherwise keep the previous language's date until the game is re-selected).
+  try{const _nd=nextDraw(cur);const _s=document.getElementById('ndb-sub');if(_s)_s.textContent=_nd.dateStr+' · '+_nd.timeLabel;const _sg=document.getElementById('sg-date');if(_sg)_sg.textContent=_nd.dateStr;}catch(_e){}
   if(window.LotoI18n)window.LotoI18n.localizeTree(document,true);
   if(typeof showCopyToast==='function')showCopyToast(LANG_FLAGS[code]+' '+LOCALE_CATALOG[code].name);
 }
