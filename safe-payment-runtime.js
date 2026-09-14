@@ -14,7 +14,7 @@
   const canonical=String(config.canonicalSiteUrl||'').trim();
   try{
     if(canonical&&!new URL(canonical).hostname.endsWith('github.io')){
-      document.getElementById('safe-domain').textContent=`Официальный адрес Loto Simulator: ${canonical}`;
+      document.getElementById('safe-domain').textContent=`Официальный адрес Lotto Simulator: ${canonical}`;
     }
   }catch(_error){}
 

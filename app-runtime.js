@@ -30,7 +30,7 @@ try{window.LOTO_APP_LOTTERY_KEYS=APP_LOTTERY_KEYS;}catch(_e){} // owner analytic
 // the network on native (Pages serves it with Access-Control-Allow-Origin: *), and fall
 // back to the bundled copy when offline. Web is unchanged (same-origin, already fresh).
 const IS_NATIVE_APP=(()=>{try{return !!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());}catch(_e){return false;}})();
-const NATIVE_DATA_BASE=String(window.LOTO_COMMERCIAL_CONFIG?.nativeDataBaseUrl||'https://lotosimulator.app/').replace(/\/*$/,'/');
+const NATIVE_DATA_BASE=String(window.LOTO_COMMERCIAL_CONFIG?.nativeDataBaseUrl||'https://lottosimulator.app/').replace(/\/*$/,'/');
 function resolveControlledResultsEndpoint(fallback){
   const configured=String(window.LOTO_COMMERCIAL_CONFIG?.resultsReadEndpoint||'').trim();
   if(!configured)return fallback;
@@ -3921,7 +3921,7 @@ function assertBottomNav(){
 })();
 
 /* ═══════════════════════════════════════════════════════════
-   СТРУКТУРНОЕ ПОЛЕ ДАННЫХ · метамодель Loto Simulator
+   СТРУКТУРНОЕ ПОЛЕ ДАННЫХ · метамодель Lotto Simulator
    Сервисы: контекст анализа, окно тиражей, Field Strength Score,
    парные связи, энтропия, 10 исследовательских строк, экран.
    ═══════════════════════════════════════════════════════════ */
@@ -4326,7 +4326,7 @@ function rowsAsText(rws,l){
 }
 async function shareText(title,text){
   const appUrl=location.href.split(/[?#]/)[0];
-  const payload={title,text:text+'\n\n🎰 Loto Simulator · '+appUrl};
+  const payload={title,text:text+'\n\n🎰 Lotto Simulator · '+appUrl};
   if(navigator.share){try{await navigator.share(payload);return;}catch(e){if(e&&e.name==='AbortError')return;}}
   try{await navigator.clipboard.writeText(payload.text);showCopyToast('📋 Скопировано — вставь в любой мессенджер');}
   catch(e){showFeedback('Поделиться','Скопируй вручную:\n\n'+payload.text,'📤',9000);}
@@ -4840,7 +4840,7 @@ const LotoWinMatch=(function(){
     // Persist the local result in the shared notification center. This keeps the exact match
     // reopenable after the celebration is dismissed and uses the same stable dedup identity.
     try{if(window.LotoNotifCenter&&LotoNotifCenter.add){const first=matches[0];LotoNotifCenter.add({id:'wm:'+CORE.notificationKey(first),lotteryId:first.gameId,eventType:'saved_ticket_results',drawId:first.drawId!=null?first.drawId:first.drawDate,title,body,createdAt:new Date().toISOString(),payload:{winMatch:true,title,body,matchId:matches.length===1?first.id:null,matchIds:matches.map(m=>m.id),drawDate:first.drawDate}});}}catch(_e){}
-    if(notifyAllowed())try{ new Notification('🎰 Loto Simulator',{body}); }catch(_e){}
+    if(notifyAllowed())try{ new Notification('🎰 Lotto Simulator',{body}); }catch(_e){}
     if(matches.length===1)openDetail(matches[0].id); else renderSummary(matches);
   }catch(_e){} }
   function ballRow(nums,hitSet,cls,bcls,bonus,bhit){ let h=(nums||[]).map(n=>`<div class="hball ${cls}" style="${hitSet.has(n)?'outline:3px solid #37d67a;outline-offset:1px;font-weight:900':'opacity:.55'}">${n}</div>`).join('');

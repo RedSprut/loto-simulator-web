@@ -1,4 +1,4 @@
-/* Loto Simulator — Owner Dashboard («Панель владельца»).
+/* Lotto Simulator — Owner Dashboard («Панель владельца»).
  *
  * Only entry that matters: the «Панель владельца» button in the user's Личный кабинет, revealed
  * ONLY after a server-side owner probe (am_i_owner). Every render calls owner-analytics, which

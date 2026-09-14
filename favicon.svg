@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Loto Simulator — объёмные лотерейные шары 8, 18 и 3">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="Lotto Simulator — объёмные лотерейные шары 8, 18 и 3">
   <defs>
     <radialGradient id="bg" cx="50%" cy="43%" r="72%"><stop stop-color="#9d002f"/><stop offset=".5" stop-color="#4b001d"/><stop offset="1" stop-color="#160009"/></radialGradient>
     <radialGradient id="gold" cx="29%" cy="20%" r="82%"><stop stop-color="#fff8b8"/><stop offset=".12" stop-color="#ffd829"/><stop offset=".55" stop-color="#f3a000"/><stop offset=".82" stop-color="#9a4a00"/><stop offset="1" stop-color="#402000"/></radialGradient>

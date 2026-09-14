@@ -1,7 +1,7 @@
 /**
  * Host combination store — the PRODUCTION adapter.
  *
- * The drum runs as a same-origin iframe inside the main Loto Simulator. It must NOT
+ * The drum runs as a same-origin iframe inside the main Lotto Simulator. It must NOT
  * keep its own localStorage list (that would be a second, incompatible store). Instead
  * this adapter is a thin bridge to the host app's real saved-combinations storage
  * (local for a guest, account-synced for a signed-in user) and its real PRO paywall.

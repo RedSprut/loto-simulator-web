@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the 42aecb2 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 77ea2d6 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-auto-20260914-tld9bq';
+const CACHE_VERSION='loto-shell-v77ea2d6';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -128,7 +128,7 @@ self.addEventListener('push',event=>{
   try{payload=event.data?event.data.json():{};}catch(_e){try{payload={body:event.data&&event.data.text()};}catch(__e){payload={};}}
   const type=payload.notificationType||payload.eventType||payload.type||'';
   const destination=payload.destination||PUSH_DESTINATIONS[type]||'simulator';
-  const title=payload.title||'Loto Simulator';
+  const title=payload.title||'Lotto Simulator';
   const options={
     body:payload.body||'',
     icon:'./icon-192.png',
@@ -155,7 +155,7 @@ self.addEventListener('notificationclick',event=>{
   const target='./index.html?'+params.toString();
   event.waitUntil((async()=>{
     const all=await self.clients.matchAll({type:'window',includeUncontrolled:true});
-    // If a Loto Simulator tab is already open: focus it FIRST (bring to front), then hand it
+    // If a Lotto Simulator tab is already open: focus it FIRST (bring to front), then hand it
     // the deep-link so the in-app center navigates to the exact lottery/screen. A click must
     // never be a no-op that just dismisses the toast (the reported macOS bug).
     const client=all.find(c=>'focus'in c);

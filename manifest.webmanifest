@@ -1,12 +1,15 @@
 {
-  "name": "Loto Simulator",
-  "short_name": "Loto",
+  "name": "Lotto Simulator",
+  "short_name": "Lotto",
   "id": "./",
   "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "categories": ["utilities", "entertainment"],
+  "categories": [
+    "utilities",
+    "entertainment"
+  ],
   "background_color": "#160a12",
   "theme_color": "#26121c",
   "description": "Free lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball and more. Educational analysis only; not a lottery operator, no ticket sales.",
@@ -36,5 +39,5 @@
       "purpose": "any"
     }
   ],
-  "version": "2.0"
+  "version": "1.0"
 }

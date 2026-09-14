@@ -1,4 +1,4 @@
-/* Loto Simulator — first-party telemetry client (Web + iOS + Android).
+/* Lotto Simulator — first-party telemetry client (Web + iOS + Android).
  *
  * ONE implementation for all three platforms: the native apps bundle this same web build via
  * Capacitor, and the platform is detected at runtime (Capacitor.getPlatform → ios/android, else
