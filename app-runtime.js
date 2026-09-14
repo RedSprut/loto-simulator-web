@@ -1295,8 +1295,8 @@ function fillAll(){
 const GEN_COUNT_KEY='loto_gen_count';
 function getGenCount(){
   const el=document.getElementById('gen-count');
-  const raw=(el&&el.value!=='')?+el.value:(+localStorage.getItem(GEN_COUNT_KEY)||10);
-  return Math.max(1,Math.min(MAX_ROWS,Number.isFinite(raw)&&raw>0?raw:10));
+  const raw=(el&&el.value!=='')?+el.value:(+localStorage.getItem(GEN_COUNT_KEY)||5);
+  return Math.max(1,Math.min(MAX_ROWS,Number.isFinite(raw)&&raw>0?raw:5));
 }
 function onGenCountChange(){
   const c=getGenCount();
@@ -1305,7 +1305,7 @@ function onGenCountChange(){
   if(document.getElementById('sg-ov')?.classList.contains('show'))generateCombos();
 }
 function initGenControls(){
-  const saved=Math.max(1,Math.min(MAX_ROWS,+localStorage.getItem(GEN_COUNT_KEY)||10));
+  const saved=Math.max(1,Math.min(MAX_ROWS,+localStorage.getItem(GEN_COUNT_KEY)||5));
   const sel=document.getElementById('gen-count');
   if(sel)sel.value=String(saved);
   updateGenCountUI();
@@ -5369,7 +5369,7 @@ function goToRows(options){
 /* ═══ Выбор количества рядов (1–50) для колеса и моделей ═══ */
 var GENN_mode='wheel';
 function setGenCount(n){
-  n=Math.max(1,Math.min(MAX_ROWS,parseInt(n)||10));
+  n=Math.max(1,Math.min(MAX_ROWS,parseInt(n)||5));
   localStorage.setItem(GEN_COUNT_KEY,String(n));
   const sel=document.getElementById('gen-count');
   if(sel){
