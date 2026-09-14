@@ -3,4 +3,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://redsprut.github.io/loto-simulator-web/sitemap.xml
+Sitemap: https://lotosimulator.app/sitemap.xml

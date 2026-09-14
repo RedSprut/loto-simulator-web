@@ -30,7 +30,7 @@ try{window.LOTO_APP_LOTTERY_KEYS=APP_LOTTERY_KEYS;}catch(_e){} // owner analytic
 // the network on native (Pages serves it with Access-Control-Allow-Origin: *), and fall
 // back to the bundled copy when offline. Web is unchanged (same-origin, already fresh).
 const IS_NATIVE_APP=(()=>{try{return !!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());}catch(_e){return false;}})();
-const NATIVE_DATA_BASE=String(window.LOTO_COMMERCIAL_CONFIG?.nativeDataBaseUrl||'https://redsprut.github.io/loto-simulator-web/').replace(/\/*$/,'/');
+const NATIVE_DATA_BASE=String(window.LOTO_COMMERCIAL_CONFIG?.nativeDataBaseUrl||'https://lotosimulator.app/').replace(/\/*$/,'/');
 function resolveControlledResultsEndpoint(fallback){
   const configured=String(window.LOTO_COMMERCIAL_CONFIG?.resultsReadEndpoint||'').trim();
   if(!configured)return fallback;
