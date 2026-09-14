@@ -2263,6 +2263,7 @@ function buildInpFields(){
   const l=L();
   const dBo=drawBonusCount(l);
   if(!document.getElementById('inp-date').value)document.getElementById('inp-date').valueAsDate=new Date();
+  if(typeof refreshLocalizedDates==='function')refreshLocalizedDates();
   document.getElementById('lbl-m-inp').textContent=`Главные числа (${l.pM}) — 1 до ${l.mB}`;
   document.getElementById('btn-add-draw').className='btn-draw '+l.cls;
   document.getElementById('official-btn').className='btn-draw '+l.cls;
@@ -3558,6 +3559,34 @@ function appLocale(){
   try{lang=(window.LotoI18n&&window.LotoI18n.language)||document.documentElement.lang||curLang;}catch(_e){lang=curLang;}
   return APP_LOCALES[lang]||APP_LOCALES[curLang]||'en-GB';
 }
+// ── Localized native date inputs (iOS Safari device-locale month fix) ──────────────────────────
+// A native <input type=date> shows its value (incl. the MONTH name) in the DEVICE system locale on
+// iOS Safari — the page cannot override this via lang or JS. For every user-facing date input we
+// hide the native text (CSS color:transparent) and paint an overlay formatted with the ACTIVE app
+// locale (appLocale), so the visible month always follows the selected app language. The underlying
+// ISO value, min/max, validation, change events and the native picker are all preserved.
+const _ldateReg=[];
+function _paintLdate(input,ov){
+  const v=input.value;
+  if(!v){ov.textContent=input.getAttribute('data-ldate-ph')||'';ov.classList.add('ph');return;}
+  let d=input.valueAsDate;if(!d){const t=new Date(v+'T12:00:00Z');d=isNaN(t)?null:t;}
+  if(!d){ov.textContent=v;ov.classList.remove('ph');return;}
+  try{ov.textContent=new Intl.DateTimeFormat(appLocale(),{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}).format(d);}
+  catch(_e){ov.textContent=v;}
+  ov.classList.remove('ph');
+}
+function localizeDateInput(input){
+  if(!input||input.dataset.ldate)return;
+  input.dataset.ldate='1';
+  const wrap=document.createElement('span');wrap.className='ldate';
+  input.parentNode.insertBefore(wrap,input);wrap.appendChild(input);
+  const ov=document.createElement('span');ov.className='ldate-ov';wrap.appendChild(ov);
+  const upd=()=>_paintLdate(input,ov);
+  input.addEventListener('input',upd);input.addEventListener('change',upd);
+  _ldateReg.push({input,ov});upd();
+}
+function refreshLocalizedDates(){for(const r of _ldateReg){try{_paintLdate(r.input,r.ov);}catch(_e){}}}
+function setupLocalizedDateInputs(){['inp-date','period-from','period-to'].forEach(id=>{const e=document.getElementById(id);if(e)localizeDateInput(e);});}
 async function applyLang(){
   document.documentElement.lang=curLang;
   if(window.LotoI18n)await window.LotoI18n.setLanguage(curLang);
@@ -3621,11 +3650,12 @@ async function selectLang(code){
   // Refresh date-bearing elements that are rendered outside the screen renderers (they format via
   // appLocale and would otherwise keep the previous language's date until the game is re-selected).
   try{const _nd=nextDraw(cur);const _s=document.getElementById('ndb-sub');if(_s)_s.textContent=_nd.dateStr+' · '+_nd.timeLabel;const _sg=document.getElementById('sg-date');if(_sg)_sg.textContent=_nd.dateStr;}catch(_e){}
+  refreshLocalizedDates();
   if(window.LotoI18n)window.LotoI18n.localizeTree(document,true);
   if(typeof showCopyToast==='function')showCopyToast(LANG_FLAGS[code]+' '+LOCALE_CATALOG[code].name);
 }
 function cycleLang(){openLangPicker();}
-document.addEventListener('DOMContentLoaded',()=>{void applyLang();});
+document.addEventListener('DOMContentLoaded',()=>{void applyLang();setupLocalizedDateInputs();});
 function stopRolls(){rollTimers.forEach(clearInterval);rollTimers=[];}
 /* универсальный эффект для любых результатов: прокрутка к блоку + вращение шаров.
    Возвращает длительность анимации (мс), чтобы модалки ждали её окончания. */
@@ -4530,6 +4560,7 @@ async function PERIOD_open(){
     pf.min=oldest;pf.max=newest;pt.min=oldest;pt.max=newest;
     const r=IF_getRange();
     pf.value=r?r.from:oldest;pt.value=r?r.to:newest;
+    if(typeof refreshLocalizedDates==='function')refreshLocalizedDates();
   }
   const y=d=>{const now=Date.now();return baseDraws.filter(x=>x&&x.date&&(now-new Date(x.date).getTime())<=d*365.25*24*3600*1000).length;};
   const presets=[];   /* [value, label, locked] */
