@@ -15,7 +15,8 @@
  * Protocol (drum → host): DRUM_REQUEST_FAVORITES, DRUM_SAVE_COMBINATION{combo},
  *   DRUM_REPLACE_COMBINATION{oldId,combo}, DRUM_REMOVE_COMBINATION{id}, DRUM_OPEN_PAYWALL.
  * Protocol (host → drum): APP_FAVORITES{limit,isPro,list:[{id,lotteryId,lotteryName,
- *   main[],additional[],date,source,resultId}]}, APP_SAVE_RESULT{status}.
+ *   main[],additional[],date,source,sourceLabel,resultId}]}, APP_SAVE_RESULT{status}.
+ *   sourceLabel is the host's already-localized provenance label for the combination.
  */
 export function createHostCombinationStore({ post, defaultLimit = 3 } = {}) {
   // Cached, host-authoritative snapshot. Starts empty; the host pushes the real one

@@ -584,6 +584,11 @@ function renderModelResultRows(){
       for(const n of r.bonus){const b=document.createElement('div');b.className='if-rball rb-b-'+cls;b.textContent=String(n);balls.appendChild(b);}
       rowEl.append(heading,balls);
       if(window.LotoCourtUI){
+        const caption=document.createElement('div');caption.className='mres-src';caption.setAttribute('data-i18n-ignore','');
+        caption.textContent=window.LotoCourtUI.rowCaption(window.LotoCourtUI.provenanceOf({m:r.main,prov:r.prov},cur));
+        rowEl.appendChild(caption);
+      }
+      if(window.LotoCourtUI){
         const analyze=document.createElement('button');analyze.type='button';analyze.className='mres-analyze';
         analyze.setAttribute('data-court-open','model');analyze.setAttribute('data-row',String(i));
         analyze.textContent='🔍 '+appText('Анализ комбинации');
@@ -1107,8 +1112,19 @@ function renderRows(){
       c.appendChild(div);
       return;
     }
+    // Visible provenance: replaced balls carry a marker and open their own history on tap.
+    ensureManualProvenance(row,l);
+    const court=window.LotoCourtUI,complete=row.m.length===l.pM;
+    const prov=court&&complete?court.provenanceOf(row,cur):null;
+    const changed=prov&&!prov.unavailable?court.changedNumbers(prov):new Map();
     let h=`<div class="rn">${i+1}</div><div class="rballs">`;
-    for(let j=0;j<l.pM;j++){const n=row.m[j];h+=n!==undefined?`<div class="rb rb-m-${l.cls}">${n}</div>`:`<div class="rb rb-e-${l.cls}">·</div>`;}
+    for(let j=0;j<l.pM;j++){
+      const n=row.m[j];
+      if(n===undefined){h+=`<div class="rb rb-e-${l.cls}">·</div>`;continue;}
+      h+=changed.has(n)
+        ?`<button type="button" class="rb rb-m-${l.cls} rb-changed" data-court-open="ball" data-row="${i}" data-n="${n}" aria-label="${escapeHtml(appText(`История числа ${n}`))}">${n}</button>`
+        :`<div class="rb rb-m-${l.cls}">${n}</div>`;
+    }
     if(dBo>0){
       h+=l.cls==='euro'?'<div class="rstar">★</div>':'<div class="rpipe"></div>';
       for(let j=0;j<dBo;j++){const n=row.b[j];h+=n!==undefined?`<div class="rb rb-b-${l.cls}">${n}</div>`:`<div class="rb rb-e-${l.cls}">·</div>`;}
@@ -1117,6 +1133,7 @@ function renderRows(){
     if(i===act&&has)h+=`<button class="ract back-${l.cls}" data-loto-event-click="event.stopPropagation();undo(${i})">←</button>`;
     else if(has)h+=`<button class="ract" data-loto-event-click="event.stopPropagation();clrRow(${i})">×</button>`;
     else h+=`<button class="ract" data-loto-event-click="event.stopPropagation();addRow()">+</button>`;
+    if(prov)h+=`<div class="rsrc" data-i18n-ignore>${escapeHtml(court.rowCaption(prov))}</div>`;
     div.innerHTML=h;c.appendChild(div);
   });
   renderRowProvenance();
@@ -1364,6 +1381,147 @@ function completeBonusList(nums,l){
   }
   return out.sort((a,b)=>a-b);
 }
+// ── Analytical court: always-available labels + lazily loaded court screens ──
+// Every row render needs its provenance caption, so the labels live here (eager). The court
+// screens themselves (court-ui.js) load only on first use: Home Jury/Defense, Analyze, history.
+const COURT_MODEL_NAMES={freq:'Частота',bal:'Комбинированный анализ',man:'Сегментный охват',rnd:'Случайный выбор',markov:'Цепи Маркова',gauss:'Гаусс · ЦПТ',delta:'Интервальная модель Δ',bayes:'Байес',overdue:'Давно не выпадавшие',phys:'Физика 3D',chaos:'Хаос',quantum:'Квантовый поток',paradox:'Система парадоксов',qastro:'Квантово-астральная модель',wheel:'Колёсная матрица','world-hot':'Мировой горячий профиль','world-mix':'Мировой комбинированный профиль',consensus:'Консенсус моделей',field:'Структурное поле',history:'История тиражей',structure:'Структура'};
+const courtCore=()=>window.LotoCourtCore||null;
+const courtRulesFor=gameId=>provRules(LOTS[gameId]||L());
+function courtPersonaName(id){const C=courtCore();const p=C&&(C.JUROR_BY_ID[id]||C.LAWYER_BY_ID[id]);return p?p.name:String(id||'');}
+function courtModelName(id){return appText(COURT_MODEL_NAMES[id]||String(id||''));}
+function courtActorLabel(actor){
+  if(!actor)return appText('Неизвестно');
+  if(actor.kind==='juror'||actor.kind==='lawyer')return courtPersonaName(actor.id);
+  if(actor.kind==='model')return appText('Модель')+' · '+courtModelName(actor.id);
+  if(actor.kind==='judge')return appText('Судья');
+  if(actor.kind==='jury_majority')return appText('Большинство присяжных');
+  return appText('Вы');
+}
+function courtSourceLabel(prov){
+  if(!prov||prov.unavailable)return appText('Источник недоступен');
+  switch(prov.sourceType){
+    case 'HOME_GENERATOR':return prov.modelId?appText('Главный генератор')+' · '+courtModelName(prov.modelId):appText('Главный генератор');
+    case 'RANDOM_MODEL':return appText('Модель')+' · '+courtModelName('rnd');
+    case 'MATHEMATICAL_MODEL':return prov.modelId?appText('Модель')+' · '+courtModelName(prov.modelId):appText('Математическая модель');
+    case 'MANUAL_ENTRY':return appText('Ручной ввод');
+    case 'WHEEL_MATRIX':return appText('Колёсная матрица');
+    case 'SIMULATED_3D_DRAW':return appText('3D-симуляция тиража');
+    case 'JUDGE':return appText('Вердикт судьи');
+    case 'JURY_MEMBER':return prov.jurorId?appText('Присяжные')+' · '+courtPersonaName(prov.jurorId):appText('Присяжные');
+    case 'JURY_CONSENSUS':return appText('Консенсус присяжных');
+  }
+  return appText('Источник недоступен');
+}
+function courtDefenseBadge(prov){
+  const C=courtCore();if(!C||!prov||prov.unavailable)return'';
+  const summary=C.defenseSummary(prov);
+  if(summary.accepted.length)return'🛡 '+appText('Защищено')+': '+summary.accepted.map(courtPersonaName).join(', ');
+  if(summary.reviewers.length)return'🛡 '+appText('Проверено защитой');
+  return'';
+}
+// The number a replaced ball originally was, following a chain of replacements back to the source.
+function courtOriginalOf(prov,number){
+  let n=number,guard=0;
+  for(const event of [...((prov&&prov.events)||[])].reverse()){
+    if(event.type==='transformation'&&event.to===n){n=event.from;if(++guard>50)break;}
+  }
+  return n;
+}
+// Numbers currently in the combination that were brought in by a replacement → that replacement.
+function courtChangedNumbers(prov){
+  const C=courtCore(),out=new Map();
+  if(!C||!prov||prov.unavailable)return out;
+  const current=new Set(C.currentMain(prov));
+  for(const event of prov.events||[])if(event.type==='transformation'&&current.has(event.to))out.set(event.to,event);
+  return out;
+}
+// One-line visible origin under a combination: source · replacements (who) · defense badge.
+function courtRowCaption(prov){
+  if(!prov||prov.unavailable)return appText('Источник недоступен');
+  const parts=[courtSourceLabel(prov)];
+  for(const [number,event] of courtChangedNumbers(prov))parts.push(`${courtOriginalOf(prov,number)} → ${number} (${courtActorLabel(event.actor)})`);
+  const badge=courtDefenseBadge(prov);if(badge)parts.push(badge);
+  return parts.join(' · ');
+}
+// Factual attribution of numbers that matched an official draw. Describes what happened to each
+// number; it never claims that anyone predicted or caused the match.
+function courtAttributionLines(rawProv,userMain,drawMain,gameId){
+  const C=courtCore();if(!C)return[];
+  const prov=C.provenanceOf({m:userMain,prov:rawProv},courtRulesFor(gameId));
+  if(prov.unavailable)return[];
+  return C.attributeMatch(prov,drawMain).map(item=>{
+    const n=item.number;
+    if(item.origin&&item.origin.kind==='added')return appText(`Совпало число ${n}. Добавлено: ${courtActorLabel(item.origin.actor)} (${courtOriginalOf(prov,n)} → ${n}).`);
+    const opposed=[...new Set((prov.events||[]).filter(e=>e.type==='defense_review'&&e.current===n&&e.proposed&&e.stance==='DEFEND_CURRENT').map(e=>courtPersonaName(e.lawyerId)))];
+    if(item.retained.length&&opposed.length)return appText(`Совпало число ${n}. Вы сохранили его после возражения защиты против замены: ${opposed.join(', ')}.`);
+    if(item.retained.length)return appText(`Совпало число ${n}. Вы сохранили его после оспаривания.`);
+    return appText(`Совпало число ${n}. Источник: исходная комбинация (${courtSourceLabel(prov)}).`);
+  });
+}
+// Visible source caption for result lists whose origin is fixed by the screen that produced them.
+function courtCaptionHtml(source){return '<div class="src-caption" data-i18n-ignore>'+escapeHtml(courtSourceLabel(source))+'</div>';}
+let courtAppPromise=null;
+function courtRevision(){
+  const script=document.querySelector('script[src*="court-core.js"]');
+  const match=script&&String(script.getAttribute('src')||'').match(/\?v=([^&"']+)/);
+  return match?match[1]:'';
+}
+// Same-origin script (CSP script-src 'self'); packaged with the web/native bundle and precached by
+// the service worker, whose ignoreSearch match serves it offline despite the ?v= revision.
+function loadCourtApp(){
+  if(window.LotoCourtApp)return Promise.resolve(window.LotoCourtApp);
+  if(courtAppPromise)return courtAppPromise;
+  courtAppPromise=new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    let timer=0;
+    const fail=error=>{clearTimeout(timer);script.remove();courtAppPromise=null;reject(error);};
+    timer=setTimeout(()=>fail(new Error('court_ui_timeout')),20000);
+    script.onload=()=>{clearTimeout(timer);if(window.LotoCourtApp)resolve(window.LotoCourtApp);else fail(new Error('court_ui_missing'));};
+    script.onerror=()=>fail(new Error('court_ui_failed'));
+    const revision=courtRevision();
+    script.src='./court-ui.js'+(revision?'?v='+encodeURIComponent(revision):'');
+    document.head.appendChild(script);
+  });
+  return courtAppPromise;
+}
+async function withCourtApp(run){
+  let app;
+  try{app=await loadCourtApp();}
+  catch(_error){showFeedback('Анализ недоступен','Не удалось загрузить экран анализа. Проверьте подключение и попробуйте ещё раз.','⚠️',0);return null;}
+  return run(app);
+}
+window.LotoCourtUI=Object.freeze({
+  sourceLabel:courtSourceLabel,defenseBadge:courtDefenseBadge,attributionLines:courtAttributionLines,
+  rowCaption:courtRowCaption,changedNumbers:courtChangedNumbers,originalOf:courtOriginalOf,
+  actorLabel:courtActorLabel,modelName:courtModelName,personaName:courtPersonaName,
+  provenanceOf:(row,gameId)=>{const C=courtCore();return C?C.provenanceOf(row,courtRulesFor(gameId||cur)):{v:1,sourceType:'SAVED_LEGACY',unavailable:true,events:[]};},
+  load:loadCourtApp,
+  open:(ctx,options)=>withCourtApp(app=>app.open(ctx,options)),
+  openHome:kind=>withCourtApp(app=>app.openHome(kind)),
+  openSaved:(favIndex,rowIndex)=>withCourtApp(app=>app.openSaved(favIndex,rowIndex)),
+  openRowHistory:(row,gameId,focus)=>withCourtApp(app=>app.openRowHistory(row,gameId,focus)),
+  close:()=>{if(window.LotoCourtApp)window.LotoCourtApp.close();},
+  revealForResult:()=>{if(window.LotoCourtApp)window.LotoCourtApp.revealForResult();},
+  resume:(action,response)=>withCourtApp(app=>app.resume(action,response)),
+});
+// Every court entry point is a delegated button (no inline handlers under the CSP).
+document.addEventListener('click',event=>{
+  const button=event.target&&event.target.closest&&event.target.closest('[data-court-open]');
+  if(!button)return;
+  event.preventDefault();
+  const kind=button.getAttribute('data-court-open');
+  const rowIndex=Number(button.getAttribute('data-row'))||0;
+  const ui=window.LotoCourtUI;
+  if(kind==='home-jury')ui.openHome('jury');
+  else if(kind==='home-defense')ui.openHome('defense');
+  else if(kind==='row')ui.open({kind:'rows',index:rowIndex});
+  else if(kind==='generate')ui.open({kind:'rows',index:rowIndex},{view:'jury',mode:'generate'});
+  else if(kind==='model')ui.open({kind:'model',index:rowIndex});
+  else if(kind==='saved')ui.openSaved(Number(button.getAttribute('data-fav')),rowIndex);
+  else if(kind==='row-history'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur);}
+  else if(kind==='ball'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur,Number(button.getAttribute('data-n')));}
+});
+
 // ── Combination provenance (court-core.js) ──
 // Every visible row records where it came from. A source is never invented: a row whose origin
 // is unknown (e.g. saved before provenance existed) is reported as "source unavailable".
@@ -1427,7 +1585,7 @@ function renderRowProvenance(){
   const label=document.createElement('span');label.className='row-prov-label';
   if(row.m.length===l.pM){
     const prov=ui.provenanceOf(row,cur),badge=ui.defenseBadge(prov);
-    label.textContent=`${act+1} · ${ui.sourceLabel(prov)}${badge?' · '+badge:''}`;
+    label.textContent=appText(`Ряд ${act+1}`)+(badge?' · '+badge:'');
     box.append(label,button('🔍 '+appText('Анализ'),'row'),button('🕘 '+appText('История'),'row-history'));
   }else{
     label.textContent=`${act+1} · ${appText('Ряд не заполнен')}`;
@@ -2291,7 +2449,7 @@ async function renderFavs(){
       if(row.b&&row.b.length>0){balls+=`<div class="fav-sep" aria-hidden="true">|</div>`;balls+=row.b.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}
       // Source label + per-combination analysis. Legacy rows honestly show "source unavailable".
       const analyze=court&&row.m.length===l.pM?`<button type="button" class="fav-analyze" data-court-open="saved" data-fav="${favIndex}" data-row="${rowIndex}" title="${escapeHtml(appText('Анализ комбинации'))}" aria-label="${escapeHtml(appText('Анализ комбинации'))}">🔍</button>`:'';
-      const source=court?`<div class="fav-prov" data-i18n-ignore>${escapeHtml(court.sourceLabel(court.provenanceOf(row,fav.lot)))}</div>`:'';
+      const source=court?`<div class="fav-prov" data-i18n-ignore>${escapeHtml(court.rowCaption(court.provenanceOf(row,fav.lot)))}</div>`:'';
       rowsH+=`<div class="fav-rowline"><div class="fav-rowballs">${balls}</div>${analyze}</div>${source}`;
     });
     div.innerHTML=`<div class="fav-main"><div class="fav-name">${escapeHtml(fav.name)}</div><div class="fav-rows">${rowsH}</div></div>
@@ -3848,7 +4006,8 @@ function renderGen(){
     const balls=c.m.map(n=>`<div class="sg-cball ${l.cls}-m"><span class="bnum">${n}</span></div>`).join('');
     let bonus='';
     if(c.b&&c.b.length>0){bonus=`<div style="font-size:11px;color:var(--sub2);margin:6px 0 4px">${bonusLabel(l)}:</div><div style="display:flex;gap:6px">${c.b.map(n=>`<div class="sg-cball ${l.cls}-b"><span class="bnum">${n}</span></div>`).join('')}</div>`;}
-    html+=`<div class="sg-combo"><div class="sg-combo-lbl">Вариант ${i+1} · ${notes[sgAlgo]}</div><div style="display:flex;gap:6px;flex-wrap:wrap">${balls}</div>${bonus}</div>`;
+    const source=window.LotoCourtUI?`<div class="sg-combo-src" data-i18n-ignore>${escapeHtml(window.LotoCourtUI.sourceLabel({sourceType:'HOME_GENERATOR',modelId:sgAlgo}))}</div>`:'';
+    html+=`<div class="sg-combo"><div class="sg-combo-lbl">Вариант ${i+1} · ${notes[sgAlgo]}</div><div style="display:flex;gap:6px;flex-wrap:wrap">${balls}</div>${bonus}${source}</div>`;
   });
   document.getElementById('sg-result').innerHTML=html;
   rollBalls();
@@ -4400,6 +4559,7 @@ async function PICK_go(){
     r._exp='Числа строки поддержали '+supModels.size+' моделей из '+CONS_MODELS.length+' ('+supFams.size+' семейств). '+(r.explanation||'')+' Включена в матрицу за '+(st.pickMode==='coverage'?'вклад в покрытие пар':(st.pickMode==='minoverlap'?'минимальное пересечение':'сочетание Candidate Score и разнообразия'))+'. Анализ выполнен по '+ctx.currentDraws.length+' последним тиражам '+ctx.lotteryName+'.';
     return '<div class="if-rowcard"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="if-rowtype">Строка '+(i+1)+' · '+who+'</span><span class="if-rowscore">CS '+r.cs+'<span class="mx-info" data-loto-event-click="MATRIX_info('+i+')">ⓘ</span></span></div>'+
       '<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b&&r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>'+
+      courtCaptionHtml({sourceType:'MATHEMATICAL_MODEL',modelId:'consensus'})+
       '<div class="if-rowexp">Добавляет '+r.newPairs+' новых пар'+(i?' · пересечение с предыдущими: до '+r.overlapPrev+' чисел':'')+'</div></div>';
   }).join('');
   });
@@ -4615,7 +4775,7 @@ async function SUP_go(){
   st.verdict=ensureUniqueGeneratedRows(verdict,l);
   const issued=st.verdict;
   res.innerHTML='<div class="if-seclbl">Вердикт судьи · '+verdict.length+' '+rowWord(verdict.length)+'</div>'+
-    issued.map((r,i)=>'<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>').join('')+
+    issued.map((r,i)=>'<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>'+courtCaptionHtml({sourceType:'JUDGE'})).join('')+
     '<div class="if-note">'+appText('Выбрано рядов для голосования')+': '+selectedRows.length+' / '+st.total+'. '+appText('Это исследовательские строки, а не прогноз.')+'</div>'+
     '<button class="btn-draw '+l.cls+'" style="margin-top:10px" data-loto-event-click="SUP_use()">Использовать в симуляторе</button>'+
     '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="SUP_share()">📤 Поделиться вердиктом</button>';
@@ -6080,6 +6240,7 @@ function PDX_rowHtml(r,l){
     '<div class="pdx-rlbl">♾️ '+r.pdx.name+' <span class="pdx-rtag">'+r.pdx.short+'</span></div>'+
     '<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+
     ((r.b&&r.b.length)?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>'+
+    courtCaptionHtml({sourceType:'MATHEMATICAL_MODEL',modelId:'paradox'})+
     '<div class="pdx-rnote">'+note+'</div></div>';
 }
 function PDX_renderRows(){

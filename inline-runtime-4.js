@@ -93,6 +93,14 @@
       id: combo.resultId || ('d' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)),
     };
   }
+  // Localized provenance label for a saved combination shown inside the 3D drum's saved list.
+  function drumSourceLabel(fav, row) {
+    try {
+      var ui = window.LotoCourtUI;
+      if (!ui || !LOTS[fav.lot]) return '';
+      return ui.rowCaption(ui.provenanceOf(row, fav.lot));
+    } catch (e) { return ''; }
+  }
   async function drumFavoritesSnapshot() {
     var favs = [];
     try { favs = (await loadFav()) || []; } catch (e) { favs = []; }
@@ -103,6 +111,7 @@
         id: f.id || ('h' + i), lotteryId: APP_TO_DRUM[f.lot] || f.lot || '',
         lotteryName: f.name || '', main: (row.m || []).slice(), additional: extra,
         date: f.date || '', source: f.source || '', resultId: f.resultId || '',
+        sourceLabel: drumSourceLabel(f, row),
       };
     });
     return { limit: drumFreeLimit(), isPro: drumIsPro(), list: list };

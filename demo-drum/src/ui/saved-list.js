@@ -302,7 +302,9 @@ export class SavedList {
     name.textContent = combo.lotteryName || '';
     const sub = document.createElement('span');
     sub.className = 'dd-saved__sub';
-    sub.textContent = `${t('saved.source')} · ${this._fmtDate(combo.date)}`;
+    // The host supplies the combination's localized provenance label (e.g. "3D Simulated Draw",
+    // "Source unavailable" for legacy rows); fall back to the generic label for older hosts.
+    sub.textContent = `${combo.sourceLabel ? String(combo.sourceLabel) : t('saved.source')} · ${this._fmtDate(combo.date)}`;
     meta.append(name, sub);
 
     const rows = document.createElement('div');
