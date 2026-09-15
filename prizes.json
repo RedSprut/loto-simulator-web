@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-14",
+  "updatedAt": "2026-09-15",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
@@ -81992,6 +81992,70 @@
     ],
     "powerball": [
       {
+        "date": "2026-09-14",
+        "lotteryId": "powerball",
+        "currency": "USD",
+        "jackpot": 253,
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 253000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 1
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 50000,
+            "winners": 4
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 100,
+            "winners": 170
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 100,
+            "winners": 509
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 7,
+            "winners": 12078
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 10416
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 82493
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 4,
+            "winners": 204249
+          }
+        ],
+        "source": "Powerball",
+        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-14&gc=powerball"
+      },
+      {
         "date": "2026-09-12",
         "lotteryId": "powerball",
         "currency": "USD",
@@ -82891,7 +82955,7 @@
         "date": "2026-08-10",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 929,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -82948,8 +83012,8 @@
             "winners": 993991
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-10&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-08",
@@ -85080,49 +85144,49 @@
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": null,
+            "prizeAmount": 1000000,
             "winners": 0
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": null,
+            "prizeAmount": 10000,
             "winners": 2
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": null,
+            "prizeAmount": 599,
             "winners": 107
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": null,
+            "prizeAmount": 200,
             "winners": 269
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": null,
+            "prizeAmount": 10,
             "winners": 6647
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": null,
+            "prizeAmount": 10,
             "winners": 6170
           },
           {
             "match": "1+1",
             "label": "1+1",
-            "prizeAmount": null,
+            "prizeAmount": 4,
             "winners": 50072
           },
           {
             "match": "0+1",
             "label": "0+1",
-            "prizeAmount": null,
+            "prizeAmount": 2,
             "winners": 124039
           }
         ],

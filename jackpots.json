@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-09-14T18:13:23.888Z",
+  "updated": "2026-09-15T08:10:22.928Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-09-12",
       "expectedLastDraw": "2026-09-12",
       "nextDrawDate": "2026-09-19",
-      "updatedAt": "2026-09-14T18:13:23.888Z",
-      "sourceUpdatedAt": "2026-09-14T18:13:23.888Z",
+      "updatedAt": "2026-09-15T08:10:22.928Z",
+      "sourceUpdatedAt": "2026-09-15T08:10:22.928Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -29,8 +29,8 @@
       "lastDrawDate": "2026-09-09",
       "expectedLastDraw": "2026-09-09",
       "nextDrawDate": "2026-09-16",
-      "updatedAt": "2026-09-14T18:13:23.888Z",
-      "sourceUpdatedAt": "2026-09-14T18:13:23.888Z",
+      "updatedAt": "2026-09-15T08:10:22.928Z",
+      "sourceUpdatedAt": "2026-09-15T08:10:22.928Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -46,25 +46,25 @@
       "lastDrawDate": "2026-09-11",
       "expectedLastDraw": "2026-09-11",
       "nextDrawDate": "2026-09-15",
-      "updatedAt": "2026-09-14T18:13:23.888Z",
-      "sourceUpdatedAt": "2026-09-14T18:13:23.888Z",
+      "updatedAt": "2026-09-15T08:10:22.928Z",
+      "sourceUpdatedAt": "2026-09-15T08:10:22.928Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "norsk-tipping.no"
     },
     "powerball": {
-      "amount": "251",
+      "amount": "271",
       "prefix": "$",
       "sub": "MILLION · ESTIMATED",
       "cur": "USD",
       "currency": "USD",
-      "display": "$251 MILLION · ESTIMATED",
-      "lastDrawDate": "2026-09-12",
-      "expectedLastDraw": "2026-09-12",
-      "nextDrawDate": "2026-09-14",
-      "updatedAt": "2026-09-14T18:13:23.888Z",
-      "sourceUpdatedAt": "2026-09-14T18:13:23.888Z",
+      "display": "$271 MILLION · ESTIMATED",
+      "lastDrawDate": "2026-09-14",
+      "expectedLastDraw": "2026-09-14",
+      "nextDrawDate": "2026-09-16",
+      "updatedAt": "2026-09-15T08:10:22.928Z",
+      "sourceUpdatedAt": "2026-09-15T08:10:22.928Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -80,8 +80,8 @@
       "lastDrawDate": "2026-09-11",
       "expectedLastDraw": "2026-09-11",
       "nextDrawDate": "2026-09-15",
-      "updatedAt": "2026-09-14T18:13:23.888Z",
-      "sourceUpdatedAt": "2026-09-14T18:13:23.888Z",
+      "updatedAt": "2026-09-15T08:10:22.928Z",
+      "sourceUpdatedAt": "2026-09-15T08:10:22.928Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -97,8 +97,8 @@
       "lastDrawDate": "2026-09-11",
       "expectedLastDraw": "2026-09-11",
       "nextDrawDate": "2026-09-15",
-      "updatedAt": "2026-09-14T18:13:23.888Z",
-      "sourceUpdatedAt": "2026-09-14T18:13:23.888Z",
+      "updatedAt": "2026-09-15T08:10:22.928Z",
+      "sourceUpdatedAt": "2026-09-15T08:10:22.928Z",
       "sourceNextDraw": "2026-09-15",
       "status": "fresh",
       "synced": true,
@@ -114,14 +114,14 @@
       "lastDrawDate": "2026-09-12",
       "expectedLastDraw": "2026-09-12",
       "nextDrawDate": "2026-09-15",
-      "updatedAt": "2026-09-14T18:13:23.888Z",
-      "sourceUpdatedAt": "2026-09-14T18:13:23.888Z",
+      "updatedAt": "2026-09-15T08:10:22.928Z",
+      "sourceUpdatedAt": "2026-09-15T08:10:22.928Z",
       "sourceNextDraw": "2026-09-15",
       "status": "fresh",
       "synced": true,
-      "source": "superenalotto.net",
-      "sourceUrl": "https://www.superenalotto.net/",
-      "extractedText": "jackpot di martedì vale circa 27,3 milioni di Euro",
+      "source": "official backend",
+      "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-09-12&next=2026-09-15",
+      "extractedText": "Jackpot, ripartito da ieri, per la prossima estrazione già vale&lt;b>&nbsp;27,3 milioni di euro",
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
@@ -161,8 +161,31 @@
         },
         {
           "source": "superenalotto.net",
-          "ok": true,
+          "ok": false,
           "sourceUrl": "https://www.superenalotto.net/"
+        },
+        {
+          "source": "sisal.it ultima estrazione",
+          "ok": false,
+          "sourceUrl": "https://www.sisal.it/superenalotto/ultima-estrazione",
+          "error": "HTTP 403"
+        },
+        {
+          "source": "sisal.it estrazioni",
+          "ok": false,
+          "sourceUrl": "https://www.sisal.it/estrazioni/superenalotto",
+          "error": "HTTP 403"
+        },
+        {
+          "source": "sisal.it news",
+          "ok": false,
+          "sourceUrl": "https://www.sisal.it/news/superenalotto",
+          "error": "HTTP 403"
+        },
+        {
+          "source": "official backend",
+          "ok": true,
+          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-09-12&next=2026-09-15"
         }
       ]
     },
@@ -176,8 +199,8 @@
       "lastDrawDate": "2026-09-11",
       "expectedLastDraw": "2026-09-11",
       "nextDrawDate": "2026-09-15",
-      "updatedAt": "2026-09-14T18:13:23.888Z",
-      "sourceUpdatedAt": "2026-09-14T18:13:23.888Z",
+      "updatedAt": "2026-09-15T08:10:22.928Z",
+      "sourceUpdatedAt": "2026-09-15T08:10:22.928Z",
       "sourceNextDraw": "2026-09-15",
       "status": "fresh",
       "synced": true,
@@ -187,7 +210,8 @@
         {
           "source": "olg.ca",
           "ok": false,
-          "sourceUrl": "https://www.olg.ca/en/lottery/play-lotto-max-encore.html"
+          "sourceUrl": "https://www.olg.ca/en/lottery/play-lotto-max-encore.html",
+          "error": "HTTP 503"
         },
         {
           "source": "wclc.com",
@@ -206,8 +230,8 @@
       "lastDrawDate": "2026-09-10",
       "expectedLastDraw": "2026-09-10",
       "nextDrawDate": "2026-09-17",
-      "updatedAt": "2026-09-14T18:13:23.888Z",
-      "sourceUpdatedAt": "2026-09-14T18:13:23.888Z",
+      "updatedAt": "2026-09-15T08:10:22.928Z",
+      "sourceUpdatedAt": "2026-09-15T08:10:22.928Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
