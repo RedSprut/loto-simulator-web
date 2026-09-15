@@ -458,7 +458,12 @@ function getBackendActionContext(){
   };
 }
 function applyBackendRows(result,label){
-  const next=(Array.isArray(result)?result:[]).map(row=>({m:[...(row.main||[])],b:[...(row.bonus||[])]}));
+  const next=(Array.isArray(result)?result:[]).map(row=>{
+    const item={m:[...(row.main||[])],b:[...(row.bonus||[])]};
+    const prov=validRowProv({m:item.m,prov:row.prov});
+    if(prov)item.prov=prov;
+    return item;
+  });
   if(!next.length){showFeedback('Нет результата','Backend не вернул допустимых рядов.','⚠️',3200);return false;}
   rows=next;act=0;renderSim();resetBanner();goToRows();
   revealResult(document.getElementById('rows-c'),'start');
@@ -489,7 +494,7 @@ function renderBackendJudge(result,mountId,target,handlers){
   const defaultApply=(finalRows,meta)=>{
     const choice=JUDGE_choiceText(meta);
     if(mountId==='jc-mount')window.JC_close?.();
-    setGeneratedRows(finalRows,choice+'. Комбинация применена в билете. ⚖️');
+    setGeneratedRows(finalRows,choice+'. Комбинация применена в билете. ⚖️',false,undefined,{sourceType:'JUDGE'});
   };
   JUDGE_state[ns]={
     plan,l,
@@ -547,16 +552,28 @@ window.showSelectedModelDescription=showSelectedModelDescription;
 window.closeModelDescription=closeModelDescription;
 let mresRows=[];
 function showModelResult(result,model){
-  const list=(Array.isArray(result)?result:[]).map(r=>({main:[...(r.main||r.m||[])],bonus:[...(r.bonus||r.b||[])]})).filter(r=>r.main.length);
+  const list=(Array.isArray(result)?result:[]).map(r=>({main:[...(r.main||r.m||[])],bonus:[...(r.bonus||r.b||[])],prov:r.prov})).filter(r=>r.main.length);
   if(!list.length){showFeedback('Нет результата','Модель не вернула допустимых рядов.','⚠️',3200);return false;}
+  const source=model==='rnd'?{sourceType:'RANDOM_MODEL',modelId:'rnd'}:model==='wheel'?{sourceType:'WHEEL_MATRIX'}:{sourceType:'MATHEMATICAL_MODEL',modelId:model};
+  list.forEach(r=>{const prov=validRowProv({m:r.main,prov:r.prov})||createRowProv({m:r.main,b:r.bonus},source);if(prov)r.prov=prov;else delete r.prov;});
   mresRows=list;
   try{if(window.LotoWinMatch&&LotoWinMatch.ready)LotoWinMatch.record(cur,list,{source:'model',modelId:model});}catch(_e){}
   const resultOverlay=document.getElementById('mres-ov');
   if(resultOverlay)resultOverlay.classList.toggle('model-rows-long',list.length>5);
+  renderModelResultRows();
+  const title=document.getElementById('mres-title');if(title)title.textContent='🎯 '+modelLabel(model);
+  const sub=document.getElementById('mres-sub');if(sub)sub.textContent=list.length+' '+rowWord(list.length);
+  bindModelResultActions(model);
+  if(window.LotoModals)window.LotoModals.openModal('mres-ov');else document.getElementById('mres-ov')?.classList.add('show');
+  return true;
+}
+// Rows of the model Result modal. Each row can be analysed on its own (court-ui.js); a decision
+// taken there updates mresRows in place and re-renders this list.
+function renderModelResultRows(){
   const cls=L().cls;const mount=document.getElementById('mres-rows');
   if(mount){
     mount.replaceChildren();
-    list.forEach((r,i)=>{
+    mresRows.forEach((r,i)=>{
       // One centred row block: label sits above the balls, left-aligned to the first
       // ball, so label + ball group read as a single unit (see .mres-row CSS).
       const rowEl=document.createElement('div');rowEl.className='mres-row';
@@ -566,11 +583,18 @@ function showModelResult(result,model){
       if(r.bonus.length){const sep=document.createElement('div');sep.style.width='6px';balls.appendChild(sep);}
       for(const n of r.bonus){const b=document.createElement('div');b.className='if-rball rb-b-'+cls;b.textContent=String(n);balls.appendChild(b);}
       rowEl.append(heading,balls);
+      if(window.LotoCourtUI){
+        const analyze=document.createElement('button');analyze.type='button';analyze.className='mres-analyze';
+        analyze.setAttribute('data-court-open','model');analyze.setAttribute('data-row',String(i));
+        analyze.textContent='🔍 '+appText('Анализ комбинации');
+        rowEl.appendChild(analyze);
+      }
       mount.appendChild(rowEl);
     });
   }
-  const title=document.getElementById('mres-title');if(title)title.textContent='🎯 '+modelLabel(model);
-  const sub=document.getElementById('mres-sub');if(sub)sub.textContent=list.length+' '+rowWord(list.length);
+}
+window.renderModelResultRows=renderModelResultRows;
+function bindModelResultActions(model){
   const useBtn=document.querySelector('[data-mres-use]');
   if(useBtn)useBtn.onclick=async()=>{
     await withTransferBusy(async()=>{
@@ -583,8 +607,6 @@ function showModelResult(result,model){
   if(judgeBtn)judgeBtn.onclick=()=>{window.judgeGeneratedRows?.(mresRows.map(r=>({main:[...r.main],bonus:[...r.bonus]})));};
   const closeBtn=document.querySelector('[data-mres-close]');
   if(closeBtn)closeBtn.onclick=()=>{window.LotoModals?window.LotoModals.closeModal('mres-ov'):document.getElementById('mres-ov')?.classList.remove('show');};
-  if(window.LotoModals)window.LotoModals.openModal('mres-ov');else document.getElementById('mres-ov')?.classList.add('show');
-  return true;
 }
 window.showModelResult=showModelResult;
 function showPreviewResultStatus(message){
@@ -1097,6 +1119,7 @@ function renderRows(){
     else h+=`<button class="ract" data-loto-event-click="event.stopPropagation();addRow()">+</button>`;
     div.innerHTML=h;c.appendChild(div);
   });
+  renderRowProvenance();
 }
 
 function renderMainGrid(){
@@ -1152,9 +1175,9 @@ function quickRoll(){
   });
 }
 
-function togM(n){clearWheelStatus();clearGroupAnalysisState();const l=L(),row=rows[act],i=row.m.indexOf(n);if(i>=0)row.m.splice(i,1);else if(row.m.length<l.pM){row.m.push(n);row.m.sort((a,b)=>a-b);}renderSim();}
-function togB(n){clearWheelStatus();clearGroupAnalysisState();const l=L(),dBo=drawBonusCount(l),row=rows[act],i=row.b.indexOf(n);if(i>=0)row.b.splice(i,1);else if(row.b.length<dBo){row.b.push(n);row.b.sort((a,b)=>a-b);}renderSim();}
-function undo(i){clearGroupAnalysisState();const l=L(),dBo=drawBonusCount(l),r=rows[i];if(dBo>0&&r.b.length>0)r.b.pop();else if(r.m.length>0)r.m.pop();renderSim();}
+function togM(n){clearWheelStatus();clearGroupAnalysisState();const l=L(),row=rows[act],i=row.m.indexOf(n);if(i>=0)row.m.splice(i,1);else if(row.m.length<l.pM){row.m.push(n);row.m.sort((a,b)=>a-b);}markRowManual(row);renderSim();}
+function togB(n){clearWheelStatus();clearGroupAnalysisState();const l=L(),dBo=drawBonusCount(l),row=rows[act],i=row.b.indexOf(n);if(i>=0)row.b.splice(i,1);else if(row.b.length<dBo){row.b.push(n);row.b.sort((a,b)=>a-b);}markRowManual(row);renderSim();}
+function undo(i){clearGroupAnalysisState();const l=L(),dBo=drawBonusCount(l),r=rows[i];if(dBo>0&&r.b.length>0)r.b.pop();else if(r.m.length>0)r.m.pop();markRowManual(r);renderSim();}
 async function clrRow(i){
   if(!(await customConfirm('Вы действительно хотите удалить этот ряд?','Удалить',{title:'Удалить ряд?'})))return;
   clearWheelStatus();clearGroupAnalysisState();rows[i]=nr();renderSim();
@@ -1275,6 +1298,7 @@ function fillOne(){
   const l=L(),row=rows[act];
   const dBo=drawBonusCount(l);
   row.m=rnd(l.mB,l.pM);if(dBo>0)row.b=rnd(l.bB,dBo);
+  setRowProvenance(row,{sourceType:'HOME_GENERATOR',modelId:'rnd'});
   const nx=rows.findIndex((r,i)=>i>act&&r.m.length===0);if(nx>=0)act=nx;
   renderSim();
 }
@@ -1283,8 +1307,11 @@ function fillAll(){
   const l=L();
   const dBo=drawBonusCount(l);
   rows.forEach(r=>{
+    const before=r.m.length+r.b.length;
     if(r.m.length<l.pM){const e=rnd(l.mB,l.pM-r.m.length,r.m);r.m=[...r.m,...e].sort((a,b)=>a-b);}
     if(dBo>0&&r.b.length<dBo){const e=rnd(l.bB,dBo-r.b.length,r.b);r.b=[...r.b,...e].sort((a,b)=>a-b);}
+    // An empty row filled at random is a Home Generator row; a partly typed row stays manual.
+    if(r.m.length+r.b.length!==before){if(before===0)setRowProvenance(r,{sourceType:'HOME_GENERATOR',modelId:'rnd'});else{markRowManual(r);ensureManualProvenance(r,l);}}
   });
   renderSim();
 }
@@ -1337,20 +1364,108 @@ function completeBonusList(nums,l){
   }
   return out.sort((a,b)=>a-b);
 }
+// ── Combination provenance (court-core.js) ──
+// Every visible row records where it came from. A source is never invented: a row whose origin
+// is unknown (e.g. saved before provenance existed) is reported as "source unavailable".
+function provRules(l=L()){return{mainMax:l.mB};}
+function provTargetDraw(game=cur){
+  try{const l=LOTS[game];return l&&window.LotoWinMatchCore?LotoWinMatchCore.nextDrawDate({days:l.drawDays||[],tz:l.timeZone||'UTC',time:l.dl||'23:59'},new Date()):null;}catch(_e){return null;}
+}
+function createRowProv(row,source,game=cur){
+  const core=window.LotoCourtCore,l=LOTS[game];
+  if(!core||!source||!source.sourceType||!l||!row||!Array.isArray(row.m)||row.m.length!==l.pM)return null;
+  try{return core.createProvenance({...source,gameId:game,main:row.m,bonus:row.b||[],targetDrawDate:provTargetDraw(game)||undefined});}catch(_e){return null;}
+}
+function validRowProv(row,l=L()){
+  const core=window.LotoCourtCore;
+  if(!core||!row||!row.prov)return null;
+  const prov=core.provenanceOf(row,provRules(l));
+  return prov.unavailable?null:prov;
+}
+function setRowProvenance(row,source){
+  if(!row)return;
+  const prov=createRowProv(row,source);
+  delete row.manual;delete row.provParent;
+  if(prov)row.prov=prov;else delete row.prov;
+}
+function attachRowProvenance(list,source){
+  const l=L();
+  for(const row of list||[]){
+    if(!row)continue;
+    const kept=validRowProv(row,l);
+    if(kept){row.prov=kept;continue;}
+    delete row.prov;
+    if(source)setRowProvenance(row,source);
+  }
+  return list;
+}
+function provSourceFromOrigin(origin){
+  const o=origin||{},modelId=o.modelId||undefined;
+  if(o.source==='model')return modelId==='rnd'?{sourceType:'RANDOM_MODEL',modelId}:modelId==='wheel'?{sourceType:'WHEEL_MATRIX'}:{sourceType:'MATHEMATICAL_MODEL',modelId};
+  if(o.source==='generator'||o.source==='smartgen'||o.source==='rnd'||o.source==='man')return{sourceType:'HOME_GENERATOR',modelId};
+  return null;
+}
+// A manual edit means the old provenance no longer describes the numbers. Once the row is complete
+// again it gets a MANUAL_ENTRY record linked to the provenance it was edited from.
+function markRowManual(row){
+  if(!row)return;
+  if(row.prov&&row.prov.id)row.provParent=row.prov.id;
+  delete row.prov;row.manual=true;
+}
+function ensureManualProvenance(row,l=L()){
+  if(!row||!row.manual||row.prov||row.m.length!==l.pM||row.b.length!==drawBonusCount(l))return;
+  const prov=createRowProv(row,{sourceType:'MANUAL_ENTRY',parentId:row.provParent});
+  if(prov)row.prov=prov;
+}
+function renderRowProvenance(){
+  const box=document.getElementById('row-prov');if(!box)return;
+  const ui=window.LotoCourtUI,l=L(),row=rows[act];
+  box.replaceChildren();
+  if(!ui||!row){box.hidden=true;return;}
+  ensureManualProvenance(row,l);
+  const button=(text,kind)=>{const b=document.createElement('button');b.type='button';b.className='row-prov-btn';b.setAttribute('data-court-open',kind);b.setAttribute('data-row',String(act));b.textContent=text;return b;};
+  const label=document.createElement('span');label.className='row-prov-label';
+  if(row.m.length===l.pM){
+    const prov=ui.provenanceOf(row,cur),badge=ui.defenseBadge(prov);
+    label.textContent=`${act+1} · ${ui.sourceLabel(prov)}${badge?' · '+badge:''}`;
+    box.append(label,button('🔍 '+appText('Анализ'),'row'),button('🕘 '+appText('История'),'row-history'));
+  }else{
+    label.textContent=`${act+1} · ${appText('Ряд не заполнен')}`;
+    box.append(label,button('👥 '+appText('Ряды от присяжных'),'generate'));
+  }
+  box.hidden=false;
+}
+window.addEventListener('loto:languagechange',()=>{try{renderRowProvenance();}catch(_e){}});
+// Win/match detail: the source of the matched combination and a factual origin line per matched
+// number. It describes what happened to each number; it never claims a prediction.
+function wmProvenanceHtml(match,fallbackLabel){
+  const ui=window.LotoCourtUI;
+  let label=fallbackLabel,lines=[];
+  if(ui&&match&&match.prov){
+    const prov=ui.provenanceOf({m:match.userMain,prov:match.prov},match.gameId);
+    if(!prov.unavailable){label=ui.sourceLabel(prov);lines=ui.attributionLines(match.prov,match.userMain,match.drawMain,match.gameId);}
+  }
+  let html=`<div style="margin-top:4px;font-size:12.5px;opacity:.8">${escapeHtml(appText('Источник'))}: <span data-i18n-ignore>${escapeHtml(label)}</span></div>`;
+  if(lines.length)html+=`<div style="margin-top:8px;font-size:12.5px;opacity:.85">${escapeHtml(appText('Происхождение совпавших чисел'))}</div><ul class="wm-attr" data-i18n-ignore>${lines.map(line=>`<li>${escapeHtml(line)}</li>`).join('')}</ul><div style="font-size:12px;opacity:.7">${escapeHtml(appText('Это описание происхождения чисел, а не доказательство предсказания.'))}</div>`;
+  return html;
+}
 function normalizeGeneratedRow(row,l=L()){
-  return{
+  const out={
     m:normalizeNumberList(row&&row.m,l.mB,l.pM),
     b:completeBonusList(row&&row.b,l)
   };
+  if(row&&row.prov){const prov=validRowProv({m:out.m,prov:row.prov},l);if(prov)out.prov=prov;}
+  return out;
 }
 function normalizeGeneratedRows(gen,l=L()){
   return (Array.isArray(gen)?gen:[]).slice(0,MAX_ROWS).map(r=>normalizeGeneratedRow(r,l));
 }
-function setGeneratedRows(gen,status,unique=false,origin){
+function setGeneratedRows(gen,status,unique=false,origin,source){
   clearGroupAnalysisState();
   const alreadyIssued=Array.isArray(gen)&&gen.length>0&&gen.every(r=>r&&r._uniqueIssued);
   rows=unique&&!alreadyIssued?ensureUniqueGeneratedRows(gen,L()):normalizeGeneratedRows(gen,L());
   if(!rows.length)rows=[nr()];
+  attachRowProvenance(rows,source||provSourceFromOrigin(origin));
   act=0;
   renderSim();
   resetBanner();
@@ -1555,7 +1670,7 @@ async function generateSelectedRows(){
     return;
   }
   const labels={freq:'горячие числа',bal:'комбинированный анализ',rnd:'pure random',man:'сегментный охват',wheel:'колесная матрица','world-hot':'мировой горячий профиль','world-mix':'мировой комбинированный профиль',markov:'цепи Маркова',gauss:'Гаусс · ЦПТ',delta:'интервальная модель Δ',bayes:'Байес · Дирихле',overdue:'gap-анализ',phys:'физическая модель лототрона',chaos:'детерминированный хаос',quantum:'квантовый коллапс',paradox:'система парадоксов'};
-  setGeneratedRows(gen,`Готово: ${count} ${rowWord(count)} · ${labels[algo]||algo} · база сохранённых тиражей не очищается при обновлении.`,true,{source:(algo==='rnd'?'rnd':(algo==='man'?'man':'model')),modelId:algo});
+  setGeneratedRows(gen,`Готово: ${count} ${rowWord(count)} · ${labels[algo]||algo} · база сохранённых тиражей не очищается при обновлении.`,true,{source:(algo==='rnd'?'rnd':(algo==='man'?'man':'model')),modelId:algo},{sourceType:'HOME_GENERATOR',modelId:algo});
 }
 function rowsToNorskText(){
   const l=L();
@@ -1789,6 +1904,7 @@ async function applyWheelMatrix(){
   if(!built)return;
   rows=filterGeneratedRows(built.rows,count,l,draws);
   if(!rows.length)rows=[nr()];
+  attachRowProvenance(rows,{sourceType:'WHEEL_MATRIX'});
   act=0;
   renderSim();
   resetBanner();
@@ -2146,7 +2262,8 @@ async function saveFav(){
   fillAll();
   const favs=await loadFav();
   const name=`${l.name} · ${new Date().toLocaleDateString(appLocale())}`;
-  favs.unshift({name,rows:normalizeGeneratedRows(rows,l).map(r=>({m:[...r.m],b:[...r.b]})),lot:cur});
+  rows.forEach(r=>ensureManualProvenance(r,l));
+  favs.unshift({name,rows:normalizeGeneratedRows(rows,l).map(r=>r.prov?{m:[...r.m],b:[...r.b],prov:r.prov}:{m:[...r.m],b:[...r.b]}),lot:cur});
   await saveFavs(favs.slice(0,10));
   // Mark these rows as SAVED (not played) in the personal win/match history, preserving origin.
   try{if(window.LotoWinMatch&&LotoWinMatch.ready)normalizeGeneratedRows(rows,l).forEach(r=>LotoWinMatch.markSavedPlayed(cur,r.m,r.b,false));}catch(_e){}
@@ -2168,10 +2285,14 @@ async function renderFavs(){
     if(JSON.stringify(displayRows)!==JSON.stringify(fav.rows)){fav.rows=displayRows;changed=true;}
     const div=document.createElement('div');div.className='fav-item';
     let rowsH='';
-    displayRows.forEach(row=>{
+    const court=window.LotoCourtUI;
+    displayRows.forEach((row,rowIndex)=>{
       let balls=row.m.map(n=>`<div class="hball ${l.cls}-m">${n}</div>`).join('');
       if(row.b&&row.b.length>0){balls+=`<div class="fav-sep" aria-hidden="true">|</div>`;balls+=row.b.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}
-      rowsH+=`<div class="fav-rowballs">${balls}</div>`;
+      // Source label + per-combination analysis. Legacy rows honestly show "source unavailable".
+      const analyze=court&&row.m.length===l.pM?`<button type="button" class="fav-analyze" data-court-open="saved" data-fav="${favIndex}" data-row="${rowIndex}" title="${escapeHtml(appText('Анализ комбинации'))}" aria-label="${escapeHtml(appText('Анализ комбинации'))}">🔍</button>`:'';
+      const source=court?`<div class="fav-prov" data-i18n-ignore>${escapeHtml(court.sourceLabel(court.provenanceOf(row,fav.lot)))}</div>`:'';
+      rowsH+=`<div class="fav-rowline"><div class="fav-rowballs">${balls}</div>${analyze}</div>${source}`;
     });
     div.innerHTML=`<div class="fav-main"><div class="fav-name">${escapeHtml(fav.name)}</div><div class="fav-rows">${rowsH}</div></div>
       <div class="fav-actions">
@@ -2882,7 +3003,7 @@ function addHeatNumber(n){
     if(rows.length<MAX_ROWS){rows.push(nr());act=rows.length-1;row=rows[act];}
     else{act=0;row=rows[0];}
   }
-  if(!row.m.includes(n)&&row.m.length<l.pM)row.m.push(n);
+  if(!row.m.includes(n)&&row.m.length<l.pM){row.m.push(n);markRowManual(row);}
   row.m.sort((a,b)=>a-b);
   renderSim();
   const out=document.getElementById('heat-status');
@@ -3736,6 +3857,7 @@ function renderGen(){
 function useGen(){
   rows=ensureUniqueGeneratedRows(sgGen.map(g=>({m:[...g.m],b:[...g.b]})),L());
   if(!rows.length)rows=[nr()];
+  attachRowProvenance(rows,{sourceType:'HOME_GENERATOR',modelId:sgAlgo});
   act=0;closeSG();renderSim();resetBanner();
   goToRows();
   showGenStatus('Числа перенесены в билет — удачи! 🍀');
@@ -4074,7 +4196,7 @@ function IF_scoreInfo(){
 function IF_useRows(){
   if(!IF_state)return;
   IF_close();
-  setGeneratedRows(IF_state.rows,'Готово: 10 исследовательских строк · Структурное поле данных · '+IF_state.ctx.lotteryName+' · '+IF_state.ctx.currentDraws.length+' тиражей.',true);
+  setGeneratedRows(IF_state.rows,'Готово: 10 исследовательских строк · Структурное поле данных · '+IF_state.ctx.lotteryName+' · '+IF_state.ctx.currentDraws.length+' тиражей.',true,undefined,{sourceType:'MATHEMATICAL_MODEL',modelId:'field'});
 }
 /* инициализация селектора окна */
 document.addEventListener('DOMContentLoaded',()=>{
@@ -4302,7 +4424,7 @@ async function MATRIX_use(){
   const st=CONS_state;if(!st||!st.matrix)return;
   await withTransferBusy(async()=>{
     MATRIX_close();CONS_close();
-    setGeneratedRows(st.matrix,'Готово: '+st.matrix.length+' '+rowWord(st.matrix.length)+' · Итоговая матрица консенсуса · '+st.ctx.lotteryName+'.',true);
+    setGeneratedRows(st.matrix,'Готово: '+st.matrix.length+' '+rowWord(st.matrix.length)+' · Итоговая матрица консенсуса · '+st.ctx.lotteryName+'.',true,undefined,{sourceType:'MATHEMATICAL_MODEL',modelId:'consensus'});
   });
   goToRows({immediate:true});
 }
@@ -4312,7 +4434,7 @@ function MATRIX_judge(){
   JUDGE_open('matrix',st.matrix.map(r=>({m:[...r.m],b:[...(r.b||[])]})),'matrix-jmount',(finalRows,meta)=>{
     MATRIX_close();CONS_close();
     const decision=JUDGE_choiceText(meta);
-    setGeneratedRows(finalRows,'Проверенная судьёй матрица перенесена в симулятор. '+decision+'.');
+    setGeneratedRows(finalRows,'Проверенная судьёй матрица перенесена в симулятор. '+decision+'.',false,undefined,{sourceType:'JUDGE'});
   },{
     intro:'Судья проверяет уже собранную итоговую матрицу и только предлагает точечные замены. Нажми на любую замену, чтобы принять или отклонить её; остальные строки сохранятся как есть.',
     applyLabel:'Использовать проверенную матрицу'
@@ -4504,7 +4626,7 @@ async function SUP_use(){
   const st=SUP_state;if(!st||!st.verdict)return;
   await withTransferBusy(async()=>{
     SUP_close();try{MATRIX_close();CONS_close();}catch(e){}
-    setGeneratedRows(st.verdict,'Готово: '+st.verdict.length+' '+rowWord(st.verdict.length)+' · Верховный судья.',true);
+    setGeneratedRows(st.verdict,'Готово: '+st.verdict.length+' '+rowWord(st.verdict.length)+' · Верховный судья.',true,undefined,{sourceType:'JUDGE'});
   });
   goToRows({immediate:true});
 }
@@ -4776,7 +4898,7 @@ const LotoWinMatch=(function(){
   // Record ONLY user-visible playable rows (full main length for the game). Never internal trials.
   function record(id,rowList,origin){ if(!ON)return; try{
     id=id||cur; if(!Array.isArray(rowList)||!rowList.length)return; const l=LOTS[id]; if(!l)return;
-    const clean=rowList.map(r=>({m:(r&&(r.m||r.main))||[],b:(r&&(r.b||r.bonus))||[]})).filter(r=>Array.isArray(r.m)&&r.m.length===l.pM);
+    const clean=rowList.map(r=>({m:(r&&(r.m||r.main))||[],b:(r&&(r.b||r.bonus))||[],prov:(r&&r.prov)||null})).filter(r=>Array.isArray(r.m)&&r.m.length===l.pM);
     if(!clean.length)return;
     let h=loadHist(); h=CORE.recordRows(h,id,clean,origin||{source:'generator'},{now:Date.now(),targetDrawDate:targetDraw(id)}); saveHist(h);
   }catch(_e){} }
@@ -4867,7 +4989,7 @@ const LotoWinMatch=(function(){
       `<div>${T('Призовая категория')}: <b data-i18n-ignore>${escapeHtml(m.tier||'')}</b></div>`+
       `<div style="margin-top:6px">${payoutLine}</div>`+
       `<div style="margin-top:10px;font-size:12.5px;opacity:.8">${statusLine}</div>`+
-      `<div style="margin-top:4px;font-size:12.5px;opacity:.8">${T('Источник')}: ${T(srcLabel(m))}</div>`+
+      wmProvenanceHtml(m,T(srcLabel(m)))+
       `</div>`; }
   function renderSummary(matches){ const s=CORE.summarize(matches);
     const head=`<div class="cele-title" style="font-size:20px">🎯 ${T('Найдено призовых совпадений')}: <span data-i18n-ignore>${s.total}</span></div>`+
@@ -5145,7 +5267,7 @@ async function QA_use(){
   const st=QA_state;if(!st||!st.rows)return;
   await withTransferBusy(async()=>{
     QA_close();
-    setGeneratedRows(st.rows,'Готово: '+st.rows.length+' '+rowWord(st.rows.length)+' · Квантово-астральный режим.',true);
+    setGeneratedRows(st.rows,'Готово: '+st.rows.length+' '+rowWord(st.rows.length)+' · Квантово-астральный режим.',true,undefined,{sourceType:'MATHEMATICAL_MODEL',modelId:'qastro'});
   });
   goToRows({immediate:true});
 }
@@ -5546,7 +5668,7 @@ async function ADV_judge(){
   if(SUPC_pending&&SUPC_pending.algo===st.algo){intro='<b>⚖️ Кабинет судьи.</b> Вы вернулись по моему направлению. '+SUPC_pending.reason+'<br><br>';SUPC_pending=null;}
   intro+='<b>Расследование судьи.</b> Проверил '+checked+' чисел по силе поля из '+data.drawsN+' тиражей (частота, пары, пропуски, зоны, чётность, суммы). '+
     'Согласен с <b>'+agreed+'</b>. '+(proposed?('Предлагаю заменить <b>'+proposed+'</b>: '+swapsList.slice(0,8).map(x=>x.from+'→'+x.to).join(', ')+(proposed>8?' и ещё '+(proposed-8):'')+'. Реши сам, какие замены применить.'):'Возражений нет — совет выдержал проверку поля полностью. ✅')+covLine;
-  JUDGE_state['adv']={plan:data.plan,l,drawsN:data.drawsN,mountId:'adv-result',intro,applyLabel:'Использовать в билете',onApply:(finalRows,meta)=>{ADV_close();closeSG();setGeneratedRows(finalRows,JUDGE_choiceText(meta)+'. Ряды перенесены в билет. ⚖️🍀');}};
+  JUDGE_state['adv']={plan:data.plan,l,drawsN:data.drawsN,mountId:'adv-result',intro,applyLabel:'Использовать в билете',onApply:(finalRows,meta)=>{ADV_close();closeSG();setGeneratedRows(finalRows,JUDGE_choiceText(meta)+'. Ряды перенесены в билет. ⚖️🍀',false,undefined,{sourceType:'JUDGE'});}};
   JUDGE_render('adv');
   const mp=document.getElementById('adv-result');if(mp)try{mp.scrollIntoView({behavior:'smooth',block:'nearest'});}catch(e){}
 }
@@ -5554,7 +5676,7 @@ async function ADV_use(){
   const st=ADV_state;if(!st||!st.rows)return;
   await withTransferBusy(async()=>{
     ADV_close();closeSG();
-    setGeneratedRows(st.rows,'Набор «'+(ADV_NAMES[st.algo]||st.algo)+'» перенесён в симулятор. Это не прогноз. 🍀',true);
+    setGeneratedRows(st.rows,'Набор «'+(ADV_NAMES[st.algo]||st.algo)+'» перенесён в симулятор. Это не прогноз. 🍀',true,undefined,{sourceType:'MATHEMATICAL_MODEL',modelId:st.algo});
   });
   goToRows({immediate:true});
 }
@@ -5562,7 +5684,7 @@ async function ADV_useVerdict(){
   const st=ADV_state;if(!st||!st.verdict)return;
   await withTransferBusy(async()=>{
     ADV_close();closeSG();
-    setGeneratedRows(st.verdict.map(r=>({m:r.m,b:r.b})),'Вердикт судьи перенесён в билет. ⚖️🍀');
+    setGeneratedRows(st.verdict.map(r=>({m:r.m,b:r.b})),'Вердикт судьи перенесён в билет. ⚖️🍀',false,undefined,{sourceType:'JUDGE'});
   });
   goToRows({immediate:true});
 }
@@ -5738,7 +5860,7 @@ async function SUPC_dbUse(){
   if(!window.SUPC_dbRows)return;
   await withTransferBusy(async()=>{
     SUPC_close();closeSG();
-    setGeneratedRows(window.SUPC_dbRows,'Совет судьи по лидерам базы перенесён в билет. 📊🍀',true);
+    setGeneratedRows(window.SUPC_dbRows,'Совет судьи по лидерам базы перенесён в билет. 📊🍀',true,undefined,{sourceType:'JUDGE'});
   });
   goToRows({immediate:true});
 }
@@ -5977,7 +6099,7 @@ async function PDX_use(){
   const st=PDX_state;if(!st||!st.rows)return;
   await withTransferBusy(async()=>{
     PDX_close();
-    setGeneratedRows(st.rows,'Парадоксы перенесены в билет. ♾️ Это исследование структуры, а не прогноз — вероятность тиража не меняется.',true);
+    setGeneratedRows(st.rows,'Парадоксы перенесены в билет. ♾️ Это исследование структуры, а не прогноз — вероятность тиража не меняется.',true,undefined,{sourceType:'MATHEMATICAL_MODEL',modelId:'paradox'});
   });
   goToRows({immediate:true});
 }
@@ -5996,7 +6118,7 @@ function PDX_judge(){
   JUDGE_open('pdx',st.rows.map(r=>({m:r.m,b:r.b})),'pdx-jmount',(finalRows,meta)=>{
     PDX_close();
     const choice=JUDGE_choiceText(meta);
-    setGeneratedRows(finalRows,choice+'. Парадоксы перенесены в билет. ⚖️♾️ Гарантий нет.');
+    setGeneratedRows(finalRows,choice+'. Парадоксы перенесены в билет. ⚖️♾️ Гарантий нет.',false,undefined,{sourceType:'JUDGE'});
   });
 }
 
@@ -6052,7 +6174,7 @@ async function JC_continue(){
   const covLine=' Твои '+good.length+' '+rowWord(good.length)+' покрывают '+uniq.size+' из '+l.mB+' чисел поля ('+covPct+'%) — '+(covPct>=45?'широкий охват.':covPct>=22?'умеренный охват; больше рядов раскрыли бы поле шире.':'узкий охват: для покрытия поля возьми больше рядов.');
   const intro='<b>Дело о твоей комбинации.</b> Проверил '+checked+' чисел по силе поля из '+data.drawsN+' тиражей (частота, пары, пропуски, зоны, чётность, суммы). Согласен с <b>'+agreed+'</b>. '+
     (proposed?('Под подозрением <b>'+proposed+'</b>: '+swapsList.slice(0,8).map(x=>x.from+'→'+x.to).join(', ')+(proposed>8?' и ещё '+(proposed-8):'')+'.'):'Возражений нет.')+covLine+'<br><br>'+verdict;
-  JUDGE_state['jc']={plan:data.plan,l,drawsN:data.drawsN,mountId:'jc-mount',intro,applyLabel:'Применить в билете',onApply:(finalRows,meta)=>{JC_close();const choice=JUDGE_choiceText(meta);setGeneratedRows(finalRows,choice+'. Комбинация применена в билете. ⚖️');}};
+  JUDGE_state['jc']={plan:data.plan,l,drawsN:data.drawsN,mountId:'jc-mount',intro,applyLabel:'Применить в билете',onApply:(finalRows,meta)=>{JC_close();const choice=JUDGE_choiceText(meta);setGeneratedRows(finalRows,choice+'. Комбинация применена в билете. ⚖️',false,undefined,{sourceType:'JUDGE'});}};
   JUDGE_render('jc');
 }
 /* ═══════════════ MODAL MANAGER ═══════════════
@@ -6070,9 +6192,9 @@ async function JC_continue(){
   // Nested utility dialogs stay above their parent feature (birth-date editor
   // over Quantum-Astral, confirmation over the editor) instead of replacing it.
   var TRANSIENT={'busy-ov':1,'aved-ov':1};
-  var NESTED={'qab-ov':1,'cc-ov':1,'period-ov':1};
+  var NESTED={'qab-ov':1,'cc-ov':1,'period-ov':1,'court-layer-ov':1};
   var CRITICAL={
-    'cc-ov':1,'fb-ov':1,'prev-ov':1,'pro-ov':1,'mres-ov':1,'jc-ov':1,
+    'cc-ov':1,'fb-ov':1,'prev-ov':1,'pro-ov':1,'mres-ov':1,'jc-ov':1,'court-ov':1,
     'cons-ov':1,'qa-ov':1,'adv-ov':1,'sup-ov':1,'pdx-ov':1,'matrix-ov':1,
     'if-ov':1,'ticket-ov':1
   };

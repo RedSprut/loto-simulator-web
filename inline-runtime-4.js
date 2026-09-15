@@ -70,12 +70,18 @@
   function drumIsPro() {
     try { return window.LotoCommercial.access.accessLevel === 'pro'; } catch (e) { return false; }
   }
+  // A 3D-drum combination keeps its source (SIMULATED_3D_DRAW) wherever it is saved or used.
+  function drumRowWithProvenance(combo, appLot) {
+    var row = { m: (combo.main || []).slice(), b: (combo.additional || []).slice() };
+    try { var prov = createRowProv(row, { sourceType: 'SIMULATED_3D_DRAW', simulationId: combo.resultId || undefined }, appLot); if (prov) row.prov = prov; } catch (e) {}
+    return row;
+  }
   function drumComboToFav(combo) {
     var appLot = DRUM_TO_APP[combo.lotteryId] || combo.lotteryId || currentAppId();
     var dateStr = ''; try { dateStr = new Date(combo.date || Date.now()).toLocaleDateString(typeof appLocale === 'function' ? appLocale() : undefined); } catch (e) {}
     return {
       name: (combo.lotteryName || '') + (dateStr ? ' · ' + dateStr : '') + ' · 3D',
-      rows: [{ m: (combo.main || []).slice(), b: (combo.additional || []).slice() }],
+      rows: [drumRowWithProvenance(combo, appLot)],
       lot: appLot,
       source: combo.source || '3d-drum',
       resultId: combo.resultId || '',
@@ -195,6 +201,7 @@
       for (var j = 0; j < rows.length; j++) if ((rows[j].m || []).length === 0 && (rows[j].b || []).length === 0) { idx = j; break; }
       if (idx < 0) { if (rows.length >= MAX_ROWS) return 'full'; rows.push(nr()); idx = rows.length - 1; }
       rows[idx].m = m; rows[idx].b = b; act = idx;
+      try { setRowProvenance(rows[idx], { sourceType: 'SIMULATED_3D_DRAW', simulationId: combo.resultId || undefined }); } catch (e) {}
       renderSim();
       if (!quiet) { try { goToRows(); } catch (e) {} try { resetBanner(); } catch (e) {} }
       return 'added';

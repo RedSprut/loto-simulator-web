@@ -63,6 +63,17 @@
     return null;
   }
 
+  // Combination provenance travels with the row (built and sanitised by court-core in the app).
+  // Stored only as a bounded plain object so history can never grow without limit.
+  const MAX_PROV_CHARS = 16000;
+  function boundedProv(prov) {
+    if (!prov || typeof prov !== 'object' || prov.v !== 1 || typeof prov.id !== 'string') return null;
+    try {
+      const text = JSON.stringify(prov);
+      return text.length <= MAX_PROV_CHARS ? JSON.parse(text) : null;
+    } catch (_e) { return null; }
+  }
+
   // ── record user-visible playable rows (dedup + origin) ──
   function recordRows(store, gameId, rows, origin, ctx) {
     const now = (ctx && ctx.now) || Date.now();
@@ -75,7 +86,11 @@
       if (!main.length) continue; // not a real playable row (never store partials/internal trials)
       const sig = rowSignature(gameId, main, bonus, target, targetDrawId);
       const existing = out.find((e) => e.sig === sig);
+      const prov = boundedProv(r.prov);
       if (existing) {
+        // Same combination re-recorded: keep the richer provenance of the SAME lineage (more
+        // events appended), or adopt one if the stored row had none. Never swap lineages.
+        if (prov && (!existing.prov || (existing.prov.id === prov.id && (prov.events || []).length >= (existing.prov.events || []).length))) existing.prov = prov;
         // dedup: keep earliest createdAt + strongest status; upgrade generic origin to a real one
         if (origin && origin.saved) existing.saved = true;
         if (origin && origin.played) existing.played = true;
@@ -95,6 +110,7 @@
         targetDrawDate: target,
         targetDrawId,
         lastMatchedDrawDate: null,
+        prov,
       });
     }
     return out;
@@ -147,6 +163,7 @@
       tier: prize.name || null, tierKey: prize.key || null, level: prize.lvl || 0,
       kind: classify(entry),
       source: entry.source, sourceLabel: entry.sourceLabel, modelId: entry.modelId,
+      prov: entry.prov || null,
       createdAt: entry.createdAt, saved: !!entry.saved, played: !!entry.played,
       payout: null, payoutState: 'pending',
       notifiedAt: null,
