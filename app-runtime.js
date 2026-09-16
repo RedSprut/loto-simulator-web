@@ -728,13 +728,37 @@ const saveROI=o=>localStorage.setItem(ROI_KEY(),JSON.stringify(o));
 // ═══════════════════════════════════════════════
 function initTheme(){
   const saved=localStorage.getItem('loto_theme');
-  const prefersDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
-  if(saved==='dark'||(saved===null&&prefersDark)){applyDark();}
-  else applyLight();
+  const mode=(saved==='light'||saved==='dark'||saved==='system')?saved:'system';
+  setThemePreference(mode,false);
+  if(!window.__lotoThemeMediaWired){
+    window.__lotoThemeMediaWired=true;
+    const media=window.matchMedia('(prefers-color-scheme:dark)');
+    const follow=()=>{if(window.__lotoThemePreference==='system')setThemePreference('system',false);};
+    if(media.addEventListener)media.addEventListener('change',follow);else if(media.addListener)media.addListener(follow);
+  }
 }
-function applyDark(){document.body.classList.add('dark');document.documentElement.dataset.theme='dark';document.getElementById('theme-btn').textContent='☀️';localStorage.setItem('loto_theme','dark');updateThemeColor();}
-function applyLight(){document.body.classList.remove('dark');document.documentElement.dataset.theme='light';document.getElementById('theme-btn').textContent='🌙';localStorage.setItem('loto_theme','light');updateThemeColor();}
-function toggleDark(){document.body.classList.contains('dark')?applyLight():applyDark();}
+function setThemePreference(mode,persist=true){
+  if(!['light','dark','system'].includes(mode))mode='system';
+  const resolved=mode==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):mode;
+  window.__lotoThemePreference=mode;
+  document.body.classList.toggle('dark',resolved==='dark');
+  document.documentElement.dataset.theme=resolved;
+  document.documentElement.dataset.themeMode=mode;
+  const btn=document.getElementById('theme-btn');if(btn){btn.textContent=mode==='system'?'🌓':(resolved==='dark'?'☀️':'🌙');btn.setAttribute('aria-pressed',resolved==='dark'?'true':'false');btn.dataset.themeMode=mode;}
+  if(persist)localStorage.setItem('loto_theme',mode);
+  updateThemeColor();
+  window.dispatchEvent(new CustomEvent('loto:themechange',{detail:{mode,resolved}}));
+}
+function applyDark(){setThemePreference('dark');}
+function applyLight(){setThemePreference('light');}
+function applySystemTheme(){setThemePreference('system');}
+// The existing header control cycles light → dark → system, so SYSTEM is reachable without any
+// new UI. In system mode the app follows the OS and keeps following it live (see initTheme's
+// prefers-color-scheme listener); 🌓 marks that state so it is distinguishable from a fixed theme.
+function toggleDark(){
+  const mode=window.__lotoThemePreference||'system';
+  setThemePreference(mode==='light'?'dark':mode==='dark'?'system':'light');
+}
 
 // ═══════════════════════════════════════════════
 //  PAGE
@@ -3004,6 +3028,8 @@ async function renderHistory(){
   const histFrag=document.createDocumentFragment();
   draws.forEach(d=>{
     const div=document.createElement('div');div.className='hist-item';
+    div.dataset.drawDate=String(d.date||'');
+    div.dataset.drawId=String(d.drawId||d.date||'');
     let balls=d.main.map(n=>`<div class="hball ${l.cls}-m">${n}</div>`).join('');
     let histBallCount=(d.main||[]).length,histSepCount=0;
     if(d.extraGroups&&d.extraGroups.length){
@@ -3464,6 +3490,22 @@ async function revealPrizeDraw(gameId,drawId,dateStr,cb){
     return done();
   }catch(e){done();}
 }
+async function revealResultDraw(gameId,drawId,dateStr,cb){
+  const done=()=>{try{if(typeof cb==='function')cb();}catch(e){}};
+  try{
+    const date=_normDrawDate(dateStr)||_normDrawDate(drawId);
+    if(gameId&&window.selLot&&cur!==gameId)selLot(gameId);
+    if(window.selPage)selPage('ana');
+    if(window.selAT)await selAT('inp');else await renderHistory();
+    const list=document.getElementById('hist-list');
+    const safe=window.CSS&&CSS.escape?CSS.escape(String(drawId||date||'')):String(drawId||date||'').replace(/["\\]/g,'\\$&');
+    let row=list&&drawId?list.querySelector('.hist-item[data-draw-id="'+safe+'"]'):null;
+    if(!row&&list&&date)row=list.querySelector('.hist-item[data-draw-date="'+date+'"]');
+    if(row){_focusPrizeCard(row);done();return;}
+    if(typeof window.showFeedback==='function')window.showFeedback((L&&L().name)||gameId,_ncText('nc.status.awaiting'),'⏳',4200);
+  }catch(e){}
+  done();
+}
 async function revealUpcomingDraw(gameId,drawId,dateStr,cb){
   const done=()=>{try{if(typeof cb==='function')cb();}catch(e){}};
   try{
@@ -3473,6 +3515,7 @@ async function revealUpcomingDraw(gameId,drawId,dateStr,cb){
   done();
 }
 window.revealPrizeDraw=revealPrizeDraw;
+window.revealResultDraw=revealResultDraw;
 window.revealUpcomingDraw=revealUpcomingDraw;
 
 // ─── JACKPOT CHART ────────────────────────────
@@ -4962,16 +5005,8 @@ function NOTIF_boot(){
 }
 function NOTIF_openDestination(d){
   try{
-    const lot=d.lotteryId;
-    if(lot&&LOTS[lot])selLot(lot);                 // preserve chosen lottery; never reset to Lotto
-    // Personal result notifications (saved-ticket checks / prize breakdowns) open the dedicated
-    // win/match history, NOT the generic Analytics→Prizes tab (replaces the dead 'chk' route).
-    const t=d.notificationType||'';
-    if((t==='saved_ticket_results'||t==='prize_breakdown')&&window.LotoWinMatch&&LotoWinMatch.ready){
-      try{const store=JSON.parse(localStorage.getItem((window.LotoWinMatchCore&&LotoWinMatchCore.MATCH_KEY)||'loto_match_records_v2')||'[]');if(store&&store.length){LotoWinMatch.openHistory();return;}}catch(_e){}
-    }
-    const dest=d.destination||'simulator';
-    selPage(dest==='analytics'?'ana':'sim');        // check + simulator both live on the sim page
+    window.__lotoPendingNotificationIntent=d;
+    if(window.LotoNotifCenter&&window.LotoNotifCenter.openDestination)window.LotoNotifCenter.openDestination(d);
   }catch(e){}
 }
 function NOTIF_consumeUrlDeepLink(){

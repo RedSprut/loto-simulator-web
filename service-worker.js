@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the 8ae2deb placeholder → short git SHA). Every deploy therefore gets a unique
+// (the dac850b placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-v8ae2deb';
+const CACHE_VERSION='loto-shell-vdac850b';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -133,8 +133,8 @@ self.addEventListener('push',event=>{
     body:payload.body||'',
     icon:'./icon-192.png',
     badge:'./favicon-64.png',
-    tag:payload.tag||(type+'-'+(payload.lotteryId||'')),
-    data:{notificationId:payload.notificationId||payload.id||'',notificationType:type,eventType:type,lotteryId:payload.lotteryId||'',drawId:payload.drawId||payload.date||'',destination:destination,deepLink:payload.deepLink||payload.deeplink||destination,createdAt:payload.createdAt||new Date().toISOString(),title:title,body:payload.body||''},
+    tag:payload.tag||(payload.notificationId||[type,payload.lotteryId||'',payload.drawId||payload.date||''].join('-')),
+    data:{notificationId:payload.notificationId||payload.id||'',notificationType:type,eventType:type,lotteryId:payload.lotteryId||'',drawId:payload.drawId||payload.date||'',destination:destination,deepLink:payload.deepLink||payload.deeplink||destination,createdAt:payload.createdAt||new Date().toISOString(),title:title,body:payload.body||'',payload:payload.payload||payload},
   };
   const full={notificationId:payload.notificationId||payload.id||'',notificationType:type,eventType:type,lotteryId:payload.lotteryId||'',drawId:payload.drawId||payload.date||'',destination:destination,deepLink:payload.deepLink||payload.deeplink||destination,title:title,body:payload.body||'',createdAt:payload.createdAt||new Date().toISOString(),unread:payload.unread,payload:payload.payload||payload};
   event.waitUntil(Promise.all([
