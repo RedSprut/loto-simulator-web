@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="f7f1d87" data-build-ts="2026-09-15T22:47:21.894Z">
+<html lang="en" data-build="8ae2deb" data-build-ts="2026-09-16T15:13:38.384Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=f7f1d87"></script>
+<script src="./boot-runtime.js?v=8ae2deb"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=f7f1d87">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=8ae2deb">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=f7f1d87">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=8ae2deb">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -1776,8 +1776,11 @@ button.ct-ball{cursor:pointer;min-width:44px;min-height:44px}
 .ct-badge-limited{background:rgba(55,160,214,.16);border-color:rgba(55,160,214,.5)}
 .ct-picker{margin:8px 0}
 .ct-picker-title{font-size:12.5px;font-weight:800;color:var(--sub2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}
-.ct-picker-list{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
-.ct-pick{flex:0 0 auto;max-width:280px;scroll-snap-align:start;display:flex;flex-direction:column;gap:6px;align-items:flex-start;text-align:left;padding:10px;border-radius:14px;border:2px solid var(--border);background:var(--bg2);color:var(--fg);cursor:pointer;font:inherit;min-height:44px}
+/* Combinations are analysed as a VERTICAL list: one full-width card per combination, scrolled
+   top-to-bottom. The old horizontal strip (overflow-x + x scroll-snap) hid combinations off the
+   right edge and forced a sideways swipe to compare them. */
+.ct-picker-list{display:flex;flex-direction:column;gap:8px;padding:2px 0 4px;max-height:min(46vh,360px);overflow-y:auto;overscroll-behavior:contain}
+.ct-pick{width:100%;display:flex;flex-direction:column;gap:6px;align-items:flex-start;text-align:left;padding:10px;border-radius:14px;border:2px solid var(--border);background:var(--bg2);color:var(--fg);cursor:pointer;font:inherit;min-height:44px}
 .ct-pick.on{border-color:var(--gold);box-shadow:0 0 0 3px rgba(233,180,76,.25)}
 .ct-pick-meta{font-size:11px;color:var(--sub2);line-height:1.35;white-space:normal}
 .ct-picker-empty p{font-size:13px;color:var(--sub2);margin:6px 0 10px;line-height:1.5}
@@ -1797,7 +1800,65 @@ button.ct-ball{cursor:pointer;min-width:44px;min-height:44px}
 .ct-kv-list dt{color:var(--sub2);font-weight:700}
 .ct-kv-list dd{margin:0;font-weight:700;overflow-wrap:anywhere}
 .mres-src,.sg-combo-src,.src-caption{font-size:11.5px;color:var(--sub2);margin-top:4px;line-height:1.35;overflow-wrap:anywhere}
-@media (prefers-reduced-motion:reduce){.ct-person-pick,.ct-check,.ct-bar i{transition:none}.ct-analyzing .ct-avatar{animation:none}}
+/* ── Live analysis scene: what is being analysed, who is working, who has finished ────── */
+/* The combination under analysis stays visible while the case scrolls. */
+.ct-stage{position:sticky;top:0;z-index:3;margin:0 0 10px;padding:8px 10px;border-radius:14px;background:color-mix(in srgb,var(--bg2) 92%,transparent);border:1px solid var(--border);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.ct-stage-lbl{font-size:11px;font-weight:800;color:var(--sub2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.ct-stage .ct-balls{gap:4px}
+.ct-stage .ct-ball{width:30px;height:30px;font-size:12.5px;min-width:0;min-height:0}
+/* Hourglass. One shared element so "still working" looks the same everywhere it appears. */
+.ct-hg{display:inline-block;font-style:normal;line-height:1;animation:ctHg 1.8s ease-in-out infinite;transform-origin:50% 50%}
+@keyframes ctHg{0%,45%{transform:rotate(0)}55%,95%{transform:rotate(180deg)}100%{transform:rotate(360deg)}}
+/* Whole-scene processing banner: the app is working, and it says who is still working. */
+.ct-proc{display:flex;align-items:center;gap:12px;padding:14px;margin:10px 0;border-radius:16px;border:1px solid rgba(233,180,76,.45);background:rgba(233,180,76,.12)}
+.ct-proc-hg{font-size:30px;line-height:1}
+.ct-proc-main{min-width:0;flex:1}
+.ct-proc-title{font-weight:900;font-size:14.5px}
+.ct-proc-sub{font-size:12.5px;color:var(--sub2);margin-top:2px;line-height:1.45}
+.ct-proc-bar{height:4px;border-radius:4px;margin-top:8px;background:var(--bg3);overflow:hidden;position:relative}
+.ct-proc-bar::after{content:'';position:absolute;inset:0;width:40%;border-radius:4px;background:var(--gold);animation:ctSlide 1.5s ease-in-out infinite}
+@keyframes ctSlide{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+/* Per-participant state: waiting · working · done · unavailable. */
+.ct-actor-state{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;white-space:nowrap}
+.ct-actor-state.is-working{color:var(--fg)}
+.ct-actor-state.is-done{color:#1a8a4a}
+.ct-actor-state.is-failed{color:#c0392b}
+:root:not([data-theme="light"]) .ct-actor-state.is-done{color:#4bd583}
+:root:not([data-theme="light"]) .ct-actor-state.is-failed{color:#ff8a8a}
+[data-theme="dark"] .ct-actor-state.is-done{color:#4bd583}
+[data-theme="dark"] .ct-actor-state.is-failed{color:#ff8a8a}
+/* Seat badge: the per-juror ⏳ / ✓ / ! marker on the round table. */
+.ct-seat-badge{position:absolute;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;pointer-events:none;border:2px solid var(--bg2);background:var(--bg3);color:var(--fg)}
+.ct-seat-badge.is-done{background:#1a8a4a;color:#fff}
+.ct-seat-badge.is-failed{background:#c0392b;color:#fff}
+.ct-seat.is-working .ct-avatar{box-shadow:0 0 0 3px rgba(233,180,76,.9)}
+.ct-seat.is-done .ct-avatar{box-shadow:0 0 0 3px #1a8a4a}
+.ct-seat.is-failed .ct-avatar{filter:grayscale(1) opacity(.6)}
+/* Defense counsel present in the scene while the court works. */
+.ct-counsel{display:flex;align-items:center;gap:10px;padding:10px 12px;margin:10px 0;border-radius:16px;border:1px solid var(--border);background:var(--bg2)}
+.ct-counsel-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+.ct-counsel-name{font-weight:800;font-size:13.5px}
+.ct-counsel-role{font-size:11.5px;color:var(--sub2)}
+/* Protest: one concrete disputed ball, never an abstract objection. */
+.ct-protest{border:1px solid rgba(220,60,60,.5);background:rgba(220,60,60,.07)}
+.ct-protest-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.ct-protest-title{font-weight:900;font-size:14px}
+.ct-protest-status{margin-left:auto;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;border:1px solid var(--border);background:var(--bg3)}
+.ct-protest-status.is-upheld{background:rgba(55,214,122,.18);border-color:rgba(55,214,122,.55)}
+.ct-protest-status.is-rejected{background:rgba(220,60,60,.16);border-color:rgba(220,60,60,.5)}
+/* Per-ball outcome: original · jury · defense · judge · result. */
+.ct-resolve{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:13.5px;margin:8px 0}
+.ct-resolve dt{color:var(--sub2);font-weight:700}
+.ct-resolve dd{margin:0;font-weight:700;overflow-wrap:anywhere}
+.ct-resolve .is-final{color:var(--fg);font-weight:900}
+/* Verdict summary: the headline numbers before any detail. */
+.ct-sum{border:1px solid rgba(233,180,76,.5);background:rgba(233,180,76,.1)}
+.ct-sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin-top:10px}
+.ct-sum-cell{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:9px 10px;display:flex;flex-direction:column;gap:2px}
+.ct-sum-cell b{font-family:'Unbounded',sans-serif;font-size:19px;line-height:1.1}
+.ct-sum-cell span{font-size:11.5px;color:var(--sub2);line-height:1.35}
+@media (prefers-reduced-motion:reduce){.ct-person-pick,.ct-check,.ct-bar i{transition:none}.ct-analyzing .ct-avatar{animation:none}
+  .ct-hg,.ct-proc-bar::after{animation:none}}
 </style>
 </head>
 <body class="access-pending">
@@ -2938,6 +2999,27 @@ body.account-open .bnav{z-index:570}
 .acc-datebtn:focus-visible{outline:2px solid var(--hdr-a,var(--gold));outline-offset:2px}
 .acc-datebtn svg{width:20px;height:20px;flex-shrink:0;color:var(--hdr-a,var(--gold))}
 .acc-datebtn.empty{color:var(--sub)}
+/* Profile card: loading skeleton → view mode (what is saved) → edit mode. */
+.acc-dataload{display:grid;gap:8px;padding:4px 0 10px}
+.acc-dataload[hidden],.acc-view[hidden],.acc-edit[hidden]{display:none}
+.acc-skel{display:block;height:14px;border-radius:7px;background:linear-gradient(90deg,var(--bg3) 25%,color-mix(in srgb,var(--border) 60%,var(--bg3)) 37%,var(--bg3) 63%);background-size:400% 100%;animation:acc-skel 1.4s ease infinite}
+.acc-skel-lbl{width:38%}
+.acc-skel-val{width:72%;height:20px}
+@keyframes acc-skel{0%{background-position:100% 50%}100%{background-position:0 50%}}
+.acc-dataload-text{font-size:12.5px;font-weight:700;color:var(--sub2)}
+.acc-view{display:grid;gap:12px;margin-bottom:4px}
+.acc-viewrow{display:flex;flex-direction:column;gap:4px}
+.acc-viewval{font-size:15px;font-weight:800;color:var(--fg);overflow-wrap:anywhere}
+.acc-mydata>.acc-btn{margin-top:10px}
+/* Unsaved-changes question (three outcomes). */
+.accq-ov{position:fixed;inset:0;z-index:600;background:rgba(6,8,14,.58);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .18s}
+.accq-ov.show{opacity:1;pointer-events:all}
+.accq-box{width:100%;max-width:380px;max-height:92vh;max-height:min(92vh,92dvh);overflow-y:auto;background:var(--modal-bg);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.accq-title{font-family:'Unbounded',sans-serif;font-size:16px;font-weight:900;color:var(--fg);margin-bottom:8px}
+.accq-msg{font-size:13.5px;line-height:1.5;color:var(--sub2);margin-bottom:14px}
+.accq-btns{display:flex;flex-direction:column;gap:8px}
+.accq-btns .acc-btn{margin:0}
+@media (prefers-reduced-motion:reduce){.acc-skel{animation:none}}
 .cal-ov{position:fixed;inset:0;z-index:580;background:rgba(6,8,14,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .18s}
 .cal-ov.show{opacity:1;pointer-events:all}
 .cal-box{width:100%;max-width:360px;max-height:92vh;max-height:min(92vh,92dvh);overflow-y:auto;background:var(--modal-bg);border:1px solid var(--border);border-radius:22px;padding:16px;box-shadow:0 24px 70px rgba(0,0,0,.5);transform:translateY(10px);transition:transform .22s cubic-bezier(.34,1.2,.5,1)}
@@ -3098,22 +3180,41 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
         </dl>
       </div>
 
-      <div class="acc-card acc-mydata" id="acc-mydata" hidden>
+      <div class="acc-card acc-mydata" id="acc-mydata" hidden data-mode="loading">
         <div class="acc-card-title">Мои данные</div>
-        <label class="acc-field">
-          <span class="acc-field-lbl">Имя в профиле</span>
-          <input type="text" id="acc-displayname" maxlength="60" autocomplete="name" placeholder="Как к вам обращаться" aria-label="Имя в профиле">
-        </label>
-        <label class="acc-field">
-          <span class="acc-field-lbl">День рождения</span>
-          <button type="button" class="acc-datebtn" id="acc-birthday-btn" data-loto-event-click="AccountUI.openCalendar()" aria-haspopup="dialog">
-            <span id="acc-birthday-display">Не указан</span>
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          </button>
-          <input type="hidden" id="acc-birthday">
-        </label>
-        <div class="acc-field-hint">В день рождения симулятор поздравит вас на вашем языке.</div>
-        <button class="acc-btn acc-btn-soft wide" id="acc-savedata-btn" type="button" data-loto-event-click="AccountUI.saveData()">Сохранить</button>
+        <!-- Loading. The profile may already exist on the server, so we must never show empty
+             fields with an active "Save" and swap the stored values in a second later. -->
+        <div class="acc-dataload" id="acc-data-loading" aria-live="polite">
+          <span class="acc-skel acc-skel-lbl" aria-hidden="true"></span>
+          <span class="acc-skel acc-skel-val" aria-hidden="true"></span>
+          <span class="acc-skel acc-skel-lbl" aria-hidden="true"></span>
+          <span class="acc-skel acc-skel-val" aria-hidden="true"></span>
+          <span class="acc-dataload-text">Загружаем профиль…</span>
+        </div>
+        <!-- View mode: exactly what is saved. Fields do not look editable until Edit is pressed. -->
+        <div class="acc-view" id="acc-data-view" hidden>
+          <div class="acc-viewrow"><span class="acc-field-lbl">Имя в профиле</span><span class="acc-viewval" id="acc-view-name" data-i18n-ignore></span></div>
+          <div class="acc-viewrow"><span class="acc-field-lbl">День рождения</span><span class="acc-viewval" id="acc-view-birthday" data-i18n-ignore></span></div>
+        </div>
+        <!-- Edit mode: the same two fields, editable. -->
+        <div class="acc-edit" id="acc-data-edit" hidden>
+          <label class="acc-field">
+            <span class="acc-field-lbl">Имя в профиле</span>
+            <input type="text" id="acc-displayname" maxlength="60" autocomplete="name" placeholder="Как к вам обращаться" aria-label="Имя в профиле">
+          </label>
+          <label class="acc-field">
+            <span class="acc-field-lbl">День рождения</span>
+            <button type="button" class="acc-datebtn" id="acc-birthday-btn" data-loto-event-click="AccountUI.openCalendar()" aria-haspopup="dialog">
+              <span id="acc-birthday-display">Не указан</span>
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" stroke="currentColor" stroke-width="1.6"/><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </button>
+            <input type="hidden" id="acc-birthday">
+          </label>
+          <div class="acc-field-hint">В день рождения симулятор поздравит вас на вашем языке.</div>
+        </div>
+        <button class="acc-btn acc-btn-soft wide" id="acc-edit-btn" type="button" data-loto-event-click="AccountUI.editData()" hidden>Редактировать</button>
+        <button class="acc-btn acc-btn-primary wide" id="acc-savedata-btn" type="button" data-loto-event-click="AccountUI.saveData()" hidden>Сохранить информацию</button>
+        <button class="acc-btn acc-btn-soft wide" id="acc-canceldata-btn" type="button" data-loto-event-click="AccountUI.cancelEdit()" hidden>Отмена</button>
         <div class="acc-msg" id="acc-data-msg" aria-live="polite" hidden></div>
       </div>
 
@@ -3252,6 +3353,20 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
   </div>
 </div>
 
+<!-- НЕСОХРАНЁННЫЕ ИЗМЕНЕНИЯ ПРОФИЛЯ. Три исхода, поэтому это не customConfirm (у него их два:
+     подтвердить / отменить, причём закрытие окна равно отмене). -->
+<div class="accq-ov" id="accq-ov" role="alertdialog" aria-modal="true" aria-labelledby="accq-title" aria-describedby="accq-msg">
+  <div class="accq-box">
+    <div class="accq-title" id="accq-title">Есть несохранённые изменения</div>
+    <div class="accq-msg" id="accq-msg">Сохранить изменения профиля перед выходом?</div>
+    <div class="accq-btns">
+      <button class="acc-btn acc-btn-primary wide" type="button" data-loto-event-click="AccountUI.answerUnsaved('save')">Сохранить</button>
+      <button class="acc-btn acc-btn-soft wide" type="button" data-loto-event-click="AccountUI.answerUnsaved('discard')">Не сохранять</button>
+      <button class="acc-btn acc-btn-soft wide" type="button" data-loto-event-click="AccountUI.answerUnsaved('keep')">Продолжить редактирование</button>
+    </div>
+  </div>
+</div>
+
 <!-- FEEDBACK MODAL -->
 <div class="fb-ov" id="fb-ov" role="dialog" aria-modal="true" aria-labelledby="fb-title" aria-describedby="fb-msg">
   <div class="fb-box">
@@ -3268,22 +3383,22 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=f7f1d87"></script>
-<script src="./commercial-config.js?v=f7f1d87"></script>
-<script src="./event-runtime.js?v=f7f1d87"></script>
-<script src="./auth-client.js?v=f7f1d87"></script>
-<script src="./native-loader.js?v=f7f1d87"></script>
-<script src="./i18n-catalog.js?v=f7f1d87"></script>
-<script src="./i18n-runtime.js?v=f7f1d87"></script>
-<script src="./owner-analytics-lib.js?v=f7f1d87"></script>
-<script src="./analytics-telemetry.js?v=f7f1d87"></script>
-<script src="./win-match-core.js?v=f7f1d87"></script>
-<script src="./court-core.js?v=f7f1d87"></script>
-<script src="./owner-dashboard.js?v=f7f1d87"></script>
-<script src="./app-runtime.js?v=f7f1d87"></script>
-<script src="./inline-runtime-2.js?v=f7f1d87"></script>
-<script src="./commercial-runtime.js?v=f7f1d87"></script>
-<script src="./inline-runtime-3.js?v=f7f1d87"></script>
+<script src="./version.js?v=8ae2deb"></script>
+<script src="./commercial-config.js?v=8ae2deb"></script>
+<script src="./event-runtime.js?v=8ae2deb"></script>
+<script src="./auth-client.js?v=8ae2deb"></script>
+<script src="./native-loader.js?v=8ae2deb"></script>
+<script src="./i18n-catalog.js?v=8ae2deb"></script>
+<script src="./i18n-runtime.js?v=8ae2deb"></script>
+<script src="./owner-analytics-lib.js?v=8ae2deb"></script>
+<script src="./analytics-telemetry.js?v=8ae2deb"></script>
+<script src="./win-match-core.js?v=8ae2deb"></script>
+<script src="./court-core.js?v=8ae2deb"></script>
+<script src="./owner-dashboard.js?v=8ae2deb"></script>
+<script src="./app-runtime.js?v=8ae2deb"></script>
+<script src="./inline-runtime-2.js?v=8ae2deb"></script>
+<script src="./commercial-runtime.js?v=8ae2deb"></script>
+<script src="./inline-runtime-3.js?v=8ae2deb"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3430,9 +3545,9 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
 .lnc-table th,.lnc-table td{padding:9px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08)}
 .lnc-table th{color:#e9d69c;font-weight:900;background:rgba(255,255,255,.05)}
 </style>
-<script src="./notification-center.js?v=f7f1d87"></script>
-<script src="./notifications-runtime.js?v=f7f1d87"></script>
-<script src="./pwa-runtime.js?v=f7f1d87"></script>
+<script src="./notification-center.js?v=8ae2deb"></script>
+<script src="./notifications-runtime.js?v=8ae2deb"></script>
+<script src="./pwa-runtime.js?v=8ae2deb"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3443,8 +3558,8 @@ html.lnc-open,html.lnc-open body{overflow:hidden!important;touch-action:none}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=f7f1d87"></script>
-<script src="./inline-runtime-5.js?v=f7f1d87"></script>
-<script src="./inline-runtime-6.js?v=f7f1d87"></script>
+<script src="./inline-runtime-4.js?v=8ae2deb"></script>
+<script src="./inline-runtime-5.js?v=8ae2deb"></script>
+<script src="./inline-runtime-6.js?v=8ae2deb"></script>
 </body>
 </html>

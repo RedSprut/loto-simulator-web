@@ -6353,7 +6353,7 @@ async function JC_continue(){
   // Nested utility dialogs stay above their parent feature (birth-date editor
   // over Quantum-Astral, confirmation over the editor) instead of replacing it.
   var TRANSIENT={'busy-ov':1,'aved-ov':1};
-  var NESTED={'qab-ov':1,'cc-ov':1,'period-ov':1,'court-layer-ov':1};
+  var NESTED={'qab-ov':1,'cc-ov':1,'period-ov':1,'court-layer-ov':1,'accq-ov':1};
   var CRITICAL={
     'cc-ov':1,'fb-ov':1,'prev-ov':1,'pro-ov':1,'mres-ov':1,'jc-ov':1,'court-ov':1,
     'cons-ov':1,'qa-ov':1,'adv-ov':1,'sup-ov':1,'pdx-ov':1,'matrix-ov':1,

@@ -81,13 +81,71 @@
     }
   }
   let loadedUid=null,profileCache=null,profileRequestSeq=0,avatarRevision=0;
+  // ── Profile: loading → (no profile yet: edit + "Сохранить информацию") | (saved: view + "Редактировать") ──
+  // Two rules drive every button here: a successful save must never leave an active "Save"
+  // standing, and we never ask to save — or send — data that has not actually changed. "Changed"
+  // is a real comparison against the last snapshot the SERVER confirmed, not a keystroke flag.
+  const PROFILE_EMPTY={displayName:'',birthday:''};
+  let profileMode='loading';               // 'loading' | 'empty' | 'view' | 'edit'
+  let savedProfile={...PROFILE_EMPTY};     // last values confirmed by the server
+  let profileSaving=false;
+  const hasSavedProfile=()=>Boolean(savedProfile.displayName||savedProfile.birthday);
+  function readProfileForm(){
+    return{
+      displayName:(($('acc-displayname')||{}).value||'').trim().slice(0,60),
+      birthday:(($('acc-birthday')||{}).value||'').trim(),
+    };
+  }
+  function writeProfileForm(data){
+    const name=$('acc-displayname');if(name)name.value=data.displayName||'';
+    setBirthdayValue(data.birthday||null);
+  }
+  function profileDirty(){
+    if(profileMode!=='edit')return false;
+    const now=readProfileForm();
+    return now.displayName!==savedProfile.displayName||now.birthday!==savedProfile.birthday;
+  }
+  function renderProfileCard(){
+    const card=$('acc-mydata');if(!card)return;
+    card.dataset.mode=profileMode;
+    const show=(id,on)=>{const el=$(id);if(el)el.hidden=!on;};
+    const editing=profileMode==='edit'||profileMode==='empty';
+    show('acc-data-loading',profileMode==='loading');
+    show('acc-data-view',profileMode==='view');
+    show('acc-data-edit',editing);
+    show('acc-edit-btn',profileMode==='view');
+    show('acc-savedata-btn',editing);
+    show('acc-canceldata-btn',profileMode==='edit');
+    const save=$('acc-savedata-btn');
+    if(save){
+      // A first profile can always be saved; an existing one only once something really changed.
+      save.disabled=profileSaving||(profileMode==='edit'&&!profileDirty());
+      save.textContent=T(profileMode==='empty'?'Сохранить информацию':'Сохранить изменения');
+      save.setAttribute('aria-busy',String(profileSaving));
+    }
+    if(profileMode==='view'){
+      const nameEl=$('acc-view-name');if(nameEl)nameEl.textContent=savedProfile.displayName||T('Не указано');
+      const bEl=$('acc-view-birthday');if(bEl)bEl.textContent=fmtBirthdayDisplay(savedProfile.birthday)||T('Не указан');
+    }
+  }
+  function setProfileMode(mode){profileMode=mode;renderProfileCard();}
+  function resetProfileState(){
+    savedProfile={...PROFILE_EMPTY};profileSaving=false;
+    writeProfileForm(savedProfile);
+    setProfileMode('loading');
+  }
   function applyProfile(p){
     profileCache=p||null;
     setAvatar(p&&p.avatarUrl||null);
     const name=(p&&p.displayName||'').trim();
     const nameEl=$('acc-name');if(nameEl){nameEl.textContent=name;nameEl.hidden=!name;}
-    const dn=$('acc-displayname');if(dn&&document.activeElement!==dn)dn.value=name;
-    setBirthdayValue((p&&p.birthday||'').slice(0,10)||null);
+    savedProfile={displayName:name,birthday:((p&&p.birthday)||'').slice(0,10)};
+    // Never overwrite what the user is currently typing: a getProfile() started before the edit
+    // can still land afterwards.
+    if(profileMode!=='edit'){
+      writeProfileForm(savedProfile);
+      setProfileMode(hasSavedProfile()?'view':'empty');
+    }else renderProfileCard();
     maybeGreetBirthday(p);
   }
   // Birthday value lives in a hidden input (ISO YYYY-MM-DD or empty) with a localized display.
@@ -104,14 +162,19 @@
     const text=fmtBirthdayDisplay(iso);
     if(disp)disp.textContent=text||'Не указан';
     if(btn)btn.classList.toggle('empty',!text);
+    // Picking or clearing a date changes the form, so the Save button state must follow.
+    renderProfileCard();
   }
   async function loadAvatar(force){
     const {user,confirmed}=accountState();
     const uid=confirmed?user.id:null;
-    if(!uid){profileRequestSeq++;loadedUid=null;profileCache=null;setAvatar(null);const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}return;}
+    if(!uid){profileRequestSeq++;loadedUid=null;profileCache=null;setAvatar(null);resetProfileState();const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}return;}
     if(!force&&uid===loadedUid)return; // profile already loaded for this account
     loadedUid=uid;
     const requestSeq=++profileRequestSeq,revision=avatarRevision;
+    // Show the skeleton, not an empty form with an active Save, until we know whether a profile
+    // already exists. An edit in progress keeps its own state.
+    if(profileMode!=='edit')setProfileMode('loading');
     try{const p=await (window.LotoAuth&&window.LotoAuth.getProfile&&window.LotoAuth.getProfile());
       // A profile request started before a successful upload/removal must never overwrite the
       // newer stored avatar when its slower response arrives.
@@ -119,7 +182,14 @@
       applyProfile(p);
       // Persist the current UI locale so a future birthday greeting can be in the right language.
       try{const loc=document.documentElement.lang||'ru';if(p&&p.locale!==loc)window.LotoAuth.updateProfile({locale:loc}).catch(()=>{});}catch(_e2){}
-    }catch(_e){if(requestSeq===profileRequestSeq)loadedUid=null;}
+    }catch(_e){
+      // The profile could not be read. Do not leave the card stuck on the skeleton, and do not
+      // claim "no profile yet" — fall back to whatever we last knew.
+      if(requestSeq===profileRequestSeq){
+        loadedUid=null;
+        if(profileMode==='loading')setProfileMode(hasSavedProfile()?'view':'empty');
+      }
+    }
   }
   // In-app birthday greeting: when the signed-in user's birthday (month+day) is today, show a
   // localized congratulation once per day. Fully client-side — no push infrastructure touched.
@@ -407,19 +477,54 @@
     calClear(){calSelIso=null;setBirthdayValue(null);this.calClose();},
     calClose(){const ov=$('cal-ov');if(ov)ov.classList.remove('show');},
     calDone(){setBirthdayValue(calSelIso||null);this.calClose();},
+    editData(){
+      writeProfileForm(savedProfile);
+      msg('acc-data-msg','',null);
+      setProfileMode('edit');
+      const name=$('acc-displayname');if(name)try{name.focus();}catch(_e){}
+    },
+    cancelEdit(){
+      writeProfileForm(savedProfile);
+      msg('acc-data-msg','',null);
+      setProfileMode(hasSavedProfile()?'view':'empty');
+    },
     async saveData(){
-      const name=(($('acc-displayname')||{}).value||'').trim().slice(0,60);
-      const birthday=(($('acc-birthday')||{}).value||'').trim();
-      const btn=$('acc-savedata-btn');if(btn)btn.disabled=true;
+      if(profileSaving)return false;
+      const next=readProfileForm();
+      // Nothing changed → nothing to send. (Save is already disabled in this state; this is the
+      // guard for keyboard/programmatic activation.)
+      if(profileMode==='edit'&&next.displayName===savedProfile.displayName&&next.birthday===savedProfile.birthday){
+        msg('acc-data-msg','',null);setProfileMode('view');return true;
+      }
+      profileSaving=true;renderProfileCard();
       msg('acc-data-msg','Сохраняем…','info');
       try{
-        const info=await window.LotoAuth.updateProfile({displayName:name||null,birthday:birthday||null,locale:document.documentElement.lang||'ru'});
+        const info=await window.LotoAuth.updateProfile({displayName:next.displayName||null,birthday:next.birthday||null,locale:document.documentElement.lang||'ru'});
+        profileSaving=false;
+        // Leave edit mode BEFORE applyProfile so it refreshes the form from the server's answer.
+        profileMode=hasSavedProfile()||next.displayName||next.birthday?'view':'empty';
         applyProfile(info);
-        msg('acc-data-msg','Данные сохранены.','success');
+        msg('acc-data-msg','Изменения сохранены.','success');
+        return true;
       }catch(err){
+        // A failed save must never look like a success, and must never lose what was typed:
+        // stay in edit mode, still dirty, with the existing saved values untouched.
+        profileSaving=false;renderProfileCard();
         const c=String((err&&err.message)||err||'');
-        msg('acc-data-msg',/invalid_birthday/.test(c)?'Проверьте дату рождения.':/account_required/.test(c)?'Войдите в аккаунт, чтобы сохранить данные.':'Не удалось сохранить. Попробуйте ещё раз.','error');
-      }finally{if(btn)btn.disabled=false;}
+        msg('acc-data-msg',/invalid_birthday/.test(c)?'Проверьте дату рождения.':/account_required/.test(c)?'Войдите в аккаунт, чтобы сохранить данные.':'Не удалось сохранить изменения. Повторите попытку.','error');
+        return false;
+      }
+    },
+    // Three real outcomes, so this is its own dialog rather than customConfirm (which has two).
+    answerUnsaved(choice){
+      const resolve=pendingUnsaved;pendingUnsaved=null;
+      const ov=$('accq-ov');
+      // Clear __lotoClose FIRST: closeOverlay() delegates to it and returns, so leaving it in
+      // place would resolve nothing and never hide the dialog.
+      if(ov)ov.__lotoClose=null;
+      if(window.LotoModals)window.LotoModals.closeModal('accq-ov');
+      else if(ov)ov.classList.remove('show');
+      if(resolve)resolve(choice);
     },
     async signOut(){try{await window.LotoCommercial.signOut();avatarRevision++;profileRequestSeq++;setAvatar(null);profileCache=null;loadedUid=null;const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}msg('acc-auth-msg','',null);msg('acc-avatar-msg','',null);msg('acc-data-msg','',null);render();}catch(_e){}},
     async deleteAccount(){
@@ -444,9 +549,39 @@
   };
   window.AccountUI=AccountUI;
 
+  // Leaving the cabinet with unsaved edits asks first — and only when something really is unsaved.
+  // Returns true when it is safe to leave.
+  let pendingUnsaved=null;
+  function askUnsaved(){
+    return new Promise(resolve=>{
+      pendingUnsaved=resolve;
+      const ov=$('accq-ov');
+      if(!ov){pendingUnsaved=null;resolve('discard');return;}
+      // closeOverlay() hands control to __lotoClose and returns, so this handler owns the
+      // hiding. Escape / native Back / the modal manager all land here and mean "keep editing".
+      ov.__lotoClose=()=>{
+        ov.__lotoClose=null;ov.classList.remove('show');
+        const r=pendingUnsaved;pendingUnsaved=null;if(r)r('keep');
+      };
+      if(window.LotoModals)window.LotoModals.openModal('accq-ov');else ov.classList.add('show');
+    });
+  }
+  async function confirmLeaveProfile(){
+    if(!profileDirty())return true;
+    const choice=await askUnsaved();
+    if(choice==='keep')return false;
+    if(choice==='save')return await AccountUI.saveData();
+    AccountUI.cancelEdit();
+    return true;
+  }
   window.openAccount=function(){
     const el=$('account-ov');
-    if(el)el.__lotoClose=()=>{el.classList.remove('show');document.body.classList.remove('account-open');const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','false');};
+    if(el)el.__lotoClose=()=>{
+      // Escape / native Back / the modal manager all come through here, so the unsaved guard has
+      // to live here too — otherwise it is trivially bypassed.
+      if(profileDirty()){void confirmLeaveProfile().then(ok=>{if(ok)window.closeAccount();});return;}
+      el.classList.remove('show');document.body.classList.remove('account-open');const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','false');
+    };
     document.body.classList.add('account-open');
     if(window.LotoModals)window.LotoModals.openModal('account-ov');else if(el)el.classList.add('show');
     const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','true');
@@ -454,14 +589,19 @@
     try{window.LotoCommercial&&window.LotoCommercial.refreshAccess&&window.LotoCommercial.refreshAccess();}catch(_e){}
   };
   window.closeAccount=function(){
+    if(profileDirty()){void confirmLeaveProfile().then(ok=>{if(ok)window.closeAccount();});return;}
     const el=$('account-ov');
-    if(window.LotoModals)window.LotoModals.closeModal('account-ov');else if(el?.__lotoClose)el.__lotoClose('close');else if(el)el.classList.remove('show');
+    if(el)el.__lotoClose=null;
+    if(window.LotoModals)window.LotoModals.closeModal('account-ov');else if(el)el.classList.remove('show');
     document.body.classList.remove('account-open');
     const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','false');
   };
 
   function wire(){
     const f=$('acc-avatar-file');if(f&&!f.__wired){f.__wired=1;f.addEventListener('change',e=>AccountUI.onFile(e));}
+    // Live dirty tracking: "Сохранить изменения" enables only once a value really differs.
+    const nameInput=$('acc-displayname');
+    if(nameInput&&!nameInput.__wired){nameInput.__wired=1;nameInput.addEventListener('input',()=>renderProfileCard());}
     // Immediately reflect a fresh Magic-Link login / entitlement change, and open the cabinet
     // straight after a successful sign-in (not the home screen).
     window.addEventListener('loto:accesschange',()=>{
