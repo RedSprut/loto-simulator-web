@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-16",
+  "updatedAt": "2026-09-17",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
@@ -31043,6 +31043,52 @@
       }
     ],
     "vikinglotto": [
+      {
+        "date": "2026-09-16",
+        "lotteryId": "vikinglotto",
+        "currency": "NOK",
+        "jackpot": 189.2,
+        "payoutTiers": [
+          {
+            "match": "6+1",
+            "label": "6+1",
+            "prizeAmount": 189184060,
+            "winners": 1
+          },
+          {
+            "match": "6+0",
+            "label": "6+0",
+            "prizeAmount": 1430740,
+            "winners": 1
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 41305,
+            "winners": 29
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 4600,
+            "winners": 107
+          },
+          {
+            "match": "4",
+            "label": "4",
+            "prizeAmount": 160,
+            "winners": 7119
+          },
+          {
+            "match": "3",
+            "label": "3",
+            "prizeAmount": 80,
+            "winners": 124535
+          }
+        ],
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/vikinglotto/resultater"
+      },
       {
         "date": "2026-09-09",
         "lotteryId": "vikinglotto",
@@ -82074,6 +82120,70 @@
     ],
     "powerball": [
       {
+        "date": "2026-09-16",
+        "lotteryId": "powerball",
+        "currency": "USD",
+        "jackpot": 271,
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 271000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 0
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 50000,
+            "winners": 7
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 100,
+            "winners": 234
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 100,
+            "winners": 781
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 7,
+            "winners": 15616
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 15374
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 115006
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 4,
+            "winners": 254335
+          }
+        ],
+        "source": "Powerball",
+        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-16&gc=powerball"
+      },
+      {
         "date": "2026-09-14",
         "lotteryId": "powerball",
         "currency": "USD",
@@ -82973,7 +83083,7 @@
         "date": "2026-08-12",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 1040,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -83030,8 +83140,8 @@
             "winners": 1684081
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-12&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-10",
@@ -92082,6 +92192,70 @@
     ],
     "powerballAustralia": [
       {
+        "date": "2026-09-17",
+        "lotteryId": "powerballAustralia",
+        "currency": "AUD",
+        "jackpot": 0,
+        "payoutTiers": [
+          {
+            "match": "7+1",
+            "label": "Division 1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "7+0",
+            "label": "Division 2",
+            "prizeAmount": 140235.05,
+            "winners": 3
+          },
+          {
+            "match": "6+1",
+            "label": "Division 3",
+            "prizeAmount": 11071.2,
+            "winners": 47
+          },
+          {
+            "match": "6+0",
+            "label": "Division 4",
+            "prizeAmount": 610.95,
+            "winners": 743
+          },
+          {
+            "match": "5+1",
+            "label": "Division 5",
+            "prizeAmount": 215.3,
+            "winners": 1594
+          },
+          {
+            "match": "4+1",
+            "label": "Division 6",
+            "prizeAmount": 92.5,
+            "winners": 23101
+          },
+          {
+            "match": "5+0",
+            "label": "Division 7",
+            "prizeAmount": 54.3,
+            "winners": 30592
+          },
+          {
+            "match": "3+1",
+            "label": "Division 8",
+            "prizeAmount": 24.5,
+            "winners": 144667
+          },
+          {
+            "match": "2+1",
+            "label": "Division 9",
+            "prizeAmount": 14.4,
+            "winners": 422906
+          }
+        ],
+        "source": "The Lott",
+        "sourceUrl": "https://www.thelott.com/powerball/results"
+      },
+      {
         "date": "2026-09-10",
         "lotteryId": "powerballAustralia",
         "currency": "AUD",
@@ -92718,8 +92892,8 @@
             "winners": 427353
           }
         ],
-        "source": "The Lott",
-        "sourceUrl": "https://www.thelott.com/powerball/results"
+        "source": "Australia National Lottery / The Lott",
+        "sourceUrl": "https://australia.national-lottery.com/powerball/results-archive-2026"
       },
       {
         "date": "2026-07-02",
