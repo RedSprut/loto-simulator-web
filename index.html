@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="80b6c06" data-build-ts="2026-09-16T15:55:47.232Z">
+<html lang="en" data-build="e8b6b16" data-build-ts="2026-09-17T16:51:19.446Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=80b6c06"></script>
+<script src="./boot-runtime.js?v=e8b6b16"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=80b6c06">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=e8b6b16">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=80b6c06">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=e8b6b16">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -545,10 +545,9 @@ body.dark input[type="number"]::-webkit-inner-spin-button,body.dark input[type="
 @media (max-width:699px) and (prefers-reduced-motion:reduce){
   .hdr,.bnav{transition:none}
 }
-/* Centre 3D-draw item: a neutral WHITE isometric die (its own colours, so it stays a
-   real 3D die on the themed footer, never dimmed/tinted). Highlighted only when its
-   overlay is actually open. Pips are mapped onto each face plane, so they never detach. */
-.bn-icon-3d svg{width:29px;height:29px;display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+/* Centre 3D-draw item: reuse the same dice glyph as the main draw button, sized to
+   the neighbouring nav icon boxes. Highlighted only when its overlay is open. */
+.bn-icon-3d{width:26px;height:26px;display:grid;place-items:center;font-size:24px;line-height:1;opacity:1;filter:none;text-shadow:none}
 .bn.on .bn-icon-3d{transform:translateY(-1px) scale(1.06)}
 #bn-drum3d:active .bn-icon-3d{transform:scale(.93)}
 
@@ -703,6 +702,7 @@ body.dark input[type="number"]::-webkit-inner-spin-button,body.dark input[type="
 .btn-exp{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--exp-border);background:var(--exp-bg);font-size:15px;font-weight:800;cursor:pointer;margin-top:8px;color:var(--exp-c);line-height:1.25}
 .matrix-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:12px;align-items:stretch}
 .matrix-actions .btn-draw,.matrix-actions .btn-exp{margin-top:0}
+.about-consent-btn{margin:2px 0 12px}.about-consent-btn[hidden]{display:none}
 .matrix-copy{width:auto;min-width:140px;padding:12px 14px}
 
 /* ROI */
@@ -1136,6 +1136,7 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
   .bn.on{background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 1px rgba(233,180,76,.35)}
   .bn.on::after{display:none}   /* desktop pill uses its own bg highlight, not the top bar */
   .bn-icon{font-size:19px}
+  .bn-icon-3d{font-size:24px}
   .bn-lbl{font-size:13px}
   .sg-sheet{max-width:min(900px,calc(100vw - 48px));border-radius:26px;padding-left:24px;padding-right:24px;align-self:center}
   .sg-ov{align-items:center}
@@ -1152,7 +1153,7 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
   body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
   .bnav{bottom:max(4px,env(safe-area-inset-bottom));width:min(560px,calc(100vw - env(safe-area-inset-left) - env(safe-area-inset-right) - 20px));height:54px;min-height:54px;padding:3px 7px}
   .bn{min-width:0;min-height:0;height:100%;padding:2px 4px;gap:1px}
-  .bn-icon svg{width:22px;height:22px}.bn-icon-3d svg{width:25px;height:25px}.bn-lbl{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .bn-icon svg{width:22px;height:22px}.bn-icon-3d{width:24px;height:24px;font-size:22px}.bn-lbl{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 }
 
 /* ── ШИРОКИЙ БРАУЗЕР: единая центрированная рабочая область ── */
@@ -2334,7 +2335,7 @@ button.ct-ball{cursor:pointer;min-width:44px;min-height:44px}
 <div class="bnav" role="navigation" aria-label="Primary">
   <div class="bn on" id="bn-sim" data-route="sim" data-loto-event-click="bottomNavRoute('sim')"><div class="bn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.6"/><path d="M8 15.1 6.4 20.4M16 15.1 17.6 20.4M6.4 20.4h11.2"/><circle cx="9.9" cy="8.4" r="1.6" fill="currentColor" stroke="none"/><circle cx="14.3" cy="9.5" r="1.35" fill="currentColor" stroke="none"/><circle cx="11.5" cy="12.1" r="1.25" fill="currentColor" stroke="none"/></svg></div><div class="bn-lbl">Симулятор</div></div>
   <div class="bn" id="bn-drum3d" data-route="drum3d" role="button" tabindex="0" aria-label="3D-розыгрыш" data-loto-event-click="bottomNavRoute('drum3d')">
-    <div class="bn-icon bn-icon-3d" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3 20.5 7.75 12 12.5 3.5 7.75Z" fill="#ffffff"/><path d="M3.5 7.75 12 12.5 12 21 3.5 16.25Z" fill="#b4bccb"/><path d="M20.5 7.75 12 12.5 12 21 20.5 16.25Z" fill="#dde1e9"/><path d="M12 3 20.5 7.75 20.5 16.25 12 21 3.5 16.25 3.5 7.75Z" fill="none" stroke="rgba(20,28,46,.34)" stroke-width=".7" stroke-linejoin="round"/><path d="M12 12.5 12 21M12 12.5 3.5 7.75M12 12.5 20.5 7.75" stroke="rgba(20,28,46,.18)" stroke-width=".55" stroke-linejoin="round"/><g fill="#28324c"><circle transform="matrix(8.5 -4.75 8.5 4.75 3.5 7.75)" cx=".5" cy=".5" r=".12"/><circle transform="matrix(8.5 4.75 0 8.5 3.5 7.75)" cx=".3" cy=".3" r=".12"/><circle transform="matrix(8.5 4.75 0 8.5 3.5 7.75)" cx=".7" cy=".7" r=".12"/><circle transform="matrix(8.5 -4.75 0 8.5 12 12.5)" cx=".28" cy=".28" r=".12"/><circle transform="matrix(8.5 -4.75 0 8.5 12 12.5)" cx=".5" cy=".5" r=".12"/><circle transform="matrix(8.5 -4.75 0 8.5 12 12.5)" cx=".72" cy=".72" r=".12"/></g></svg></div>
+    <div class="bn-icon bn-icon-3d" aria-hidden="true">🎲</div>
     <div class="bn-lbl">3D-тираж</div>
   </div>
   <div class="bn" id="bn-ana" data-route="ana" data-loto-event-click="bottomNavRoute('ana')"><div class="bn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="12" width="3.6" height="6.5" rx="1.2" fill="currentColor" stroke="none"/><rect x="10.2" y="8.5" width="3.6" height="10" rx="1.2" fill="currentColor" stroke="none"/><rect x="15.9" y="13.5" width="3.6" height="5" rx="1.2" fill="currentColor" stroke="none"/><path d="M4.5 8.2 9.4 5.2 14.3 7.8 19.6 3.8"/></svg></div><div class="bn-lbl">Аналитика</div></div>
@@ -3336,6 +3337,7 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
     <p class="about-p">В максимальной степени, допустимой применимым законодательством, разработчик не несёт ответственности за решения пользователя на основании результатов моделей, покупку реальных билетов у сторонних операторов, финансовые потери, упущенную прибыль, неверную интерпретацию результатов анализа, изменения правил или информации сторонними операторами, а также за ошибки или изменения внешних источников данных.</p>
     <div class="about-sh">Конфиденциальность</div>
     <p class="about-p">Lotto Simulator бережно относится к вашим данным. Сохранённые комбинации и настройки хранятся на вашем устройстве. Для работы расширенных функций используется анонимная учётная запись без обязательной регистрации.</p>
+    <button class="btn-exp about-consent-btn" id="about-privacy-settings" type="button" data-i18n-ignore hidden></button>
     <div class="about-sh">Источники данных</div>
     <p class="about-p">Приложение использует общедоступную историческую информацию о результатах лотерей. Источники и даты обновления доступны в приложении. Внешние данные могут изменяться сторонними операторами.</p>
     <div class="about-sh">Товарные знаки</div>
@@ -3397,22 +3399,21 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=80b6c06"></script>
-<script src="./commercial-config.js?v=80b6c06"></script>
-<script src="./event-runtime.js?v=80b6c06"></script>
-<script src="./auth-client.js?v=80b6c06"></script>
-<script src="./native-loader.js?v=80b6c06"></script>
-<script src="./i18n-catalog.js?v=80b6c06"></script>
-<script src="./i18n-runtime.js?v=80b6c06"></script>
-<script src="./owner-analytics-lib.js?v=80b6c06"></script>
-<script src="./analytics-telemetry.js?v=80b6c06"></script>
-<script src="./win-match-core.js?v=80b6c06"></script>
-<script src="./court-core.js?v=80b6c06"></script>
-<script src="./owner-dashboard.js?v=80b6c06"></script>
-<script src="./app-runtime.js?v=80b6c06"></script>
-<script src="./inline-runtime-2.js?v=80b6c06"></script>
-<script src="./commercial-runtime.js?v=80b6c06"></script>
-<script src="./inline-runtime-3.js?v=80b6c06"></script>
+<script src="./version.js?v=e8b6b16"></script>
+<script src="./commercial-config.js?v=e8b6b16"></script>
+<script src="./event-runtime.js?v=e8b6b16"></script>
+<script src="./auth-client.js?v=e8b6b16"></script>
+<script src="./native-loader.js?v=e8b6b16"></script>
+<script src="./i18n-catalog.js?v=e8b6b16"></script>
+<script src="./i18n-runtime.js?v=e8b6b16"></script>
+<script src="./consent-runtime.js?v=e8b6b16"></script>
+<script src="./analytics-telemetry.js?v=e8b6b16"></script>
+<script src="./win-match-core.js?v=e8b6b16"></script>
+<script src="./court-core.js?v=e8b6b16"></script>
+<script src="./app-runtime.js?v=e8b6b16"></script>
+<script src="./inline-runtime-2.js?v=e8b6b16"></script>
+<script src="./commercial-runtime.js?v=e8b6b16"></script>
+<script src="./inline-runtime-3.js?v=e8b6b16"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3561,9 +3562,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=80b6c06"></script>
-<script src="./notifications-runtime.js?v=80b6c06"></script>
-<script src="./pwa-runtime.js?v=80b6c06"></script>
+<script src="./notification-center.js?v=e8b6b16"></script>
+<script src="./notifications-runtime.js?v=e8b6b16"></script>
+<script src="./pwa-runtime.js?v=e8b6b16"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3574,8 +3575,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=80b6c06"></script>
-<script src="./inline-runtime-5.js?v=80b6c06"></script>
-<script src="./inline-runtime-6.js?v=80b6c06"></script>
+<script src="./inline-runtime-4.js?v=e8b6b16"></script>
+<script src="./inline-runtime-5.js?v=e8b6b16"></script>
+<script src="./inline-runtime-6.js?v=e8b6b16"></script>
 </body>
 </html>

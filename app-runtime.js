@@ -1514,6 +1514,56 @@ async function withCourtApp(run){
   catch(_error){showFeedback('Анализ недоступен','Не удалось загрузить экран анализа. Проверьте подключение и попробуйте ещё раз.','⚠️',0);return null;}
   return run(app);
 }
+// Owner dashboard (owner-analytics-lib.js + owner-dashboard.js, ≈48 KB) is not a startup script:
+// it loads only for a signed-in account that passes the server owner probe, or when #owner is
+// opened directly. owner-dashboard.js re-verifies ownership itself; every data call is checked
+// server-side, so loading it grants nothing.
+let ownerDashboardPromise=null,ownerProbedUser=null;
+function loadRuntimeScript(file){
+  return new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    const revision=courtRevision();
+    script.src=`./${file}`+(revision?`?v=${encodeURIComponent(revision)}`:'');
+    script.async=false;
+    script.onload=()=>resolve();
+    script.onerror=()=>{script.remove();reject(new Error(`load_failed:${file}`));};
+    document.head.appendChild(script);
+  });
+}
+function loadOwnerDashboard(){
+  if(window.LotoOwnerDashboard)return Promise.resolve(window.LotoOwnerDashboard);
+  if(!ownerDashboardPromise){
+    ownerDashboardPromise=(window.LotoOwnerLib?Promise.resolve():loadRuntimeScript('owner-analytics-lib.js'))
+      .then(()=>loadRuntimeScript('owner-dashboard.js'))
+      .then(()=>window.LotoOwnerDashboard)
+      .catch(error=>{ownerDashboardPromise=null;throw error;});
+  }
+  return ownerDashboardPromise;
+}
+async function probeOwnerDashboard(){
+  if(window.LotoOwnerDashboard)return;
+  try{
+    if(!(window.LotoAuth&&window.LotoAuth.getSession))return;
+    const session=await window.LotoAuth.getSession();
+    const user=session&&session.user;
+    if(!user||user.is_anonymous||!session.access_token||ownerProbedUser===user.id)return;
+    const config=window.LOTO_COMMERCIAL_CONFIG||{};
+    const base=String(config.supabaseUrl||'').replace(/\/+$/,'');
+    if(!base)return;
+    const response=await fetch(`${base}/functions/v1/owner-analytics`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json',apikey:String(config.supabasePublishableKey||''),Authorization:`Bearer ${session.access_token}`},
+      body:JSON.stringify({probe:true}),
+    });
+    const body=await response.json().catch(()=>null);
+    ownerProbedUser=user.id;
+    if(response.status===200&&body&&body.owner===true)await loadOwnerDashboard();
+  }catch(_error){/* network failure: the next access change probes again */}
+}
+window.addEventListener('loto:accesschange',()=>{probeOwnerDashboard();});
+window.addEventListener('hashchange',()=>{if(location.hash==='#owner')loadOwnerDashboard().catch(()=>{});});
+if(location.hash==='#owner')loadOwnerDashboard().catch(()=>{});
+setTimeout(()=>{probeOwnerDashboard();},1500);
 window.LotoCourtUI=Object.freeze({
   sourceLabel:courtSourceLabel,defenseBadge:courtDefenseBadge,attributionLines:courtAttributionLines,
   rowCaption:courtRowCaption,changedNumbers:courtChangedNumbers,originalOf:courtOriginalOf,
