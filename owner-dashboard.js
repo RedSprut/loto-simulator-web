@@ -37,6 +37,7 @@
     { id: 'funnels', label: 'Воронки' },
     { id: 'retention', label: 'Удержание' },
     { id: 'bots', label: 'Боты и QA' },
+    { id: 'consent', label: 'Согласия' },
     { id: 'quality', label: 'Качество данных' }
   ];
   var PRESETS = [
@@ -62,6 +63,11 @@
     channels: 'Источник берётся из перехода: домен-источник и метки кампании. Если источника нет (старые данные или возврат в уже открытой вкладке) — «Источник неизвестен». Ничего не домысливается.',
     geo: 'Местоположение определяется по IP на сервере и хранится грубо: страна, регион, город и координаты центра города. Сам IP не сохраняется. Точный адрес не показывается никогда.',
     live: 'Активны сейчас: профили с событиями за последние 5 минут.',
+    newPeople: 'Новые: первый визит за всё время попал внутрь выбранного периода.',
+    returningPeople: 'Вернувшиеся: человек был известен ДО начала периода и снова заходил внутри него.',
+    returnedAnotherDay: 'Приходили в разные дни: человек был активен минимум в два разных календарных дня внутри периода (по выбранному часовому поясу). Новый человек тоже может сюда попасть.',
+    repeatSessions: 'Повторные сессии: сколько сессий сверх первой пришлось на людей в этом периоде.',
+    consent: 'Долю согласившихся от ВСЕХ посетителей измерить нельзя: до решения не сохраняется ничего, поэтому закрывшие баннер следов не оставляют. Показаны решения, доля согласий среди них и доля данных, собранных с согласием.',
     funnels: 'Воронка по людям: на каждом шаге считается число людей, которые его достигли в выбранном периоде.',
     retention: 'Когорты по дню первого визита. D1/D7/D30 — вернулся ли человек ровно на 1-й, 7-й и 30-й день.',
     quality: 'Качество приёма: сколько событий принято, сколько отклонено и почему. Здесь же свежесть данных и распределение уверенности идентификации.'
@@ -597,13 +603,16 @@
       card('Подтверждённые люди', num(people.verified), 'вошли в аккаунт', 'verified', previous ? null : null) +
       card('Вероятные люди', num(people.probable), 'анонимные, сгруппированы по нижней границе', 'probable') +
       card('Неизвестные посетители', num(people.unknown_visitors), 'нет признаков взаимодействия', 'unknown') +
-      card('Новые', num(people.new), 'впервые в этом периоде') +
-      card('Вернувшиеся', num(people.returning), 'были и раньше') +
+      card('Новые', num(people.new), 'первый визит внутри периода', 'newPeople') +
+      card('Вернувшиеся', num(people.returning), 'были известны до периода', 'returningPeople') +
+      card('Приходили в разные дни', num(people.returned_another_day), 'активны в 2+ календарных дня', 'returnedAnotherDay') +
+      card('Дней активности в среднем', String(people.active_days_avg == null ? '—' : people.active_days_avg), 'на человека за период') +
       card('Активны сейчас', num(live.active_now), 'события за 5 минут', 'live') +
       card('Домохозяйства', num(structure.households), 'одна домашняя сеть', 'households') +
       card('Устройства', num(structure.devices), num(structure.shared_devices) + ' общих (несколько аккаунтов)', 'devices') +
       card('Профили браузера', num(structure.browser_profiles), 'установки и профили', 'profiles') +
       card('Сессии', num(structure.sessions), 'таймаут 30 минут', 'sessions', previous ? deltaOf(structure.sessions, previous.sessions) : null) +
+      card('Повторные сессии', num(structure.repeat_sessions), 'сверх первой на человека', 'repeatSessions') +
       card('События', num(structure.events), previous ? '' : '', null, previous ? deltaOf(structure.events, previous.events) : null) +
       card('Активное время в среднем', dur(engagement.avg_active_ms), num(engagement.measured_sessions) + ' измерено / ' + num(engagement.estimated_sessions) + ' оценка', 'active') +
       card('Вовлечённые сессии', num(engagement.engaged_sessions), pctText(engagement.engaged_sessions, structure.sessions) + ' от всех') +
@@ -910,11 +919,31 @@
       ], data.resolution_runs, 'Разбор ещё не запускался') + '</div>';
   }
 
+  function renderConsent(data) {
+    var decisions = data.decisions || {}, coverage = data.analytics_coverage || {}, device = data.device_recognition || {};
+    var acceptRate = data.accept_rate == null ? '—' : data.accept_rate + '%';
+    return '<div class="ow-cards">' +
+      card('Решений о согласии', num(decisions.total), 'за выбранный период', 'consent') +
+      card('Согласились на аналитику', num(decisions.accepted), 'доля среди решений: ' + esc(acceptRate)) +
+      card('Только необходимое', num(decisions.only_necessary), 'отказ от необязательной статистики') +
+      card('Включили «Повторные посещения»', num(decisions.device_recognition), num(device.profiles_with_signal) + ' профилей с признаком') +
+      card('Данные с согласием', num(coverage.events_consented), num(coverage.events_legacy) + ' событий собрано до внедрения согласия') +
+      card('Профили с согласием', num(coverage.consented_profiles), num(coverage.legacy_profiles) + ' старых профилей') +
+      card('Охват от всех посетителей', 'нельзя измерить', 'см. пояснение ниже', 'consent') +
+    '</div>' +
+    '<div class="ow-block"><div class="ow-block-h">Почему нет процента охвата</div>' +
+      '<div class="ow-card-s">' + esc(coverage.note || '') + '</div></div>' +
+    barList(data.by_source, { banner: 'Баннер', settings: 'Настройки', privacy_page: 'Страница политики' }, null, 'Где принято решение') +
+    barList(data.by_platform, { web: 'Веб', ios: 'iOS', android: 'Android', unknown: 'Не указано' }, null, 'Платформа') +
+    barList(data.by_policy, null, null, 'Версия политики') +
+    lineChart(data.timeseries || [], ['accepted', 'only_necessary'], ['Согласились', 'Только необходимое']);
+  }
+
   var RENDERERS = {
     overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
     devices: renderDevices, sessions: renderSessions, acquisition: renderAcquisition, geography: renderGeography,
     map: renderMap, games: renderGames, features: renderFeatures, funnels: renderFunnels,
-    retention: renderRetention, bots: renderBots, quality: renderQuality
+    retention: renderRetention, bots: renderBots, consent: renderConsent, quality: renderQuality
   };
 
   function render() {
