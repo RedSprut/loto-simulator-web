@@ -105,6 +105,7 @@
     if (!response.ok) {
       var error = new Error((body && (body.error || body.detail)) || ('HTTP ' + response.status));
       error.status = response.status;
+      error.code = body && body.code ? String(body.code) : '';
       throw error;
     }
     return body;
@@ -452,11 +453,26 @@
     }
   }
 
+  // The owner gets a sentence and a code that says which part failed; the details stay in the logs.
+  var ERROR_TEXT = {
+    REPORT_COMPARE_FAILED: 'Не удалось посчитать сравнение с прошлым периодом.',
+    REPORT_SECTION_FAILED: 'Не удалось загрузить этот раздел.',
+    REPORT_QUERY_FAILED: 'Не удалось загрузить отчёт.',
+    REPORT_TIMEOUT: 'Отчёт считался слишком долго. Попробуйте более короткий период.'
+  };
+  function errorText(error) {
+    var code = error && error.code;
+    if (code && ERROR_TEXT[code]) return ERROR_TEXT[code] + ' Код: ' + code;
+    if (error && error.status === 403) return 'Нет доступа к панели владельца.';
+    if (error && /Failed to fetch|NetworkError|load failed/i.test(error.message || '')) return 'Нет связи с сервером. Проверьте соединение.';
+    return 'Ошибка: ' + ((error && error.message) || 'неизвестно');
+  }
+
   function renderError(error, retry) {
     var host = ovEl.querySelector('#ow-section');
     var box = D.createElement('div');
     box.className = 'ow-err';
-    box.innerHTML = '<span>Ошибка: ' + esc((error && error.message) || 'неизвестно') + '</span>';
+    box.innerHTML = '<span>' + esc(errorText(error)) + '</span>';
     var button = D.createElement('button');
     button.className = 'ow-btn';
     button.type = 'button';
