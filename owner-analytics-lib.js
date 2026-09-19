@@ -344,12 +344,52 @@
     return String(key);
   }
 
+  // ── Owner Analytics 2.1 (2026-09-19): KPI precision, world-map palette, continents ──────────
+  // Every KPI card names how exact it is; these are the only four words used for that.
+  var PRECISION_RU = { exact: 'точно', filtered: 'фильтр', consented: 'с согласием', estimate: 'оценка' };
+  var TRAFFIC_RU = { human: 'Люди', suspicious: 'Подозрительный трафик', bot: 'Боты' };
+  var CONTINENT_RU = {
+    EU: 'Европа', AS: 'Азия', NA: 'Северная Америка', SA: 'Южная Америка',
+    AF: 'Африка', OC: 'Океания', AN: 'Антарктида'
+  };
+  var CONTINENT_ORDER = ['EU', 'AS', 'NA', 'SA', 'AF', 'OC', 'AN'];
+  // Soft sequential blues (the restored «Голубая» character: calm, no acid tones). Index 0 = no data.
+  var BLUE_LIGHT = ['#dde6ee', '#cfe1f6', '#a9cbef', '#7fb0e6', '#5591db', '#3470cf', '#1d4ed8', '#173ba6'];
+  var BLUE_DARK = ['#26364a', '#22405f', '#245583', '#2b6ea9', '#3a89cd', '#5aa4e8', '#8cc1f4', '#c3ddfa'];
+  // Log scale: one dominant country must not flatten every other one into the palest tone.
+  function choroplethColor(value, max, theme) {
+    var scale = theme === 'dark' ? BLUE_DARK : BLUE_LIGHT;
+    var v = +value || 0, m = +max || 0;
+    if (v <= 0 || m <= 0) return scale[0];
+    var t = Math.min(1, Math.log1p(v) / Math.log1p(Math.max(m, v)));
+    var steps = scale.length - 1;
+    var idx = 1 + Math.min(steps - 1, Math.floor(t * steps));
+    return scale[idx];
+  }
+  function flagEmoji(iso) {
+    var code = String(iso || '').toUpperCase();
+    if (!/^[A-Z]{2}$/.test(code) || code === 'ZZ') return '';
+    return String.fromCodePoint(0x1F1E6 + code.charCodeAt(0) - 65, 0x1F1E6 + code.charCodeAt(1) - 65);
+  }
+  // What a KPI card prints. null → «Нет данных» (or «Недостаточно данных» when the metric exists but
+  // the sample is too small); a real 0 stays «0»; an unanswered backend never becomes a 0.
+  function kpiText(value, opts) {
+    opts = opts || {};
+    if (opts.unavailable) return { text: 'Нет данных', state: 'none' };
+    if (value == null) return opts.insufficient ? { text: 'Недостаточно данных', state: 'insufficient' } : { text: 'Нет данных', state: 'none' };
+    var n = +value;
+    if (!isFinite(n)) return { text: 'Нет данных', state: 'none' };
+    return { text: n.toLocaleString('ru-RU'), state: 'ok' };
+  }
+
   return {
     osloRange: osloRange, forecast: forecast, pctChange: pctChange,
     COUNTRY_RU: COUNTRY_RU, countryNameRu: countryNameRu, countryList: countryList,
     range: range, ZONES: ZONES, formatDuration: formatDuration, csv: csv, confidence: confidence,
     KIND_RU: KIND_RU, CLASS_RU: CLASS_RU, CHANNEL_RU: CHANNEL_RU, EVENT_RU: EVENT_RU,
     EVIDENCE_RU: EVIDENCE_RU, evidenceRu: evidenceRu,
+    PRECISION_RU: PRECISION_RU, TRAFFIC_RU: TRAFFIC_RU, CONTINENT_RU: CONTINENT_RU, CONTINENT_ORDER: CONTINENT_ORDER,
+    BLUE_LIGHT: BLUE_LIGHT, BLUE_DARK: BLUE_DARK, choroplethColor: choroplethColor, flagEmoji: flagEmoji, kpiText: kpiText,
     _zoneOffsetMinutes: zoneOffsetMinutes, _zoneCivilToUTC: zoneCivilToUTC, _zoneYMD: zoneYMD,
     _osloCivilToUTC: osloCivilToUTC, _osloYMD: osloYMD, _osloOffsetMinutes: osloOffsetMinutes
   };

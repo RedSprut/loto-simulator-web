@@ -10,6 +10,12 @@
  *   unknown visitors · an estimated audience RANGE · households · devices · browser profiles ·
  *   sessions, with owner/test and bots excluded by default and counted separately.
  * Each card carries a «Как считается» note, and every probabilistic number carries its confidence.
+ *
+ * 2026-09-19: the restored calm BLUE theme (tokens from the original «Голубая» palette), a KPI block
+ * that names the precision of every number (точно · фильтр · с согласием · оценка), identifier-free
+ * visit counters (people / suspicious / bots per country), exact account and purchase metrics from the
+ * auth + entitlement tables, and a country choropleth with hover, whole-territory selection, continent
+ * view and a scrollable country card. Still Russian only, owner only, real data only.
  */
 (function () {
   'use strict';
@@ -45,10 +51,13 @@
     ['30d', '30 дней'], ['90d', '90 дней'], ['month', 'Текущий месяц'], ['lastMonth', 'Прошлый месяц'],
     ['all', 'Всё время'], ['custom', 'Период…']
   ];
-  var MAP_MODES = [
-    ['people', 'Реальные люди'], ['households', 'Домохозяйства'], ['sessions', 'Сессии'],
-    ['devices', 'Устройства'], ['bots', 'Боты'], ['all', 'Весь трафик']
+  // Choropleth metrics: every one is a column of the `countries` report rows.
+  var MAP_METRICS = [
+    ['visits_human', 'Визиты (люди)'], ['visitors', 'Посетители с согласием'], ['registered', 'Зарегистрированные'],
+    ['buyers', 'Покупатели'], ['households', 'Домохозяйства (оценка)'], ['consent_accepted', 'Согласились на аналитику'],
+    ['visits_suspicious', 'Подозрительный трафик'], ['visits_bot', 'Боты']
   ];
+  var AUDIENCES = [['all', 'Все'], ['guest', 'Гости'], ['registered', 'С аккаунтом']];
   var HOW = {
     verified: 'Люди с подтверждённой личностью: вошли в аккаунт. Один аккаунт = один человек, сколько бы устройств он ни использовал. Владелец исключён.',
     probable: 'Анонимные устройства с признаками живого человека, сгруппированные внутри одного домохозяйства по нижней границе: в группу попадают только устройства разных типов, которые никогда не работали одновременно. Это оценка, а не доказанная личность.',
@@ -70,7 +79,16 @@
     consent: 'Долю согласившихся от ВСЕХ посетителей измерить нельзя: до решения не сохраняется ничего, поэтому закрывшие баннер следов не оставляют. Показаны решения, доля согласий среди них и доля данных, собранных с согласием.',
     funnels: 'Воронка по людям: на каждом шаге считается число людей, которые его достигли в выбранном периоде.',
     retention: 'Когорты по дню первого визита. D1/D7/D30 — вернулся ли человек ровно на 1-й, 7-й и 30-й день.',
-    quality: 'Качество приёма: сколько событий принято, сколько отклонено и почему. Здесь же свежесть данных и распределение уверенности идентификации.'
+    quality: 'Качество приёма: сколько событий принято, сколько отклонено и почему. Здесь же свежесть данных и распределение уверенности идентификации.',
+    visitsHuman: 'Визиты без признаков автоматизации: по одному на загрузку страницы или запуск приложения, независимо от согласия. Сервер считает их как обезличенные счётчики по стране и платформе — без идентификаторов, поэтому «уникальных посетителей» из них вывести нельзя. Автоматизация, headless-браузеры, сети дата-центров, VPN и Tor считаются отдельно.',
+    guests: 'Гости — визиты без входа в аккаунт (по счётчикам). Кто именно заходил, сервер не знает и не записывает.',
+    registered: 'Точное число: аккаунты в базе авторизации без анонимных сессий. Не зависит от согласия на аналитику и от фильтров трафика. Владелец учтён и показан отдельно.',
+    levels: 'FREE / PRO / Lifetime — из серверной таблицы прав доступа (entitlements). PRO — активная платная подписка; Lifetime — бессрочный доступ владельца; истёкшие показаны отдельно. Клиентский флаг isPro не используется никогда.',
+    buyers: 'Покупатели — аккаунты с оплаченным правом доступа от магазина (Apple, Google, Paddle, Stripe, RevenueCat) в production. Клиентское событие «оплатил» доказательством не считается. Продления появятся после подключения журнала платёжных событий.',
+    conversion: 'Оценка: новые регистрации за период ÷ визиты людей за период; покупатели ÷ все аккаунты. Показывается только при достаточной выборке (≥ 20 визитов, ≥ 10 аккаунтов), иначе — «Недостаточно данных».',
+    traffic: 'Боты — объявленные краулеры. Подозрительный трафик — headless-браузеры, сети дата-центров, VPN, Tor и всплески запросов с одной сети. Ни одна страна не удаляется вручную: видно, какой это трафик.',
+    consented: 'Посетители с согласием — люди из данных, собранных после «Принять»: подтверждённые аккаунты и вероятные анонимные люди. Это часть всех посетителей, а не все посетители.',
+    countryMap: 'Страна определяется сервером по сети запроса — это страна посещения, а не гражданство или место жительства; VPN и Tor показаны отдельно. Хранится только счётчик. Аккаунты и покупатели привязаны к стране только если их устройства согласились на аналитику; остальные — «не определено».'
   };
 
   var state = {
@@ -78,13 +96,15 @@
     preset: '7d',
     tz: 'Europe/Oslo',
     custom: { from: '', to: '' },
-    filters: { platform: 'all', country: 'all', lottery: 'all' },
+    filters: { platform: 'all', country: 'all', lottery: 'all', audience: 'all' },
     toggles: { owner: false, bots: false, unknown: true },
     compare: true,
     page: 0,
     peopleKind: 'all',
-    mapMode: 'people',
-    heatmap: false,
+    mapMetric: 'visits_human',
+    continent: 'all',
+    selectedCountry: null,
+    kpiError: null,
     busy: false,
     refreshing: false,
     lastRefresh: null,
@@ -122,6 +142,7 @@
     var payload = {
       from: range.from, to: range.to, tz: range.tz, bucket: range.bucket,
       platform: state.filters.platform, country: state.filters.country, lottery: state.filters.lottery,
+      audience: state.filters.audience,
       include_owner: state.toggles.owner, include_bots: state.toggles.bots, include_unknown: state.toggles.unknown
     };
     if (state.compare && range.prev_from) { payload.prev_from = range.prev_from; payload.prev_to = range.prev_to; }
@@ -198,6 +219,11 @@
           '<span class="ow-bar-v">' + num(row.value) + '</span></div>';
       }).join('') + '</div>';
   }
+  function chartColors() {
+    return (ovEl && ovEl.getAttribute('data-ow-theme') === 'dark')
+      ? ['#6fb7ff', '#5eead4', '#c4b5fd']
+      : ['#1d4ed8', '#0891b2', '#7c3aed'];
+  }
   function lineChart(series, keys, titles) {
     if (!series || series.length < 2) return '<div class="ow-empty">Для графика нужно минимум две точки</div>';
     var width = 720, height = 190, padLeft = 42, padBottom = 26, padTop = 12;
@@ -205,7 +231,7 @@
     series.forEach(function (point) { keys.forEach(function (key) { max = Math.max(max, +point[key] || 0); }); });
     max = max || 1;
     var stepX = (width - padLeft - 10) / Math.max(1, series.length - 1);
-    var colors = ['#a5316b', '#5ad19a', '#f2c14e'];
+    var colors = chartColors();
     var paths = keys.map(function (key, index) {
       var d = series.map(function (point, i) {
         var x = padLeft + i * stepX;
@@ -236,6 +262,7 @@
     var stored = null;
     try { stored = W.localStorage.getItem(THEME_KEY); } catch (e) {}
     if (stored === 'light' || stored === 'dark') return stored;
+    try { if (D.body && D.body.classList.contains('dark')) return 'dark'; } catch (e) {}
     try { return W.matchMedia && W.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; } catch (e) { return 'light'; }
   }
   function ensureStyles() {
@@ -243,8 +270,10 @@
     var css = [
       '#ow-ov{position:fixed;inset:0;z-index:1300;display:none;background:var(--ow-bg);color:var(--ow-tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}',
       '#ow-ov.show{display:flex;flex-direction:column}',
-      '#ow-ov[data-ow-theme="dark"]{--ow-bg:#0e0710;--ow-card:#1a0e16;--ow-card2:#160c13;--ow-tx:#f3e9ef;--ow-sub:#b79aac;--ow-bd:#33202e;--ow-accent:#a5316b;--ow-up:#5ad19a;--ow-down:#f2789a;--ow-chip:#241420}',
-      '#ow-ov[data-ow-theme="light"]{--ow-bg:#f6eef2;--ow-card:#ffffff;--ow-card2:#fbf4f8;--ow-tx:#25141d;--ow-sub:#6f5563;--ow-bd:#e7d3de;--ow-accent:#b3255f;--ow-up:#1a7f4b;--ow-down:#c2185b;--ow-chip:#f3e3ea}',
+      // «Голубая» — the original soft light-blue palette of the owner analytics (commit 6235a66), restored.
+      '#ow-ov[data-ow-theme="light"]{--ow-bg:#e8f2fc;--ow-card:#ffffff;--ow-card2:#d7e9fb;--ow-tx:#0d2540;--ow-sub:#3f6690;--ow-bd:#bcd7f2;--ow-accent:#1d4ed8;--ow-up:#0f7a4d;--ow-down:#c62a5a;--ow-chip:#e3effc}',
+      // Night variant of the same character: deep blue surfaces, luminous blue accent.
+      '#ow-ov[data-ow-theme="dark"]{--ow-bg:#0b1624;--ow-card:#12223a;--ow-card2:#0f1c30;--ow-tx:#e6f0fb;--ow-sub:#8fb0d6;--ow-bd:#22405f;--ow-accent:#4f8ff7;--ow-up:#5ad19a;--ow-down:#f2789a;--ow-chip:#183050}',
       '#ow-ov .ow-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--ow-bd);background:var(--ow-card);min-width:0}',
       '#ow-ov .ow-title{font-weight:800;font-size:16px;margin-right:auto;min-width:0;flex:1 1 140px}',
       '#ow-ov .ow-btn{min-height:34px;padding:6px 12px;border-radius:10px;border:1px solid var(--ow-bd);background:var(--ow-card2);color:inherit;font:inherit;font-weight:700;cursor:pointer}',
@@ -310,7 +339,23 @@
       '@media (min-width:720px){#ow-ov .ow-sheet{align-items:center}#ow-ov .ow-sheet-in{border-radius:16px}}',
       '#ow-ov .ow-jr{display:grid;grid-template-columns:64px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid var(--ow-bd);font-size:13px}',
       '#ow-ov .ow-jr b{font-variant-numeric:tabular-nums;color:var(--ow-sub);font-weight:700}',
-      '#ow-ov .ow-deny{padding:30px;text-align:center}'
+      '#ow-ov .ow-deny{padding:30px;text-align:center}',
+      // KPI precision tags, empty states, map legend / tooltip / country card
+      '#ow-ov .ow-tag{display:inline-block;margin-left:auto;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:800;text-transform:none;letter-spacing:0;background:var(--ow-chip);color:var(--ow-sub);white-space:nowrap}',
+      '#ow-ov .ow-tag-exact{color:var(--ow-up)}#ow-ov .ow-tag-estimate{color:#a8730b}',
+      '#ow-ov .ow-kpi-none{font-size:15px;font-weight:700;color:var(--ow-sub);margin-top:10px}',
+      '#ow-ov .ow-kpi-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px}',
+      '#ow-ov .ow-kpi-h h2{font-size:15px;margin:0 8px 0 0}',
+      '#ow-ov .ow-legend-scale{display:flex;align-items:center;gap:4px;margin-top:8px;color:var(--ow-sub);font-size:12px;flex-wrap:wrap}',
+      '#ow-ov .ow-legend-scale i{display:inline-block;width:22px;height:12px;border-radius:3px;border:1px solid var(--ow-bd)}',
+      '#ow-ov .ow-map{position:relative}',
+      '#ow-ov .ow-map-tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--ow-card);color:var(--ow-tx);border:1px solid var(--ow-bd);border-radius:10px;padding:6px 9px;font-size:12px;line-height:1.4;box-shadow:0 8px 24px rgba(13,37,64,.18);z-index:4;max-width:240px}',
+      '#ow-ov .ow-map-tip[hidden]{display:none}',
+      '#ow-ov .ow-block-h{flex-wrap:wrap}#ow-ov .ow-block-h select{max-width:46vw}',
+      '#ow-ov .ow-country-h{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;margin-bottom:8px;flex-wrap:wrap}',
+      '#ow-ov .ow-country-h .ow-flag{font-size:28px;line-height:1}',
+      '#ow-ov .ow-country-h code{font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--ow-chip);padding:3px 6px;border-radius:6px}',
+      '#ow-ov .ow-sheet-in .ow-cards{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}'
     ].join('\n');
     var style = D.createElement('style');
     style.id = 'ow-style';
@@ -340,6 +385,7 @@
         '<label>Часовой пояс <select id="ow-tz"></select></label>' +
         '<label>Платформа <select id="ow-platform"><option value="all">Все</option><option value="web">Веб</option><option value="ios">iOS</option><option value="android">Android</option></select></label>' +
         '<label>Лотерея <select id="ow-lottery"><option value="all">Все</option></select></label>' +
+        '<label>Аудитория <select id="ow-audience">' + AUDIENCES.map(function (a) { return '<option value="' + a[0] + '">' + esc(a[1]) + '</option>'; }).join('') + '</select></label>' +
         '<label class="ow-toggle"><input type="checkbox" id="ow-compare" checked> Сравнить с прошлым периодом</label>' +
         '<label class="ow-toggle"><input type="checkbox" id="ow-owner"> Включить владельца / тесты</label>' +
         '<label class="ow-toggle"><input type="checkbox" id="ow-bots"> Включить ботов</label>' +
@@ -403,13 +449,38 @@
       setHourglass(false);
     }
   }
+  // Overview = its own section + the KPI block; the map = the batch of country rows. Each request
+  // fails on its own: a KPI failure never hides the overview, and vice versa.
+  async function loadMany(sections, extra) {
+    if (state.busy) return null;
+    state.busy = true;
+    state.error = null;
+    state.kpiError = null;
+    setHourglass(true, 'Загрузка раздела…');
+    try {
+      var settled = await Promise.allSettled(sections.map(function (name) { return api({ section: name, params: params(extra) }); }));
+      settled.forEach(function (outcome, index) {
+        var name = sections[index];
+        if (outcome.status === 'fulfilled') { state.data[name] = outcome.value; return; }
+        state.data[name] = null;
+        if (name === 'kpi') state.kpiError = outcome.reason;
+        else state.error = outcome.reason;
+      });
+      return settled;
+    } finally {
+      state.busy = false;
+      setHourglass(false);
+    }
+  }
   async function show(section, extra) {
     state.section = section;
     ovEl.querySelectorAll('.ow-tab').forEach(function (tab) {
       tab.setAttribute('aria-selected', String(tab.getAttribute('data-section') === section));
     });
     stopLive();
-    await load(section, extra);
+    if (section === 'overview') await loadMany(['overview', 'kpi'], extra);
+    else if (section === 'map') { await loadMany(['countries'], extra); state.data.map = state.data.countries; }
+    else await load(section, extra);
     render();
     if (section === 'live') startLive();
     if (section === 'map') mountMap();
@@ -433,9 +504,8 @@
         .map(function (s) { return s[1] + ' ✓ ' + stages[s[0]] + ' мс'; }).join(' · ') || 'Идентификация…');
       state.data = {};
       state.busy = false;
-      await load(state.section);
-      render();
-      if (state.section === 'map') { await mountMap(true); }
+      if (mapApi) { mapApi.destroy(); mapApi = null; }
+      await show(state.section);
       var added = [];
       if (result.refresh.new_events) added.push('+' + num(result.refresh.new_events) + ' событий');
       if (result.refresh.new_sessions) added.push('+' + num(result.refresh.new_sessions) + ' сессий');
@@ -494,11 +564,34 @@
   function stopLive() { if (livePoll) { clearInterval(livePoll); livePoll = null; } }
 
   // ── map ────────────────────────────────────────────────────────────────────────────────────
+  function countryRows() {
+    var response = state.data.countries;
+    return (response && response.data && Array.isArray(response.data.rows)) ? response.data.rows : [];
+  }
+  function countryName(iso) {
+    if (!iso || iso === 'ZZ') return 'Не определено';
+    return LIB.countryNameRu ? LIB.countryNameRu(iso) : iso;
+  }
+  function continentOf(iso) {
+    try { return (mapApi && mapApi.world && mapApi.world.meta[iso] && mapApi.world.meta[iso].c) || null; } catch (e) { return null; }
+  }
+  function metricLabel(metric) {
+    for (var i = 0; i < MAP_METRICS.length; i++) if (MAP_METRICS[i][0] === metric) return MAP_METRICS[i][1];
+    return metric;
+  }
+  function hoverHtml(iso, metric) {
+    var row = countryRows().filter(function (r) { return r.country === iso; })[0] || {};
+    return '<b>' + esc((LIB.flagEmoji ? LIB.flagEmoji(iso) + ' ' : '') + countryName(iso)) + '</b><br>' +
+      esc(metricLabel(metric)) + ': <b>' + num(row[metric]) + '</b><br>' +
+      'Визиты (люди): ' + num(row.visits_human) + ' · Аккаунты: ' + num(row.registered) + ' · Покупатели: ' + num(row.buyers);
+  }
   async function mountMap(force) {
     var host = ovEl.querySelector('#ow-mapbox');
     if (!host || mapLoading) return;
-    var data = (state.data.map && state.data.map.data) || { points: [], live: [] };
-    if (mapApi && !force) { mapApi.setData(data.points, data.live); mapApi.setMode(state.mapMode); mapApi.resize(); return; }
+    var rows = countryRows();
+    if (mapApi && !force && mapApi.map && mapApi.map.getContainer() === host) {
+      mapApi.setData(rows, state.mapMetric); mapApi.setContinent(state.continent); mapApi.select(state.selectedCountry); mapApi.resize(); return;
+    }
     mapLoading = true;
     setHourglass(true, 'Загрузка карты…');
     try {
@@ -507,20 +600,13 @@
       mapApi = await module.createMap({
         container: host,
         theme: ovEl.getAttribute('data-ow-theme'),
-        onPick: function (props, coords, live) {
-          openPopup(live ? 'Активность сейчас' : place(props),
-            live
-              ? esc(place(props)) + ' · событий за 15 минут: ' + num(props.events)
-              : 'Люди: ' + num(props.people) + ' · Домохозяйства: ' + num(props.households) +
-                ' · Устройства: ' + num(props.devices) + ' · Сессии: ' + num(props.sessions) +
-                '<br>Новые: ' + num(props.new_people) + ' · Вернувшиеся: ' + num(props.returning_people) +
-                ' · Боты: ' + num(props.bots) + '<br>Точность: ' + esc(props.resolution === 'city' ? 'город' : props.resolution === 'region' ? 'регион' : 'страна'));
-        }
+        colorFor: function (value, max, theme) { return LIB.choroplethColor ? LIB.choroplethColor(value, max, theme) : (value > 0 ? '#5591db' : '#dde6ee'); },
+        onHover: hoverHtml,
+        onSelect: function (iso) { state.selectedCountry = iso; openCountry(iso); }
       });
-      mapApi.setData(data.points, data.live);
-      mapApi.setMode(state.mapMode);
-      mapApi.setHeatmap(state.heatmap);
-      mapApi.fit();
+      mapApi.setData(rows, state.mapMetric);
+      if (state.continent !== 'all') mapApi.setContinent(state.continent); else mapApi.fit();
+      if (state.selectedCountry) mapApi.select(state.selectedCountry);
     } catch (error) {
       var box = ovEl.querySelector('#ow-mapbox');
       if (box) box.innerHTML = '<div class="ow-empty">Карта не загрузилась: ' + esc(error.message || 'ошибка') + '</div>';
@@ -528,6 +614,73 @@
       mapLoading = false;
       setHourglass(false);
     }
+  }
+
+  // The country card: everything the owner may know about one country, nothing about one person.
+  // Raw IP addresses and e-mails do not exist in this data and are never shown.
+  var countryLoading = false;
+  async function openCountry(iso) {
+    if (!iso || countryLoading) return;
+    countryLoading = true;
+    state.selectedCountry = iso;
+    if (mapApi) mapApi.select(iso);
+    setHourglass(true, 'Загрузка страны…');
+    var response = null;
+    try { response = await api({ section: 'country', params: params({ country: iso }) }); }
+    catch (error) { countryLoading = false; setHourglass(false); openPopup('Ошибка', esc(errorText(error))); return; }
+    countryLoading = false;
+    setHourglass(false);
+    var data = response.data || {};
+    var sum = data.summary || {};
+    var visits = data.visits_available !== false;
+    var kv = function (value, opts) { var k = LIB.kpiText ? LIB.kpiText(value, opts) : { text: num(value), state: 'ok' }; return k.state === 'ok' ? k.text : '<span class="ow-kpi-none">' + esc(k.text) + '</span>'; };
+    var v = function (key) { return visits ? kv(sum[key] == null ? 0 : sum[key]) : kv(null, { unavailable: true }); };
+    var human = +sum.visits_human || 0, regNew = +sum.registered_new || 0;
+    var conversion = visits && human >= 20 ? (Math.round((regNew / human) * 10000) / 100) + '%' : kv(null, { insufficient: true });
+    var netLabels = { isp: 'Домашний провайдер', mobile: 'Мобильный оператор', hosting: 'Дата-центр', vpn: 'VPN', tor: 'Tor', education: 'Учебная сеть', business: 'Корпоративная', unknown: 'Не определено' };
+    var old = ovEl.querySelector('#ow-sheet'); if (old) old.remove();
+    var sheet = D.createElement('div');
+    sheet.className = 'ow-sheet';
+    sheet.id = 'ow-sheet';
+    sheet.setAttribute('role', 'dialog');
+    sheet.setAttribute('aria-label', countryName(iso));
+    sheet.innerHTML = '<div class="ow-sheet-in">' +
+      '<div class="ow-country-h"><span class="ow-flag">' + esc(LIB.flagEmoji ? LIB.flagEmoji(iso) : '') + '</span><span>' + esc(countryName(iso)) + '</span>' +
+        '<code>' + esc(iso) + '</code>' + (continentOf(iso) ? '<span class="ow-tag">' + esc(label(LIB.CONTINENT_RU, continentOf(iso))) + '</span>' : '') +
+        how('countryMap') + '</div>' +
+      '<div class="ow-cards">' +
+        card('Визиты (люди)', v('visits_human'), 'фильтр · без идентификаторов', 'visitsHuman') +
+        card('Гости', v('visits_guest'), 'визиты без входа в аккаунт', 'guests') +
+        card('С аккаунтом', v('visits_signed_in'), 'визиты с входом в аккаунт') +
+        card('Зарегистрированные', kv(sum.registered), 'точно · новых за период: ' + num(sum.registered_new), 'registered') +
+        card('FREE', kv(sum.free), 'точно', 'levels') +
+        card('PRO', kv(sum.pro), 'активная подписка', 'levels') +
+        card('Lifetime', kv(sum.lifetime), 'бессрочный доступ', 'levels') +
+        card('Покупатели', kv(sum.buyers), 'покупок за период: ' + num(sum.purchases), 'buyers') +
+        card('Домохозяйства', kv(sum.households), 'оценка · с согласием', 'households') +
+        card('Посетители с согласием', kv(sum.visitors), num(sum.guests) + ' гостевых профилей', 'consented') +
+        card('Web', v('web'), 'визиты людей') + card('iOS', v('ios'), 'визиты людей') + card('Android', v('android'), 'визиты людей') +
+        card('Согласились', kv(sum.consent_accepted), 'решений за период', 'consent') +
+        card('Отклонили', kv(sum.consent_declined), 'решений за период', 'consent') +
+        card('Боты', v('visits_bot'), 'объявленные краулеры', 'traffic') +
+        card('Подозрительный трафик', v('visits_suspicious'), 'VPN / Tor / дата-центры: ' + (visits ? num(sum.visits_proxy) : '—'), 'traffic') +
+        card('Конверсия в регистрацию', conversion, 'оценка · регистрации ÷ визиты людей', 'conversion') +
+      '</div>' +
+      (visits ? lineChart(data.timeseries || [], ['human', 'suspicious', 'bot'], ['Люди', 'Подозрительный', 'Боты']) : '<div class="ow-empty">Счётчики визитов ещё не накоплены</div>') +
+      lineChart(data.visitors_timeseries || [], ['visitors', 'sessions'], ['Посетители с согласием', 'Сессии']) +
+      barList(data.platforms, { web: 'Веб', ios: 'iOS', android: 'Android' }, null, 'Платформы (все визиты)') +
+      barList(data.network_types, netLabels, 'traffic', 'Тип сети') +
+      '<div class="ow-block"><div class="ow-block-h">Лотереи</div>' +
+        table([{ title: 'Лотерея', key: 'lottery' }, { title: 'Сессий', key: 'sessions', numeric: true }], data.top_lotteries, 'Нет данных с согласием') + '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">Функции</div>' +
+        table([{ title: 'Функция', key: 'feature', html: function (r) { return esc(label(LIB.EVENT_RU, r.feature)); } }, { title: 'Сессий', key: 'sessions', numeric: true }], data.top_features, 'Нет данных с согласием') + '</div>' +
+      lineChart(data.consent_timeseries || [], ['accepted', 'declined'], ['Согласились', 'Отклонили']) +
+      '<button class="ow-btn ow-btn-primary" id="ow-sheet-close" type="button" style="margin-top:10px">Закрыть</button></div>';
+    ovEl.appendChild(sheet);
+    sheet.addEventListener('click', function (event) {
+      if (event.target === sheet || event.target.id === 'ow-sheet-close') { sheet.remove(); state.selectedCountry = null; if (mapApi) mapApi.select(null); }
+    });
+    try { sheet.querySelector('#ow-sheet-close').focus({ preventScroll: true }); } catch (e) {}
   }
 
   function openPopup(title, html) {
@@ -610,11 +763,61 @@
   }
 
   // ── sections ───────────────────────────────────────────────────────────────────────────────
+  // KPI card: value text or an honest empty state, a precision tag and a «how» note.
+  function kcard(title, value, sub, howKey, precision, opts) {
+    var k = LIB.kpiText ? LIB.kpiText(value, opts) : { text: num(value), state: 'ok' };
+    var text = k.state === 'ok' ? k.text + (opts && opts.suffix ? opts.suffix : '') : '<span class="ow-kpi-none">' + esc(k.text) + '</span>';
+    var tag = precision ? '<span class="ow-tag ow-tag-' + esc(precision) + '">' + esc(label(LIB.PRECISION_RU, precision)) + '</span>' : '';
+    return '<div class="ow-card ow-kpi" data-kpi="' + esc(title) + '">' +
+      '<div class="ow-card-h"><span>' + esc(title) + '</span>' + (howKey ? how(howKey) : '') + tag + '</div>' +
+      '<div class="ow-card-v">' + text + '</div>' +
+      (sub ? '<div class="ow-card-s">' + sub + '</div>' : '') + '</div>';
+  }
+  function renderKpi() {
+    var response = state.data.kpi;
+    var head = '<div class="ow-kpi-h"><h2>Ключевые показатели</h2>' +
+      ['exact', 'filtered', 'consented', 'estimate'].map(function (p) { return '<span class="ow-tag ow-tag-' + p + '">' + esc(LIB.PRECISION_RU ? LIB.PRECISION_RU[p] : p) + '</span>'; }).join('') + '</div>';
+    if (!response) {
+      return '<div class="ow-block" id="ow-kpi">' + head +
+        '<div class="ow-err"><span>' + esc(state.kpiError ? errorText(state.kpiError) : 'Нет данных') + '</span>' +
+        '<button class="ow-btn" type="button" data-kpi-retry>Повторить</button></div></div>';
+    }
+    var d = response.data || {};
+    var a = d.accounts || {}, t = d.traffic || {}, c = d.consented || {}, cs = d.consent || {}, cv = d.conversion || {};
+    var levels = a.levels || {};
+    var tv = function (key) { return t.available ? (t[key] == null ? 0 : t[key]) : null; };
+    var un = { unavailable: !t.available };
+    var pct = function (value) { return value == null ? null : value; };
+    return '<div class="ow-block" id="ow-kpi">' + head + '<div class="ow-cards">' +
+      kcard('Визиты (люди)', tv('human'), t.available ? num(t.visits) + ' всего · ' + pctText(t.human, t.visits) + ' без признаков автоматизации' : 'счётчики ещё не накоплены', 'visitsHuman', 'filtered', un) +
+      kcard('Гости', tv('guest'), 'визиты без входа в аккаунт', 'guests', 'filtered', un) +
+      kcard('С аккаунтом', tv('signed_in'), 'визиты с входом в аккаунт', 'guests', 'filtered', un) +
+      kcard('Зарегистрированные аккаунты', a.registered_total, '+' + num(a.registered_new) + ' за период · владелец: ' + num(a.owners) + ' · анонимных сессий: ' + num(a.anonymous_accounts), 'registered', 'exact') +
+      kcard('Новые регистрации', a.registered_new, 'за выбранный период', 'registered', 'exact') +
+      kcard('FREE', levels.free, 'без активной подписки', 'levels', 'exact') +
+      kcard('PRO', levels.pro, 'истёкших: ' + num(levels.expired) + ' · пробных: ' + num(a.trials_active), 'levels', 'exact') +
+      kcard('Lifetime', levels.lifetime, 'бессрочный доступ', 'levels', 'exact') +
+      kcard('Покупатели', a.paying_customers, 'подписок активно: ' + num(a.active_subscriptions) + ' · тестовых аккаунтов: ' + num(a.test_accounts), 'buyers', 'exact') +
+      kcard('Покупки за период', a.purchases, 'продления: ' + (a.renewals == null ? 'нет данных' : num(a.renewals)), 'buyers', 'exact') +
+      kcard('Конверсия в регистрацию', pct(cv.signup_rate_pct), 'регистрации ÷ визиты людей · нужно ≥ ' + num(cv.min_visits) + ' визитов', 'conversion', 'estimate', { insufficient: true, suffix: '%' }) +
+      kcard('Конверсия в покупку', pct(cv.purchase_rate_pct), 'покупатели ÷ аккаунты · нужно ≥ ' + num(cv.min_registered) + ' аккаунтов', 'conversion', 'estimate', { insufficient: true, suffix: '%' }) +
+      kcard('Посетители с согласием', c.visitors, num(c.guest_profiles) + ' гостевых профилей · ' + num(c.registered_profiles) + ' с аккаунтом · ' + num(c.unknown_visitors) + ' без признаков', 'consented', 'consented') +
+      kcard('Домохозяйства', c.households, 'по домашним сетям согласившихся', 'households', 'estimate') +
+      kcard('Боты', tv('bot'), 'объявленные краулеры', 'traffic', 'filtered', un) +
+      kcard('Подозрительный трафик', tv('suspicious'), 'headless, дата-центры, VPN, Tor, всплески', 'traffic', 'filtered', un) +
+      kcard('Согласия', cs.accepted, 'отклонили: ' + num(cs.declined) + ' · стран известно: ' + num(cs.countries_known), 'consent', 'exact') +
+    '</div>' +
+    (t.available ? lineChart(t.timeseries || [], ['human', 'suspicious', 'bot'], ['Люди', 'Подозрительный', 'Боты']) : '') +
+    (t.available ? barList(t.by_platform, { web: 'Веб', ios: 'iOS', android: 'Android' }, 'visitsHuman', 'Визиты людей по платформам') : '') +
+    (t.available ? barList(t.by_consent, { accepted: 'Согласились', declined: 'Отклонили', undecided: 'Ещё не решили' }, 'consent', 'Визиты людей по состоянию согласия') : '') +
+    '</div>';
+  }
+
   function renderOverview(data) {
     var people = data.people || {}, structure = data.structure || {}, excluded = data.excluded || {};
     var engagement = data.engagement || {}, geography = data.geography || {}, live = data.live || {};
     var previous = data.previous || null;
-    return '<div class="ow-cards">' +
+    return renderKpi() + '<div class="ow-cards" style="margin-top:12px">' +
       card('Оценка живой аудитории', num(people.estimated_min) + '–' + num(people.estimated_max), 'подтверждённые + вероятные … + каждое устройство отдельно', 'estimated') +
       card('Подтверждённые люди', num(people.verified), 'вошли в аккаунт', 'verified', previous ? null : null) +
       card('Вероятные люди', num(people.probable), 'анонимные, сгруппированы по нижней границе', 'probable') +
@@ -813,23 +1016,42 @@
   }
 
   function renderMap(data) {
-    return '<div class="ow-block"><div class="ow-block-h">Карта' + how('geo') +
-      '<select id="ow-mapmode" style="margin-left:auto">' + MAP_MODES.map(function (m) {
-        return '<option value="' + m[0] + '"' + (m[0] === state.mapMode ? ' selected' : '') + '>' + esc(m[1]) + '</option>';
+    var rows = (data.rows || []).map(function (row) { return Object.assign({}, row, { __click: true }); });
+    var totals = data.totals || {};
+    var visits = data.visits_available !== false;
+    var theme = ovEl.getAttribute('data-ow-theme');
+    var scale = (theme === 'dark' ? LIB.BLUE_DARK : LIB.BLUE_LIGHT) || [];
+    var legend = '<div class="ow-legend-scale"><span>Нет данных</span><i style="background:' + esc(scale[0] || '#dde6ee') + '"></i><span>меньше</span>' +
+      scale.slice(1).map(function (c) { return '<i style="background:' + esc(c) + '"></i>'; }).join('') + '<span>больше · ' + esc(metricLabel(state.mapMetric)) + '</span></div>';
+    var cell = function (key) { return function (r) { return visits ? num(r[key]) : '—'; }; };
+    return '<div class="ow-block"><div class="ow-block-h">Карта' + how('countryMap') +
+      '<select id="ow-mapmetric" aria-label="Показатель карты" style="margin-left:auto">' + MAP_METRICS.map(function (m) {
+        return '<option value="' + m[0] + '"' + (m[0] === state.mapMetric ? ' selected' : '') + '>' + esc(m[1]) + '</option>';
       }).join('') + '</select>' +
-      '<label class="ow-toggle" style="margin-left:8px"><input type="checkbox" id="ow-heat"' + (state.heatmap ? ' checked' : '') + '> Тепловая карта</label>' +
-      '<button class="ow-btn" id="ow-fit" type="button" style="margin-left:8px">Показать всё</button></div>' +
-      '<div class="ow-map" id="ow-mapbox"></div>' +
-      '<div class="ow-map-note">Точки — центры городов или регионов (не адреса). Активных точек: ' + num((data.points || []).length) +
-        ' · только страна: ' + num((data.country_only || []).length) + ' · активны сейчас: ' + num((data.live || []).length) +
-        ' · ' + esc(data.attribution || '') + '</div></div>' +
+      '<select id="ow-continent" aria-label="Континент">' + [['all', 'Весь мир']].concat((LIB.CONTINENT_ORDER || []).map(function (c) { return [c, LIB.CONTINENT_RU[c]]; })).map(function (c) {
+        return '<option value="' + c[0] + '"' + (c[0] === state.continent ? ' selected' : '') + '>' + esc(c[1]) + '</option>';
+      }).join('') + '</select>' +
+      '<button class="ow-btn" id="ow-fit" type="button">Показать всё</button></div>' +
+      '<div class="ow-map" id="ow-mapbox"></div>' + legend +
+      '<div class="ow-map-note">Наведите на страну — подсветится вся её территория; нажмите — откроется карточка. ' +
+        (visits ? 'Визиты людей: ' + num(totals.visits_human) + ' · подозрительных: ' + num(totals.visits_suspicious) + ' · ботов: ' + num(totals.visits_bot) + ' · стран: ' + num(totals.countries)
+          : 'Счётчики визитов ещё не накоплены — карта показывает данные, собранные с согласием') +
+        ' · аккаунтов со страной: ' + num(totals.registered) + ' · покупателей: ' + num(totals.buyers) + '<br>' + esc(data.note || '') + '</div></div>' +
+      '<div class="ow-block"><div class="ow-block-h">Страны</div>' +
       table([
-        { title: 'Место', key: 'city', html: function (r) { return esc(place(r)); } },
-        { title: 'Людей', key: 'people', numeric: true }, { title: 'Домохозяйств', key: 'households', numeric: true },
-        { title: 'Устройств', key: 'devices', numeric: true }, { title: 'Сессий', key: 'sessions', numeric: true },
-        { title: 'Новых', key: 'new_people', numeric: true }, { title: 'Вернувшихся', key: 'returning_people', numeric: true },
-        { title: 'Точность', key: 'resolution' }
-      ], data.points, 'Нет точек: гео пока определяется только до страны');
+        { title: 'Страна', key: 'country', html: function (r) { return esc((LIB.flagEmoji ? LIB.flagEmoji(r.country) + ' ' : '') + countryName(r.country)) + ' <span class="ow-card-s" style="display:inline">' + esc(r.country) + '</span>'; } },
+        { title: 'Визиты (люди)', key: 'visits_human', html: cell('visits_human'), numeric: true },
+        { title: 'Гости', key: 'visits_guest', html: cell('visits_guest'), numeric: true },
+        { title: 'Подозр.', key: 'visits_suspicious', html: cell('visits_suspicious'), numeric: true },
+        { title: 'Боты', key: 'visits_bot', html: cell('visits_bot'), numeric: true },
+        { title: 'С согласием', key: 'visitors', numeric: true },
+        { title: 'Аккаунты', key: 'registered', numeric: true },
+        { title: 'FREE / PRO / Lifetime', key: 'free', html: function (r) { return num(r.free) + ' / ' + num(r.pro) + ' / ' + num(r.lifetime); }, numeric: true },
+        { title: 'Покупатели', key: 'buyers', numeric: true },
+        { title: 'Дом. (оценка)', key: 'households', numeric: true },
+        { title: 'Web / iOS / Android', key: 'web', html: function (r) { return visits ? num(r.web) + ' / ' + num(r.ios) + ' / ' + num(r.android) : '—'; }, numeric: true },
+        { title: 'Согласия да / нет', key: 'consent_accepted', html: function (r) { return num(r.consent_accepted) + ' / ' + num(r.consent_declined); }, numeric: true }
+      ], rows, 'Нет данных за период') + '</div>';
   }
 
   function renderGames(data) {
@@ -1013,6 +1235,7 @@
       ovEl.setAttribute('data-ow-theme', next);
       try { W.localStorage.setItem(THEME_KEY, next); } catch (e) {}
       if (mapApi) mapApi.setTheme(next);
+      if (state.data[state.section]) render();
     });
     ovEl.querySelector('#ow-tabs').addEventListener('click', function (event) {
       var tab = event.target.closest('[data-section]');
@@ -1036,6 +1259,7 @@
     ovEl.querySelector('#ow-tz').addEventListener('change', function (event) { state.tz = event.target.value; state.data = {}; reload(); });
     ovEl.querySelector('#ow-platform').addEventListener('change', function (event) { state.filters.platform = event.target.value; state.data = {}; reload(); });
     ovEl.querySelector('#ow-lottery').addEventListener('change', function (event) { state.filters.lottery = event.target.value; state.data = {}; reload(); });
+    ovEl.querySelector('#ow-audience').addEventListener('change', function (event) { state.filters.audience = event.target.value; state.data = {}; reload(); });
     ovEl.querySelector('#ow-compare').addEventListener('change', function (event) { state.compare = event.target.checked; state.data = {}; reload(); });
     ovEl.querySelector('#ow-owner').addEventListener('change', function (event) { state.toggles.owner = event.target.checked; state.data = {}; reload(); });
     ovEl.querySelector('#ow-bots').addEventListener('change', function (event) { state.toggles.bots = event.target.checked; state.data = {}; reload(); });
@@ -1051,7 +1275,13 @@
         show(state.section, { limit: 50, offset: state.page * 50, kind: state.peopleKind !== 'all' ? state.peopleKind : undefined });
         return;
       }
+      if (event.target.closest('[data-kpi-retry]')) { state.data.kpi = null; show('overview'); return; }
       var row = event.target.closest('tr.ow-click');
+      if (row && state.section === 'map') {
+        var country = countryRows()[+row.getAttribute('data-row')];
+        if (country) { openCountry(country.country); if (mapApi) mapApi.focus(country.country); }
+        return;
+      }
       if (row && state.section === 'people') {
         var response = state.data.people;
         var person = response && response.data && response.data.rows && response.data.rows[+row.getAttribute('data-row')];
@@ -1065,16 +1295,21 @@
         state.data.people = null;
         show('people', { kind: state.peopleKind !== 'all' ? state.peopleKind : undefined });
       }
-      if (event.target.id === 'ow-mapmode') { state.mapMode = event.target.value; if (mapApi) mapApi.setMode(state.mapMode); }
-      if (event.target.id === 'ow-heat') { state.heatmap = event.target.checked; if (mapApi) mapApi.setHeatmap(state.heatmap); }
+      if (event.target.id === 'ow-mapmetric') {
+        state.mapMetric = event.target.value;
+        if (mapApi) mapApi.setMetric(state.mapMetric);
+        var legend = ovEl.querySelector('.ow-legend-scale span:last-child');
+        if (legend) legend.textContent = 'больше · ' + metricLabel(state.mapMetric);
+      }
+      if (event.target.id === 'ow-continent') { state.continent = event.target.value; if (mapApi) mapApi.setContinent(state.continent); }
     });
     ovEl.querySelector('#ow-content').addEventListener('click', function (event) {
-      if (event.target.id === 'ow-fit' && mapApi) mapApi.fit();
+      if (event.target.id === 'ow-fit' && mapApi) { state.continent = 'all'; var sel = ovEl.querySelector('#ow-continent'); if (sel) sel.value = 'all'; mapApi.setContinent('all'); }
     });
     D.addEventListener('keydown', function (event) {
       if (!ovEl || !ovEl.classList.contains('show')) return;
       if (event.key === 'Escape') {
-        if (ovEl.querySelector('#ow-sheet')) ovEl.querySelector('#ow-sheet').remove();
+        if (ovEl.querySelector('#ow-sheet')) { ovEl.querySelector('#ow-sheet').remove(); state.selectedCountry = null; if (mapApi) mapApi.select(null); }
         else if (ovEl.querySelector('#ow-pop')) closePopup();
         else close();
       }
@@ -1144,7 +1379,8 @@
     })();
   }
 
-  W.LotoOwnerDashboard = { open: open, close: close, revealAccountEntry: revealAccountEntry };
+  // _map: read-only accessor for the browser tests (the panel is owner-only; this grants nothing).
+  W.LotoOwnerDashboard = { open: open, close: close, revealAccountEntry: revealAccountEntry, _map: function () { return mapApi; } };
   W.addEventListener('hashchange', function () { if (location.hash === '#owner') open(false); });
   try { W.addEventListener('loto:accesschange', revealAccountEntry); } catch (e) {}
   function wrapOpenAccount() {
