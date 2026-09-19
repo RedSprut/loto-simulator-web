@@ -347,7 +347,7 @@
   // ── Owner Analytics 2.1 (2026-09-19): KPI precision, world-map palette, continents ──────────
   // Every KPI card names how exact it is; these are the only four words used for that.
   var PRECISION_RU = { exact: 'точно', filtered: 'фильтр', consented: 'с согласием', estimate: 'оценка' };
-  var TRAFFIC_RU = { human: 'Люди', suspicious: 'Подозрительный трафик', bot: 'Боты' };
+  var TRAFFIC_RU = { human: 'Обычные визиты', suspicious: 'Подозрительный трафик', bot: 'Боты' };
   var CONTINENT_RU = {
     EU: 'Европа', AS: 'Азия', NA: 'Северная Америка', SA: 'Южная Америка',
     AF: 'Африка', OC: 'Океания', AN: 'Антарктида'

@@ -53,7 +53,7 @@
   ];
   // Choropleth metrics: every one is a column of the `countries` report rows.
   var MAP_METRICS = [
-    ['visits_human', 'Визиты (люди)'], ['visitors', 'Посетители с согласием'], ['registered', 'Зарегистрированные'],
+    ['visits_human', 'Обычные визиты'], ['visitors', 'Посетители с согласием'], ['registered', 'Зарегистрированные'],
     ['buyers', 'Покупатели'], ['households', 'Домохозяйства (оценка)'], ['consent_accepted', 'Согласились на аналитику'],
     ['visits_suspicious', 'Подозрительный трафик'], ['visits_bot', 'Боты']
   ];
@@ -80,12 +80,12 @@
     funnels: 'Воронка по людям: на каждом шаге считается число людей, которые его достигли в выбранном периоде.',
     retention: 'Когорты по дню первого визита. D1/D7/D30 — вернулся ли человек ровно на 1-й, 7-й и 30-й день.',
     quality: 'Качество приёма: сколько событий принято, сколько отклонено и почему. Здесь же свежесть данных и распределение уверенности идентификации.',
-    visitsHuman: 'Визиты без признаков автоматизации: по одному на загрузку страницы или запуск приложения, независимо от согласия. Сервер считает их как обезличенные счётчики по стране и платформе — без идентификаторов, поэтому «уникальных посетителей» из них вывести нельзя. Автоматизация, headless-браузеры, сети дата-центров, VPN и Tor считаются отдельно.',
+    visitsHuman: 'Обычные визиты — визиты без обнаруженных признаков автоматизации (не доказательство живого человека): по одному на загрузку страницы или запуск приложения, независимо от согласия. Сервер считает их как обезличенные счётчики по стране и платформе — без идентификаторов, поэтому «уникальных посетителей» из них вывести нельзя. Автоматизация, headless-браузеры, сети дата-центров, VPN и Tor считаются отдельно.',
     guests: 'Гости — визиты без входа в аккаунт (по счётчикам). Кто именно заходил, сервер не знает и не записывает.',
     registered: 'Точное число: аккаунты в базе авторизации без анонимных сессий. Не зависит от согласия на аналитику и от фильтров трафика. Владелец учтён и показан отдельно.',
     levels: 'FREE / PRO / Lifetime — из серверной таблицы прав доступа (entitlements). PRO — активная платная подписка; Lifetime — бессрочный доступ владельца; истёкшие показаны отдельно. Клиентский флаг isPro не используется никогда.',
     buyers: 'Покупатели — аккаунты с оплаченным правом доступа от магазина (Apple, Google, Paddle, Stripe, RevenueCat) в production. Клиентское событие «оплатил» доказательством не считается. Продления появятся после подключения журнала платёжных событий.',
-    conversion: 'Оценка: новые регистрации за период ÷ визиты людей за период; покупатели ÷ все аккаунты. Показывается только при достаточной выборке (≥ 20 визитов, ≥ 10 аккаунтов), иначе — «Недостаточно данных».',
+    conversion: 'Оценка: новые регистрации за период ÷ обычные визиты за период; покупатели ÷ все аккаунты. Показывается только при достаточной выборке (≥ 20 визитов, ≥ 10 аккаунтов), иначе — «Недостаточно данных».',
     traffic: 'Боты — объявленные краулеры. Подозрительный трафик — headless-браузеры, сети дата-центров, VPN, Tor и всплески запросов с одной сети. Ни одна страна не удаляется вручную: видно, какой это трафик.',
     consented: 'Посетители с согласием — люди из данных, собранных после «Принять»: подтверждённые аккаунты и вероятные анонимные люди. Это часть всех посетителей, а не все посетители.',
     countryMap: 'Страна определяется сервером по сети запроса — это страна посещения, а не гражданство или место жительства; VPN и Tor показаны отдельно. Хранится только счётчик. Аккаунты и покупатели привязаны к стране только если их устройства согласились на аналитику; остальные — «не определено».'
@@ -293,7 +293,9 @@
       '@media (max-width:719px){#ow-ov .ow-status{flex:1 1 100%;margin-left:0;text-align:left}#ow-ov .ow-top .ow-btn{flex:1 1 auto}}',
       '#ow-ov .ow-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}',
       '#ow-ov .ow-card{background:var(--ow-card);border:1px solid var(--ow-bd);border-radius:14px;padding:12px}',
-      '#ow-ov .ow-card-h{display:flex;align-items:center;gap:6px;color:var(--ow-sub);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}',
+      '#ow-ov .ow-card-h{display:flex;align-items:center;gap:6px;color:var(--ow-sub);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;flex-wrap:wrap}',
+      // Long uppercase titles («Зарегистрированные») must wrap inside a narrow card, never push the info button out of it.
+      '#ow-ov .ow-card-h > span:first-child{min-width:0;flex:1 1 auto;overflow-wrap:anywhere}',
       '#ow-ov .ow-card-v{font-size:26px;font-weight:800;margin-top:6px;overflow-wrap:anywhere}',
       '#ow-ov .ow-card-s{color:var(--ow-sub);font-size:12px;margin-top:4px}',
       '#ow-ov .ow-card-d{font-size:12px;font-weight:700;margin-top:4px}',
@@ -330,6 +332,8 @@
       '#ow-ov .ow-status{color:var(--ow-sub);font-size:12px;margin-left:auto;text-align:right}',
       '#ow-ov .ow-err{background:rgba(242,120,154,.14);border:1px solid var(--ow-down);border-radius:12px;padding:10px;margin-top:10px;display:flex;gap:10px;align-items:center}',
       '#ow-ov .ow-map{height:min(70vh,560px);border-radius:14px;overflow:hidden;border:1px solid var(--ow-bd);margin-top:10px;background:var(--ow-card2)}',
+      // A phone shows the whole world in a short, wide box instead of a tall box with a tiny world in it.
+      '@media (max-width:719px){#ow-ov .ow-map{height:min(48vh,340px)}}',
       '#ow-ov .ow-map-note{color:var(--ow-sub);font-size:12px;margin-top:6px}',
       '#ow-ov .ow-pop{position:fixed;inset:auto 12px 12px 12px;max-width:560px;margin:0 auto;background:var(--ow-card);border:1px solid var(--ow-bd);border-radius:14px;padding:12px;box-shadow:0 18px 50px rgba(0,0,0,.35);z-index:20}',
       '#ow-ov .ow-pop h3{margin:0 0 6px;font-size:14px}',
@@ -579,11 +583,14 @@
     for (var i = 0; i < MAP_METRICS.length; i++) if (MAP_METRICS[i][0] === metric) return MAP_METRICS[i][1];
     return metric;
   }
+  // Compact tooltip: the selected metric first, then the three anchors — each figure exactly once.
   function hoverHtml(iso, metric) {
     var row = countryRows().filter(function (r) { return r.country === iso; })[0] || {};
-    return '<b>' + esc((LIB.flagEmoji ? LIB.flagEmoji(iso) + ' ' : '') + countryName(iso)) + '</b><br>' +
-      esc(metricLabel(metric)) + ': <b>' + num(row[metric]) + '</b><br>' +
-      'Визиты (люди): ' + num(row.visits_human) + ' · Аккаунты: ' + num(row.registered) + ' · Покупатели: ' + num(row.buyers);
+    var lines = [[metric, metricLabel(metric)], ['visits_human', 'Обычные визиты'], ['registered', 'Аккаунты'], ['buyers', 'Покупатели']];
+    var seen = {};
+    return '<b>' + esc((LIB.flagEmoji ? LIB.flagEmoji(iso) + ' ' : '') + countryName(iso)) + '</b>' +
+      lines.filter(function (l) { if (seen[l[0]]) return false; seen[l[0]] = true; return true; })
+        .map(function (l, i) { return '<br>' + esc(l[1]) + ': ' + (i === 0 ? '<b>' + num(row[l[0]]) + '</b>' : num(row[l[0]])); }).join('');
   }
   async function mountMap(force) {
     var host = ovEl.querySelector('#ow-mapbox');
@@ -649,7 +656,7 @@
         '<code>' + esc(iso) + '</code>' + (continentOf(iso) ? '<span class="ow-tag">' + esc(label(LIB.CONTINENT_RU, continentOf(iso))) + '</span>' : '') +
         how('countryMap') + '</div>' +
       '<div class="ow-cards">' +
-        card('Визиты (люди)', v('visits_human'), 'фильтр · без идентификаторов', 'visitsHuman') +
+        card('Обычные визиты', v('visits_human'), 'без обнаруженных признаков автоматизации', 'visitsHuman') +
         card('Гости', v('visits_guest'), 'визиты без входа в аккаунт', 'guests') +
         card('С аккаунтом', v('visits_signed_in'), 'визиты с входом в аккаунт') +
         card('Зарегистрированные', kv(sum.registered), 'точно · новых за период: ' + num(sum.registered_new), 'registered') +
@@ -659,14 +666,14 @@
         card('Покупатели', kv(sum.buyers), 'покупок за период: ' + num(sum.purchases), 'buyers') +
         card('Домохозяйства', kv(sum.households), 'оценка · с согласием', 'households') +
         card('Посетители с согласием', kv(sum.visitors), num(sum.guests) + ' гостевых профилей', 'consented') +
-        card('Web', v('web'), 'визиты людей') + card('iOS', v('ios'), 'визиты людей') + card('Android', v('android'), 'визиты людей') +
+        card('Web', v('web'), 'обычные визиты') + card('iOS', v('ios'), 'обычные визиты') + card('Android', v('android'), 'обычные визиты') +
         card('Согласились', kv(sum.consent_accepted), 'решений за период', 'consent') +
         card('Отклонили', kv(sum.consent_declined), 'решений за период', 'consent') +
         card('Боты', v('visits_bot'), 'объявленные краулеры', 'traffic') +
         card('Подозрительный трафик', v('visits_suspicious'), 'VPN / Tor / дата-центры: ' + (visits ? num(sum.visits_proxy) : '—'), 'traffic') +
-        card('Конверсия в регистрацию', conversion, 'оценка · регистрации ÷ визиты людей', 'conversion') +
+        card('Конверсия в регистрацию', conversion, 'оценка · регистрации ÷ обычные визиты', 'conversion') +
       '</div>' +
-      (visits ? lineChart(data.timeseries || [], ['human', 'suspicious', 'bot'], ['Люди', 'Подозрительный', 'Боты']) : '<div class="ow-empty">Счётчики визитов ещё не накоплены</div>') +
+      (visits ? lineChart(data.timeseries || [], ['human', 'suspicious', 'bot'], ['Обычные', 'Подозрительный', 'Боты']) : '<div class="ow-empty">Счётчики визитов ещё не накоплены</div>') +
       lineChart(data.visitors_timeseries || [], ['visitors', 'sessions'], ['Посетители с согласием', 'Сессии']) +
       barList(data.platforms, { web: 'Веб', ios: 'iOS', android: 'Android' }, null, 'Платформы (все визиты)') +
       barList(data.network_types, netLabels, 'traffic', 'Тип сети') +
@@ -789,7 +796,7 @@
     var un = { unavailable: !t.available };
     var pct = function (value) { return value == null ? null : value; };
     return '<div class="ow-block" id="ow-kpi">' + head + '<div class="ow-cards">' +
-      kcard('Визиты (люди)', tv('human'), t.available ? num(t.visits) + ' всего · ' + pctText(t.human, t.visits) + ' без признаков автоматизации' : 'счётчики ещё не накоплены', 'visitsHuman', 'filtered', un) +
+      kcard('Обычные визиты', tv('human'), t.available ? num(t.visits) + ' всего · ' + pctText(t.human, t.visits) + ' без обнаруженных признаков автоматизации' : 'счётчики ещё не накоплены', 'visitsHuman', 'filtered', un) +
       kcard('Гости', tv('guest'), 'визиты без входа в аккаунт', 'guests', 'filtered', un) +
       kcard('С аккаунтом', tv('signed_in'), 'визиты с входом в аккаунт', 'guests', 'filtered', un) +
       kcard('Зарегистрированные аккаунты', a.registered_total, '+' + num(a.registered_new) + ' за период · владелец: ' + num(a.owners) + ' · анонимных сессий: ' + num(a.anonymous_accounts), 'registered', 'exact') +
@@ -799,7 +806,7 @@
       kcard('Lifetime', levels.lifetime, 'бессрочный доступ', 'levels', 'exact') +
       kcard('Покупатели', a.paying_customers, 'подписок активно: ' + num(a.active_subscriptions) + ' · тестовых аккаунтов: ' + num(a.test_accounts), 'buyers', 'exact') +
       kcard('Покупки за период', a.purchases, 'продления: ' + (a.renewals == null ? 'нет данных' : num(a.renewals)), 'buyers', 'exact') +
-      kcard('Конверсия в регистрацию', pct(cv.signup_rate_pct), 'регистрации ÷ визиты людей · нужно ≥ ' + num(cv.min_visits) + ' визитов', 'conversion', 'estimate', { insufficient: true, suffix: '%' }) +
+      kcard('Конверсия в регистрацию', pct(cv.signup_rate_pct), 'регистрации ÷ обычные визиты · нужно ≥ ' + num(cv.min_visits) + ' визитов', 'conversion', 'estimate', { insufficient: true, suffix: '%' }) +
       kcard('Конверсия в покупку', pct(cv.purchase_rate_pct), 'покупатели ÷ аккаунты · нужно ≥ ' + num(cv.min_registered) + ' аккаунтов', 'conversion', 'estimate', { insufficient: true, suffix: '%' }) +
       kcard('Посетители с согласием', c.visitors, num(c.guest_profiles) + ' гостевых профилей · ' + num(c.registered_profiles) + ' с аккаунтом · ' + num(c.unknown_visitors) + ' без признаков', 'consented', 'consented') +
       kcard('Домохозяйства', c.households, 'по домашним сетям согласившихся', 'households', 'estimate') +
@@ -807,9 +814,9 @@
       kcard('Подозрительный трафик', tv('suspicious'), 'headless, дата-центры, VPN, Tor, всплески', 'traffic', 'filtered', un) +
       kcard('Согласия', cs.accepted, 'отклонили: ' + num(cs.declined) + ' · стран известно: ' + num(cs.countries_known), 'consent', 'exact') +
     '</div>' +
-    (t.available ? lineChart(t.timeseries || [], ['human', 'suspicious', 'bot'], ['Люди', 'Подозрительный', 'Боты']) : '') +
-    (t.available ? barList(t.by_platform, { web: 'Веб', ios: 'iOS', android: 'Android' }, 'visitsHuman', 'Визиты людей по платформам') : '') +
-    (t.available ? barList(t.by_consent, { accepted: 'Согласились', declined: 'Отклонили', undecided: 'Ещё не решили' }, 'consent', 'Визиты людей по состоянию согласия') : '') +
+    (t.available ? lineChart(t.timeseries || [], ['human', 'suspicious', 'bot'], ['Обычные', 'Подозрительный', 'Боты']) : '') +
+    (t.available ? barList(t.by_platform, { web: 'Веб', ios: 'iOS', android: 'Android' }, 'visitsHuman', 'Обычные визиты по платформам') : '') +
+    (t.available ? barList(t.by_consent, { accepted: 'Согласились', declined: 'Отклонили', undecided: 'Ещё не решили' }, 'consent', 'Обычные визиты по состоянию согласия') : '') +
     '</div>';
   }
 
@@ -1034,13 +1041,13 @@
       '<button class="ow-btn" id="ow-fit" type="button">Показать всё</button></div>' +
       '<div class="ow-map" id="ow-mapbox"></div>' + legend +
       '<div class="ow-map-note">Наведите на страну — подсветится вся её территория; нажмите — откроется карточка. ' +
-        (visits ? 'Визиты людей: ' + num(totals.visits_human) + ' · подозрительных: ' + num(totals.visits_suspicious) + ' · ботов: ' + num(totals.visits_bot) + ' · стран: ' + num(totals.countries)
+        (visits ? 'Обычные визиты: ' + num(totals.visits_human) + ' · подозрительных: ' + num(totals.visits_suspicious) + ' · ботов: ' + num(totals.visits_bot) + ' · стран: ' + num(totals.countries)
           : 'Счётчики визитов ещё не накоплены — карта показывает данные, собранные с согласием') +
         ' · аккаунтов со страной: ' + num(totals.registered) + ' · покупателей: ' + num(totals.buyers) + '<br>' + esc(data.note || '') + '</div></div>' +
       '<div class="ow-block"><div class="ow-block-h">Страны</div>' +
       table([
         { title: 'Страна', key: 'country', html: function (r) { return esc((LIB.flagEmoji ? LIB.flagEmoji(r.country) + ' ' : '') + countryName(r.country)) + ' <span class="ow-card-s" style="display:inline">' + esc(r.country) + '</span>'; } },
-        { title: 'Визиты (люди)', key: 'visits_human', html: cell('visits_human'), numeric: true },
+        { title: 'Обычные визиты', key: 'visits_human', html: cell('visits_human'), numeric: true },
         { title: 'Гости', key: 'visits_guest', html: cell('visits_guest'), numeric: true },
         { title: 'Подозр.', key: 'visits_suspicious', html: cell('visits_suspicious'), numeric: true },
         { title: 'Боты', key: 'visits_bot', html: cell('visits_bot'), numeric: true },
@@ -1234,8 +1241,10 @@
       var next = ovEl.getAttribute('data-ow-theme') === 'dark' ? 'light' : 'dark';
       ovEl.setAttribute('data-ow-theme', next);
       try { W.localStorage.setItem(THEME_KEY, next); } catch (e) {}
-      if (mapApi) mapApi.setTheme(next);
+      // render() rebuilds the section markup, which replaces #ow-mapbox: the map must be re-mounted
+      // into the new element (a theme swap on the orphaned map instance would leave an empty box).
       if (state.data[state.section]) render();
+      if (state.section === 'map') mountMap(true);
     });
     ovEl.querySelector('#ow-tabs').addEventListener('click', function (event) {
       var tab = event.target.closest('[data-section]');
