@@ -1431,6 +1431,7 @@ function courtSourceLabel(prov){
     case 'WHEEL_MATRIX':return appText('Колёсная матрица');
     case 'SIMULATED_3D_DRAW':return appText('3D-симуляция тиража');
     case 'JUDGE':return appText('Вердикт судьи');
+    case 'JUDGE_RECOMMENDATION':return appText('Верховный судья')+' · '+appText('Рекомендация');
     case 'JURY_MEMBER':return prov.jurorId?appText('Присяжные')+' · '+courtPersonaName(prov.jurorId):appText('Присяжные');
     case 'JURY_CONSENSUS':return appText('Консенсус присяжных');
   }
@@ -4784,46 +4785,119 @@ function TK_open(){
 function TK_close(){document.getElementById('ticket-ov').classList.remove('show');}
 
 /* ═══════════════ ВЕРХОВНЫЙ СУДЬЯ ═══════════════ */
+// Two states that are never mixed, because they are two different user intentions:
+//   mode 'analyze'   — the user already has combinations: the Judge reads exactly those.
+//   mode 'recommend' — the user has none: the Judge may draft its own rows, but ONLY after
+//                      the user explicitly asks for it.
+// Opening (or closing) this window must never create, replace or re-label a single row.
+// It used to call fillAll() on open, which filled the two empty starter rows with random
+// numbers, stamped them HOME_GENERATOR · Случайный выбор and presented them as "your 2 rows".
 var SUP_state=null;
-function SUP_open(src){
+// The combinations the user really has right now: complete rows only, read-only copies.
+function supExistingRows(src){
   const l=L();
-  let srcRows=[],label='';
-  if(src==='sim'){fillAll();srcRows=rows.filter(r=>r.m.length===l.pM).map(r=>({m:[...r.m],b:[...(r.b||[])]}));label=`Анализирую ${srcRows.length} ${rowWord(srcRows.length)} из симулятора · ${l.short||l.name}`;}
-  else{const st=CONS_state;if(st&&st.matrix)srcRows=st.matrix.map(r=>({m:[...r.m],b:[...(r.b||[])]}));label=`Анализирую ${srcRows.length} ${rowWord(srcRows.length)} итоговой матрицы · ${l.short||l.name}`;}
-  if(srcRows.length<2){showFeedback('Мало данных','Судье нужно минимум 2 заполненных ряда.','⚖️',3000);return;}
-  const processingRows=prepareRowsForGroupAnalysis(srcRows,'judge');
-  const total=processingRows.length;
-  SUP_state={src,srcRows:processingRows,n:Math.min(total>10?10:3,total),total,label};
+  const list=src==='sim'?rows:((CONS_state&&CONS_state.matrix)||[]);
+  return list.filter(r=>r&&Array.isArray(r.m)&&r.m.length===l.pM).map(r=>({m:[...r.m],b:[...(r.b||[])]}));
+}
+// How many rows the Judge may propose when it has to pick them itself. Both existing FREE rules
+// apply and neither is invented here: the generator's rows-per-run cap, and the group-analysis
+// cap (the Judge still has to weigh every row it drafts). PRO keeps the usual MAX_ROWS.
+function supRecommendMax(){
+  if(hasConfirmedPro())return MAX_ROWS;
+  const perRun=Math.max(1,Number(window.LotoCommercial?.freeGenerationRowsPerRun)||5);
+  return Math.max(1,Math.min(MAX_ROWS,perRun,groupAnalysisFreeLimit()));
+}
+// Draft rows the Judge weighs when it proposes combinations itself. They exist only inside this
+// call: they are never written into `rows`, never stored and never get provenance of their own —
+// only the verdict the user asks for becomes a real combination.
+function supDraftRows(count){
+  const l=L(),dBo=drawBonusCount(l),out=[];
+  for(let i=0;i<count;i++)out.push({m:rnd(l.mB,l.pM),b:dBo>0?rnd(l.bB,dBo):[]});
+  return out;
+}
+function SUP_open(src){
+  const l=L(),game=l.short||l.name;
+  const existing=supExistingRows(src);
+  if(existing.length){
+    const processingRows=prepareRowsForGroupAnalysis(existing,'judge');
+    const total=processingRows.length;
+    SUP_state={src,mode:'analyze',srcRows:processingRows,total,n:Math.min(total>10?10:3,total),
+      label:`Для анализа доступно: ${total} ${rowWord(total)} · ${game}`};
+  }else{
+    const total=supRecommendMax();
+    SUP_state={src,mode:'recommend',srcRows:[],total,n:Math.max(1,Math.min(total,getGenCount())),
+      label:`Готовых рядов пока нет · ${game}`};
+  }
   SUP_renderSelection();
   document.getElementById('sup-result').innerHTML='';
   document.getElementById('sup-go').style.display='';
   document.getElementById('sup-ov').classList.add('show');
 }
+const SUP_HOW={
+  analyze:'Как работает судья: каждое число получает «голоса» из твоих рядов (55% веса) и структурный балл по истории выбранного периода (частота, пары и интервалы — 45%). Затем судья собирает разные строки; уже использованные числа временно теряют вес. Это анализ структуры, а не прогноз.',
+  recommend:'Готовых рядов нет, анализировать пока нечего. Верховный судья может подобрать рекомендации сам: он составит черновые варианты и взвесит каждое число по структуре поля за выбранный период. Комбинации появятся только после нажатия кнопки. Это анализ структуры, а не прогноз.',
+};
 function SUP_renderSelection(){
   const st=SUP_state;if(!st)return;
-  document.getElementById('sup-src').textContent=st.label+' · '+appText('Для анализа выбрано')+': '+st.n+' / '+st.total;
+  const recommend=st.mode==='recommend';
+  const how=document.getElementById('sup-how');if(how)how.textContent=SUP_HOW[recommend?'recommend':'analyze'];
+  const countLabel=document.getElementById('sup-count-label');
+  if(countLabel)countLabel.textContent=recommend?'Сколько рядов подобрать':'Сколько строк собрать';
+  const go=document.getElementById('sup-go');
+  if(go)go.textContent=recommend?'Получить рекомендации судьи':'Собрать вердикт';
+  document.getElementById('sup-src').textContent=st.label;
+  SUP_renderPick();
   const counts=document.getElementById('sup-counts');
   if(st.total<=10){
     counts.style.display='grid';counts.style.gridTemplateColumns='repeat(5,1fr)';
     counts.innerHTML=Array.from({length:st.total},(_,i)=>i+1).map(n=>'<button class="pick-cnt'+(n===st.n?' on':'')+'" data-loto-event-click="SUP_setN('+n+',this)">'+n+'</button>').join('');
   }else{
     counts.style.display='block';
-    counts.innerHTML='<select class="gen-select" id="sup-count-select" aria-label="'+escapeHtml(appText('Сколько строк собрать'))+'" data-loto-event-change="SUP_setN(this.value,this)">'+
+    const label=recommend?'Сколько рядов подобрать':'Сколько строк собрать';
+    const last=recommend?String(st.total):escapeHtml(appText('Все строки'))+' ('+st.total+')';
+    counts.innerHTML='<select class="gen-select" id="sup-count-select" aria-label="'+escapeHtml(appText(label))+'" data-loto-event-change="SUP_setN(this.value,this)">'+
       Array.from({length:st.total-1},(_,i)=>i+1).map(n=>'<option value="'+n+'"'+(n===st.n?' selected':'')+'>'+n+'</option>').join('')+
-      '<option value="'+st.total+'"'+(st.n===st.total?' selected':'')+'>'+escapeHtml(appText('Все строки'))+' ('+st.total+')</option></select>';
+      '<option value="'+st.total+'"'+(st.n===st.total?' selected':'')+'>'+last+'</option></select>';
   }
+}
+// One line that always says what the button will do with the chosen number.
+function SUP_renderPick(){
+  const st=SUP_state,el=document.getElementById('sup-sel');if(!st||!el)return;
+  el.textContent=st.mode==='recommend'?`Судья подберёт рядов: ${st.n}`:`Для анализа выбрано: ${st.n} / ${st.total}`;
 }
 function SUP_setN(n,el){
   const st=SUP_state;if(!st)return;
   st.n=Math.max(1,Math.min(st.total,parseInt(n,10)||1));
   document.querySelectorAll('#sup-counts .pick-cnt').forEach(b=>b.classList.toggle('on',+b.textContent===st.n));
-  document.getElementById('sup-src').textContent=st.label+' · '+appText('Для анализа выбрано')+': '+st.n+' / '+st.total;
+  SUP_renderPick();
 }
+// The rows handed to the Judge. In 'analyze' mode these are the user's own rows; in 'recommend'
+// mode the Judge drafts them here, at the moment the user presses the button — never on open.
 function getSupSelectedRows(){
-  const st=SUP_state;if(!st||!Array.isArray(st.srcRows))return[];
-  return st.srcRows.slice(0,Math.max(1,Math.min(st.srcRows.length,parseInt(st.n,10)||1)));
+  const st=SUP_state;if(!st)return[];
+  const n=Math.max(1,Math.min(Math.max(1,st.total),parseInt(st.n,10)||1));
+  const srcRows=st.mode==='recommend'?supDraftRows(n):(Array.isArray(st.srcRows)?st.srcRows:[]);
+  return srcRows.slice(0,n);
 }
 window.getSupSelectedRows=getSupSelectedRows;
+// Provenance of a row this window produced: a Judge recommendation is the Judge's own work, not
+// the generator that drew the draft numbers it weighed.
+function supRowSource(){return{sourceType:SUP_state&&SUP_state.mode==='recommend'?'JUDGE_RECOMMENDATION':'JUDGE'};}
+function supStatusText(count){
+  return supRowSource().sourceType==='JUDGE_RECOMMENDATION'
+    ?`Готово: ${count} ${rowWord(count)} · Верховный судья · Рекомендация.`
+    :`Готово: ${count} ${rowWord(count)} · Верховный судья.`;
+}
+// Options the backend Judge (commercial-runtime) applies for THIS window, so the rows it writes
+// into the simulator carry the same honest source as the local path.
+window.supJudgeOptions=function(){
+  if(!SUP_state||SUP_state.mode!=='recommend')return{};
+  // JUDGE_apply already shows the transfer state, closes the sheet and jumps to the rows.
+  return{onApply:(finalRows)=>{
+    SUP_close();
+    setGeneratedRows(finalRows,supStatusText(finalRows.length),false,undefined,{sourceType:'JUDGE_RECOMMENDATION'});
+  }};
+};
 function SUP_close(){document.getElementById('sup-ov').classList.remove('show');}
 async function SUP_go(){
   const st=SUP_state;if(!st)return;
@@ -4866,10 +4940,12 @@ async function SUP_go(){
     verdict.push({m,b});
   }
   st.verdict=ensureUniqueGeneratedRows(verdict,l);
-  const issued=st.verdict;
-  res.innerHTML='<div class="if-seclbl">Вердикт судьи · '+verdict.length+' '+rowWord(verdict.length)+'</div>'+
-    issued.map((r,i)=>'<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>'+courtCaptionHtml({sourceType:'JUDGE'})).join('')+
-    '<div class="if-note">'+appText('Выбрано рядов для голосования')+': '+selectedRows.length+' / '+st.total+'. '+appText('Это исследовательские строки, а не прогноз.')+'</div>'+
+  const issued=st.verdict,recommend=st.mode==='recommend',source=supRowSource();
+  res.innerHTML='<div class="if-seclbl">'+(recommend?'Рекомендация судьи':'Вердикт судьи')+' · '+verdict.length+' '+rowWord(verdict.length)+'</div>'+
+    issued.map((r,i)=>'<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>'+courtCaptionHtml(source)).join('')+
+    '<div class="if-note">'+(recommend
+      ?appText('Судья подобрал эти ряды сам')+': '+issued.length+' '+rowWord(issued.length)+'. '
+      :appText('Выбрано рядов для голосования')+': '+selectedRows.length+' / '+st.total+'. ')+appText('Это исследовательские строки, а не прогноз.')+'</div>'+
     '<button class="btn-draw '+l.cls+'" style="margin-top:10px" data-loto-event-click="SUP_use()">Использовать в симуляторе</button>'+
     '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="SUP_share()">📤 Поделиться вердиктом</button>';
   document.getElementById('sup-go').style.display='none';
@@ -4877,9 +4953,10 @@ async function SUP_go(){
 }
 async function SUP_use(){
   const st=SUP_state;if(!st||!st.verdict)return;
+  const source=supRowSource(),status=supStatusText(st.verdict.length);
   await withTransferBusy(async()=>{
     SUP_close();try{MATRIX_close();CONS_close();}catch(e){}
-    setGeneratedRows(st.verdict,'Готово: '+st.verdict.length+' '+rowWord(st.verdict.length)+' · Верховный судья.',true,undefined,{sourceType:'JUDGE'});
+    setGeneratedRows(st.verdict,status,true,undefined,source);
   });
   goToRows({immediate:true});
 }
