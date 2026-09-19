@@ -10,6 +10,12 @@
 // `countries`): no request per country, no coordinates finer than a border. Colour is a calm blue
 // sequential scale (owner-analytics-lib.js choroplethColor); countries without data stay neutral.
 //
+// Geometry model: one feature per ISO 3166-1 alpha-2 code from Natural Earth admin-0 MAP UNITS
+// (assets/world-units-50m.json). The analytics country key (what GeoIP reports) and the display
+// geometry are therefore the same thing: Svalbard is SJ, not a second Norway; French Guiana is GF,
+// not France. `meta[iso].parent` records the sovereign for the tooltip; no figure is ever moved from
+// a territory to its sovereign or back.
+//
 // Antimeridian: Natural Earth rings are NOT split at ±180° — Russia's mainland ring, Fiji and others
 // run from lon 179.9 straight to −180 inside one ring. Web Mercator draws that edge as a line across
 // the whole world and fills the wedge behind it (the horizontal stripes seen in production). Every
@@ -20,6 +26,8 @@ const STYLES = {
   dark: 'https://tiles.openfreemap.org/styles/dark',
 };
 const WORLD_URL = './vendor/world/countries.json';
+// Build revision of the page (index.html data-build), so the geometry URL changes with every deploy.
+const buildRevision = () => { try { return document.documentElement.getAttribute('data-build') || ''; } catch (_e) { return ''; } };
 // The opening view: every inhabited continent, no Mercator-inflated Arctic, no polar band.
 const WORLD_VIEW = [[-168, -56], [180, 78]];
 const FILL = 'ow-country-fill', LINE = 'ow-country-line', SELECTED = 'ow-country-selected';
@@ -110,20 +118,29 @@ export function decodeWorld(bundle) {
     });
     const first = points[0], last = points[points.length - 1];
     if (first && (first[0] !== last[0] || first[1] !== last[1])) points.push(first);
-    return points;
+    // Simplification can collapse a speck of an island to two or three points: not a ring.
+    return points.length >= 4 ? points : null;
+  };
+  const polygonOf = (ringIndexes) => {
+    const outer = ring(ringIndexes[0]);
+    if (!outer) return null;
+    return [outer].concat(ringIndexes.slice(1).map(ring).filter(Boolean));
   };
   const features = [];
   for (const geometry of topology.objects.countries.geometries) {
     const iso = geometry.properties && geometry.properties.iso;
     const polygons = geometry.type === 'Polygon'
-      ? [geometry.arcs.map(ring)]
-      : geometry.type === 'MultiPolygon' ? geometry.arcs.map((polygon) => polygon.map(ring)) : null;
+      ? [polygonOf(geometry.arcs)]
+      : geometry.type === 'MultiPolygon' ? geometry.arcs.map(polygonOf) : null;
     if (!polygons) continue;
-    const coordinates = polygons.flatMap(splitAtAntimeridian);
+    const coordinates = polygons.filter(Boolean).flatMap(splitAtAntimeridian);
     if (!coordinates.length) continue;
     features.push({
       type: 'Feature',
-      properties: { iso: iso || '', name: (geometry.properties && geometry.properties.name) || '', value: 0, color: null, dim: 0 },
+      properties: {
+        iso: iso || '', name: (geometry.properties && geometry.properties.name) || '',
+        parent: (geometry.properties && geometry.properties.parent) || '', value: 0, color: null, dim: 0,
+      },
       geometry: { type: 'MultiPolygon', coordinates },
     });
   }
@@ -131,7 +148,10 @@ export function decodeWorld(bundle) {
 }
 function loadWorld() {
   if (!worldPromise) {
-    worldPromise = fetch(WORLD_URL, { cache: 'force-cache' })
+    const revision = buildRevision();
+    // Versioned URL + default cache mode: force-cache kept the previous deploy's geometry for as long
+    // as the browser held it, which is how an owner could keep seeing an already-fixed map.
+    worldPromise = fetch(WORLD_URL + (revision ? '?v=' + encodeURIComponent(revision) : ''), { cache: 'default' })
       .then((response) => { if (!response.ok) throw new Error('world_geometry_unavailable'); return response.json(); })
       .then(decodeWorld)
       .catch((error) => { worldPromise = null; throw error; });
@@ -164,6 +184,27 @@ function continentView(features) {
   const lats = points.map((p) => p[1]);
   const pad = 3;
   return [[west - pad, Math.max(-56, Math.min(...lats) - pad)], [east + pad, Math.min(78, Math.max(...lats) + pad)]];
+}
+// Bounds of ONE feature: the shortest longitude interval on the circle that covers all its pieces
+// (so the USA with the Aleutians east of the dateline is not "the whole world") and the latitude
+// extent of those pieces. East may exceed 180 for a dateline country; fitBounds accepts that.
+export function featureBounds(feature) {
+  const spans = [];
+  let south = 90, north = -90;
+  for (const polygon of feature.geometry.coordinates) {
+    let lo = 180, hi = -180;
+    for (const p of polygon[0]) { lo = Math.min(lo, p[0]); hi = Math.max(hi, p[0]); south = Math.min(south, p[1]); north = Math.max(north, p[1]); }
+    spans.push([lo, hi]);
+  }
+  if (!spans.length) return null;
+  spans.sort((a, b) => a[0] - b[0]);
+  const merged = [spans[0].slice()];
+  for (const [lo, hi] of spans.slice(1)) { const last = merged[merged.length - 1]; if (lo <= last[1] + 0.001) last[1] = Math.max(last[1], hi); else merged.push([lo, hi]); }
+  let gapStart = merged.length - 1, gapSize = (merged[0][0] + 360) - merged[merged.length - 1][1];
+  for (let i = 0; i + 1 < merged.length; i++) { const gap = merged[i + 1][0] - merged[i][1]; if (gap > gapSize) { gapSize = gap; gapStart = i; } }
+  let west = merged[(gapStart + 1) % merged.length][0], east = merged[gapStart][1];
+  if (east < west) east += 360;
+  return [[west, south], [east, north]];
 }
 function bboxOf(features) {
   const box = [180, 90, -180, -90];
@@ -362,9 +403,10 @@ export async function createMap({ container, theme = 'light', colorFor, onHover,
     },
     focus(iso) {
       const feature = world.features.find((f) => f.properties.iso === iso);
-      const box = feature ? bboxOf([feature]) : null;
-      if (box) { try { map.fitBounds([[box[0], box[1]], [box[2], box[3]]], { padding: 48, maxZoom: 5, duration: 600 }); } catch (_e) {} }
+      const bounds = feature ? featureBounds(feature) : null;
+      if (bounds) { try { map.fitBounds(bounds, { padding: 48, maxZoom: 5, duration: 600 }); } catch (_e) {} }
     },
+    bounds(iso) { const feature = world.features.find((f) => f.properties.iso === iso); return feature ? featureBounds(feature) : null; },
     resize() { try { map.resize(); } catch (_e) {} },
     destroy() { try { tooltip.remove(); map.remove(); } catch (_e) {} },
   };

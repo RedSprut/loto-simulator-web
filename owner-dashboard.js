@@ -572,9 +572,20 @@
     var response = state.data.countries;
     return (response && response.data && Array.isArray(response.data.rows)) ? response.data.rows : [];
   }
+  function worldMeta(iso) {
+    try { return (mapApi && mapApi.world && mapApi.world.meta[iso]) || null; } catch (e) { return null; }
+  }
   function countryName(iso) {
     if (!iso || iso === 'ZZ') return 'Не определено';
-    return LIB.countryNameRu ? LIB.countryNameRu(iso) : iso;
+    var fromCatalog = LIB.countryNameRu ? LIB.countryNameRu(iso) : iso;
+    if (fromCatalog !== iso) return fromCatalog;
+    var meta = worldMeta(iso);
+    return (meta && (meta.ru || meta.n)) || iso;
+  }
+  // «территория Норвегии» for a dependency drawn as its own feature (SJ → NO, GF → FR, TK → NZ).
+  function parentNote(iso) {
+    var meta = worldMeta(iso);
+    return meta && meta.parent ? 'территория: ' + countryName(meta.parent) : '';
   }
   function continentOf(iso) {
     try { return (mapApi && mapApi.world && mapApi.world.meta[iso] && mapApi.world.meta[iso].c) || null; } catch (e) { return null; }
@@ -588,7 +599,8 @@
     var row = countryRows().filter(function (r) { return r.country === iso; })[0] || {};
     var lines = [[metric, metricLabel(metric)], ['visits_human', 'Обычные визиты'], ['registered', 'Аккаунты'], ['buyers', 'Покупатели']];
     var seen = {};
-    return '<b>' + esc((LIB.flagEmoji ? LIB.flagEmoji(iso) + ' ' : '') + countryName(iso)) + '</b>' +
+    var parent = parentNote(iso);
+    return '<b>' + esc((LIB.flagEmoji ? LIB.flagEmoji(iso) + ' ' : '') + countryName(iso)) + '</b>' + (parent ? '<br><i>' + esc(parent) + '</i>' : '') +
       lines.filter(function (l) { if (seen[l[0]]) return false; seen[l[0]] = true; return true; })
         .map(function (l, i) { return '<br>' + esc(l[1]) + ': ' + (i === 0 ? '<b>' + num(row[l[0]]) + '</b>' : num(row[l[0]])); }).join('');
   }
@@ -603,7 +615,11 @@
     setHourglass(true, 'Загрузка карты…');
     try {
       if (mapApi) { mapApi.destroy(); mapApi = null; }
-      var module = await import('./owner-map.js');
+      // Versioned like every other runtime script: an unversioned dynamic import could be served from
+      // the HTTP cache (max-age 600) or the service worker's stale-while-revalidate for a while after a deploy.
+      var rev = '';
+      try { rev = D.documentElement.getAttribute('data-build') || ''; } catch (e) {}
+      var module = await import('./owner-map.js' + (rev ? '?v=' + encodeURIComponent(rev) : ''));
       mapApi = await module.createMap({
         container: host,
         theme: ovEl.getAttribute('data-ow-theme'),
@@ -654,6 +670,7 @@
     sheet.innerHTML = '<div class="ow-sheet-in">' +
       '<div class="ow-country-h"><span class="ow-flag">' + esc(LIB.flagEmoji ? LIB.flagEmoji(iso) : '') + '</span><span>' + esc(countryName(iso)) + '</span>' +
         '<code>' + esc(iso) + '</code>' + (continentOf(iso) ? '<span class="ow-tag">' + esc(label(LIB.CONTINENT_RU, continentOf(iso))) + '</span>' : '') +
+        (parentNote(iso) ? '<span class="ow-tag">' + esc(parentNote(iso)) + '</span>' : '') +
         how('countryMap') + '</div>' +
       '<div class="ow-cards">' +
         card('Обычные визиты', v('visits_human'), 'без обнаруженных признаков автоматизации', 'visitsHuman') +

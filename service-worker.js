@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the b09bb83 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 9554d04 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-vb09bb83';
+const CACHE_VERSION='loto-shell-v9554d04';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -104,6 +104,13 @@ self.addEventListener('fetch',event=>{
   // with no-store when online; fall back to cache only offline. Heavy, rarely-changing
   // vendor libs and audio sample assets stay stale-while-revalidate for load speed.
   if(/\/demo-drum\//.test(url.pathname)&&!/\/demo-drum\/(?:vendor|assets)\//.test(url.pathname)){
+    event.respondWith(networkFirst(request,SHELL_CACHE));
+    return;
+  }
+  // Owner Analytics map: owner-map.js is a dynamic import and vendor/world/countries.json a fetch.
+  // Both carry a ?v= build revision, but the ignoreSearch match above would still hand back the
+  // previous deploy first. Owner-only, loaded lazily, small: network-first, cache only offline.
+  if(/\/owner-map\.js$|\/vendor\/world\//.test(url.pathname)){
     event.respondWith(networkFirst(request,SHELL_CACHE));
     return;
   }
