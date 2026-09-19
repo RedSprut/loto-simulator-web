@@ -490,6 +490,17 @@ function renderBackendJudge(result,mountId,target,handlers){
     };
   }).filter(item=>item.orig.length===l.pM).sort((a,b)=>a.index-b.index).map(({index,...item})=>item);
   if(!plan.length){mount.innerHTML='<div class="if-empty">⚖️ Backend не вернул допустимых рядов для судьи.</div>';return false;}
+  // Recommendation mode (the Judge reviewed its OWN drafts): its replacements are its own
+  // decisions, not a proposal to the user. Apply them and show the finished rows — the Judge
+  // never publishes an argument with itself. Interactive swaps stay in analysis mode, where the
+  // rows belong to the user.
+  if(handlers?.finalize||target?.finalize){
+    const finalRows=plan.map(item=>{
+      item.swaps.forEach(swap=>{swap.apply=true;});
+      return{m:JUDGE_effective(item).m,b:[...item.b]};
+    });
+    return SUP_showRecommendation(finalRows,{drawsN:Number(target?.drawsN||handlers?.drawsN||0)});
+  }
   const ns=target?.namespace||handlers?.namespace||String(mountId||'judge').replace(/[^a-z0-9_-]/gi,'')||'judge';
   const defaultApply=(finalRows,meta)=>{
     const choice=JUDGE_choiceText(meta);
@@ -1572,7 +1583,7 @@ window.LotoCourtUI=Object.freeze({
   provenanceOf:(row,gameId)=>{const C=courtCore();return C?C.provenanceOf(row,courtRulesFor(gameId||cur)):{v:1,sourceType:'SAVED_LEGACY',unavailable:true,events:[]};},
   load:loadCourtApp,
   open:(ctx,options)=>withCourtApp(app=>app.open(ctx,options)),
-  openHome:kind=>withCourtApp(app=>app.openHome(kind)),
+  openHome:(kind,source)=>withCourtApp(app=>app.openHome(kind,source)),
   openSaved:(favIndex,rowIndex)=>withCourtApp(app=>app.openSaved(favIndex,rowIndex)),
   openRowHistory:(row,gameId,focus)=>withCourtApp(app=>app.openRowHistory(row,gameId,focus)),
   close:()=>{if(window.LotoCourtApp)window.LotoCourtApp.close();},
@@ -1589,6 +1600,12 @@ document.addEventListener('click',event=>{
   const ui=window.LotoCourtUI;
   if(kind==='home-jury')ui.openHome('jury');
   else if(kind==='home-defense')ui.openHome('defense');
+  // Верховный судья hands its FINAL recommendations to the existing Jury / Defense screens. The
+  // rows stay the Judge's own (kind:'judge'); nothing is written into the ticket to make it work.
+  else if(kind==='judge-jury'||kind==='judge-defense'){
+    if(!(window.supRecommendationRows&&window.supRecommendationRows().length))return;
+    ui.openHome(kind==='judge-jury'?'jury':'defense',{kind:'judge'});
+  }
   else if(kind==='row')ui.open({kind:'rows',index:rowIndex});
   else if(kind==='generate')ui.open({kind:'rows',index:rowIndex},{view:'jury',mode:'generate'});
   else if(kind==='model')ui.open({kind:'model',index:rowIndex});
@@ -4817,6 +4834,7 @@ function supDraftRows(count){
 }
 function SUP_open(src){
   const l=L(),game=l.short||l.name;
+  supRecRows=[];supRecMeta={drawsN:0};   // a previous recommendation never leaks into a new session
   const existing=supExistingRows(src);
   if(existing.length){
     const processingRows=prepareRowsForGroupAnalysis(existing,'judge');
@@ -4888,16 +4906,89 @@ function supStatusText(count){
     ?`Готово: ${count} ${rowWord(count)} · Верховный судья · Рекомендация.`
     :`Готово: ${count} ${rowWord(count)} · Верховный судья.`;
 }
-// Options the backend Judge (commercial-runtime) applies for THIS window, so the rows it writes
-// into the simulator carry the same honest source as the local path.
+// Options the backend Judge (commercial-runtime) applies for THIS window. `finalize` is the whole
+// difference between the two processes: in recommendation mode the Judge is reviewing ITS OWN
+// drafts, so its replacements are its own internal decisions and are applied before the result is
+// shown. In analysis mode the rows belong to the user, so the replacements stay a proposal.
 window.supJudgeOptions=function(){
   if(!SUP_state||SUP_state.mode!=='recommend')return{};
-  // JUDGE_apply already shows the transfer state, closes the sheet and jumps to the rows.
-  return{onApply:(finalRows)=>{
+  // JUDGE_apply already shows the transfer state, closes the sheet and jumps to the rows. This
+  // onApply only runs if a resumed action lost its finalize flag and fell back to the review UI.
+  return{finalize:true,onApply:(finalRows)=>{
     SUP_close();
     setGeneratedRows(finalRows,supStatusText(finalRows.length),false,undefined,{sourceType:'JUDGE_RECOMMENDATION'});
   }};
 };
+
+// ── FINAL Верховный судья recommendations ───────────────────────────────────────────────────
+// The Judge's finished decision on rows it created itself. It lives here, in memory, until the
+// user takes one of the three explicit paths under it (accept · jury · defense). Nothing reaches
+// the ticket, storage or saved combinations before that.
+let supRecRows=[],supRecMeta={drawsN:0};
+function supRecommendationRows(){return supRecRows;}
+function supRecommendationRow(index){return supRecRows[index]||null;}
+// A Jury/Defense decision taken on a recommendation updates it in place — exactly like the model
+// Result modal — and re-renders the list. It is still not committed to the ticket.
+function supRecommendationUpdate(index,row){
+  if(!supRecRows[index]||!row||!Array.isArray(row.m))return false;
+  const next={m:[...row.m],b:[...(row.b||[])]};
+  if(row.prov)next.prov=row.prov;
+  supRecRows[index]=next;
+  SUP_renderRecommendation();
+  return true;
+}
+window.supRecommendationRows=supRecommendationRows;
+window.supRecommendationRow=supRecommendationRow;
+window.supRecommendationUpdate=supRecommendationUpdate;
+// The Judge has finished deliberating: keep the final rows and show them. drawsN is the real size
+// of the analysed period reported by the run that produced them.
+function SUP_showRecommendation(finalRows,meta){
+  const l=L();
+  const list=normalizeGeneratedRows(finalRows,l).filter(r=>r.m.length===l.pM);
+  if(!list.length){showFeedback('Верховный судья','Судья не смог собрать рекомендацию. Попробуйте ещё раз.','⚖️',3600);return false;}
+  // In-memory provenance from the start, so Jury and Defense see the real origin of the input.
+  list.forEach(row=>{const prov=validRowProv(row,l)||createRowProv(row,{sourceType:'JUDGE_RECOMMENDATION'});if(prov)row.prov=prov;else delete row.prov;});
+  supRecRows=list;supRecMeta={drawsN:Math.max(0,Number(meta&&meta.drawsN)||0)};
+  if(SUP_state)SUP_state.mode='recommend';
+  else SUP_state={src:'sim',mode:'recommend',srcRows:[],total:list.length,n:list.length,label:''};
+  SUP_renderRecommendation();
+  const go=document.getElementById('sup-go');if(go)go.style.display='none';
+  const overlay=document.getElementById('sup-ov');
+  if(overlay&&!overlay.classList.contains('show')){
+    if(window.LotoModals)window.LotoModals.openModal('sup-ov');else overlay.classList.add('show');
+  }
+  return true;
+}
+// The final screen: clean rows and three honest paths. No self-replacement chips — the Judge does
+// not argue with the recommendation it has just made.
+function SUP_renderRecommendation(){
+  const l=L(),res=document.getElementById('sup-result');if(!res||!supRecRows.length)return;
+  // Russian source text goes into the DOM as-is: the i18n observer localizes it and keeps the
+  // source, so a language switch while the screen is open re-translates it correctly.
+  const checked=supRecMeta.drawsN>0?` <span>Проверено по ${supRecMeta.drawsN} тиражам выбранного периода.</span>`:'';
+  res.innerHTML='<div class="if-seclbl">'+`⚖️ Рекомендации Верховного судьи · ${supRecRows.length} ${rowWord(supRecRows.length)}`+'</div>'+
+    '<div class="if-note" style="margin:0 0 12px"><span>Судья составил эти ряды сам и сам их проверил: каждое число взвешено по структуре поля за выбранный период — частота, пары, пропуски, зоны, чётность, суммы. Это его итоговое решение, а не прогноз.</span>'+checked+'</div>'+
+    supRecRows.map((r,i)=>'<div class="pdx-jrow"><div class="pdx-jhead">Ряд '+(i+1)+'</div>'+
+      '<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+
+      ((r.b&&r.b.length)?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>'+
+      '<div class="src-caption" data-i18n-ignore>'+escapeHtml(courtRowCaption(validRowProv(r,l)))+'</div></div>').join('')+
+    '<div class="judge-action-panel">'+
+      '<button class="btn-draw '+l.cls+'" type="button" data-loto-event-click="SUP_accept()">Принять рекомендации судьи</button>'+
+      '<button class="btn-exp" type="button" data-court-open="judge-jury">👥 Передать присяжным</button>'+
+      '<button class="btn-exp" type="button" data-court-open="judge-defense">🛡 Обратиться к защите</button>'+
+      '<button class="btn-exp" type="button" data-loto-event-click="SUP_share()">📤 Поделиться</button>'+
+    '</div>';
+}
+// The only place a recommendation becomes a real row of the ticket.
+async function SUP_accept(){
+  if(!supRecRows.length)return;
+  const list=supRecRows.map(r=>{const row={m:[...r.m],b:[...(r.b||[])]};if(r.prov)row.prov=r.prov;return row;});
+  await withTransferBusy(async()=>{
+    SUP_close();
+    setGeneratedRows(list,supStatusText(list.length),false,undefined,{sourceType:'JUDGE_RECOMMENDATION'});
+  });
+  goToRows({immediate:true});
+}
 function SUP_close(){document.getElementById('sup-ov').classList.remove('show');}
 async function SUP_go(){
   const st=SUP_state;if(!st)return;
@@ -4940,12 +5031,12 @@ async function SUP_go(){
     verdict.push({m,b});
   }
   st.verdict=ensureUniqueGeneratedRows(verdict,l);
-  const issued=st.verdict,recommend=st.mode==='recommend',source=supRowSource();
-  res.innerHTML='<div class="if-seclbl">'+(recommend?'Рекомендация судьи':'Вердикт судьи')+' · '+verdict.length+' '+rowWord(verdict.length)+'</div>'+
-    issued.map((r,i)=>'<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>'+courtCaptionHtml(source)).join('')+
-    '<div class="if-note">'+(recommend
-      ?appText('Судья подобрал эти ряды сам')+': '+issued.length+' '+rowWord(issued.length)+'. '
-      :appText('Выбрано рядов для голосования')+': '+selectedRows.length+' / '+st.total+'. ')+appText('Это исследовательские строки, а не прогноз.')+'</div>'+
+  // Recommendation mode: the rows are the Judge's own finished decision → the final screen.
+  if(st.mode==='recommend'){SUP_showRecommendation(st.verdict,{drawsN:ctx.currentDraws.length});return;}
+  const issued=st.verdict;
+  res.innerHTML='<div class="if-seclbl">Вердикт судьи · '+verdict.length+' '+rowWord(verdict.length)+'</div>'+
+    issued.map((r,i)=>'<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>'+courtCaptionHtml(supRowSource())).join('')+
+    '<div class="if-note">'+appText('Выбрано рядов для голосования')+': '+selectedRows.length+' / '+st.total+'. '+appText('Это исследовательские строки, а не прогноз.')+'</div>'+
     '<button class="btn-draw '+l.cls+'" style="margin-top:10px" data-loto-event-click="SUP_use()">Использовать в симуляторе</button>'+
     '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="SUP_share()">📤 Поделиться вердиктом</button>';
   document.getElementById('sup-go').style.display='none';
@@ -4961,8 +5052,11 @@ async function SUP_use(){
   goToRows({immediate:true});
 }
 function SUP_share(){
-  const st=SUP_state;if(!st||!st.verdict)return;
-  shareText('Вердикт Верховного судьи · '+L().name,'⚖️ Вердикт Верховного судьи · '+L().name+'\n'+rowsAsText(st.verdict,L()));
+  const st=SUP_state,recommend=!!(st&&st.mode==='recommend'&&supRecRows.length);
+  const list=recommend?supRecRows:(st&&st.verdict);
+  if(!list||!list.length)return;
+  const title=recommend?'Рекомендации Верховного судьи':'Вердикт Верховного судьи';
+  shareText(title+' · '+L().name,'⚖️ '+title+' · '+L().name+'\n'+rowsAsText(list,L()));
 }
 
 /* ═══════════════ ПЕРИОД АНАЛИЗА: динамические пресеты от базы ═══════════════ */
