@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="9554d04" data-build-ts="2026-09-19T17:58:33.247Z">
+<html lang="en" data-build="61598da" data-build-ts="2026-09-19T18:45:16.878Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=9554d04"></script>
+<script src="./boot-runtime.js?v=61598da"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=9554d04">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=61598da">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=9554d04">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=61598da">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -1623,9 +1623,19 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   }
 }
 /* ═══ Analytical court: jury · defense counsel · judge · models (court-ui.js) ═══ */
-.ct-ov .ct-sheet{position:relative;padding-top:10px}
+/* The court sheet is the scroller for a sticky section header (.ct-stage), so it must not keep a
+   top padding of its own: sticky top:0 resolves against the content box, and any top padding
+   becomes a strip where scrolled content stays visible ABOVE the stuck header. The 10px are
+   given back to the first block (and to the floating ✕) instead. --ct-gutter mirrors the sheet's
+   own horizontal padding so the header can span the full width of the sheet. */
+.ct-ov .ct-sheet{position:relative;padding-top:0;--ct-gutter:16px}
+@media(min-width:700px){.ct-ov .ct-sheet{--ct-gutter:24px}}
+.ct-ov .ct-head{margin-top:10px}
 .ct-x{width:44px;height:44px;min-width:44px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
-.ct-ov .ct-x{position:sticky;top:0;margin:0 0 -44px auto;z-index:4}
+/* The sheet no longer has a top padding, so the ✕ carries its own inset: margin at rest, the
+   matching sticky inset while scrolling. It floats above the analysed-row band (z-index), which
+   reserves room for it on the right. The negative bottom margin keeps it out of the flow. */
+.ct-ov .ct-x{position:sticky;top:10px;margin:10px 0 -54px auto;z-index:4}
 .ct-x:focus-visible,.ct-back:focus-visible,.ct-analyzer:focus-visible,.ct-person-pick:focus-visible,.ct-info:focus-visible,.ct-chip:focus-visible,.ct-seg button:focus-visible,.ct-voter:focus-visible,.ct-secondary:focus-visible,.ct-model:focus-visible,.ct-link:focus-visible,.ct-ball:focus-visible,.row-prov-btn:focus-visible,.fav-analyze:focus-visible,.mres-analyze:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .ct-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .ct-head{display:flex;align-items:center;gap:10px;min-height:44px;padding-right:54px;margin-bottom:12px}
@@ -1669,10 +1679,12 @@ button.ct-ball{cursor:pointer;min-width:44px;min-height:44px}
 .ct-count{font-weight:800;font-size:13.5px;margin-right:auto}
 .ct-chip{min-height:36px;padding:0 12px;border-radius:999px;border:1.5px solid var(--border);background:var(--bg3);color:var(--fg);font:700 12.5px 'Manrope',sans-serif;cursor:pointer}
 .ct-chip:disabled{opacity:.5;cursor:default}
-.ct-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+/* grid-auto-rows:1fr + a card that fills its stretched grid item = every persona card has the
+   same height, whatever the length of its role/badges text. */
+.ct-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));grid-auto-rows:1fr;gap:10px}
 @media (max-width:380px){.ct-grid{grid-template-columns:1fr 1fr}}
-.ct-person{position:relative}
-.ct-person-pick{width:100%;min-height:150px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px 10px;border-radius:16px;border:2px solid var(--border);background:var(--bg2);color:var(--fg);cursor:pointer;font:inherit;text-align:center;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.ct-person{position:relative;display:flex}
+.ct-person-pick{width:100%;min-height:150px;flex:1 1 auto;display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px 10px;border-radius:16px;border:2px solid var(--border);background:var(--bg2);color:var(--fg);cursor:pointer;font:inherit;text-align:center;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
 .ct-person.on .ct-person-pick{border-color:var(--gold);box-shadow:0 0 0 3px rgba(233,180,76,.25);transform:translateY(-1px)}
 .ct-person-pick:active{transform:scale(.97)}
 .ct-person-pick:disabled{cursor:default}
@@ -1794,7 +1806,7 @@ button.ct-ball{cursor:pointer;min-width:44px;min-height:44px}
 /* Combinations are analysed as a VERTICAL list: one full-width card per combination, scrolled
    top-to-bottom. The old horizontal strip (overflow-x + x scroll-snap) hid combinations off the
    right edge and forced a sideways swipe to compare them. */
-.ct-picker-list{display:flex;flex-direction:column;gap:8px;padding:2px 0 4px;max-height:min(46vh,360px);overflow-y:auto;overscroll-behavior:contain}
+.ct-picker-list{display:flex;flex-direction:column;gap:8px;padding:4px;max-height:min(46vh,360px);overflow-y:auto;overscroll-behavior:contain}
 .ct-pick{width:100%;display:flex;flex-direction:column;gap:6px;align-items:flex-start;text-align:left;padding:10px;border-radius:14px;border:2px solid var(--border);background:var(--bg2);color:var(--fg);cursor:pointer;font:inherit;min-height:44px}
 .ct-pick.on{border-color:var(--gold);box-shadow:0 0 0 3px rgba(233,180,76,.25)}
 .ct-pick-meta{font-size:11px;color:var(--sub2);line-height:1.35;white-space:normal}
@@ -1816,8 +1828,12 @@ button.ct-ball{cursor:pointer;min-width:44px;min-height:44px}
 .ct-kv-list dd{margin:0;font-weight:700;overflow-wrap:anywhere}
 .mres-src,.sg-combo-src,.src-caption{font-size:11.5px;color:var(--sub2);margin-top:4px;line-height:1.35;overflow-wrap:anywhere}
 /* ── Live analysis scene: what is being analysed, who is working, who has finished ────── */
-/* The combination under analysis stays visible while the case scrolls. */
-.ct-stage{position:sticky;top:0;z-index:3;margin:0 0 10px;padding:8px 10px;border-radius:14px;background:color-mix(in srgb,var(--bg2) 92%,transparent);border:1px solid var(--border);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+/* The combination under analysis stays visible while the case scrolls. It is a section header of
+   the sheet, not a floating card: it spans the full sheet width (so nothing scrolls past it in the
+   side gutters) and is fully opaque (a translucent background + backdrop blur let the scrolled
+   text show through, which read as the analysed row striking through the captions below it).
+   The right inset keeps the balls clear of the floating ✕, which stays on top of the band. */
+.ct-stage{position:sticky;top:0;z-index:3;margin:0 calc(-1 * var(--ct-gutter,16px)) 10px;padding:10px var(--ct-gutter,16px);padding-right:calc(var(--ct-gutter,16px) + 50px);border-radius:0;background:var(--modal-bg);border:0;border-bottom:1px solid var(--border)}
 .ct-stage-lbl{font-size:11px;font-weight:800;color:var(--sub2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
 .ct-stage .ct-balls{gap:4px}
 .ct-stage .ct-ball{width:30px;height:30px;font-size:12.5px;min-width:0;min-height:0}
@@ -3400,21 +3416,21 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=9554d04"></script>
-<script src="./commercial-config.js?v=9554d04"></script>
-<script src="./event-runtime.js?v=9554d04"></script>
-<script src="./auth-client.js?v=9554d04"></script>
-<script src="./native-loader.js?v=9554d04"></script>
-<script src="./i18n-catalog.js?v=9554d04"></script>
-<script src="./i18n-runtime.js?v=9554d04"></script>
-<script src="./consent-runtime.js?v=9554d04"></script>
-<script src="./analytics-telemetry.js?v=9554d04"></script>
-<script src="./win-match-core.js?v=9554d04"></script>
-<script src="./court-core.js?v=9554d04"></script>
-<script src="./app-runtime.js?v=9554d04"></script>
-<script src="./inline-runtime-2.js?v=9554d04"></script>
-<script src="./commercial-runtime.js?v=9554d04"></script>
-<script src="./inline-runtime-3.js?v=9554d04"></script>
+<script src="./version.js?v=61598da"></script>
+<script src="./commercial-config.js?v=61598da"></script>
+<script src="./event-runtime.js?v=61598da"></script>
+<script src="./auth-client.js?v=61598da"></script>
+<script src="./native-loader.js?v=61598da"></script>
+<script src="./i18n-catalog.js?v=61598da"></script>
+<script src="./i18n-runtime.js?v=61598da"></script>
+<script src="./consent-runtime.js?v=61598da"></script>
+<script src="./analytics-telemetry.js?v=61598da"></script>
+<script src="./win-match-core.js?v=61598da"></script>
+<script src="./court-core.js?v=61598da"></script>
+<script src="./app-runtime.js?v=61598da"></script>
+<script src="./inline-runtime-2.js?v=61598da"></script>
+<script src="./commercial-runtime.js?v=61598da"></script>
+<script src="./inline-runtime-3.js?v=61598da"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3563,9 +3579,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=9554d04"></script>
-<script src="./notifications-runtime.js?v=9554d04"></script>
-<script src="./pwa-runtime.js?v=9554d04"></script>
+<script src="./notification-center.js?v=61598da"></script>
+<script src="./notifications-runtime.js?v=61598da"></script>
+<script src="./pwa-runtime.js?v=61598da"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3576,8 +3592,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=9554d04"></script>
-<script src="./inline-runtime-5.js?v=9554d04"></script>
-<script src="./inline-runtime-6.js?v=9554d04"></script>
+<script src="./inline-runtime-4.js?v=61598da"></script>
+<script src="./inline-runtime-5.js?v=61598da"></script>
+<script src="./inline-runtime-6.js?v=61598da"></script>
 </body>
 </html>
