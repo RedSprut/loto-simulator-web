@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-09-19T09:44:21.894Z",
-    "sourceFetchedAt": "2026-09-19T09:44:21.894Z",
+    "generatedAt": "2026-09-19T12:38:31.144Z",
+    "sourceFetchedAt": "2026-09-19T12:38:31.144Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "a00f31529bbfcd95",
     "updatedAt": "2026-09-19",
@@ -13964,8 +13964,8 @@
         ],
         "jackpot": null,
         "lotteryId": "powerballAustralia",
-        "source": "The Lott",
-        "sourceUrl": "https://www.thelott.com/powerball/results",
+        "source": "Australia National Lottery / The Lott",
+        "sourceUrl": "https://australia.national-lottery.com/powerball/results-archive-2026",
         "drawId": 1583,
         "currency": "AUD",
         "payoutTiers": [
