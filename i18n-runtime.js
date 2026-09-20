@@ -261,8 +261,36 @@
     }
   }
 
+  // ── Jackpot amounts ──
+  // Every jackpot the app holds (jackpots.json `amount`, a draw's `payload.jackpot`, the
+  // notification payloads built from them) is a number of MILLIONS in the operator's currency.
+  // Formatting that number as a plain currency amount showed «298,00 $» for a $298 million
+  // Powerball jackpot. This is the single formatter for a jackpot amount everywhere (hero,
+  // notification centre, analysis modals): the value is untouched, the unit is spelled out in
+  // the requested language (the catalog's own translation of «млн»), the currency stays the
+  // source's — a symbol before the number for $/€/£, the ISO code after it otherwise.
+  //   ru: $298 млн · €29,6 млн · 23,5 млн NOK · 55 млн CAD
+  //   en: $298 million · €29.6 million · 23.5 million NOK · 55 million CAD
+  // A value in currency units (≥ 100 000, e.g. 55000000) is converted to millions first.
+  const CURRENCY_SYMBOL={USD:'$',EUR:'€',GBP:'£'};
+  const intlLocale=code=>code==='no'?'nb-NO':code==='en'?'en-GB':code;
+  function formatJackpot(value,currency,code=language,numberLocale=''){
+    const raw=String(value??'').replace(',','.').trim();
+    if(raw==='')return '';
+    let n=typeof value==='number'?value:Number(raw);
+    if(!Number.isFinite(n)||n<0)return '';
+    if(n>=1e5)n=n/1e6;
+    const cur=String(currency||'').toUpperCase().trim();
+    let num;
+    try{num=new Intl.NumberFormat(numberLocale||intlLocale(code),{maximumFractionDigits:2}).format(n);}
+    catch(_e){num=String(n);}
+    const unit=translateCore('млн',code);
+    return CURRENCY_SYMBOL[cur]?`${CURRENCY_SYMBOL[cur]}${num} ${unit}`:`${num} ${unit}${cur?' '+cur:''}`;
+  }
+
   window.LotoI18n={
     catalog,
+    formatJackpot,
     get language(){return language;},
     ready,
     setLanguage,

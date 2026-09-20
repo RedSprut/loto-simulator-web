@@ -998,14 +998,38 @@ async function getJackpot(id){
      (rollover-confirmed if it was re-fetched after the passed draw), else unavailable. */
   let status=e.status||'unavailable';
   if(!validForNext)status=e.amount?(updatedAfterNext?'rollover-confirmed':'last-confirmed'):'unavailable';
+  /* The amount is a number of MILLIONS in the source currency. It is shown in the app's one
+     jackpot format («$313 млн», «Ca. 735 млн NOK» — the unit is explicit, never a bare number
+     that could pass for 313 dollars). The source's own qualifier («Ca.» ≈ estimate prefix,
+     «ESTIMATED») and the source name stay as context; the source's unit/currency words
+     («MILLION», «MILLIONER NOK») are replaced by the formatted amount itself. */
+  const currency=e.cur||e.currency||'';
+  const prefix=/^[$€£]\s*$/.test(String(e.prefix||''))?'':String(e.prefix||'');
+  let qualifier=String(e.sub||'').replace(/\bMILLION(?:ER|S)?\b/gi,'');
+  if(currency)qualifier=qualifier.replace(new RegExp('\\b'+currency+'\\b','g'),'');
+  qualifier=qualifier.split('·').map(s=>s.trim()).filter(Boolean).join(' · ');
   return{
     status,validForNext,amount:e.amount||null,
-    txt:(e.prefix||'Ca. ')+(e.amount||''),
-    sub:(e.sub||('MILLIONER '+(e.cur||'')))+(e.source?' · '+e.source:''),
+    txt:e.amount?prefix+fmtJackpot(e.amount,currency):'',
+    sub:[qualifier,e.source].filter(Boolean).join(' · '),
     nextDrawDate:e.nextDrawDate,lastDrawDate:e.lastDrawDate,updated:j.updated,offline:j.offline===true,
   };
 }
 let heroToken=0;
+/* The amount line now carries the unit and the currency («Ca. 735 млн NOK», «Ca. 735 Millionen
+   NOK» once translated). Shrink the font just enough to keep it on ONE line on a phone; the
+   catalog translation lands a microtask after the text is set and the language can change later,
+   so the fit runs after both. Falls back to wrapping only below the minimum size. */
+function fitHeroPot(){
+  const el=document.getElementById('hero-pot');if(!el||!el.isConnected)return;
+  el.style.fontSize='';el.style.whiteSpace='nowrap';
+  const max=parseFloat(getComputedStyle(el).fontSize)||40,min=20;
+  let size=max;
+  while(size>min&&el.scrollWidth>el.clientWidth+1){size-=1;el.style.fontSize=size+'px';}
+  if(el.scrollWidth>el.clientWidth+1)el.style.whiteSpace='';
+}
+window.addEventListener('loto:languagechange',()=>setTimeout(fitHeroPot,0));
+window.addEventListener('resize',()=>fitHeroPot());
 async function renderHero(){
   const l=L(),h=document.getElementById('lot-hero');
   if(!h)return;
@@ -1032,6 +1056,7 @@ async function renderHero(){
        next-draw are never mixed, and a stale amount can never appear here. */
     potEl.textContent=jp.txt;
     potSub.textContent=jp.sub+(jp.offline?' · офлайн':'');
+    setTimeout(fitHeroPot,0);
   }else if(jp&&(jp.status==='rollover-confirmed'||jp.status==='last-confirmed')&&jp.amount){
     /* The draw window passed but the next-draw amount has not landed in the snapshot yet.
        Show the last confirmed official amount with an honest label instead of the noisy,
@@ -1039,12 +1064,14 @@ async function renderHero(){
     potLbl.textContent='Последняя подтверждённая сумма';
     potEl.textContent=jp.txt;
     potSub.textContent='ожидается новая официальная сумма'+(jp.sub?' · '+jp.sub:'')+(jp.offline?' · офлайн':'');
+    setTimeout(fitHeroPot,0);
   }else{
     /* No official amount available yet (operator has not published, or the source is down).
        An honest, localized "awaiting official update" — never a permanent dash caused by a
        stale loader. Odds are NOT a jackpot, so they are not substituted here. */
     potEl.textContent='—';
     potSub.textContent='ожидается официальное обновление';
+    setTimeout(fitHeroPot,0);
   }
 }
 
@@ -3213,6 +3240,17 @@ function tierProbability(l,match){
 }
 function fmtInt(n){return Math.round(n).toLocaleString(appLocale());}
 function fmtChance(n){return n>=1000000?(n/1000000).toFixed(n>=10000000?0:1).replace('.',',')+' млн':fmtInt(n);}
+/* Jackpot amount (a number of MILLIONS in the game's currency) in the app's one jackpot format:
+   «$298 млн», «€29,6 млн», «23,5 млн NOK», «55 млн CAD». Written in the source language like every
+   other UI string here; the i18n runtime translates «млн» in place for the active locale, the
+   digits follow the active locale. Never a bare number or a currency-formatted «298,00 $».
+   `lang` = the active language for text the runtime does not translate (attributes such as a
+   chart tooltip). */
+function fmtJackpot(v,currency,lang='ru'){
+  const c=currency||L().currency||'NOK';
+  try{if(window.LotoI18n&&typeof window.LotoI18n.formatJackpot==='function'){const s=window.LotoI18n.formatJackpot(v,c,lang,appLocale());if(s)return s;}}catch(_e){}
+  const n=Number(v);return Number.isFinite(n)?(n>=1e5?n/1e6:n)+' млн '+c:'—';
+}
 
 async function renderFreq(){
   const l=L(),draws=await loadAnalyticsDraws(cur);
@@ -3604,10 +3642,10 @@ async function renderJackpotChart(){
   draws.slice(-60).forEach(d=>{
     const pct=(d.jackpot/max)*100;
     const[y,mo,dy]=d.date.split('-');
-    html+=`<div class="fbw" style="width:34px"><div class="fbar" style="height:${Math.max(pct,3)}px;width:26px;background:#f0a500" data-tip="${d.jackpot}М ${d.currency||L().currency||'NOK'} · ${dy}.${mo}"></div><div class="fn">${dy}/${mo}</div></div>`;
+    html+=`<div class="fbw" style="width:34px"><div class="fbar" style="height:${Math.max(pct,3)}px;width:26px;background:#f0a500" data-tip="${fmtJackpot(d.jackpot,d.currency||L().currency||'NOK',window.LotoI18n?.language)} · ${dy}.${mo}"></div><div class="fn">${dy}/${mo}</div></div>`;
   });
   html+='</div></div>';
-  html+=`<div class="srow" style="margin-top:8px"><span>Максимальный джекпот:</span><span>${max} млн ${L().currency||'NOK'}</span></div>`;
+  html+=`<div class="srow" style="margin-top:8px"><span>Максимальный джекпот:</span><span>${fmtJackpot(max,L().currency||'NOK')}</span></div>`;
   html+=`<div class="srow"><span>Записей:</span><span>${draws.length}</span></div>`;
   c.innerHTML=html;
 }
@@ -3629,7 +3667,7 @@ function renderCombinationAnalysis(){
     <div class="mrow"><span>Мин. покупка:</span><span>${l.minR} ряд(а) = ${l.minR*l.price} ${currency}</span></div>
     <div class="mrow"><span>Стоимость ВСЕХ комбинаций:</span><span>~${totalCostM} млн ${currency}</span></div>
     <div class="mrow"><span>Консервативный ориентир ×3:</span><span style="color:#ff9f0a">~${conservativeTarget} млн ${currency}</span></div>
-    <div class="mrow"><span>Текущий джекпот:</span><span>${jv||'—'} млн ${currency}</span></div>
+    <div class="mrow"><span>Текущий джекпот:</span><span>${jv?fmtJackpot(jv,currency):'—'}</span></div>
     <div class="mrow"><span>Джекпот / стоимость:</span><span style="color:${conservative?'#34c759':'#ff9f0a'}">${ratio?ratio+'×':'введи джекпот'}</span></div>
     <div class="mverdict ${conservative?'go':'wait'}">${verdict}</div>
     <div class="warn-note">Без учёта налогов, деления приза между победителями, лимитов продаж и стоимости организации покупки. Расчёт не является гарантией дохода.</div>
