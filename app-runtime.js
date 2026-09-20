@@ -5318,6 +5318,8 @@ const LotoWinMatch=(function(){
   const saveHist=a=>{if(ON)jset(CORE.HISTORY_KEY,CORE.retentionCleanup(a,Date.now()));};
   const loadMatches=()=>jget(CORE.MATCH_KEY,[]);
   const saveMatches=a=>jset(CORE.MATCH_KEY,(a||[]).slice(0,200));
+  /* The record the popup currently shows — lets "Статистика призов" land on ITS game. */
+  let shown=null;
   const gname=id=>{try{const l=LOTS[id];return l&&(l.short||l.name)||id;}catch(_e){return id;}};
   const SRC={drum3d:'3D-симулятор',model:'Математическая модель',freq:'Модель частоты',bal:'Комбинированная модель',rnd:'Случайный генератор',man:'Сегментный охват',wheel:'Колёсная система',smartgen:'Генератор комбинаций',markov:'Модель Маркова',gauss:'Модель Гаусса',delta:'Интервальная модель',bayes:'Модель Байеса',overdue:'Gap-анализ',phys:'Физическая модель',chaos:'Модель хаоса',quantum:'Квантовая модель',paradox:'Система парадоксов','world-hot':'Мировой профиль','world-mix':'Мировой микс',manual:'Ручной ввод',saved:'Сохранённая комбинация',legacy:'Сохранённая комбинация',ticket:'Сыгранный билет',consensus:'Консенсус моделей',judge:'Верховный судья',generator:'Генератор'};
   const srcLabel=e=>e.played?'Сыгранный билет':(SRC[e.modelId]||SRC[e.source]||'Сохранённая комбинация');
@@ -5427,11 +5429,17 @@ const LotoWinMatch=(function(){
       (s.generatedMatches?('🎯 <b data-i18n-ignore>'+s.generatedMatches+'</b> '+T('среди созданных/сохранённых комбинаций')):'')+`</div>`;
     const list=matches.map(m=>`<button class="acc-btn acc-btn-soft wide" style="margin-top:8px;text-align:left;display:block;width:100%" data-loto-event-click="LotoWinMatch.openDetail('${m.id}')"><b data-i18n-ignore>${escapeHtml(gname(m.gameId))}</b> · <span data-i18n-ignore>${escapeHtml(m.drawDate)}</span> · ${m.played?('🎉 '+T('выигрыш')):('🎯 '+T('совпадение'))} · <span data-i18n-ignore>${m.mainHit}</span></button>`).join('');
     const el=document.getElementById('wm-body'); if(el){el.innerHTML=head+list; if(window.LotoI18n)try{window.LotoI18n.localizeTree(el,true);}catch(_e){}}
-    showWm(); }
-  function openDetail(id){ try{ const store=loadMatches(); const m=store.find(x=>x.id===id); if(!m)return false; const el=document.getElementById('wm-body'); if(!el)return false; el.innerHTML=detailHtml(m); if(window.LotoI18n)try{window.LotoI18n.localizeTree(el,true);}catch(_e){} showWm(); return true; }catch(_e){return false;} }
+    shown=null; showWm(); }
+  function openDetail(id){ try{ const store=loadMatches(); const m=store.find(x=>x.id===id); if(!m)return false; const el=document.getElementById('wm-body'); if(!el)return false; el.innerHTML=detailHtml(m); if(window.LotoI18n)try{window.LotoI18n.localizeTree(el,true);}catch(_e){} shown=m; showWm(); return true; }catch(_e){return false;} }
   function showWm(){const o=document.getElementById('wm-ov');if(o)o.classList.add('show');}
   function closeDetail(){const o=document.getElementById('wm-ov');if(o)o.classList.remove('show');}
-  function openPrizeStats(){ closeDetail(); try{if(window.selPage)selPage('ana');}catch(_e){} }
+  /* Reuses the notification-centre deep link: the match's OWN game, the Prizes tab, scrolled to
+     that draw's card (paging the list until it materialises). Without a single shown record
+     (multi-match summary) it can only fall back to the Prizes tab of the current game. */
+  function openPrizeStats(){ const m=shown; closeDetail();
+    try{ if(m&&typeof revealPrizeDraw==='function'){revealPrizeDraw(m.gameId,m.drawId,m.drawDate);return;} }catch(_e){}
+    try{ if(curPage!=='ana')selPage('ana'); }catch(_e){}
+    try{ selAT('prize'); }catch(_e){} }
   function openHistory(){ const store=loadMatches(); if(!store.length){showCopyToast(T('Пока нет призовых совпадений'));return;} if(store.length===1)openDetail(store[0].id); else renderSummary(store); }
   return { record, scan, markSavedPlayed, openDetail, closeDetail, openPrizeStats, openHistory, ready:ON };
 })();
