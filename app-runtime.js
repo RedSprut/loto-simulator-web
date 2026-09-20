@@ -3083,7 +3083,13 @@ async function renderHistory(){
     if(firstPaint&&!resultsJsonCache)LotoState.loading(c0,cur);
     await fetchResultsJson(RESULTS_JSON_URL);
   }catch(_err){ if(c0)LotoState.error(c0,()=>renderHistory()); return; }
-  const l=L(),pack=await loadFullHistory(cur),draws=pack.draws,eras=pack.eras;
+  // The full base (PRO: every archive page from the backend) can fail like any network load.
+  // Show the same error/offline state with Retry — never let the rejection escape to the
+  // diagnostic banner as a raw backend code.
+  let pack;
+  try{pack=await loadFullHistory(cur);}
+  catch(_err){ if(c0)LotoState.error(c0,()=>renderHistory()); return; }
+  const l=L(),draws=pack.draws,eras=pack.eras;
   document.getElementById('hist-title').textContent=historyText('История ({{0}} всего · {{1}} по текущим правилам)',draws.length,pack.currentCount);
   const summary=document.getElementById('hist-rule-summary');
   if(summary)summary.innerHTML=renderRuleSummary(draws,eras,pack.currentCount);
@@ -3669,7 +3675,10 @@ async function renderMathCheck(){
 }
 
 async function renderStats(){
-  const l=L(),draws=await loadAnalyticsDraws(cur),pack=await loadFullHistory(cur),c=document.getElementById('stats-out');
+  const l=L(),c=document.getElementById('stats-out');
+  let draws,pack;
+  try{draws=await loadAnalyticsDraws(cur);pack=await loadFullHistory(cur);}
+  catch(_err){ if(c)LotoState.error(c,()=>renderStats()); return; }
   if(!draws.length){c.innerHTML='<div class="empty">Нет данных</div>';return;}
   const all=draws.flatMap(d=>d.main);
   const avg=(all.reduce((s,v)=>s+v,0)/all.length).toFixed(1);
