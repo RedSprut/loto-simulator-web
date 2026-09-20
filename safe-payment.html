@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru" class="i18n-pending">
+<html lang="en" class="i18n-pending">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -16,6 +16,11 @@
     .domain{padding:12px;border-left:4px solid #b8860b;background:#fff;overflow-wrap:anywhere}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
     .button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;border-radius:7px;background:#2b1710;color:#fff;text-decoration:none;font-weight:800}
     .secondary{background:#fff;color:#2b1710;border:1px solid #b5894c}[hidden]{display:none!important}
+    /* Без вспышки исходного (русского) текста: пока i18n не применил язык, main невидим.
+       Страховка в самой анимации — через 3 с она показывает контент, поэтому сбой i18n,
+       выключенный JS или отключённые анимации дают показ, а не вечно пустую страницу. */
+    html.i18n-pending main{animation:legalI18nHold 3s steps(1,end) forwards}
+    @keyframes legalI18nHold{from{opacity:0}to{opacity:1}}
   </style>
 </head>
 <body>
@@ -45,6 +50,7 @@
   </main>
   <script src="./commercial-config.js"></script>
   <script src="./i18n-catalog.js"></script>
+  <script src="./lang-detect.js"></script>
   <script src="./i18n-runtime.js"></script>
   <script src="./safe-payment-runtime.js"></script>
 </body>

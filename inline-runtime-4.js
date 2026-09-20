@@ -261,7 +261,7 @@
     for (var k in map) { var v = cssVar(map[k]); if (v) p.set(k, v); }
     try { var L = window.LOTS && window.LOTS[appId]; if (L && (L.short || L.name)) p.set('name', L.short || L.name); } catch (e) {}
     // Pass the app's current locale so the embedded drum matches the app language.
-    try { var lang = localStorage.getItem('loto_lang') || document.documentElement.lang || 'ru'; if (lang) p.set('lang', lang); } catch (e) {}
+    try { var lang = (window.LotoI18n && window.LotoI18n.language) || document.documentElement.lang || (window.LotoLang && window.LotoLang.detect()) || 'en'; if (lang) p.set('lang', lang); } catch (e) {}
     p.set('navH', '64px'); p.set('navB', '6px'); p.set('navGap', '6px');
 
     // Mark the central nav item active while the overlay is open.
@@ -290,7 +290,7 @@
     window.addEventListener('popstate', popHandler);
     // Live language sync: if the user switches app language while the drum overlay is
     // open, tell the iframe to re-localize its HUD in place (no draw restart / reset).
-    langHandler = function () { try { var lg = localStorage.getItem('loto_lang') || document.documentElement.lang; frame.contentWindow.postMessage({ type: 'loto:lang', lang: lg }, location.origin); } catch (e) {} };
+    langHandler = function () { try { var lg = (window.LotoI18n && window.LotoI18n.language) || document.documentElement.lang; frame.contentWindow.postMessage({ type: 'loto:lang', lang: lg }, location.origin); } catch (e) {} };
     window.addEventListener('loto:languagechange', langHandler);
     msgHandler = function (e) {
       var d = e.data; if (!d || d.source !== 'loto-drum') return;

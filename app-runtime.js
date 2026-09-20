@@ -3938,12 +3938,22 @@ const LANG_ORDER=Object.keys(LOCALE_CATALOG);
    translations, flags, switching logic and count are untouched. */
 const LANG_PICKER_ORDER=['uk',...LANG_ORDER.filter(c=>c!=='uk'&&c!=='ru'),'ru'].filter(c=>LOCALE_CATALOG[c]);
 const LANG_FLAGS=Object.fromEntries(LANG_ORDER.map(code=>[code,LOCALE_CATALOG[code].flag]));
-let curLang=localStorage.getItem('loto_lang')||(navigator.language||'ru').slice(0,2);
+/* Язык интерфейса определяет ОДИН общий детектор (lang-detect.js / LotoLang), одинаковый для
+   Web, iOS и Android: сохранённый ручной выбор → exact locale → base language → English.
+   Никакой страны, IP или геолокации; жёсткого «русского по умолчанию» тоже нет. */
+let curLang=(window.LotoLang&&window.LotoLang.detect())||'en';
 if(!LOCALE_CATALOG[curLang])curLang='en';
 const APP_LOCALES={ru:'ru-RU',en:'en-GB',no:'nb-NO',sv:'sv-SE',da:'da-DK',fi:'fi-FI',de:'de-DE',fr:'fr-FR',es:'es-ES',it:'it-IT',pt:'pt-PT',pl:'pl-PL',nl:'nl-NL',et:'et-EE',lv:'lv-LV',lt:'lt-LT',uk:'uk-UA'};
 // The active UI language is the single source of truth for ALL locale-dependent formatting
 // (dates, numbers, currency). Prefer the live i18n language, then <html lang>, then curLang, so a
 // stale curLang or the device/browser/OS locale can never leak a foreign locale into formatting.
+// Активный язык интерфейса как КОД каталога (для Intl и для locale, отправляемой бэкенду).
+// Один общий источник — LotoLang.current(); локального запасного языка здесь нет и быть не может:
+// запасной вариант ровно один на весь проект — English, и он живёт в lang-detect.js.
+function uiLang(){
+  try{return (window.LotoLang&&window.LotoLang.current())||document.documentElement.lang||'en';}
+  catch(_e){return 'en';}
+}
 function appLocale(){
   let lang;
   try{lang=(window.LotoI18n&&window.LotoI18n.language)||document.documentElement.lang||curLang;}catch(_e){lang=curLang;}
@@ -4026,7 +4036,10 @@ try{
 async function selectLang(code){
   if(!LOCALE_CATALOG[code])return;
   curLang=code;
-  localStorage.setItem('loto_lang',code);
+  /* Ручной выбор сохраняется навсегда: перезагрузка, перезапуск PWA/приложения, обновление
+     версии и смена системного языка его больше не переопределяют. */
+  if(window.LotoLang)window.LotoLang.save(code);
+  else{try{localStorage.setItem('loto_lang',code);}catch(_e){}}
   await applyLang();
   closeLangPicker();
   if(curPage==='ana')await renderAna();

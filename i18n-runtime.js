@@ -60,13 +60,23 @@
   }
   if(!catalog.chunksBase)localeCodes.forEach(code=>loadedLocales.add(code));
 
+  // Определение языка живёт в ОДНОМ месте — lang-detect.js (LotoLang): сохранённый выбор →
+  // exact locale → base language → English, одинаково на Web, iOS и Android. Здесь остаётся
+  // только аварийный путь на случай, если lang-detect.js не загрузился.
   function initialLanguage(){
+    const detected=globalThis.LotoLang?.detect?.();
+    if(detected&&localeIndex.has(detected))return detected;
     let stored='';
     try{
       if(typeof localStorage!=='undefined')stored=String(localStorage.getItem('loto_lang')||'').trim().toLowerCase();
     }catch(_error){}
-    const browser=String(globalThis.navigator?.languages?.[0]||globalThis.navigator?.language||'en').toLowerCase().split(/[-_]/)[0];
-    return localeIndex.has(stored)?stored:(localeIndex.has(browser)?browser:'en');
+    if(localeIndex.has(stored))return stored;
+    const tags=[...(globalThis.navigator?.languages||[]),globalThis.navigator?.language||''];
+    for(const tag of tags){
+      const base=String(tag||'').toLowerCase().split(/[-_]/)[0];
+      if(localeIndex.has(base))return base;
+    }
+    return 'en';
   }
 
   let language=initialLanguage();
@@ -241,7 +251,14 @@
   async function start(){
     observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:translatedAttrs});
     try{await setLanguage(language);}
-    finally{resolveReady();}
+    finally{
+      // Сигнал для splash-прелоадера (boot-runtime): интерфейс уже переведён на выбранный язык,
+      // приложение можно показывать. Без этого пользователь с польским браузером мог на миг
+      // увидеть исходный русский текст, если чанк локали приехал позже конца splash-анимации.
+      // Ставится и при ошибке загрузки чанка — иначе splash завис бы навсегда.
+      window.__lotoI18nApplied=true;
+      resolveReady();
+    }
   }
 
   window.LotoI18n={

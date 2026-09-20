@@ -12,7 +12,7 @@
   const pad2=n=>String(n).padStart(2,'0');
   const isoOf=(y,m,d)=>`${y}-${pad2(m+1)}-${pad2(d)}`;
   function calRender(){
-    const loc=document.documentElement.lang||'ru';
+    const loc=uiLang();
     const title=$('cal-title');
     try{title.textContent=new Date(calY,calM,1).toLocaleDateString(loc,{month:'long',year:'numeric'});}catch(_e){title.textContent=`${calM+1}.${calY}`;}
     const yv=$('cal-yearsel'),grid=$('cal-grid'),wd=$('cal-weekdays');
@@ -46,7 +46,7 @@
   function fmtDate(iso){
     const t=Date.parse(iso||'');
     if(!Number.isFinite(t))return '';
-    const loc=(document.documentElement.lang||'ru');
+    const loc=uiLang();
     try{return new Date(t).toLocaleDateString(loc,{day:'numeric',month:'long',year:'numeric'});}
     catch(_e){return new Date(t).toISOString().slice(0,10);}
   }
@@ -152,7 +152,7 @@
   function fmtBirthdayDisplay(iso){
     const t=Date.parse((iso||'')+'T12:00:00Z');
     if(!iso||!Number.isFinite(t))return '';
-    const loc=document.documentElement.lang||'ru';
+    const loc=uiLang();
     try{return new Date(t).toLocaleDateString(loc,{day:'numeric',month:'long',year:'numeric'});}
     catch(_e){return iso;}
   }
@@ -181,7 +181,7 @@
       if(requestSeq!==profileRequestSeq||revision!==avatarRevision||accountState().user?.id!==uid)return;
       applyProfile(p);
       // Persist the current UI locale so a future birthday greeting can be in the right language.
-      try{const loc=document.documentElement.lang||'ru';if(p&&p.locale!==loc)window.LotoAuth.updateProfile({locale:loc}).catch(()=>{});}catch(_e2){}
+      try{const loc=uiLang();if(p&&p.locale!==loc)window.LotoAuth.updateProfile({locale:loc}).catch(()=>{});}catch(_e2){}
     }catch(_e){
       // The profile could not be read. Do not leave the card stuck on the skeleton, and do not
       // claim "no profile yet" — fall back to whatever we last knew.
@@ -499,7 +499,7 @@
       profileSaving=true;renderProfileCard();
       msg('acc-data-msg','Сохраняем…','info');
       try{
-        const info=await window.LotoAuth.updateProfile({displayName:next.displayName||null,birthday:next.birthday||null,locale:document.documentElement.lang||'ru'});
+        const info=await window.LotoAuth.updateProfile({displayName:next.displayName||null,birthday:next.birthday||null,locale:uiLang()});
         profileSaving=false;
         // Leave edit mode BEFORE applyProfile so it refreshes the form from the server's answer.
         profileMode=hasSavedProfile()||next.displayName||next.birthday?'view':'empty';

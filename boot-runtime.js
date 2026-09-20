@@ -65,9 +65,27 @@ window.addEventListener('unhandledrejection',function(e){
     s.classList.add('ls-hide');
     setTimeout(function(){if(s&&s.parentNode)s.parentNode.removeChild(s);reveal();},520);
   }
+  /* Единственный шлюз показа приложения: ждём, пока i18n применит определённый язык
+     (window.__lotoI18nApplied). Иначе splash мог исчезнуть раньше перевода, и пользователь с
+     польским/украинским устройством на миг увидел бы исходный русский текст. Ожидание
+     ограничено 3 с (и почти всегда равно нулю: __lotoI18nApplied выставляется в finally, даже
+     если чанк локали не загрузился), поэтому за splash приложение зависнуть не может. */
+  var i18nWaiting=false;
+  function whenLanguageApplied(run){
+    if(window.__lotoI18nApplied){run();return;}
+    if(i18nWaiting)return;
+    i18nWaiting=true;
+    var fired=false,tries=0;
+    var go=function(){if(fired)return;fired=true;clearInterval(poll);run();};
+    window.addEventListener('loto:languagechange',go,{once:true});
+    var poll=setInterval(function(){if(window.__lotoI18nApplied||++tries>60)go();},50);
+  }
   function requestHide(){
     if(done)return;
-    setTimeout(hide,Math.max(0,minMs-(Date.now()-anchor)));
+    whenLanguageApplied(function(){
+      if(done)return;
+      setTimeout(hide,Math.max(0,minMs-(Date.now()-anchor)));
+    });
   }
   window.__lotoMarkAppReady=function(){appReady=true;requestHide();};
   // Отсчёт от появления DOM (шары уже в разметке), чтобы анимация всегда была видна.

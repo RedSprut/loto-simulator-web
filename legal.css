@@ -22,6 +22,19 @@ a{color:#8a2b23;text-underline-offset:3px}
 .legal-action{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;border:1px solid #8a2b23;border-radius:6px;background:#8a2b23;color:#fff;text-decoration:none;font-weight:850}
 .legal-action.secondary{background:#fff;color:#8a2b23}
 [hidden]{display:none!important}
+/* ── Без вспышки исходного (русского) текста ────────────────────────────────────────────────
+   Класс i18n-pending стоит в разметке и снимается i18n-runtime сразу после локализации. Пока он
+   есть, содержимое держится невидимым, поэтому непереведённый исходный текст не мелькает.
+   Скрыт ТОЛЬКО main: фон и оформление страницы остаются, она не выглядит сломанной.
+
+   Страховка встроена в САМУ анимацию — она и прячет, и через 3 с показывает. Поэтому любой сбой
+   отказывает В СТОРОНУ ПОКАЗА: если i18n-runtime не загрузился, упал, JS выключен или анимации
+   отключены совсем, страница всё равно откроется (максимум с прежней вспышкой). Пустой она не
+   останется никогда — для юридической страницы это обязательное свойство. Статический
+   visibility:hidden такого свойства НЕ даёт: при отключённых анимациях он спрятал бы контент
+   навсегда. steps(1,end) держит opacity:0 всю длительность и переключает на 1 в конце. */
+html.i18n-pending main{animation:legalI18nHold 3s steps(1,end) forwards}
+@keyframes legalI18nHold{from{opacity:0}to{opacity:1}}
 @media(max-width:560px){
   body{padding-left:14px;padding-right:14px}
   .legal-header{grid-template-columns:1fr}
