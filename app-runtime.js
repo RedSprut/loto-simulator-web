@@ -1596,12 +1596,20 @@ async function probeOwnerDashboard(){
     });
     const body=await response.json().catch(()=>null);
     ownerProbedUser=user.id;
+    // The Owner Panel entry only. The owner NOTIFICATION centre is deliberately NOT loaded here:
+    // it is a part of the panel (owner-dashboard.js pulls owner-notifications.js when the panel
+    // opens), so no owner listener, timer or request exists on the public page.
     if(response.status===200&&body&&body.owner===true)await loadOwnerDashboard();
   }catch(_error){/* network failure: the next access change probes again */}
 }
+window.loadOwnerDashboard=loadOwnerDashboard;
+// owner-dashboard.js loads its own notification centre through this (same ?v= revision, so the
+// service worker's network-first rule for owner scripts applies).
+window.LotoLoadRuntimeScript=loadRuntimeScript;
 window.addEventListener('loto:accesschange',()=>{probeOwnerDashboard();});
-window.addEventListener('hashchange',()=>{if(location.hash==='#owner')loadOwnerDashboard().catch(()=>{});});
-if(location.hash==='#owner')loadOwnerDashboard().catch(()=>{});
+// #owner and #owner?d=YYYY-MM-DD&s=day&b=commerce (deep links from owner notifications) both load the panel.
+window.addEventListener('hashchange',()=>{if(location.hash.indexOf('#owner')===0)loadOwnerDashboard().catch(()=>{});});
+if(location.hash.indexOf('#owner')===0)loadOwnerDashboard().catch(()=>{});
 setTimeout(()=>{probeOwnerDashboard();},1500);
 window.LotoCourtUI=Object.freeze({
   sourceLabel:courtSourceLabel,defenseBadge:courtDefenseBadge,attributionLines:courtAttributionLines,
@@ -5281,17 +5289,35 @@ function NOTIF_boot(){
   window.LotoNotifications.onChange(NOTIF_render);
   window.LotoNotifications.init();
   window.addEventListener('loto-push-open',e=>NOTIF_openDestination(e.detail||{}));
+  /* The user centre routes a tapped OWNER push out of its own stream as `loto-owner-open`. The
+     owner centre is loaded only with the Owner Panel, so the shell must be able to honour that tap
+     on its own — otherwise an owner push opened nothing while the panel was closed. */
+  window.addEventListener('loto-owner-open',e=>{const d=e.detail||{};NOTIF_openDestination({destination:'owner',notificationType:'owner_event',deepLink:d.deepLink||d.deeplink||d.link});});
   try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='LOTO_PUSH_OPEN')NOTIF_openDestination(e.data.data||{});});}catch(e){}
   NOTIF_consumeUrlDeepLink();
 }
 function NOTIF_openDestination(d){
   try{
+    // Owner notifications (destination = owner) open the Owner Panel deep link, never the user centre.
+    if(d&&(d.destination==='owner'||d.notificationType==='owner_event')){
+      const link=(d.deepLink&&/^#owner/.test(String(d.deepLink)))?String(d.deepLink):'#owner';
+      /* One tap can reach us twice (the runtime's `loto-push-open` and the user centre's
+         `loto-owner-open` both fire for the same native notification); honour it once. */
+      const now=Date.now();
+      if(window.__lotoOwnerLinkAt&&window.__lotoOwnerLink===link&&now-window.__lotoOwnerLinkAt<3000)return;
+      window.__lotoOwnerLink=link;window.__lotoOwnerLinkAt=now;
+      window.__lotoPendingOwnerLink=link;
+      // The owner centre lives INSIDE the panel, so the panel is the one entry point for a
+      // tapped owner push. A non-owner reaching here gets the server's «access denied» card.
+      loadOwnerDashboard().then(()=>window.LotoOwnerDashboard&&window.LotoOwnerDashboard.openLink&&window.LotoOwnerDashboard.openLink(link)).catch(()=>{});
+      return;
+    }
     window.__lotoPendingNotificationIntent=d;
     if(window.LotoNotifCenter&&window.LotoNotifCenter.openDestination)window.LotoNotifCenter.openDestination(d);
   }catch(e){}
 }
 function NOTIF_consumeUrlDeepLink(){
-  try{const q=new URLSearchParams(location.search);if(q.get('n_dest')){NOTIF_openDestination({destination:q.get('n_dest'),lotteryId:q.get('n_lot'),notificationType:q.get('n_type'),drawId:q.get('n_draw')});history.replaceState(null,'',location.pathname);}}catch(e){}
+  try{const q=new URLSearchParams(location.search);if(q.get('n_dest')){NOTIF_openDestination({destination:q.get('n_dest'),lotteryId:q.get('n_lot'),notificationType:q.get('n_type'),drawId:q.get('n_draw'),deepLink:q.get('n_link')});history.replaceState(null,'',location.pathname+(q.get('n_dest')==='owner'&&q.get('n_link')?q.get('n_link'):''));}}catch(e){}
 }
 function NOTIF_master(on){
   if(on){document.getElementById('notif-explain').style.display='block';const m=document.getElementById('notif-master');if(m)m.checked=false;}
@@ -6766,7 +6792,23 @@ async function JC_continue(){
     if(opened)activate(opened);
     else recomputeActive(closedId);
   });
-  function attach(){tops().forEach(function(el){labelModal(el);obs.observe(el,{attributes:true,attributeFilter:['class'],attributeOldValue:true});});}
+  /* attach() only sees the overlays that exist at DOMContentLoaded. A LAZY overlay (the Owner
+     Panel and its notification centre are built on first open) is still matched by the live
+     tops() selector, so it took part in visibleContent()/activate() while its own .show changes
+     were invisible to this observer: a normal modal stripped its .show without running its real
+     close(), leaving html{overflow:hidden} and its timers alive, and recomputeActive() could lock
+     the body against an overlay whose closing it would never see — the page froze. Lazy overlays
+     must therefore register here the moment they are inserted. */
+  function observeModal(el){
+    if(!el||el.parentElement!==document.body||el.__lotoObserved)return false;
+    el.__lotoObserved=true;labelModal(el);
+    obs.observe(el,{attributes:true,attributeFilter:['class'],attributeOldValue:true});
+    return true;
+  }
+  /* A late overlay may already be .show when it announces itself (it is built and shown in the
+     same tick), and the observer only reports CHANGES — so apply the invariant once, here. */
+  function register(el){if(observeModal(el)&&el.classList.contains('show'))activate(el);}
+  function attach(){tops().forEach(observeModal);}
   /* remember the control that triggered a modal so focus can return to it */
   document.addEventListener('pointerdown',function(e){var t=e.target&&e.target.closest&&e.target.closest('button,a,[onclick],[role="button"]');if(t)lastTrigger=t;},true);
   document.addEventListener('keydown',function(e){
@@ -6799,6 +6841,8 @@ async function JC_continue(){
     closeActiveModal:function(){if(activeModal)this.closeModal(activeModal);},
     replaceModal:function(from,to){this.closeModal(from);this.openModal(to);},
     visibleTopLevelModals:function(){return visibleContent().map(function(el){return el.id;});},
+    /* A lazily created body-level overlay announces itself here (see register above). */
+    register:function(id){register(typeof id==='string'?document.getElementById(id):id);},
     managesBodyScroll:true,
     get active(){return activeModal;}
   };

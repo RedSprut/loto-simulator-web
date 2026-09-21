@@ -29,6 +29,7 @@
   var THEME_KEY = 'ow_theme_v2';
 
   var SECTIONS = [
+    { id: 'day', label: 'День' },
     { id: 'overview', label: 'Обзор' },
     { id: 'live', label: 'Live' },
     { id: 'people', label: 'Люди' },
@@ -47,7 +48,7 @@
     { id: 'quality', label: 'Качество данных' }
   ];
   var PRESETS = [
-    ['live', 'Live · 30 минут'], ['today', 'Сегодня'], ['yesterday', 'Вчера'], ['7d', '7 дней'],
+    ['day', 'День по календарю'], ['live', 'Live · 30 минут'], ['today', 'Сегодня'], ['yesterday', 'Вчера'], ['7d', '7 дней'],
     ['30d', '30 дней'], ['90d', '90 дней'], ['month', 'Текущий месяц'], ['lastMonth', 'Прошлый месяц'],
     ['all', 'Всё время'], ['custom', 'Период…']
   ];
@@ -88,12 +89,27 @@
     conversion: 'Оценка: новые регистрации за период ÷ обычные визиты за период; покупатели ÷ все аккаунты. Показывается только при достаточной выборке (≥ 20 визитов, ≥ 10 аккаунтов), иначе — «Недостаточно данных».',
     traffic: 'Боты — объявленные краулеры. Подозрительный трафик — headless-браузеры, сети дата-центров, VPN, Tor и всплески запросов с одной сети. Ни одна страна не удаляется вручную: видно, какой это трафик.',
     consented: 'Посетители с согласием — люди из данных, собранных после «Принять»: подтверждённые аккаунты и вероятные анонимные люди. Это часть всех посетителей, а не все посетители.',
-    countryMap: 'Страна определяется сервером по сети запроса — это страна посещения, а не гражданство или место жительства; VPN и Tor показаны отдельно. Хранится только счётчик. Аккаунты и покупатели привязаны к стране только если их устройства согласились на аналитику; остальные — «не определено».'
+    countryMap: 'Страна определяется сервером по сети запроса — это страна посещения, а не гражданство или место жительства; VPN и Tor показаны отдельно. Хранится только счётчик. Аккаунты и покупатели привязаны к стране только если их устройства согласились на аналитику; остальные — «не определено».',
+    // 2026-09-20: the calendar day report
+    dayBounds: 'Границы дня — календарные сутки в часовом поясе отчёта (по умолчанию Europe/Oslo): от полуночи до полуночи, в день перевода часов — 23 или 25 часов. Исходные метки времени хранятся в UTC и не меняются; день только выбирает окно.',
+    dayCompare: 'Сравнение: предыдущий день, тот же день недели неделей раньше и среднее дневных значений за 7 предыдущих дней. Процент показан только когда база больше нуля; для уникальных счётчиков среднее за 7 дней — это среднее по дням, а не уникальные за неделю.',
+    dayPeople: 'Люди — посетители с согласием на аналитику: подтверждённые аккаунты, вероятные и неизвестные анонимные устройства (каждое анонимное устройство считается отдельно). Новые — первый визит в истории попал в этот день; вернувшиеся — были известны раньше. Это не все посетители: без согласия остаются только счётчики визитов.',
+    dayEntities: 'Аккаунты, устройства, сессии и домохозяйства — четыре разные величины: один человек может иметь несколько устройств, несколько сессий за день и делить домашнюю сеть с другими. IP-адрес никогда не считается человеком.',
+    dayStatuses: 'Статусы активных за день аккаунтов — из серверной таблицы прав доступа: FREE, PRO (активная платная подписка), PRO Lifetime, PRO истёк/отменён. Гости — устройства без входа в аккаунт. Владелец и тестовые аккаунты считаются отдельно и в эти цифры не входят даже при включённом переключателе.',
+    dayRegistrations: 'Регистрации — аккаунты, созданные в этот день (точно, из базы авторизации, без анонимных сессий и без владельца). Анонимная сессия, ставшая аккаунтом, считается по дате создания её записи.',
+    dayLanguages: 'Язык интерфейса — из событий с согласием (locale приложения). Страна — из счётчиков визитов (сервер, по сети) и сессий с согласием. Это две независимые величины: язык не выводится из страны и наоборот.',
+    dayCommerce: 'Покупки, продления, отмены, возвраты, сбои оплаты, тариф (1/3/6/12 мес.), магазин и выручка — из журнала событий магазина (вебхук RevenueCat), записанного с момента подключения этого журнала. У исторических покупок без цены выручка не выдумывается: они показаны как «без суммы». Checkout started/failed — клиентские события экрана оплаты.',
+    dayFeatures: 'Функции — все события приложения за день: сколько раз произошло и сколько уникальных пользователей (аккаунт, человек или устройство) их совершили. Периодические отчёты об активности не показываются.',
+    daySystem: 'Сбои за день: отклонённые и невалидные события приёма, ошибки разбора аналитики, недоставленные push, ошибки в приложении у пользователей и системные уведомления владельца.',
+    identity: 'Шесть разных величин, которые не складываются друг в друга. Точные аккаунты — один auth-аккаунт = один пользователь, сколько бы визитов, сессий и устройств у него ни было (владелец отдельно). Оценка уникальных гостей — гостевые профили с согласием (одна стабильная анонимная идентичность) плюс дневные ключи гостей без согласия: HMAC суток, сети, браузера, ОС, устройства, платформы и языка; 50 загрузок одного такого гостя за день — 1 гость и 50 визитов, на следующий день — новый ключ. IP не хранится, ключ не считается доказанным человеком и не является аккаунтом; ключи, за которыми в тот же день был вход в аккаунт, исключены. Визиты, сессии, устройства и домохозяйства — отдельные метрики.',
+    liveFeed: 'Лента — реальные события сегодня (по часовому поясу отчёта): действия пользователей с согласием, платежи магазина, новые аккаунты и обезличенные счётчики визитов по часам. Показаны только страна, платформа, язык, лотерея/функция, статус и 8-значный псевдоним; e-mail, IP и идентификаторы устройств не существуют в этих данных. Владелец и боты скрыты, пока не включены переключатели.'
   };
 
   var state = {
     section: 'overview',
-    preset: '7d',
+    preset: 'day',
+    day: LIB.todayYMD ? LIB.todayYMD('Europe/Oslo') : '',
+    block: null,
     tz: 'Europe/Oslo',
     custom: { from: '', to: '' },
     filters: { platform: 'all', country: 'all', lottery: 'all', audience: 'all' },
@@ -134,6 +150,7 @@
     try { var r = await api({ probe: true }); return r && r.owner === true; } catch (e) { return false; }
   }
   function currentRange() {
+    if (state.preset === 'day' && LIB.dayRange) return LIB.dayRange(state.day, state.tz);
     var r = LIB.range ? LIB.range(state.preset, Date.now(), state.tz, state.custom.from, state.custom.to) : null;
     return r || { from: new Date(Date.now() - 7 * 86400000).toISOString(), to: new Date().toISOString(), bucket: 'day', tz: state.tz };
   }
@@ -203,7 +220,8 @@
       columns.map(function (c) { return '<th' + (c.numeric ? ' class="num"' : '') + '>' + esc(c.title) + '</th>'; }).join('') +
       '</tr></thead><tbody>' +
       rows.map(function (row, index) {
-        return '<tr' + (row.__click ? ' class="ow-click" data-row="' + index + '"' : '') + '>' +
+        var cls = (row.__click ? 'ow-click ' : '') + (row.__class || '');
+        return '<tr' + (cls.trim() ? ' class="' + esc(cls.trim()) + '"' : '') + (row.__click ? ' data-row="' + index + '"' : '') + '>' +
           columns.map(function (c) { return '<td' + (c.numeric ? ' class="num"' : '') + '>' + (c.html ? c.html(row) : esc(row[c.key])) + '</td>'; }).join('') + '</tr>';
       }).join('') + '</tbody></table></div>';
   }
@@ -279,6 +297,11 @@
       '#ow-ov .ow-btn{min-height:34px;padding:6px 12px;border-radius:10px;border:1px solid var(--ow-bd);background:var(--ow-card2);color:inherit;font:inherit;font-weight:700;cursor:pointer}',
       '#ow-ov .ow-btn[disabled]{opacity:.6;cursor:progress}',
       '#ow-ov .ow-btn-primary{background:var(--ow-accent);border-color:var(--ow-accent);color:#fff}',
+      // The owner bell inside the panel header (the public header has no owner bell at all).
+      '#ow-ov .ow-bell{position:relative;padding:6px 10px;line-height:1}',
+      '#ow-ov .ow-bell .ow-bell-ico{font-size:16px}',
+      '#ow-ov .ow-bell.has-unread{border-color:var(--ow-accent);box-shadow:0 0 0 1px var(--ow-accent) inset}',
+      '#ow-ov .ow-bell-badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--ow-accent);color:#fff;font-size:11px;font-weight:800;line-height:18px;text-align:center}',
       '#ow-ov .ow-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--ow-bd);background:var(--ow-card2)}',
       '#ow-ov select,#ow-ov input[type="date"]{min-height:32px;padding:4px 8px;border-radius:9px;border:1px solid var(--ow-bd);background:var(--ow-card);color:inherit;font:inherit}',
       '#ow-ov .ow-toggle{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:9px;border:1px solid var(--ow-bd);background:var(--ow-card);cursor:pointer}',
@@ -359,7 +382,33 @@
       '#ow-ov .ow-country-h{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;margin-bottom:8px;flex-wrap:wrap}',
       '#ow-ov .ow-country-h .ow-flag{font-size:28px;line-height:1}',
       '#ow-ov .ow-country-h code{font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--ow-chip);padding:3px 6px;border-radius:6px}',
-      '#ow-ov .ow-sheet-in .ow-cards{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}'
+      '#ow-ov .ow-sheet-in .ow-cards{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}',
+      // 2026-09-20: calendar bar, chips, comparison deltas, day header, LIVE feed
+      '#ow-ov .ow-daybar{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}',
+      '#ow-ov .ow-daybar[hidden]{display:none}',
+      '#ow-ov .ow-chip{min-height:32px;padding:4px 11px;border-radius:999px;border:1px solid var(--ow-bd);background:var(--ow-card);color:inherit;font:inherit;font-weight:700;cursor:pointer}',
+      '#ow-ov .ow-chip[aria-pressed="true"]{background:var(--ow-accent);border-color:var(--ow-accent);color:#fff}',
+      '#ow-ov .ow-daynav{min-width:34px;padding:4px 8px}',
+      '#ow-ov .ow-dayhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 10px}',
+      '#ow-ov .ow-dayhead h2{margin:0;font-size:20px}',
+      '#ow-ov .ow-dayhead .ow-card-s{font-size:13px}',
+      '#ow-ov .ow-cmp{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:11.5px;color:var(--ow-sub);line-height:1.35}',
+      '#ow-ov .ow-cmp b{font-weight:800}',
+      '#ow-ov .ow-cmp .up{color:var(--ow-up)}#ow-ov .ow-cmp .down{color:var(--ow-down)}',
+      '#ow-ov .ow-block[id^="ow-b-"]{scroll-margin-top:12px}',
+      '#ow-ov .ow-block.ow-focus{outline:2px solid var(--ow-accent);outline-offset:2px}',
+      '#ow-ov .ow-anchors{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}',
+      '#ow-ov .ow-anchors a{color:var(--ow-accent);text-decoration:none;font-size:12px;font-weight:700;padding:3px 9px;border:1px solid var(--ow-bd);border-radius:999px;background:var(--ow-card)}',
+      '#ow-ov .ow-status-chip{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:800;background:var(--ow-chip);color:var(--ow-sub);white-space:nowrap}',
+      '#ow-ov .ow-status-pro,#ow-ov .ow-status-lifetime{background:rgba(90,209,154,.2);color:var(--ow-up)}',
+      '#ow-ov .ow-status-owner{background:rgba(242,193,78,.25);color:#a8730b}',
+      '#ow-ov .ow-status-expired{background:rgba(242,120,154,.18);color:var(--ow-down)}',
+      '#ow-ov .ow-feed-commerce td{background:rgba(90,209,154,.08)}',
+      '#ow-ov .ow-feed-account td{background:rgba(79,143,247,.09)}',
+      '#ow-ov .ow-feed-visits td{color:var(--ow-sub)}',
+      '#ow-ov .ow-live-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ow-up);margin-right:6px;animation:ow-pulse 1.6s ease-in-out infinite}',
+      '@keyframes ow-pulse{0%,100%{opacity:1}50%{opacity:.35}}',
+      '@media(prefers-reduced-motion:reduce){#ow-ov .ow-live-dot{animation:none}}'
     ].join('\n');
     var style = D.createElement('style');
     style.id = 'ow-style';
@@ -379,12 +428,25 @@
       '<div class="ow-top">' +
         '<button class="ow-btn" id="ow-back" type="button">‹ Назад</button>' +
         '<span class="ow-title">Аналитика — реальная аудитория</span>' +
+        // The owner analytics bell lives HERE, inside the owner panel — never in the public header.
+        // owner-notifications.js reveals it after the server owner probe and owns its badge.
+        '<button class="ow-btn ow-bell" id="owner-bell-btn" type="button" hidden aria-label="Уведомления владельца">' +
+          '<span class="ow-bell-ico" aria-hidden="true">🔔</span>' +
+          '<span class="ow-bell-badge" id="owner-bell-badge" hidden aria-hidden="true">0</span></button>' +
         '<button class="ow-btn" id="ow-theme" type="button">Тема</button>' +
         '<button class="ow-btn" id="ow-export" type="button">Экспорт</button>' +
         '<button class="ow-btn ow-btn-primary" id="ow-refresh" type="button">Обновить</button>' +
       '</div>' +
       '<div class="ow-controls">' +
         '<label>Период <select id="ow-preset"></select></label>' +
+        '<span id="ow-daybar" class="ow-daybar" role="group" aria-label="Календарь">' +
+          '<button class="ow-chip" type="button" data-day="0">Сегодня</button>' +
+          '<button class="ow-chip" type="button" data-day="-1">Вчера</button>' +
+          '<button class="ow-chip" type="button" data-day="-2">Позавчера</button>' +
+          '<button class="ow-btn ow-daynav" type="button" id="ow-day-prev" aria-label="Предыдущий день">‹</button>' +
+          '<input type="date" id="ow-day" aria-label="Дата" max="2099-12-31" min="2026-01-01">' +
+          '<button class="ow-btn ow-daynav" type="button" id="ow-day-next" aria-label="Следующий день">›</button>' +
+        '</span>' +
         '<span id="ow-custom" hidden><input type="date" id="ow-from"> — <input type="date" id="ow-to"></span>' +
         '<label>Часовой пояс <select id="ow-tz"></select></label>' +
         '<label>Платформа <select id="ow-platform"><option value="all">Все</option><option value="web">Веб</option><option value="ios">iOS</option><option value="android">Android</option></select></label>' +
@@ -402,9 +464,26 @@
         '<div id="ow-section"></div>' +
       '</div>';
     D.body.appendChild(ovEl);
+    // The panel is a body-level "-ov" overlay built lazily, so the shell's modal manager has to be
+    // told about it: __lotoClose routes an external close (another modal opening, Escape, native
+    // back) through the REAL close(), which releases the scroll lock and stops the live poll, the
+    // map and the owner notification centre. Without this the manager stripped .show behind our
+    // back and the page stayed locked with the panel's timers running.
+    ovEl.__lotoClose = function (reason) {
+      // Escape closes the notification centre first (it is nested inside this panel), the panel next.
+      try {
+        if (reason === 'escape' && W.LotoOwnerNotifications && W.LotoOwnerNotifications._state().open) {
+          W.LotoOwnerNotifications.close();
+          return;
+        }
+      } catch (e) {}
+      close();
+    };
+    try { if (W.LotoModals && W.LotoModals.register) W.LotoModals.register(ovEl); } catch (e) {}
 
     var presetSelect = ovEl.querySelector('#ow-preset');
     presetSelect.innerHTML = PRESETS.map(function (p) { return '<option value="' + p[0] + '"' + (p[0] === state.preset ? ' selected' : '') + '>' + esc(p[1]) + '</option>'; }).join('');
+    syncControls();
     var zones = (LIB.ZONES || ['Europe/Oslo', 'UTC']).slice();
     try {
       var local = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -488,6 +567,42 @@
     render();
     if (section === 'live') startLive();
     if (section === 'map') mountMap();
+    focusBlock();
+  }
+  // Deep links (#owner?d=…&s=day&b=commerce) land on a block of the day report.
+  function focusBlock() {
+    if (!state.block) return;
+    var block = state.block;
+    state.block = null;
+    var el = ovEl.querySelector('#ow-b-' + block.replace(/[^a-z_]/g, ''));
+    if (!el) return;
+    try { el.scrollIntoView({ block: 'start', behavior: 'smooth' }); } catch (e) { el.scrollIntoView(); }
+    el.classList.add('ow-focus');
+    setTimeout(function () { el.classList.remove('ow-focus'); }, 2600);
+  }
+  // Keep the calendar bar, the preset select and the date input in step with the state.
+  function syncControls() {
+    if (!ovEl) return;
+    var preset = ovEl.querySelector('#ow-preset'); if (preset) preset.value = state.preset;
+    var bar = ovEl.querySelector('#ow-daybar'); if (bar) bar.hidden = state.preset !== 'day';
+    var custom = ovEl.querySelector('#ow-custom'); if (custom) custom.hidden = state.preset !== 'custom';
+    var input = ovEl.querySelector('#ow-day'); if (input && state.day) input.value = state.day;
+    var today = LIB.todayYMD ? LIB.todayYMD(state.tz) : '';
+    var next = ovEl.querySelector('#ow-day-next'); if (next) next.disabled = !!today && state.day >= today;
+    ovEl.querySelectorAll('.ow-chip[data-day]').forEach(function (chip) {
+      var target = LIB.shiftDay ? LIB.shiftDay(today, +chip.getAttribute('data-day')) : null;
+      chip.setAttribute('aria-pressed', String(state.preset === 'day' && !!target && target === state.day));
+    });
+    var tz = ovEl.querySelector('#ow-tz'); if (tz) tz.value = state.tz;
+  }
+  function setDay(ymd) {
+    if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return;
+    state.preset = 'day';
+    state.day = ymd;
+    state.data = {};
+    state.page = 0;
+    syncControls();
+    reload();
   }
   function reload() { return show(state.section); }
 
@@ -872,24 +987,285 @@
     '</div>';
   }
 
-  function renderLive(data) {
-    var rows = (data.stream || []).map(function (row) {
-      return Object.assign({}, row, { __click: false });
+  // ── LIVE: today's aggregates + the chronological feed (v4). The older `stream` shape is still
+  // rendered when a backend answers with it, so nothing breaks during a rollout.
+  function statusChip(status) {
+    var key = String(status || 'guest');
+    return '<span class="ow-status-chip ow-status-' + esc(key) + '">' + esc(label(LIB.STATUS_RU, key)) + '</span>';
+  }
+  function feedRows(data) {
+    if (Array.isArray(data.feed)) return data.feed;
+    return (data.stream || []).map(function (row) {
+      return { at: row.at, kind: 'event', name: row.event, lottery: row.lottery, page: row.page, platform: row.platform, country: row.country,
+        device: row.device, status: row.owner_test ? 'owner' : (row.kind === 'verified' ? 'free' : 'guest'), who: row.person, class: row.class };
     });
-    return '<div class="ow-cards">' +
-      card('Активны сейчас', num(data.active_now), 'события за 5 минут', 'live') +
-      card('События за час', num(data.events_last_hour)) +
-      card('Обновление', 'каждые 15 с', 'пока открыт раздел') +
-    '</div>' +
-    '<div class="ow-block"><div class="ow-block-h">Живая активность (30 минут)</div>' +
+  }
+  function feedWhat(row) {
+    if (row.kind === 'commerce') {
+      var money = row.price != null && row.currency ? ' · ' + (LIB.formatMoney ? LIB.formatMoney(row.price, row.currency) : row.price + ' ' + row.currency) : '';
+      return esc(label(LIB.COMMERCE_RU, row.name)) + (row.plan ? ' · ' + esc(row.plan) + ' мес.' : '') + money + (row.reason ? ' · ' + esc(row.reason) : '');
+    }
+    if (row.kind === 'account') return 'Новый аккаунт' + (row.platform ? ' · ' + esc(row.platform) : '');
+    if (row.kind === 'visits') {
+      return 'Визиты за час: ' + num(row.count) + ' · ' + esc(label(LIB.TRAFFIC_RU, row.name)) +
+        (row.consent ? ' · ' + esc({ accepted: 'с согласием', declined: 'отклонили', undecided: 'без решения' }[row.consent] || row.consent) : '');
+    }
+    var what = esc(label(LIB.EVENT_RU, row.name));
+    if (row.lottery) what += ' · ' + esc(row.lottery);
+    if (row.model) what += ' · модель ' + esc(row.model);
+    if (row.rows) what += ' · ' + num(row.rows) + ' ряд.';
+    if (row.context && row.name === 'client_error') what += ' · ' + esc(row.context);
+    return what;
+  }
+  function renderLive(data) {
+    var s = data.today_scalars || {};
+    var rows = feedRows(data).map(function (row) { return Object.assign({}, row, { __click: false, __class: 'ow-feed-' + (row.kind || 'event') }); });
+    var revenue = LIB.kpiText ? LIB.kpiText(s.revenue_usd) : { text: num(s.revenue_usd), state: 'ok' };
+    var cards = '<div class="ow-cards">' +
+      card('Активны сейчас', '<span class="ow-live-dot" aria-hidden="true"></span>' + num(data.active_now), 'события за 5 минут · за 15 минут: ' + num(data.active_15m), 'live') +
+      card('Точные аккаунты сегодня', num(s.exact_accounts), 'один аккаунт = один пользователь', 'identity') +
+      card('Оценка уникальных гостей', num(s.estimated_unique_guests), 'с согласием: ' + num(s.guest_profiles_consented) + ' · дневных ключей: ' + num(s.guest_keys_daily), 'identity') +
+      card('Люди с согласием сегодня', num(s.people), 'новых: ' + num(s.new_people) + ' · вернувшихся: ' + num(s.returning_people), 'dayPeople') +
+      card('Визиты сегодня', data.visits_available === false ? '—' : num(s.visits_human), 'обычные · за последний час: ' + num(data.visits_last_hour), 'visitsHuman') +
+      card('Регистрации сегодня', num(s.registrations), 'точно', 'dayRegistrations') +
+      card('Страны сегодня', num(s.countries), 'по визитам и сессиям', 'dayLanguages') +
+      card('Новые PRO сегодня', num(s.purchases), 'продлений: ' + num(s.renewals) + ' · сбоев оплаты: ' + num(s.payment_failures), 'dayCommerce') +
+      card('Выручка сегодня', revenue.state === 'ok' ? revenue.text + ' USD' : '<span class="ow-kpi-none">' + esc(revenue.text) + '</span>', 'по данным магазина', 'dayCommerce') +
+      card('Owner-уведомления', num(data.unread_owner_notifications), 'непрочитанных', 'liveFeed') +
+      card('Обновление', 'каждые 15 с', 'пока открыт раздел · ' + esc(data.today || '')) +
+    '</div>';
+    var host = ovEl && ovEl.querySelector('#ow-section');
+    var scroll = host ? host.scrollTop : 0;
+    var html = cards +
+      '<div class="ow-block" id="ow-b-feed"><div class="ow-block-h">Живая активность сегодня' + how('liveFeed') + '<span class="ow-tag" style="margin-left:auto">' + num(rows.length) + ' записей</span></div>' +
       table([
         { title: 'Время', key: 'at', html: function (r) { return esc(clockText(r.at)); } },
-        { title: 'Событие', key: 'event', html: function (r) { return esc(label(LIB.EVENT_RU, r.event)); } },
-        { title: 'Лотерея', key: 'lottery', html: function (r) { return esc(r.lottery || '—'); } },
-        { title: 'Место', key: 'city', html: function (r) { return esc(place(r)); } },
-        { title: 'Устройство', key: 'device', html: function (r) { return esc([r.browser, r.os, r.device].filter(Boolean).join(' / ')); } },
-        { title: 'Кто', key: 'kind', html: function (r) { return esc(label(LIB.KIND_RU, r.kind) + (r.owner_test ? ' · владелец' : '')); } }
-      ], rows, 'За последние 30 минут событий не было') + '</div>';
+        { title: 'Что', key: 'kind', html: function (r) { return '<span class="ow-tag">' + esc(label(LIB.FEED_KIND_RU, r.kind)) + '</span>'; } },
+        { title: 'Событие', key: 'name', html: feedWhat },
+        { title: 'Статус', key: 'status', html: function (r) { return statusChip(r.status); } },
+        { title: 'Платформа', key: 'platform', html: function (r) { return esc(label({ web: 'Веб', ios: 'iOS', android: 'Android' }, r.platform)); } },
+        { title: 'Язык', key: 'locale', html: function (r) { return esc(r.locale || '—'); } },
+        { title: 'Страна', key: 'country', html: function (r) { return esc(r.country ? (LIB.flagEmoji ? LIB.flagEmoji(r.country) + ' ' : '') + countryName(r.country) : '—'); } },
+        { title: 'Устройство', key: 'device', html: function (r) { return esc(r.device || (r.network ? label({ isp: 'провайдер', mobile: 'мобильная', hosting: 'дата-центр', vpn: 'VPN', tor: 'Tor' }, r.network) : '—')); } },
+        { title: 'Кто', key: 'who', html: function (r) { return '<code>' + esc(r.who || '—') + '</code>'; } }
+      ], rows, 'Сегодня событий ещё не было') + '</div>';
+    if (host) setTimeout(function () { try { host.scrollTop = scroll; } catch (e) {} }, 0);
+    return html;
+  }
+
+  // ── День: the calendar day report ──────────────────────────────────────────────────────────
+  var WEEKDAYS_RU = ['', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье'];
+  function dayTitle(ymd) {
+    try {
+      var p = ymd.split('-');
+      return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).toLocaleDateString('ru-RU', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' });
+    } catch (e) { return ymd; }
+  }
+  function cmpLine(key, compare, opts) {
+    opts = opts || {};
+    var cur = compare && compare.__current ? compare.__current[key] : null;
+    if (cur == null || !LIB.delta) return '';
+    var parts = [];
+    var one = function (title, block) {
+      if (!block || !block.scalars || block.scalars[key] == null) return;
+      var d = LIB.delta(cur, block.scalars[key]);
+      if (!d) return;
+      var value = opts.money ? (LIB.formatMoney ? LIB.formatMoney(block.scalars[key], 'USD') : block.scalars[key]) : num(block.scalars[key]);
+      var sign = d.abs > 0 ? '+' : '';
+      var change = d.pct == null ? (d.abs === 0 ? '±0' : sign + num(d.abs)) : sign + num(d.abs) + ' · ' + sign + num(d.pct) + '%';
+      parts.push('<span>' + esc(title) + ' <b>' + esc(String(value)) + '</b> <span class="' + d.dir + '">' + esc(change) + '</span></span>');
+    };
+    one('вчера', compare.prev_day);
+    one('нед. назад', compare.same_weekday);
+    one('ср. 7 дн.', compare.avg7);
+    return parts.length ? '<div class="ow-cmp">' + parts.join('') + '</div>' : '';
+  }
+  // A day card: the value, its precision tag, the «how» note and the three comparisons.
+  function dayCard(title, key, sub, howKey, precision, compare, opts) {
+    opts = opts || {};
+    var scalars = (compare && compare.__current) || {};
+    var value = scalars[key];
+    var text;
+    if (opts.money) { var k = LIB.kpiText ? LIB.kpiText(value) : { text: num(value), state: 'ok' }; text = k.state === 'ok' ? esc(LIB.formatMoney ? LIB.formatMoney(value, 'USD') : k.text) : '<span class="ow-kpi-none">' + esc(k.text) + '</span>'; }
+    else if (opts.unavailable) text = '<span class="ow-kpi-none">Нет данных</span>';
+    else text = num(value);
+    var tag = precision ? '<span class="ow-tag ow-tag-' + esc(precision) + '">' + esc(label(LIB.PRECISION_RU, precision)) + '</span>' : '';
+    return '<div class="ow-card ow-kpi" data-kpi="' + esc(title) + '">' +
+      '<div class="ow-card-h"><span>' + esc(title) + '</span>' + (howKey ? how(howKey) : '') + tag + '</div>' +
+      '<div class="ow-card-v">' + text + '</div>' +
+      (sub ? '<div class="ow-card-s">' + sub + '</div>' : '') +
+      (opts.unavailable ? '' : cmpLine(key, compare, opts)) + '</div>';
+  }
+  function block(id, title, howKey, inner, extraHead) {
+    return '<div class="ow-block" id="ow-b-' + id + '"><div class="ow-block-h">' + esc(title) + (howKey ? how(howKey) : '') + (extraHead || '') + '</div>' + inner + '</div>';
+  }
+  function renderDay(data) {
+    var s = data.scalars || {};
+    var compare = Object.assign({ __current: s }, data.compare || {});
+    var visits = data.visits_available !== false;
+    var un = { unavailable: !visits };
+    var v = data.visits || {}, platforms = data.platforms || {}, accounts = data.accounts || {}, commerce = data.commerce || {}, system = data.system || {}, excluded = data.excluded || {};
+    var netLabels = { isp: 'Домашний провайдер', mobile: 'Мобильный оператор', hosting: 'Дата-центр', vpn: 'VPN', tor: 'Tor', education: 'Учебная сеть', business: 'Корпоративная', unknown: 'Не определено' };
+    var anchors = [['identity', 'Кто это был'], ['visits', 'Визиты'], ['people', 'Аудитория'], ['accounts', 'Аккаунты'], ['platforms', 'Платформы'], ['countries', 'Страны и языки'], ['lotteries', 'Лотереи'], ['features', 'Функции'], ['funnel', 'Воронка'], ['commerce', 'Платежи'], ['system', 'Сбои']];
+    var head = '<div class="ow-dayhead"><h2>' + esc(dayTitle(data.day || state.day)) + '</h2>' +
+      '<span class="ow-card-s">' + esc(WEEKDAYS_RU[data.weekday] || '') + (data.is_today ? ' · сегодня (день ещё идёт)' : '') + ' · ' + esc(String(data.hours_in_day || 24)) + ' ч · ' + esc(state.tz) + '</span>' + how('dayBounds') + how('dayCompare') + '</div>' +
+      '<div class="ow-anchors">' + anchors.map(function (a) { return '<a href="#ow-b-' + a[0] + '" data-block="' + a[0] + '">' + esc(a[1]) + '</a>'; }).join('') + '</div>';
+
+    var visitsBlock = block('visits', 'Визиты (счётчики без идентификаторов)', 'visitsHuman',
+      '<div class="ow-cards">' +
+        dayCard('Обычные визиты', 'visits_human', visits ? num(s.visits_total) + ' всего · ' + pctText(s.visits_human, s.visits_total) + ' без признаков автоматизации' : 'счётчики ещё не накоплены', 'visitsHuman', 'filtered', compare, un) +
+        dayCard('Гости', 'visits_guest', 'визиты без входа в аккаунт', 'guests', 'filtered', compare, un) +
+        dayCard('С аккаунтом', 'visits_signed_in', 'визиты с входом', 'guests', 'filtered', compare, un) +
+        dayCard('Подозрительный трафик', 'visits_suspicious', 'headless, дата-центры, VPN, Tor, всплески', 'traffic', 'filtered', compare, un) +
+        dayCard('Боты', 'visits_bot', 'объявленные краулеры', 'traffic', 'filtered', compare, un) +
+      '</div>' +
+      (visits ? lineChart(v.hourly || [], ['human', 'suspicious', 'bot'], ['Обычные', 'Подозрительный', 'Боты']) : '') +
+      (visits ? barList(v.by_platform, { web: 'Веб', ios: 'iOS', android: 'Android' }, null, 'Обычные визиты по платформам') : '') +
+      (visits ? barList(v.by_consent, { accepted: 'Согласились', declined: 'Отклонили', undecided: 'Ещё не решили' }, 'consent', 'Обычные визиты по состоянию согласия') : '') +
+      (visits ? barList(v.by_network, netLabels, 'traffic', 'Все визиты по типу сети') : ''));
+
+    var identityBlock = block('identity', 'Кто это был: аккаунты · гости · визиты · сессии · устройства · домохозяйства', 'identity',
+      '<div class="ow-cards">' +
+        dayCard('Точные активные аккаунты', 'exact_accounts', 'один аккаунт = один пользователь · владелец отдельно', 'identity', 'exact', compare) +
+        dayCard('Оценка уникальных гостей', 'estimated_unique_guests', 'профилей с согласием: ' + num(s.guest_profiles_consented) + ' · дневных ключей: ' + num(s.guest_keys_daily) + (s.guest_keys_linked ? ' · связано с аккаунтом и исключено: ' + num(s.guest_keys_linked) : ''), 'identity', 'estimate', compare) +
+        dayCard('Визиты', 'visits_human', 'обычные · загрузки страницы, не люди', 'visitsHuman', 'filtered', compare, un) +
+        dayCard('Сессии', 'sessions', 'с согласием · таймаут 30 минут', 'sessions', 'consented', compare) +
+        dayCard('Устройства', 'devices', 'с согласием · ' + num(s.profiles) + ' профилей/установок', 'devices', 'consented', compare) +
+        dayCard('Домохозяйства (оценка)', 'households', 'по домашним сетям согласившихся', 'households', 'estimate', compare) +
+      '</div>' +
+      (data.identity && data.identity.guest_keys_by_platform ? barList(data.identity.guest_keys_by_platform, { web: 'Веб', ios: 'iOS', android: 'Android' }, 'identity', 'Дневные ключи гостей по платформам') : '') +
+      '<div class="ow-card-s" style="margin-top:6px">' + esc((data.identity && data.identity.note) || '') + '</div>');
+
+    var peopleBlock = block('people', 'Аудитория с согласием', 'dayPeople',
+      '<div class="ow-cards">' +
+        dayCard('Уникальные пользователи', 'people', 'с признаками человека: ' + num(s.people_human), 'dayPeople', 'consented', compare) +
+        dayCard('Новые', 'new_people', 'первый визит в истории — в этот день', 'newPeople', 'consented', compare) +
+        dayCard('Вернувшиеся', 'returning_people', 'были известны до этого дня', 'returningPeople', 'consented', compare) +
+        dayCard('Аккаунты активны', 'accounts_active', 'вошли в аккаунт в этот день (без владельца)', 'dayEntities', 'exact', compare) +
+        dayCard('Устройства', 'devices', num(s.profiles) + ' профилей/установок', 'dayEntities', 'consented', compare) +
+        dayCard('Сессии', 'sessions', num(s.engaged_sessions) + ' вовлечённых · ' + num(s.events) + ' событий', 'sessions', 'consented', compare) +
+        dayCard('Домохозяйства (оценка)', 'households', 'по домашним сетям', 'households', 'estimate', compare) +
+        dayCard('Гости', 'guests', 'устройства без входа в аккаунт', 'dayStatuses', 'consented', compare) +
+      '</div>' +
+      lineChart(data.sessions_hourly || [], ['sessions', 'people'], ['Сессии', 'Люди']));
+
+    var levels = accounts.levels_active || {};
+    var accountsBlock = block('accounts', 'Аккаунты и статусы', 'dayStatuses',
+      '<div class="ow-cards">' +
+        dayCard('Регистрации', 'registrations', 'аккаунтов всего сейчас: ' + num(accounts.registered_total_now), 'dayRegistrations', 'exact', compare) +
+        dayCard('FREE активны', 'free_active', 'вошли в этот день', 'dayStatuses', 'exact', compare) +
+        dayCard('PRO активны', 'pro_active', 'активная платная подписка', 'dayStatuses', 'exact', compare) +
+        dayCard('PRO Lifetime активны', 'lifetime_active', 'бессрочный доступ (не владелец)', 'dayStatuses', 'exact', compare) +
+        dayCard('PRO истёк / отменён', 'expired_active', 'заходили с истёкшей подпиской', 'dayStatuses', 'exact', compare) +
+        card('Владелец / тест (отдельно)', num(excluded.owner_sessions) + ' сес. · ' + num(excluded.owner_profiles) + ' проф.', 'аккаунтов владельца активно: ' + num(excluded.owner_accounts_active) + ' · регистраций владельца: ' + num(s.registrations_owner) + ' · не входят в цифры выше', 'excluded') +
+        card('Исключено: боты', num(excluded.bot_sessions) + ' сес.', 'краулеры и автоматизация', 'excluded') +
+      '</div>' +
+      (Object.keys(levels).length ? barList(levels, LIB.STATUS_RU, 'dayStatuses', 'Активные аккаунты по статусу') : ''));
+
+    var platformsBlock = block('platforms', 'Платформы и устройства', 'devices',
+      '<div class="ow-cards">' +
+        dayCard('Web', 'web', 'сессий', 'devices', 'consented', compare) +
+        dayCard('iOS', 'ios', 'сессий', 'devices', 'consented', compare) +
+        dayCard('Android', 'android', 'сессий', 'devices', 'consented', compare) +
+        dayCard('Телефоны', 'mobile', 'устройств', 'devices', 'consented', compare) +
+        dayCard('Компьютеры', 'desktop', 'устройств', 'devices', 'consented', compare) +
+        dayCard('Планшеты', 'tablet', 'устройств', 'devices', 'consented', compare) +
+      '</div>' +
+      barList(platforms.os, null, null, 'Операционные системы (устройства)'));
+
+    var countriesBlock = block('countries', 'Страны и языки интерфейса', 'dayLanguages',
+      '<div class="ow-cards">' +
+        dayCard('Страны', 'countries', 'по визитам и сессиям, без ботов', 'countryMap', 'filtered', compare) +
+        card('Языки интерфейса', num((data.languages || []).length), 'разных locale за день', 'dayLanguages') +
+      '</div>' +
+      '<div class="ow-block-h" style="margin-top:8px">Страны</div>' +
+      table([
+        { title: 'Страна', key: 'country', html: function (r) { return esc((LIB.flagEmoji ? LIB.flagEmoji(r.country) + ' ' : '') + countryName(r.country)) + (r.is_new ? ' <span class="ow-tag ow-tag-exact">новая</span>' : ''); } },
+        { title: 'Обычные визиты', key: 'visits_human', html: function (r) { return visits ? num(r.visits_human) : '—'; }, numeric: true },
+        { title: 'Подозр.', key: 'visits_suspicious', html: function (r) { return visits ? num(r.visits_suspicious) : '—'; }, numeric: true },
+        { title: 'Боты', key: 'visits_bot', html: function (r) { return visits ? num(r.visits_bot) : '—'; }, numeric: true },
+        { title: 'Люди (с согласием)', key: 'people', numeric: true },
+        { title: 'Сессий', key: 'sessions', numeric: true },
+        { title: 'Аккаунтов', key: 'accounts', numeric: true }
+      ], data.countries, 'В этот день визитов не было') +
+      '<div class="ow-block-h" style="margin-top:12px">Языки интерфейса</div>' +
+      table([
+        { title: 'Язык', key: 'locale' }, { title: 'Людей', key: 'people', numeric: true }, { title: 'Сессий', key: 'sessions', numeric: true }
+      ], data.languages, 'Нет данных с согласием'));
+
+    var lotteriesBlock = block('lotteries', 'Лотереи', 'funnels',
+      table([
+        { title: 'Лотерея', key: 'lottery' }, { title: 'Людей', key: 'people', numeric: true }, { title: 'Сессий', key: 'sessions', numeric: true },
+        { title: 'Событий', key: 'events', numeric: true }, { title: 'Генераций', key: 'generator_runs', numeric: true }, { title: '3D', key: 'draw3d', numeric: true }
+      ], data.lotteries, 'В этот день лотереи не открывали'));
+
+    var featuresBlock = block('features', 'Функции: события и уникальные пользователи', 'dayFeatures',
+      table([
+        { title: 'Функция', key: 'feature', html: function (r) { return esc(label(LIB.EVENT_RU, r.feature)); } },
+        { title: 'Событий', key: 'events', numeric: true }, { title: 'Уникальных пользователей', key: 'users', numeric: true }
+      ], data.features, 'Событий с согласием не было') +
+      barList(data.pages, { sim: 'Симулятор', ana: 'Статистика', privacy: 'Политика', terms: 'Условия' }, null, 'Разделы (просмотры)'));
+
+    var steps = data.funnel || [];
+    var first = steps.length ? (+steps[0].value || 0) : 0;
+    var stepTitles = { visits: 'Обычные визиты', people: 'Люди с согласием', signup: 'Регистрации', paywall: 'Увидели PRO', checkout: 'Начали оплату', purchase: 'Купили PRO' };
+    var funnelBlock = block('funnel', 'Регистрации и конверсия в PRO', 'conversion',
+      steps.map(function (step) {
+        var value = +step.value || 0;
+        return '<div class="ow-bar"><span class="ow-bar-l">' + esc(stepTitles[step.step] || step.step) + ' <span class="ow-tag ow-tag-' + esc(step.precision) + '">' + esc(label(LIB.PRECISION_RU, step.precision)) + '</span></span>' +
+          '<span class="ow-bar-t"><i style="width:' + (first ? Math.max(1, Math.round((value / first) * 100)) : 0) + '%"></i></span>' +
+          '<span class="ow-bar-v">' + num(value) + ' · ' + pctText(value, first) + '</span></div>';
+      }).join('') +
+      '<div class="ow-card-s" style="margin-top:6px">Ступени с разной точностью не складываются в одну воронку буквально: визиты — счётчики, люди — только с согласием, регистрации и покупки — точные записи.</div>');
+
+    var byCurrency = (commerce.revenue_by_currency || []).map(function (r) { return (LIB.formatMoney ? LIB.formatMoney(r.amount, r.currency) : r.amount + ' ' + r.currency) + ' (' + num(r.n) + ')'; }).join(' · ');
+    var commerceBlock = block('commerce', 'Платежи и подписки', 'dayCommerce',
+      '<div class="ow-cards">' +
+        dayCard('Checkout начат', 'checkout_started', 'клиент открыл оплату · по телеметрии: ' + num((commerce.telemetry || {}).purchase_start), 'dayCommerce', 'exact', compare) +
+        dayCard('Checkout не удался', 'checkout_failed', 'отменено пользователем: ' + num(s.checkout_cancelled), 'dayCommerce', 'exact', compare) +
+        dayCard('Покупки PRO', 'purchases', 'подтверждено магазином', 'dayCommerce', 'exact', compare) +
+        dayCard('Продления', 'renewals', 'подтверждено магазином', 'dayCommerce', 'exact', compare) +
+        dayCard('Отмены', 'cancellations', 'истекло: ' + num(s.expirations), 'dayCommerce', 'exact', compare) +
+        dayCard('Возвраты', 'refunds', commerce.refund_usd != null ? 'на сумму ' + esc(LIB.formatMoney ? LIB.formatMoney(commerce.refund_usd, 'USD') : commerce.refund_usd) : 'сумма неизвестна', 'dayCommerce', 'exact', compare) +
+        dayCard('Сбои оплаты', 'payment_failures', 'магазин + клиент', 'dayCommerce', 'exact', compare) +
+        dayCard('Выручка (USD)', 'revenue_usd', num(s.revenue_known) + ' событий с суммой · ' + num(s.revenue_unknown) + ' без суммы' + (byCurrency ? '<br>' + esc(byCurrency) : ''), 'dayCommerce', 'exact', compare, { money: true }) +
+      '</div>' +
+      barList(commerce.by_plan, { 1: '1 месяц', 3: '3 месяца', 6: '6 месяцев', 12: '12 месяцев', unknown: 'Тариф не определён' }, 'dayCommerce', 'Тариф (покупки и продления)') +
+      barList(commerce.by_store, { apple: 'App Store', google: 'Google Play', paddle: 'Paddle (веб)', stripe: 'Stripe', revenuecat: 'RevenueCat', web: 'Веб', ios: 'iOS', android: 'Android', unknown: 'Не определено' }, 'dayCommerce', 'Платформа покупки') +
+      '<div class="ow-block-h" style="margin-top:12px">События магазина</div>' +
+      table([
+        { title: 'Время', key: 'at', html: function (r) { return esc(clockText(r.at)); } },
+        { title: 'Событие', key: 'name', html: function (r) { return esc(label(LIB.COMMERCE_RU, r.name)); } },
+        { title: 'Тариф', key: 'plan', html: function (r) { return r.plan ? esc(r.plan) + ' мес.' : '—'; } },
+        { title: 'Магазин', key: 'store', html: function (r) { return esc(r.store || '—'); } },
+        { title: 'Сумма', key: 'price', html: function (r) { return r.price != null && r.currency ? esc(LIB.formatMoney ? LIB.formatMoney(r.price, r.currency) : r.price + ' ' + r.currency) : '<span class="ow-card-s">без суммы</span>'; }, numeric: true },
+        { title: 'USD', key: 'price_usd', html: function (r) { return r.price_usd != null ? num(r.price_usd) : '—'; }, numeric: true },
+        { title: 'Статус', key: 'status', html: function (r) { return statusChip(r.status); } },
+        { title: 'Страна', key: 'country', html: function (r) { return esc(r.country ? countryName(r.country) : '—'); } },
+        { title: 'Причина', key: 'reason', html: function (r) { return esc(r.reason || '—'); } }
+      ], commerce.events, 'Событий магазина в этот день не было') +
+      '<div class="ow-card-s" style="margin-top:6px">' + esc(commerce.note || '') + '</div>');
+
+    var ingest = {};
+    (system.ingest || []).forEach(function (row) { ingest[row.outcome + ': ' + (row.reason || '—')] = row.events; });
+    var systemBlock = block('system', 'Сбои и системные события', 'daySystem',
+      '<div class="ow-cards">' +
+        dayCard('Отклонено приёмом', 'ingest_rejected', 'событий rejected + invalid', 'quality', 'exact', compare) +
+        dayCard('Ошибки разбора', 'resolve_errors', 'запусков analytics_resolve со статусом error', 'quality', 'exact', compare) +
+        dayCard('Push не доставлен', 'push_failed', 'отправлено: ' + num((system.push || {}).sent), 'daySystem', 'exact', compare) +
+        card('Ошибки в приложении', num(system.client_errors), 'client_error у пользователей', 'daySystem') +
+      '</div>' +
+      barList(ingest, null, 'quality', 'Приём событий') +
+      '<div class="ow-block-h" style="margin-top:12px">Ошибки разбора</div>' +
+      table([
+        { title: 'Когда', key: 'at', html: function (r) { return esc(clockText(r.at)); } }, { title: 'Причина', key: 'trigger' }, { title: 'Ошибка', key: 'error' }
+      ], system.resolution_errors, 'Ошибок разбора не было') +
+      '<div class="ow-block-h" style="margin-top:12px">Системные уведомления владельца</div>' +
+      table([
+        { title: 'Когда', key: 'at', html: function (r) { return esc(clockText(r.at)); } }, { title: 'Заголовок', key: 'title' }, { title: 'Детали', key: 'body' }
+      ], system.notifications, 'Системных уведомлений не было'));
+
+    return head + identityBlock + visitsBlock + peopleBlock + accountsBlock + platformsBlock + countriesBlock + lotteriesBlock + featuresBlock + funnelBlock + commerceBlock + systemBlock;
   }
 
   function renderPeople(data) {
@@ -1202,7 +1578,7 @@
   }
 
   var RENDERERS = {
-    overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
+    day: renderDay, overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
     devices: renderDevices, sessions: renderSessions, acquisition: renderAcquisition, geography: renderGeography,
     map: renderMap, games: renderGames, features: renderFeatures, funnels: renderFunnels,
     retention: renderRetention, bots: renderBots, consent: renderConsent, quality: renderQuality
@@ -1216,7 +1592,10 @@
     var renderer = RENDERERS[state.section];
     host.innerHTML = renderer ? renderer(response.data || {}) : '<div class="ow-empty">Раздел недоступен</div>';
     var range = response.range || {};
-    if (!state.lastRefresh) {
+    if (!state.lastRefresh && state.preset === 'day') {
+      setStatus('День ' + esc(state.day) + ' · ' + esc(range.tz || state.tz) + (state.filters.country !== 'all' ? ' · страна ' + esc(state.filters.country) : '') +
+        (response.ms != null ? ' · ' + response.ms + ' мс' : ''));
+    } else if (!state.lastRefresh) {
       setStatus('Период ' + esc(String(range.from || '').slice(0, 16).replace('T', ' ')) + ' — ' +
         esc(String(range.to || '').slice(0, 16).replace('T', ' ')) + ' · ' + esc(range.tz || '') +
         (response.ms != null ? ' · ' + response.ms + ' мс' : ''));
@@ -1271,9 +1650,18 @@
     });
     ovEl.querySelector('#ow-preset').addEventListener('change', function (event) {
       state.preset = event.target.value;
-      ovEl.querySelector('#ow-custom').hidden = state.preset !== 'custom';
+      if (state.preset === 'day' && !state.day && LIB.todayYMD) state.day = LIB.todayYMD(state.tz);
+      syncControls();
       if (state.preset !== 'custom' || (state.custom.from && state.custom.to)) { state.data = {}; state.page = 0; reload(); }
     });
+    // Calendar: quick chips (today / yesterday / day before), one-day arrows, any date of any year.
+    ovEl.querySelector('#ow-daybar').addEventListener('click', function (event) {
+      var chip = event.target.closest('.ow-chip[data-day]');
+      if (chip && LIB.todayYMD && LIB.shiftDay) { setDay(LIB.shiftDay(LIB.todayYMD(state.tz), +chip.getAttribute('data-day'))); return; }
+      var nav = event.target.closest('#ow-day-prev, #ow-day-next');
+      if (nav && LIB.shiftDay) setDay(LIB.shiftDay(state.day || LIB.todayYMD(state.tz), nav.id === 'ow-day-prev' ? -1 : 1));
+    });
+    ovEl.querySelector('#ow-day').addEventListener('change', function (event) { if (event.target.value) setDay(event.target.value); });
     ovEl.querySelector('#ow-from').addEventListener('change', function (event) {
       state.custom.from = event.target.value;
       if (state.custom.to) { state.data = {}; reload(); }
@@ -1282,7 +1670,7 @@
       state.custom.to = event.target.value;
       if (state.custom.from) { state.data = {}; reload(); }
     });
-    ovEl.querySelector('#ow-tz').addEventListener('change', function (event) { state.tz = event.target.value; state.data = {}; reload(); });
+    ovEl.querySelector('#ow-tz').addEventListener('change', function (event) { state.tz = event.target.value; state.data = {}; syncControls(); reload(); });
     ovEl.querySelector('#ow-platform').addEventListener('change', function (event) { state.filters.platform = event.target.value; state.data = {}; reload(); });
     ovEl.querySelector('#ow-lottery').addEventListener('change', function (event) { state.filters.lottery = event.target.value; state.data = {}; reload(); });
     ovEl.querySelector('#ow-audience').addEventListener('change', function (event) { state.filters.audience = event.target.value; state.data = {}; reload(); });
@@ -1292,6 +1680,8 @@
     ovEl.querySelector('#ow-unknown').addEventListener('change', function (event) { state.toggles.unknown = event.target.checked; state.data = {}; reload(); });
 
     ovEl.querySelector('#ow-content').addEventListener('click', function (event) {
+      var anchor = event.target.closest('.ow-anchors a[data-block]');
+      if (anchor) { event.preventDefault(); state.block = anchor.getAttribute('data-block'); focusBlock(); return; }
       var howButton = event.target.closest('[data-how]');
       if (howButton) { openPopup('Как считается', esc(HOW[howButton.getAttribute('data-how')] || '')); return; }
       var pageButton = event.target.closest('[data-page]');
@@ -1359,6 +1749,7 @@
     fromAccount = !!viaAccount;
     build();
     fillLotteries();
+    syncControls();
     ovEl.classList.add('show');
     D.documentElement.style.overflow = 'hidden';
     var owner = await isOwner();
@@ -1367,16 +1758,37 @@
         '<p>Эта панель доступна только аккаунту владельца проекта.</p></div>';
       return;
     }
+    startOwnerNotifications();
     await show(state.section);
+  }
+  // The Owner Notification Center is part of THIS panel, not of the public page: it is fetched on
+  // the first open and started/stopped with the panel, so no owner query, listener or timer can
+  // run while the panel is closed.
+  var notifPromise = null;
+  function startOwnerNotifications() {
+    if (W.LotoOwnerNotifications) { W.LotoOwnerNotifications.start(); return; }
+    if (!notifPromise) {
+      var load = (typeof W.LotoLoadRuntimeScript === 'function')
+        ? W.LotoLoadRuntimeScript('owner-notifications.js')
+        : Promise.reject(new Error('no_loader'));
+      notifPromise = load.catch(function (error) { notifPromise = null; throw error; });
+    }
+    notifPromise.then(function () {
+      if (W.LotoOwnerNotifications && ovEl && ovEl.classList.contains('show')) W.LotoOwnerNotifications.start();
+    }).catch(function () { /* the bell simply stays hidden; the report itself is unaffected */ });
+  }
+  function stopOwnerNotifications() {
+    try { if (W.LotoOwnerNotifications) W.LotoOwnerNotifications.stop(); } catch (e) {}
   }
   function close() {
     if (!ovEl) return;
     ovEl.classList.remove('show');
     D.documentElement.style.overflow = '';
     stopLive();
+    stopOwnerNotifications();
     closePopup();
     if (mapApi) { mapApi.destroy(); mapApi = null; }
-    if (location.hash === '#owner') {
+    if (location.hash.indexOf('#owner') === 0) {
       try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { location.hash = ''; }
     }
     if (fromAccount) { fromAccount = false; try { if (typeof W.openAccount === 'function') W.openAccount(); } catch (e) {} }
@@ -1405,9 +1817,32 @@
     })();
   }
 
-  // _map: read-only accessor for the browser tests (the panel is owner-only; this grants nothing).
-  W.LotoOwnerDashboard = { open: open, close: close, revealAccountEntry: revealAccountEntry, _map: function () { return mapApi; } };
-  W.addEventListener('hashchange', function () { if (location.hash === '#owner') open(false); });
+  // ── deep links: #owner?d=YYYY-MM-DD&s=<section>&b=<block>&c=<country> ─────────────────────
+  // Every owner notification (push and in-app) carries such a link; opening it lands on that day,
+  // that section and that block with the country filter applied. Unknown values fall back safely.
+  function applyLink(link) {
+    if (!link) return;
+    if (link.d) { state.preset = 'day'; state.day = link.d; }
+    if (link.c && /^[A-Z]{2}$/.test(link.c)) { state.filters.country = link.c; state.selectedCountry = link.c; }
+    else if (link.c === 'all') state.filters.country = 'all';
+    var section = link.s;
+    var known = SECTIONS.some(function (x) { return x.id === section; });
+    state.section = known ? section : (link.d || link.b ? 'day' : state.section);
+    state.block = link.b || null;
+    state.data = {};
+    state.page = 0;
+  }
+  async function openLink(hash) {
+    var link = LIB.parseOwnerLink ? LIB.parseOwnerLink(hash) : null;
+    if (link === null) link = {};
+    applyLink(link);
+    if (ovEl && ovEl.classList.contains('show')) { syncControls(); await show(state.section); return; }
+    await open(false);
+  }
+  // _map / _state: read-only accessors for the browser tests (the panel is owner-only; this grants nothing).
+  W.LotoOwnerDashboard = { open: open, close: close, openLink: openLink, revealAccountEntry: revealAccountEntry,
+    _map: function () { return mapApi; }, _state: function () { return JSON.parse(JSON.stringify(state, function (k, v) { return k === 'data' ? undefined : v; })); } };
+  W.addEventListener('hashchange', function () { if (location.hash.indexOf('#owner') === 0) openLink(location.hash); });
   try { W.addEventListener('loto:accesschange', revealAccountEntry); } catch (e) {}
   function wrapOpenAccount() {
     try {
@@ -1420,7 +1855,7 @@
     } catch (e) {}
   }
   function boot() {
-    if (location.hash === '#owner') open(false);
+    if (location.hash.indexOf('#owner') === 0) openLink(location.hash);
     revealAccountEntry();
     wrapOpenAccount();
     var tries = 0;

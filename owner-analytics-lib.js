@@ -96,9 +96,13 @@
     }
     return r;
   }
+  // A real calendar date only: '2026-02-30' or '2026-99-99' is rejected, not silently normalised.
   function parseYMD(s) {
     if (!s) return null; var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s)); if (!m) return null;
-    return { y: +m[1], m: +m[2], d: +m[3] };
+    var y = +m[1], mo = +m[2], d = +m[3];
+    var probe = new Date(Date.UTC(y, mo - 1, d));
+    if (probe.getUTCFullYear() !== y || probe.getUTCMonth() !== mo - 1 || probe.getUTCDate() !== d) return null;
+    return { y: y, m: mo, d: d };
   }
 
   // ── Deterministic forecast: Holt's linear (level+trend) exponential smoothing. ──
@@ -206,6 +210,13 @@
     var d = new Date(t);
     return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() };
   }
+  function civilMidnight(tz, ymd) { return zoneCivilToUTC(tz, ymd.y, ymd.m, ymd.d, 0, 0); }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function ymdText(ymd) { return ymd.y + '-' + pad2(ymd.m) + '-' + pad2(ymd.d); }
+  // Today's civil date in tz as 'YYYY-MM-DD'; shiftDay moves a civil date by n days (calendar math,
+  // month / year boundaries handled by Date.UTC normalisation).
+  function todayYMD(tz, nowMs) { return ymdText(zoneYMD(tz || TZ, nowMs == null ? Date.now() : nowMs)); }
+  function shiftDay(ymdStr, n) { var p = parseYMD(ymdStr); return p ? ymdText(addDays(p, n)) : null; }
 
   // Presets used by the Owner Panel. Every range is [from, to) in UTC ISO, with the bucket the
   // charts should use and the immediately preceding window of the same length for comparison.
@@ -217,8 +228,15 @@
     var from, to, bucket = 'day';
     switch (preset) {
       case 'live': from = nowMs - 30 * 60000; to = nowMs + 60000; bucket = 'hour'; break;
-      case 'today': from = startOfToday; to = startOfToday + 86400000; bucket = 'hour'; break;
-      case 'yesterday': from = startOfToday - 86400000; to = startOfToday; bucket = 'hour'; break;
+      // Civil day boundaries: the next midnight is resolved through the tz database, so a DST day
+      // is 23 or 25 hours long instead of a fixed 86 400 000 ms.
+      case 'today': from = startOfToday; to = civilMidnight(tz, addDays(today, 1)); bucket = 'hour'; break;
+      case 'yesterday': from = civilMidnight(tz, addDays(today, -1)); to = startOfToday; bucket = 'hour'; break;
+      case 'day': {
+        var d = parseYMD(customFrom) || today;
+        from = civilMidnight(tz, d); to = civilMidnight(tz, addDays(d, 1)); bucket = 'hour';
+        break;
+      }
       case '7d': from = zoneCivilToUTC(tz, addDays(today, -6).y, addDays(today, -6).m, addDays(today, -6).d, 0, 0); to = startOfToday + 86400000; break;
       case '30d': from = zoneCivilToUTC(tz, addDays(today, -29).y, addDays(today, -29).m, addDays(today, -29).d, 0, 0); to = startOfToday + 86400000; break;
       case '90d': from = zoneCivilToUTC(tz, addDays(today, -89).y, addDays(today, -89).m, addDays(today, -89).d, 0, 0); to = startOfToday + 86400000; bucket = 'week'; break;
@@ -307,6 +325,7 @@
     notification_open: 'Открыл уведомление', language_change: 'Сменил язык', theme_change: 'Сменил тему',
     signup: 'Регистрация', login: 'Вход', logout: 'Выход', paywall_view: 'Экран PRO',
     purchase_start: 'Начал оплату', purchase_success: 'Оплатил', restore_success: 'Восстановил покупку',
+    purchase_failed: 'Оплата не прошла', purchase_cancelled: 'Отменил оплату',
     client_error: 'Ошибка в приложении'
   };
   var EVIDENCE_RU = {
@@ -382,6 +401,82 @@
     return { text: n.toLocaleString('ru-RU'), state: 'ok' };
   }
 
+  // ── Owner Panel calendar + Owner Notification Center (2026-09-20) ────────────────────────────
+  // One day in the report timezone: [from, to) in UTC ISO, hour buckets, previous civil day for
+  // the comparison. Any date of any month / year; DST-safe because both midnights come from the tz db.
+  function dayRange(ymdStr, tz) {
+    tz = tz || TZ;
+    var d = parseYMD(ymdStr) || zoneYMD(tz, Date.now());
+    var from = civilMidnight(tz, d), to = civilMidnight(tz, addDays(d, 1));
+    var prevFrom = civilMidnight(tz, addDays(d, -1));
+    return { preset: 'day', day: ymdText(d), tz: tz, bucket: 'hour', from: new Date(from).toISOString(), to: new Date(to).toISOString(),
+      prev_from: new Date(prevFrom).toISOString(), prev_to: new Date(from).toISOString(), hours: Math.round((to - from) / 3600000) };
+  }
+  // Absolute and relative change. The percentage exists only when the base is a real positive
+  // number: against 0 there is no honest "%", so pct is null and the card shows the absolute delta.
+  function delta(current, previous) {
+    var cur = current == null ? null : +current, prev = previous == null ? null : +previous;
+    if (cur == null || !isFinite(cur) || prev == null || !isFinite(prev)) return null;
+    var abs = cur - prev;
+    var pct = prev > 0 ? (abs / prev) * 100 : null;
+    return { abs: Math.round(abs * 100) / 100, pct: pct == null ? null : Math.round(pct * 10) / 10, dir: abs > 0 ? 'up' : abs < 0 ? 'down' : 'stable' };
+  }
+  // '#owner?d=2026-09-20&s=day&b=commerce&c=NO' ↔ { d, s, b, c }. Unknown keys are dropped, values are
+  // reduced to the safe alphabet the server also uses, so a pushed link can never inject markup.
+  var LINK_KEYS = ['d', 's', 'b', 'c', 'cat', 'f', 'p', 'n'];
+  function parseOwnerLink(hash) {
+    var text = String(hash || '');
+    if (text.indexOf('#owner') !== 0) return null;
+    var out = {};
+    var query = text.indexOf('?') >= 0 ? text.slice(text.indexOf('?') + 1) : '';
+    query.split('&').forEach(function (pair) {
+      if (!pair) return;
+      var idx = pair.indexOf('=');
+      var key = decodeURIComponent(idx >= 0 ? pair.slice(0, idx) : pair);
+      var value = idx >= 0 ? decodeURIComponent(pair.slice(idx + 1)) : '';
+      if (LINK_KEYS.indexOf(key) < 0) return;
+      value = value.replace(/[^A-Za-z0-9_.:-]/g, '');
+      if (key === 'd' && !parseYMD(value)) return;
+      if (value) out[key] = value;
+    });
+    return out;
+  }
+  function buildOwnerLink(parts) {
+    var query = LINK_KEYS.filter(function (k) { return parts && parts[k]; })
+      .map(function (k) { return k + '=' + encodeURIComponent(String(parts[k]).replace(/[^A-Za-z0-9_.:-]/g, '')); });
+    return '#owner' + (query.length ? '?' + query.join('&') : '');
+  }
+  var CATEGORY_RU = {
+    visit: 'Визит', new_user: 'Новый пользователь', returning_user: 'Вернувшийся пользователь', registration: 'Регистрация',
+    new_country: 'Новая страна', purchase: 'Покупка PRO', renewal: 'Продление PRO', cancellation: 'Отмена подписки',
+    refund: 'Возврат', payment_failure: 'Сбой оплаты', system: 'Системное событие', daily_summary: 'Итоги дня'
+  };
+  var CATEGORY_ICON = {
+    visit: '👣', new_user: '✨', returning_user: '🔁', registration: '🪪', new_country: '🌍', purchase: '💎', renewal: '♻️',
+    cancellation: '⛔', refund: '↩️', payment_failure: '⚠️', system: '🛠️', daily_summary: '📊'
+  };
+  var SEVERITY_RU = { info: 'Информация', important: 'Важное', critical: 'Критично' };
+  var MODE_RU = {
+    all: ['Все события', 'Push о каждом событии: визиты, пользователи, регистрации, покупки, сбои, итоги дня.'],
+    important: ['Только важное', 'Push о регистрациях, новых странах, покупках, продлениях, отменах, возвратах, сбоях и итогах дня. Визиты и пользователи — только в центре.'],
+    digest: ['Дайджест', 'Push только «Итоги дня» и критичные сбои. Всё остальное копится в центре уведомлений.'],
+    custom: ['Свой набор', 'Для каждой категории отдельно: показывать в центре и/или присылать push.']
+  };
+  var STATUS_RU = { guest: 'Гость', free: 'FREE', pro: 'PRO', lifetime: 'PRO Lifetime', expired: 'PRO истёк', owner: 'Владелец', signed_in: 'С аккаунтом' };
+  var FEED_KIND_RU = { event: 'Событие', commerce: 'Платёж', account: 'Аккаунт', visits: 'Визиты' };
+  var COMMERCE_RU = {
+    checkout_open: 'Открыл оплату', checkout_failed: 'Оплата не удалась', checkout_cancelled: 'Оплата отменена',
+    purchase_success: 'Покупка PRO', renewal: 'Продление', cancellation: 'Отмена подписки', uncancellation: 'Отмена отозвана',
+    expiration: 'Подписка истекла', refund: 'Возврат', payment_failed: 'Проблема с оплатой', plan_change: 'Смена тарифа',
+    transfer: 'Перенос покупки', billing_test: 'Тест RevenueCat', billing_webhook_failed: 'Сбой вебхука платежей', restore_success: 'Восстановление'
+  };
+  function formatMoney(amount, currency) {
+    var n = +amount;
+    if (!isFinite(n)) return '—';
+    try { return n.toLocaleString('ru-RU', { style: 'currency', currency: currency || 'USD', maximumFractionDigits: 2 }); }
+    catch (e) { return n.toLocaleString('ru-RU') + ' ' + (currency || ''); }
+  }
+
   return {
     osloRange: osloRange, forecast: forecast, pctChange: pctChange,
     COUNTRY_RU: COUNTRY_RU, countryNameRu: countryNameRu, countryList: countryList,
@@ -390,6 +485,9 @@
     EVIDENCE_RU: EVIDENCE_RU, evidenceRu: evidenceRu,
     PRECISION_RU: PRECISION_RU, TRAFFIC_RU: TRAFFIC_RU, CONTINENT_RU: CONTINENT_RU, CONTINENT_ORDER: CONTINENT_ORDER,
     BLUE_LIGHT: BLUE_LIGHT, BLUE_DARK: BLUE_DARK, choroplethColor: choroplethColor, flagEmoji: flagEmoji, kpiText: kpiText,
+    dayRange: dayRange, todayYMD: todayYMD, shiftDay: shiftDay, delta: delta, parseOwnerLink: parseOwnerLink, buildOwnerLink: buildOwnerLink,
+    CATEGORY_RU: CATEGORY_RU, CATEGORY_ICON: CATEGORY_ICON, SEVERITY_RU: SEVERITY_RU, MODE_RU: MODE_RU, STATUS_RU: STATUS_RU,
+    FEED_KIND_RU: FEED_KIND_RU, COMMERCE_RU: COMMERCE_RU, formatMoney: formatMoney,
     _zoneOffsetMinutes: zoneOffsetMinutes, _zoneCivilToUTC: zoneCivilToUTC, _zoneYMD: zoneYMD,
     _osloCivilToUTC: osloCivilToUTC, _osloYMD: osloYMD, _osloOffsetMinutes: osloOffsetMinutes
   };

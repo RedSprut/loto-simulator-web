@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the 9190d93 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 9517696 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-auto-20260921-tlprjz';
+const CACHE_VERSION='loto-shell-v9517696';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -110,7 +110,7 @@ self.addEventListener('fetch',event=>{
   // Owner Analytics map: owner-map.js is a dynamic import and vendor/world/countries.json a fetch.
   // Both carry a ?v= build revision, but the ignoreSearch match above would still hand back the
   // previous deploy first. Owner-only, loaded lazily, small: network-first, cache only offline.
-  if(/\/owner-map\.js$|\/vendor\/world\//.test(url.pathname)){
+  if(/\/owner-map\.js$|\/owner-notifications\.js$|\/vendor\/world\//.test(url.pathname)){
     event.respondWith(networkFirst(request,SHELL_CACHE));
     return;
   }
@@ -127,7 +127,8 @@ const PUSH_DESTINATIONS={
   jackpot_updated:'simulator',jackpot_update:'simulator',jackpot_updates:'simulator',
   saved_ticket_result:'check',saved_ticket_results:'check',
   deadline_reminder:'simulator',deadline_reminders:'simulator',upcoming_draw:'simulator',
-  system_message:'simulator'
+  system_message:'simulator',
+  owner_event:'owner'
 };
 
 self.addEventListener('push',event=>{
@@ -159,6 +160,8 @@ self.addEventListener('notificationclick',event=>{
   if(data.lotteryId)params.set('n_lot',data.lotteryId);
   if(data.notificationType)params.set('n_type',data.notificationType);
   if(data.drawId)params.set('n_draw',data.drawId);
+  // Owner notifications carry a panel deep link (#owner?d=…&s=…): keep it across a cold start.
+  if(data.deepLink&&/^#owner/.test(String(data.deepLink)))params.set('n_link',String(data.deepLink).slice(0,200));
   const target='./index.html?'+params.toString();
   event.waitUntil((async()=>{
     const all=await self.clients.matchAll({type:'window',includeUncontrolled:true});
