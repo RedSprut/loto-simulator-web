@@ -3077,16 +3077,32 @@ function ruleParameters(era){
   const groups=(era.extraGroups||[]).map(group=>`${ruleGroupLabel(group)}: ${group.count}/${group.max}`);
   return[main,...groups].join(' · ');
 }
+/* Выбранная эпоха правил ('' = вся доступная база). Состояние рядом с рендером: его читает
+   renderRuleSummary при каждой перерисовке (смена лотереи, обновление, подтверждение PRO). */
+let HIST_eraFilter='';
+/* id эпохи попадает и в data-атрибут, и в inline-обработчик → только безопасный алфавит. */
+const HIST_eraToken=value=>/^[A-Za-z0-9._:-]+$/.test(String(value??''))?String(value):'';
+// Карточка эпохи = кнопка фильтра (HIST_pickEra). Счётчик считается по ТЕМ ЖЕ тиражам, что
+// отрисованы ниже (FREE — официальное окно, PRO — весь архив), поэтому число на карточке всегда
+// равно числу видимых строк и не обходит ограничения FREE/PRO.
+function ruleEraPick(id,title,detail,count){
+  const token=HIST_eraToken(id);
+  const selected=HIST_eraFilter===token;
+  const label=`${escapeHtml(title)}${count===null?'':` · ${escapeHtml(historyText('{{0}} тиражей',count))}`}`;
+  return`<button type="button" class="rule-era rule-pick${selected?' on':''}" aria-pressed="${selected}" data-rule-era="${escapeHtml(token)}" data-loto-event-click="HIST_pickEra('${token}')"><b>${label}</b>${escapeHtml(detail)}</button>`;
+}
 function renderRuleSummary(draws,eras,currentCount){
   if(!eras.length)return`<div class="rule-era"><b>${escapeHtml(historyText('Текущая база'))}</b>${escapeHtml(historyText('Исторические версии правил для этого источника не заявлены.'))}</div>`;
   const blocks=eras.map(era=>{
     const count=draws.filter(draw=>ruleEraForDraw(draw,eras)?.id===era.id).length;
     const range=`${formatHistoryDate(era.from)} — ${era.to?formatHistoryDate(era.to):historyText('сейчас')}`;
     const status=historyText(era.current?'Текущие правила':'Старые правила');
-    return`<div class="rule-era"><b>${escapeHtml(status)} · ${escapeHtml(era.id)}</b>${escapeHtml(range)} · ${escapeHtml(ruleParameters(era))} · ${escapeHtml(historyText('{{0}} тиражей',count))}</div>`;
+    return ruleEraPick(era.id,`${status} · ${era.id}`,`${range} · ${ruleParameters(era)}`,count);
   }).join('');
   const summary=historyText('Показано {{0}} тиражей. Модели текущего формата используют {{1}} совместимых тиражей; статистика старых эпох рассчитывается отдельно.',draws.length,currentCount);
-  return`<div class="rule-era"><b>${escapeHtml(historyText('Как используется архив'))}</b>${escapeHtml(summary)}</div>${blocks}`;
+  const allRange=draws.length?`${formatHistoryDate(draws[draws.length-1].date)} — ${formatHistoryDate(draws[0].date)}`:'';
+  const all=ruleEraPick('',historyText('Вся доступная база'),allRange,draws.length);
+  return`<div class="rule-era"><b>${escapeHtml(historyText('Как используется архив'))}</b>${escapeHtml(summary)}</div>${all}${blocks}`;
 }
 
 // ── Canonical deletion policy (single source of truth for every platform) ──
@@ -3125,11 +3141,14 @@ async function renderHistory(){
   try{pack=await loadFullHistory(cur);}
   catch(_err){ if(c0)LotoState.error(c0,()=>renderHistory()); return; }
   const l=L(),draws=pack.draws,eras=pack.eras;
+  /* Эпоха принадлежит своей лотерее: если после смены игры, обновления архива или PRO её id
+     исчез — возвращаемся ко всей базе, иначе история осталась бы пустой. */
+  if(HIST_eraFilter&&!eras.some(era=>HIST_eraToken(era.id)===HIST_eraFilter))HIST_eraFilter='';
   document.getElementById('hist-title').textContent=historyText('История ({{0}} всего · {{1}} по текущим правилам)',draws.length,pack.currentCount);
   const summary=document.getElementById('hist-rule-summary');
   if(summary)summary.innerHTML=renderRuleSummary(draws,eras,pack.currentCount);
   const c=document.getElementById('hist-list');
-  if(!draws.length){c.innerHTML=`<div class="empty">📭 ${escapeHtml(historyText('Тиражей нет'))}</div>`;return;}
+  if(!draws.length){c.innerHTML=`<div class="empty">📭 ${escapeHtml(historyText('Тиражей нет'))}</div>`;HIST_filter();return;}
   c.innerHTML='';
   // Build the full base into a detached fragment and insert it ONCE — a single reflow instead of
   // thousands of live appendChild mutations. With content-visibility:auto on .hist-item this keeps
@@ -3155,6 +3174,7 @@ async function renderHistory(){
     if(d.superStar!=null){histSepCount++;histBallCount++;balls+=`<div class="hist-sep" role="separator" aria-label="SuperStar">★</div>`;balls+=`<div class="hball superstar" title="SuperStar">${escapeHtml(String(d.superStar))}</div>`;}
     const src=` · ${escapeHtml(drawLotteryName(d,cur))}`;
     const era=ruleEraForDraw(d,eras),isCurrent=era?.current??d.ruleEra!=='legacy';
+    div.dataset.ruleEra=era?HIST_eraToken(era.id):'';   // ключ быстрого фильтра по эпохе (HIST_filter)
     const badgeLabel=historyText(isCurrent?'Текущие правила':'Старые правила');
     const badgeTitle=era?`${era.id} · ${ruleParameters(era)}`:'';
     const badge=era?`<span class="rule-badge ${isCurrent?'current':''}" title="${escapeHtml(badgeTitle)}">${escapeHtml(badgeLabel)}</span>`:'';
@@ -3621,6 +3641,13 @@ async function revealResultDraw(gameId,drawId,dateStr,cb){
     const safe=window.CSS&&CSS.escape?CSS.escape(String(drawId||date||'')):String(drawId||date||'').replace(/["\\]/g,'\\$&');
     let row=list&&drawId?list.querySelector('.hist-item[data-draw-id="'+safe+'"]'):null;
     if(!row&&list&&date)row=list.querySelector('.hist-item[data-draw-date="'+date+'"]');
+    /* Переход из уведомления ведёт к КОНКРЕТНОМУ тиражу: если он скрыт эпохой или поиском,
+       снимаем оба фильтра, иначе подсветка уводила бы к невидимой строке. */
+    if(row&&row.style.display==='none'){
+      const search=document.getElementById('hist-search');
+      if(search)search.value='';
+      HIST_eraFilter='';HIST_syncEraPicks();HIST_filter();   // без прокрутки: ниже к строке ведёт _focusPrizeCard
+    }
     if(row){_focusPrizeCard(row);done();return;}
     if(typeof window.showFeedback==='function')window.showFeedback((L&&L().name)||gameId,_ncText('nc.status.awaiting'),'⏳',4200);
   }catch(e){}
@@ -6388,17 +6415,46 @@ function SUPC_dbShare(){
   if(!window.SUPC_dbRows)return;
   shareText('Совет судьи · '+L().name,'⚖️📊 Совет судьи по лидерам базы · '+L().name+' · тираж '+QA_nextDrawDate().toLocaleDateString(appLocale(),{day:'numeric',month:'short'})+'\n'+rowsAsText(window.SUPC_dbRows,L()));
 }
-/* ═══ Поиск по истории ═══ */
+/* ═══ Поиск по истории + фильтр по эпохе правил ═══
+   Один проход по уже отрисованным строкам, без перезагрузки и без запроса к архиву: строка
+   видна, когда совпала и с эпохой (data-rule-era), и со строкой поиска. */
+function HIST_pickEra(id){
+  const next=HIST_eraToken(id);
+  if(next===HIST_eraFilter)return;
+  HIST_eraFilter=next;
+  HIST_syncEraPicks();
+  HIST_filter();
+  /* На длинном архиве список резко укорачивается — возвращаем к началу отфильтрованной истории. */
+  document.getElementById('hist-rule-summary')?.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function HIST_syncEraPicks(){
+  document.querySelectorAll('#hist-rule-summary .rule-pick').forEach(el=>{
+    const on=(el.dataset.ruleEra||'')===HIST_eraFilter;
+    el.classList.toggle('on',on);
+    el.setAttribute('aria-pressed',String(on));
+  });
+}
 function HIST_filter(){
   const q=(document.getElementById('hist-search')?.value||'').trim().toLowerCase();
   const list=document.getElementById('hist-list');
   if(!list)return;
-  let shown=0;
+  const era=HIST_eraFilter;
+  let shown=0,total=0;
   [...list.children].forEach(el=>{
-    const hit=!q||el.textContent.toLowerCase().includes(q);
+    if(!el.classList.contains('hist-item'))return;
+    total++;
+    const hit=(!era||(el.dataset.ruleEra||'')===era)&&(!q||el.textContent.toLowerCase().includes(q));
     el.style.display=hit?'':'none';
     if(hit)shown++;
   });
+  const note=document.getElementById('hist-filter-note');
+  if(note){
+    const active=Boolean(era||q);
+    note.textContent=active?historyText('{{0}} тиражей',shown):'';
+    note.hidden=!active;
+  }
+  const empty=document.getElementById('hist-filter-empty');
+  if(empty)empty.hidden=!(total&&!shown);
 }
 
 
