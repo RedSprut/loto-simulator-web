@@ -58,7 +58,7 @@
     ['buyers', 'Покупатели'], ['households', 'Домохозяйства (оценка)'], ['consent_accepted', 'Согласились на аналитику'],
     ['visits_suspicious', 'Подозрительный трафик'], ['visits_bot', 'Боты']
   ];
-  var AUDIENCES = [['all', 'Все'], ['guest', 'Гости'], ['registered', 'С аккаунтом']];
+  var AUDIENCES = [['all', 'Все'], ['guest', 'Гостевые визиты'], ['registered', 'Авторизованные визиты']];
   var HOW = {
     verified: 'Люди с подтверждённой личностью: вошли в аккаунт. Один аккаунт = один человек, сколько бы устройств он ни использовал. Владелец исключён.',
     probable: 'Анонимные устройства с признаками живого человека, сгруппированные внутри одного домохозяйства по нижней границе: в группу попадают только устройства разных типов, которые никогда не работали одновременно. Это оценка, а не доказанная личность.',
@@ -82,7 +82,8 @@
     retention: 'Когорты по дню первого визита. D1/D7/D30 — вернулся ли человек ровно на 1-й, 7-й и 30-й день.',
     quality: 'Качество приёма: сколько событий принято, сколько отклонено и почему. Здесь же свежесть данных и распределение уверенности идентификации.',
     visitsHuman: 'Обычные визиты — визиты без обнаруженных признаков автоматизации (не доказательство живого человека): по одному на загрузку страницы или запуск приложения, независимо от согласия. Сервер считает их как обезличенные счётчики по стране и платформе — без идентификаторов, поэтому «уникальных посетителей» из них вывести нельзя. Автоматизация, headless-браузеры, сети дата-центров, VPN и Tor считаются отдельно.',
-    guests: 'Гости — визиты без входа в аккаунт (по счётчикам). Кто именно заходил, сервер не знает и не записывает.',
+    guests: 'Гостевые визиты — визиты без входа в аккаунт (по счётчикам). Кто именно заходил, сервер не знает и не записывает.',
+    authorizedVisits: 'Авторизованные визиты — загрузки страницы и запуски приложения, в которых был проверенный вход в аккаунт (по обезличенным счётчикам; какой именно аккаунт, не записывается). Это ВИЗИТЫ, а не люди: один человек за день даёт столько визитов, сколько раз открыл приложение. Число людей за ними — «Точные активные аккаунты» в блоке «Кто это был».',
     registered: 'Точное число: аккаунты в базе авторизации без анонимных сессий. Не зависит от согласия на аналитику и от фильтров трафика. Владелец учтён и показан отдельно.',
     levels: 'FREE / PRO / Lifetime — из серверной таблицы прав доступа (entitlements). PRO — активная платная подписка; Lifetime — бессрочный доступ владельца; истёкшие показаны отдельно. Клиентский флаг isPro не используется никогда.',
     buyers: 'Покупатели — аккаунты с оплаченным правом доступа от магазина (Apple, Google, Paddle, Stripe, RevenueCat) в production. Клиентское событие «оплатил» доказательством не считается. Продления появятся после подключения журнала платёжных событий.',
@@ -789,8 +790,8 @@
         how('countryMap') + '</div>' +
       '<div class="ow-cards">' +
         card('Обычные визиты', v('visits_human'), 'без обнаруженных признаков автоматизации', 'visitsHuman') +
-        card('Гости', v('visits_guest'), 'визиты без входа в аккаунт', 'guests') +
-        card('С аккаунтом', v('visits_signed_in'), 'визиты с входом в аккаунт') +
+        card('Гостевые визиты', v('visits_guest'), 'визиты без входа в аккаунт', 'guests') +
+        card('Авторизованные визиты', v('visits_signed_in'), 'визиты с входом в аккаунт · это визиты, не люди', 'authorizedVisits') +
         card('Зарегистрированные', kv(sum.registered), 'точно · новых за период: ' + num(sum.registered_new), 'registered') +
         card('FREE', kv(sum.free), 'точно', 'levels') +
         card('PRO', kv(sum.pro), 'активная подписка', 'levels') +
@@ -929,8 +930,8 @@
     var pct = function (value) { return value == null ? null : value; };
     return '<div class="ow-block" id="ow-kpi">' + head + '<div class="ow-cards">' +
       kcard('Обычные визиты', tv('human'), t.available ? num(t.visits) + ' всего · ' + pctText(t.human, t.visits) + ' без обнаруженных признаков автоматизации' : 'счётчики ещё не накоплены', 'visitsHuman', 'filtered', un) +
-      kcard('Гости', tv('guest'), 'визиты без входа в аккаунт', 'guests', 'filtered', un) +
-      kcard('С аккаунтом', tv('signed_in'), 'визиты с входом в аккаунт', 'guests', 'filtered', un) +
+      kcard('Гостевые визиты', tv('guest'), 'визиты без входа в аккаунт', 'guests', 'filtered', un) +
+      kcard('Авторизованные визиты', tv('signed_in'), 'визиты с входом в аккаунт · это визиты, не люди', 'authorizedVisits', 'filtered', un) +
       kcard('Зарегистрированные аккаунты', a.registered_total, '+' + num(a.registered_new) + ' за период · владелец: ' + num(a.owners) + ' · анонимных сессий: ' + num(a.anonymous_accounts), 'registered', 'exact') +
       kcard('Новые регистрации', a.registered_new, 'за выбранный период', 'registered', 'exact') +
       kcard('FREE', levels.free, 'без активной подписки', 'levels', 'exact') +
@@ -1114,8 +1115,8 @@
     var visitsBlock = block('visits', 'Визиты (счётчики без идентификаторов)', 'visitsHuman',
       '<div class="ow-cards">' +
         dayCard('Обычные визиты', 'visits_human', visits ? num(s.visits_total) + ' всего · ' + pctText(s.visits_human, s.visits_total) + ' без признаков автоматизации' : 'счётчики ещё не накоплены', 'visitsHuman', 'filtered', compare, un) +
-        dayCard('Гости', 'visits_guest', 'визиты без входа в аккаунт', 'guests', 'filtered', compare, un) +
-        dayCard('С аккаунтом', 'visits_signed_in', 'визиты с входом', 'guests', 'filtered', compare, un) +
+        dayCard('Гостевые визиты', 'visits_guest', 'визиты без входа в аккаунт', 'guests', 'filtered', compare, un) +
+        dayCard('Авторизованные визиты', 'visits_signed_in', 'визиты с входом · это визиты, не люди', 'authorizedVisits', 'filtered', compare, un) +
         dayCard('Подозрительный трафик', 'visits_suspicious', 'headless, дата-центры, VPN, Tor, всплески', 'traffic', 'filtered', compare, un) +
         dayCard('Боты', 'visits_bot', 'объявленные краулеры', 'traffic', 'filtered', compare, un) +
       '</div>' +
@@ -1126,7 +1127,7 @@
 
     var identityBlock = block('identity', 'Кто это был: аккаунты · гости · визиты · сессии · устройства · домохозяйства', 'identity',
       '<div class="ow-cards">' +
-        dayCard('Точные активные аккаунты', 'exact_accounts', 'один аккаунт = один пользователь · владелец отдельно', 'identity', 'exact', compare) +
+        dayCard('Точные активные аккаунты', 'exact_accounts', 'один аккаунт = один пользователь · владелец отдельно · авторизованных визитов: ' + num(s.visits_signed_in), 'identity', 'exact', compare) +
         dayCard('Оценка уникальных гостей', 'estimated_unique_guests', 'профилей с согласием: ' + num(s.guest_profiles_consented) + ' · дневных ключей: ' + num(s.guest_keys_daily) + (s.guest_keys_linked ? ' · связано с аккаунтом и исключено: ' + num(s.guest_keys_linked) : ''), 'identity', 'estimate', compare) +
         dayCard('Визиты', 'visits_human', 'обычные · загрузки страницы, не люди', 'visitsHuman', 'filtered', compare, un) +
         dayCard('Сессии', 'sessions', 'с согласием · таймаут 30 минут', 'sessions', 'consented', compare) +

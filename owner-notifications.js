@@ -168,6 +168,9 @@
     var b = bell();
     if (!b) return;
     b.hidden = false;
+    // The panel markup labels the button; refresh it here so a bell revealed with unread messages
+    // already carries the count in its accessible name instead of waiting for the next sync.
+    updateBadge(state.unread);
     if (!b.__ownWired) { b.__ownWired = true; b.addEventListener('click', function () { toggle(); }); }
   }
   function conceal() { var b = bell(); if (b) { b.hidden = true; } updateBadge(0); }
