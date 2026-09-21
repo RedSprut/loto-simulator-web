@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-09-21T18:21:04.091Z",
+  "updated": "2026-09-21T22:39:50.066Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-09-19",
       "expectedLastDraw": "2026-09-19",
       "nextDrawDate": "2026-09-26",
-      "updatedAt": "2026-09-21T18:21:04.091Z",
-      "sourceUpdatedAt": "2026-09-21T18:21:04.091Z",
+      "updatedAt": "2026-09-21T22:39:50.066Z",
+      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -29,8 +29,8 @@
       "lastDrawDate": "2026-09-16",
       "expectedLastDraw": "2026-09-16",
       "nextDrawDate": "2026-09-23",
-      "updatedAt": "2026-09-21T18:21:04.091Z",
-      "sourceUpdatedAt": "2026-09-21T18:21:04.091Z",
+      "updatedAt": "2026-09-21T22:39:50.066Z",
+      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -46,8 +46,8 @@
       "lastDrawDate": "2026-09-18",
       "expectedLastDraw": "2026-09-18",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-21T18:21:04.091Z",
-      "sourceUpdatedAt": "2026-09-21T18:21:04.091Z",
+      "updatedAt": "2026-09-21T22:39:50.066Z",
+      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -63,8 +63,8 @@
       "lastDrawDate": "2026-09-19",
       "expectedLastDraw": "2026-09-19",
       "nextDrawDate": "2026-09-21",
-      "updatedAt": "2026-09-21T18:21:04.091Z",
-      "sourceUpdatedAt": "2026-09-21T18:21:04.091Z",
+      "updatedAt": "2026-09-21T22:39:50.066Z",
+      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -80,8 +80,8 @@
       "lastDrawDate": "2026-09-18",
       "expectedLastDraw": "2026-09-18",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-21T18:21:04.091Z",
-      "sourceUpdatedAt": "2026-09-21T18:21:04.091Z",
+      "updatedAt": "2026-09-21T22:39:50.066Z",
+      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -97,8 +97,8 @@
       "lastDrawDate": "2026-09-18",
       "expectedLastDraw": "2026-09-18",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-21T18:21:04.091Z",
-      "sourceUpdatedAt": "2026-09-21T18:21:04.091Z",
+      "updatedAt": "2026-09-21T22:39:50.066Z",
+      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
       "sourceNextDraw": "2026-09-22",
       "status": "fresh",
       "synced": true,
@@ -114,55 +114,79 @@
       "lastDrawDate": "2026-09-19",
       "expectedLastDraw": "2026-09-19",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-21T18:21:04.091Z",
-      "sourceUpdatedAt": "2026-09-21T18:21:04.091Z",
+      "updatedAt": "2026-09-21T22:39:50.066Z",
+      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
       "sourceNextDraw": "2026-09-22",
       "status": "fresh",
       "synced": true,
-      "source": "superenalotto.net",
-      "sourceUrl": "https://www.superenalotto.net/",
-      "extractedText": "jackpot di martedì vale circa 30,4 milioni di Euro",
+      "source": "official backend",
+      "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-09-19&next=2026-09-22",
+      "extractedText": "Jackpot che si stabilisce a &lt;b>30,4 milioni di euro",
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-19-settembre-2026",
-          "error": "HTTP 403"
+          "error": "fetch failed"
         },
         {
           "source": "superenalotto.it",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/",
-          "error": "HTTP 403"
+          "error": "fetch failed"
         },
         {
           "source": "superenalotto.it estrazioni",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/estrazioni",
-          "error": "HTTP 403"
+          "error": "fetch failed"
         },
         {
           "source": "superenalotto.it archivio estrazioni",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/archivio-estrazioni/2026/settembre",
-          "error": "HTTP 403"
+          "error": "fetch failed"
         },
         {
           "source": "superenalotto.it bollettini ufficiali",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/archivio-estrazioni/bollettini",
-          "error": "HTTP 403"
+          "error": "fetch failed"
         },
         {
           "source": "superenalotto.it news",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/news/risultati",
-          "error": "HTTP 403"
+          "error": "fetch failed"
         },
         {
           "source": "superenalotto.net",
+          "ok": false,
+          "sourceUrl": "https://www.superenalotto.net/",
+          "error": "fetch failed"
+        },
+        {
+          "source": "sisal.it ultima estrazione",
+          "ok": false,
+          "sourceUrl": "https://www.sisal.it/superenalotto/ultima-estrazione",
+          "error": "HTTP 403"
+        },
+        {
+          "source": "sisal.it estrazioni",
+          "ok": false,
+          "sourceUrl": "https://www.sisal.it/estrazioni/superenalotto",
+          "error": "HTTP 403"
+        },
+        {
+          "source": "sisal.it news",
+          "ok": false,
+          "sourceUrl": "https://www.sisal.it/news/superenalotto",
+          "error": "HTTP 403"
+        },
+        {
+          "source": "official backend",
           "ok": true,
-          "sourceUrl": "https://www.superenalotto.net/"
+          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-09-19&next=2026-09-22"
         }
       ]
     },
@@ -176,8 +200,8 @@
       "lastDrawDate": "2026-09-18",
       "expectedLastDraw": "2026-09-18",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-21T18:21:04.091Z",
-      "sourceUpdatedAt": "2026-09-21T18:21:04.091Z",
+      "updatedAt": "2026-09-21T22:39:50.066Z",
+      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
       "sourceNextDraw": "2026-09-22",
       "status": "fresh",
       "synced": true,
@@ -206,8 +230,8 @@
       "lastDrawDate": "2026-09-17",
       "expectedLastDraw": "2026-09-17",
       "nextDrawDate": "2026-09-24",
-      "updatedAt": "2026-09-21T18:21:04.091Z",
-      "sourceUpdatedAt": "2026-09-21T18:21:04.091Z",
+      "updatedAt": "2026-09-21T22:39:50.066Z",
+      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
