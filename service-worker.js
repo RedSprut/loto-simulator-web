@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the 56cac60 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 29898b8 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-auto-20260921-tlpzro';
+const CACHE_VERSION='loto-shell-v29898b8';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -10,8 +10,14 @@ const CORE_PRECACHE=[
   './i18n-catalog.js','./lang-detect.js','./i18n-runtime.js','./commercial-runtime.js','./pwa-runtime.js','./native-loader.js','./external-link-runtime.js',
   './notifications-runtime.js',
   './boot-runtime.js','./app-runtime.js','./manifest.webmanifest','./favicon-64.png',
-  './icon-192.png','./icon-512.png','./results.json',
+  './icon-192.png','./icon-512.png',
 ];
+// results.json is NOT precached: it is 6 MB, the page fetches it itself at boot, and the runtime
+// handler already stores that fetch in DATA_CACHE (network-first), so offline still works after
+// one visit. Downloading it a second time here — with cache:'reload', so not even from the HTTP
+// cache — doubled the traffic of a cold first visit and was what made a tap on a lazily loaded
+// screen wait until loadCourtApp() gave up after 20s.
+
 const OPTIONAL_PRECACHE=[
   './win-match-core.js','./court-core.js','./court-ui.js',
   './safe-payment.html','./safe-payment-runtime.js','./auth-client.js','./native-bridge.js','./billing-web.js',
@@ -21,16 +27,55 @@ const OPTIONAL_PRECACHE=[
 const SUPPORTED_LOCALES=new Set(['ru','en','no','sv','da','fi','de','fr','es','it','pt','pl','nl','et','lv','lt','uk']);
 const NEVER_CACHE=/(?:results-archive|\/functions\/v1\/|\/auth\/v1\/|pro-(?:analysis|compute)|access-state|consume-feature|start-trial|billing-(?:status|reconcile)|checkout|management|payment-return|revenuecat|paddle|token|session)/i;
 
+// A file the OPTIONAL precache is fetching right now, so a page asking for the SAME file gets
+// that one response instead of starting a second download of it.
+const inflightPrecache=new Map();
+
+// The optional set is everything the app loads LAZILY (the court screens, the auth client, the
+// legal pages). It must never compete with the page for the connection pool: a user who taps
+// «Присяжные» seconds after a cold first load used to wait behind this precache until
+// loadCourtApp() gave up after 20s and showed «Анализ недоступен». So it runs AFTER activation,
+// one file at a time, it skips what is already cached, and it does not force-reload the HTTP
+// cache (the cache name already carries the build SHA, so a stale copy is impossible).
+let optionalPrecacheStarted=false,lastPageRequest=0;
+const idle=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+// The precache is opportunistic: it only ever runs while the page is asking for nothing. A user
+// who taps a lazily loaded screen must win that race every time — the whole point of this queue
+// is offline availability later, not speed now.
+async function whenPageIsQuiet(quietMs=1500,maxWaitMs=30000){
+  const deadline=Date.now()+maxWaitMs;
+  for(;;){
+    const quiet=Date.now()-lastPageRequest;
+    if(quiet>=quietMs||Date.now()>deadline)return;
+    await idle(Math.min(quietMs-quiet,quietMs));
+  }
+}
+async function precacheOptional(){
+  const cache=await caches.open(SHELL_CACHE);
+  for(const url of OPTIONAL_PRECACHE){
+    await whenPageIsQuiet();
+    try{
+      if(await cache.match(url,{ignoreSearch:true}))continue;
+      const request=new Request(url);
+      const pending=fetch(request).then(async response=>{
+        if(response&&response.ok)await cache.put(request,response.clone());
+        return response;
+      });
+      inflightPrecache.set(new URL(url,self.location.href).pathname,pending);
+      await pending;
+    }catch(_e){/* an optional file that fails simply stays lazy */}
+    finally{inflightPrecache.delete(new URL(url,self.location.href).pathname);}
+  }
+}
+
 self.addEventListener('install',event=>{
   // Take over immediately so a version bump reaches returning users / installed
   // PWAs on the very next visit (with clients.claim() on activate), and the old
   // cache (stale index.html / JS) is purged — no manual Safari cache clearing.
   self.skipWaiting();
-  event.waitUntil(caches.open(SHELL_CACHE).then(async cache=>{
-    const request=url=>new Request(url,{cache:'reload'});
-    await cache.addAll(CORE_PRECACHE.map(request));
-    await Promise.allSettled(OPTIONAL_PRECACHE.map(url=>cache.add(request(url))));
-  }));
+  event.waitUntil(caches.open(SHELL_CACHE).then(cache=>
+    cache.addAll(CORE_PRECACHE.map(url=>new Request(url,{cache:'reload'})))
+  ));
 });
 
 self.addEventListener('activate',event=>{
@@ -76,15 +121,33 @@ async function networkFirst(request,cacheName){
 async function staleWhileRevalidate(request){
   const cache=await caches.open(SHELL_CACHE);
   const cached=await cache.match(request,{ignoreSearch:true});
-  const network=fetch(request).then(async response=>{
+  if(cached)return cached;
+  // Nothing cached yet and the optional precache is already downloading this exact file: wait for
+  // it and serve the copy it just stored, instead of queueing a duplicate request behind it. The
+  // cache entry is read back rather than the response shared, so no body is ever consumed twice.
+  const pending=inflightPrecache.get(new URL(request.url).pathname);
+  if(pending){
+    try{
+      await pending;
+      const filled=await cache.match(request,{ignoreSearch:true});
+      if(filled)return filled;
+    }catch(_e){}
+  }
+  const network=await fetch(request).then(async response=>{
     if(cacheable(request,response))await cache.put(request,response.clone());
     return response;
   }).catch(()=>null);
-  return cached||(await network)||Response.error();
+  return network||Response.error();
 }
 
 self.addEventListener('fetch',event=>{
   const request=event.request;
+  // The optional precache is started from the FIRST request the page makes, not from `activate`:
+  // an activation that is still open queues every fetch event behind it, so awaiting a multi-file
+  // download there would stall the very page it is meant to speed up. `waitUntil` on a fetch event
+  // keeps the worker alive for it without delaying this — or any other — response.
+  lastPageRequest=Date.now();
+  if(!optionalPrecacheStarted){optionalPrecacheStarted=true;event.waitUntil(precacheOptional());}
   if(request.method!=='GET')return;
   const url=new URL(request.url);
   if(url.origin!==self.location.origin||NEVER_CACHE.test(url.pathname+url.search)||request.headers.has('authorization'))return;

@@ -730,6 +730,121 @@ async function saveFavs(arr){
   catch(e){ console.error('Storage save failed',e); showFeedback('Избранное не сохранилось','Хранилище ответило таймаутом. Попробуйте ещё раз через несколько секунд.','⚠️',3800); }
 }
 
+// ─── TICKET PERSISTENCE (same storage layer as the draw database and favourites) ───
+// A combination and its analysis are ONE object: the row carries its provenance (source, every
+// decision, every rollback, review status), and next to it lives the working state of its review
+// (jury votes and proposals, defense and judge results, the pending queue). Both go into ONE
+// per-game record through the app's existing storage primitive, so a reload continues exactly
+// where the user stopped. There is no second history: the decisions are read back out of the
+// provenance, exactly as they are in memory. A ticket saved before this existed simply has no
+// record — nothing about it is invented.
+const TICKET_KEY=game=>'ticket_'+(game||cur);
+const TICKET_MAX_CHARS=250000;
+const COURT_SESSION_MAX=12;
+let courtSessions=Object.create(null);
+let ticketGeneration=0,ticketSaveTimer=0,ticketSaveReady=false;
+function courtSessionsTrim(store){
+  const keys=Object.keys(store);
+  if(keys.length<=COURT_SESSION_MAX)return store;
+  keys.sort((a,b)=>((store[a]&&store[a].at)||0)-((store[b]&&store[b].at)||0));
+  for(const key of keys.slice(0,keys.length-COURT_SESSION_MAX))delete store[key];
+  return store;
+}
+function ticketRowSnapshot(row){
+  const out={m:[...(row.m||[])],b:[...(row.b||[])]};
+  if(row.prov)out.prov=row.prov;
+  if(row.manual)out.manual=1;
+  if(row.provParent)out.provParent=row.provParent;
+  if(Array.isArray(row.provPrev)&&row.provPrev.length)out.provPrev=row.provPrev;
+  return out;
+}
+// Storage is finite and the server's per-persona evidence is by far the biggest part of a saved
+// session. When the record does not fit, the evidence goes first, then the sessions — the rows
+// and their provenance are never dropped, because that is the part that cannot be recomputed.
+function slimEvaluation(evaluation){
+  if(!evaluation||typeof evaluation!=='object')return evaluation;
+  const {metrics,sources,...rest}=evaluation;
+  return rest;
+}
+function slimCourtSessions(store){
+  const out={};
+  for(const [key,value] of Object.entries(store||{})){
+    const copy=JSON.parse(JSON.stringify(value));
+    for(const part of ['jury','defense','models','judge']){
+      const result=copy[part]&&copy[part].result;
+      if(result&&Array.isArray(result.evaluations))result.evaluations=result.evaluations.map(slimEvaluation);
+      if(result&&Array.isArray(result.rows))result.rows=result.rows.map(slimEvaluation);
+    }
+    out[key]=copy;
+  }
+  return out;
+}
+function ticketPayload(){
+  const base={v:1,at:Date.now(),act,rows:rows.map(ticketRowSnapshot)};
+  let text=JSON.stringify({...base,sessions:courtSessions});
+  if(text.length<=TICKET_MAX_CHARS)return text;
+  text=JSON.stringify({...base,sessions:slimCourtSessions(courtSessions)});
+  if(text.length<=TICKET_MAX_CHARS)return text;
+  return JSON.stringify({...base,sessions:{}});
+}
+function scheduleTicketSave(){
+  if(!ticketSaveReady)return;
+  clearTimeout(ticketSaveTimer);
+  const game=cur;
+  ticketSaveTimer=setTimeout(()=>{
+    // A switch to another lottery (or a restore that started meanwhile) invalidates this write:
+    // without the re-check it would save the freshly emptied ticket over the stored one.
+    if(!ticketSaveReady||game!==cur)return;
+    try{storageSet(TICKET_KEY(game),ticketPayload(),true).catch(()=>{});}catch(_e){}
+  },300);
+}
+// Applied only while the ticket is still the empty one selLot() just created: a restore must never
+// overwrite numbers the user has already typed in the moment the read took.
+function ticketIsPristine(){return rows.every(row=>!row||((row.m||[]).length===0&&(row.b||[]).length===0));}
+function restoreTicketRows(stored,l){
+  const out=[];
+  for(const raw of (Array.isArray(stored)?stored:[]).slice(0,MAX_ROWS)){
+    if(!raw||typeof raw!=='object')continue;
+    const row={m:normalizeNumberList(raw.m,l.mB,l.pM),b:normalizeNumberList(raw.b,l.bB,drawBonusCount(l))};
+    const prov=raw.prov?validRowProv({m:row.m,prov:raw.prov},l):null;
+    if(prov)row.prov=prov;
+    if(raw.manual)row.manual=true;
+    if(raw.provParent)row.provParent=String(raw.provParent);
+    if(Array.isArray(raw.provPrev)&&raw.provPrev.length)row.provPrev=raw.provPrev.slice(-PROV_CHAIN_MAX);
+    out.push(row);
+  }
+  return out;
+}
+async function restoreTicket(game){
+  const generation=++ticketGeneration;
+  ticketSaveReady=false;
+  clearTimeout(ticketSaveTimer);
+  courtSessions=Object.create(null);
+  let record=null;
+  try{
+    const stored=await withTimeout(storageGet(TICKET_KEY(game),true));
+    record=stored?JSON.parse(stored.value):null;
+  }catch(_e){record=null;}
+  if(generation!==ticketGeneration||game!==cur){return;}
+  if(record&&record.v===1&&ticketIsPristine()){
+    const l=LOTS[game]||L();
+    const restored=restoreTicketRows(record.rows,l);
+    if(restored.length){
+      rows=restored;
+      act=Number.isInteger(record.act)&&record.act>=0&&record.act<rows.length?record.act:0;
+    }
+    if(record.sessions&&typeof record.sessions==='object')courtSessions=courtSessionsTrim({...record.sessions});
+    renderSim();
+  }
+  ticketSaveReady=true;
+}
+window.addEventListener('pagehide',()=>{
+  // A debounced save can still be pending when the tab goes away.
+  if(!ticketSaveReady)return;
+  clearTimeout(ticketSaveTimer);
+  try{storageSet(TICKET_KEY(cur),ticketPayload(),true).catch(()=>{});}catch(_e){}
+});
+
 // ─── PERSONAL STORAGE (ROI — stays only on this device) ───
 const loadROI=()=>{try{return JSON.parse(localStorage.getItem(ROI_KEY()))||{spent:0,won:0}}catch{return{spent:0,won:0}}};
 const saveROI=o=>localStorage.setItem(ROI_KEY(),JSON.stringify(o));
@@ -1114,6 +1229,7 @@ function selLot(id){
   renderLotteryNav();
   renderHero();
   initRows();renderSim();resetBanner();buildCheckFields();renderFavs();renderWheelBuilder();renderSavedDrawOptions();updateFilterDefaults();
+  restoreTicket(id);
   const nd=nextDraw(id);
   document.getElementById('ndb-sub').textContent=nd.dateStr+' · '+nd.timeLabel;
   document.getElementById('ndb').className='ndb '+L().cls;
@@ -1138,7 +1254,7 @@ const nr=()=>({m:[],b:[]});
 function drawBonusCount(l){return l.pBo||0;} /* БИЛЕТ: сколько доп-чисел ОТМЕЧАЕТ ИГРОК (lotto/superenalotto/lottomax = 0) */
 function drawnBonusCount(l){return l.offBo||l.pBo||0;} /* ТИРАЖ: сколько доп-чисел ВЫТЯГИВАЕТСЯ (tillegg/jolly/bonus) */
 
-function renderSim(){updatePickLabels();renderRows();renderMainGrid();renderBonusCol();renderSimBtns();updateHdr();}
+function renderSim(){updatePickLabels();renderRows();renderMainGrid();renderBonusCol();renderSimBtns();updateHdr();scheduleTicketSave();}
 
 function updatePickLabels(){
   const l=L();
@@ -1483,19 +1599,22 @@ function courtDefenseBadge(prov){
   return'';
 }
 // The number a replaced ball originally was, following a chain of replacements back to the source.
+// A number that was replaced and later reverted resolves back to itself.
 function courtOriginalOf(prov,number){
+  const C=courtCore();
+  if(C&&C.originalNumberOf)return C.originalNumberOf(prov,number);
   let n=number,guard=0;
   for(const event of [...((prov&&prov.events)||[])].reverse()){
     if(event.type==='transformation'&&event.to===n){n=event.from;if(++guard>50)break;}
   }
   return n;
 }
-// Numbers currently in the combination that were brought in by a replacement → that replacement.
+// Numbers currently in the combination that a replacement brought in AND that are not back at
+// their original value → that replacement. A reverted ball is not a change any more.
 function courtChangedNumbers(prov){
   const C=courtCore(),out=new Map();
   if(!C||!prov||prov.unavailable)return out;
-  const current=new Set(C.currentMain(prov));
-  for(const event of prov.events||[])if(event.type==='transformation'&&current.has(event.to))out.set(event.to,event);
+  for(const change of C.changes(prov))out.set(change.number,{type:'transformation',from:change.from,to:change.number,actor:change.actor,at:change.at});
   return out;
 }
 // One-line visible origin under a combination: source · replacements (who) · defense badge.
@@ -1615,12 +1734,20 @@ window.LotoCourtUI=Object.freeze({
   sourceLabel:courtSourceLabel,defenseBadge:courtDefenseBadge,attributionLines:courtAttributionLines,
   rowCaption:courtRowCaption,changedNumbers:courtChangedNumbers,originalOf:courtOriginalOf,
   actorLabel:courtActorLabel,modelName:courtModelName,personaName:courtPersonaName,
+  provLookup:rowProvLookup,reviewStatus:row=>{const C=courtCore();return C?C.reviewStatus(C.provenanceOf(row,courtRulesFor(cur))):null;},
+  // The court's working sessions live in the ticket record, next to the rows they analyse — one
+  // store, so a session can never outlive or drift away from its combination.
+  sessions:Object.freeze({
+    get:key=>(key&&courtSessions[key])||null,
+    set:(key,value)=>{if(!key)return;courtSessions[key]=value;courtSessionsTrim(courtSessions);scheduleTicketSave();},
+    drop:key=>{if(key&&courtSessions[key]){delete courtSessions[key];scheduleTicketSave();}},
+  }),
   provenanceOf:(row,gameId)=>{const C=courtCore();return C?C.provenanceOf(row,courtRulesFor(gameId||cur)):{v:1,sourceType:'SAVED_LEGACY',unavailable:true,events:[]};},
   load:loadCourtApp,
   open:(ctx,options)=>withCourtApp(app=>app.open(ctx,options)),
   openHome:(kind,source)=>withCourtApp(app=>app.openHome(kind,source)),
   openSaved:(favIndex,rowIndex)=>withCourtApp(app=>app.openSaved(favIndex,rowIndex)),
-  openRowHistory:(row,gameId,focus)=>withCourtApp(app=>app.openRowHistory(row,gameId,focus)),
+  openRowHistory:(row,gameId,focus,ctx)=>withCourtApp(app=>app.openRowHistory(row,gameId,focus,ctx)),
   close:()=>{if(window.LotoCourtApp)window.LotoCourtApp.close();},
   revealForResult:()=>{if(window.LotoCourtApp)window.LotoCourtApp.revealForResult();},
   resume:(action,response)=>withCourtApp(app=>app.resume(action,response)),
@@ -1645,8 +1772,10 @@ document.addEventListener('click',event=>{
   else if(kind==='generate')ui.open({kind:'rows',index:rowIndex},{view:'jury',mode:'generate'});
   else if(kind==='model')ui.open({kind:'model',index:rowIndex});
   else if(kind==='saved')ui.openSaved(Number(button.getAttribute('data-fav')),rowIndex);
-  else if(kind==='row-history'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur);}
-  else if(kind==='ball'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur,Number(button.getAttribute('data-n')));}
+  // The ticket row is passed along with its index, so a rollback in the history writes back to
+  // THIS row instead of only describing what happened.
+  else if(kind==='row-history'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur,null,{kind:'rows',index:rowIndex});}
+  else if(kind==='ball'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur,Number(button.getAttribute('data-n')),{kind:'rows',index:rowIndex});}
 });
 
 // ── Combination provenance (court-core.js) ──
@@ -1670,7 +1799,7 @@ function validRowProv(row,l=L()){
 function setRowProvenance(row,source){
   if(!row)return;
   const prov=createRowProv(row,source);
-  delete row.manual;delete row.provParent;
+  delete row.manual;clearProvChain(row);
   if(prov)row.prov=prov;else delete row.prov;
 }
 function attachRowProvenance(list,source){
@@ -1694,14 +1823,29 @@ function provSourceFromOrigin(origin){
 // again it gets a MANUAL_ENTRY record linked to the provenance it was edited from.
 function markRowManual(row){
   if(!row)return;
-  if(row.prov&&row.prov.id)row.provParent=row.prov.id;
+  // The numbers no longer match the recorded provenance, so it stops describing THIS row — but it
+  // is not thrown away: it stays on the row as the parent record, so "Combination history" can
+  // still show where the row came from before the manual edit.
+  if(row.prov&&row.prov.id){
+    row.provParent=row.prov.id;
+    row.provPrev=[...(Array.isArray(row.provPrev)?row.provPrev:[]),row.prov].slice(-PROV_CHAIN_MAX);
+  }
   delete row.prov;row.manual=true;
+}
+const PROV_CHAIN_MAX=4;
+// Parent lookup for a row's lineage: the provenance records the row carried before its edits.
+function rowProvLookup(row){
+  const chain=Array.isArray(row&&row.provPrev)?row.provPrev:[];
+  return id=>chain.find(node=>node&&node.id===id)||null;
 }
 function ensureManualProvenance(row,l=L()){
   if(!row||!row.manual||row.prov||row.m.length!==l.pM||row.b.length!==drawBonusCount(l))return;
   const prov=createRowProv(row,{sourceType:'MANUAL_ENTRY',parentId:row.provParent});
   if(prov)row.prov=prov;
 }
+// setRowProvenance/attachRowProvenance replace the record outright (a new source, not an edit of
+// the old one), so the parent chain is dropped with it.
+function clearProvChain(row){if(row){delete row.provParent;delete row.provPrev;}}
 function renderRowProvenance(){
   const box=document.getElementById('row-prov');if(!box)return;
   const ui=window.LotoCourtUI,l=L(),row=rows[act];
@@ -1712,8 +1856,13 @@ function renderRowProvenance(){
   const label=document.createElement('span');label.className='row-prov-label';
   if(row.m.length===l.pM){
     const prov=ui.provenanceOf(row,cur),badge=ui.defenseBadge(prov);
-    label.textContent=appText(`Ряд ${act+1}`)+(badge?' · '+badge:'');
-    box.append(label,button('🔍 '+appText('Анализ'),'row'),button('🕘 '+appText('История'),'row-history'));
+    // The row says where its review stands, so an already analysed row can be picked up again
+    // instead of looking like a fresh one.
+    const review=ui.reviewStatus?ui.reviewStatus(row):null;
+    const status=review&&review.state==='done'?appText('Разобран')
+      :review&&review.state==='in_progress'?appText(`Разбирается · нерешённых: ${review.pending}`):'';
+    label.textContent=appText(`Ряд ${act+1}`)+(status?' · '+status:'')+(badge?' · '+badge:'');
+    box.append(label,button('🔍 '+appText(review&&review.reviewed?'Рассмотреть снова':'Анализ'),'row'),button('🕘 '+appText('История'),'row-history'));
   }else{
     label.textContent=`${act+1} · ${appText('Ряд не заполнен')}`;
     box.append(label,button('👥 '+appText('Ряды от присяжных'),'generate'));
