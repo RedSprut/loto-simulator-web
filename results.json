@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-09-20",
+  "updatedAt": "2026-09-21",
   "generatedBy": "Lotto Simulator secure public bundle",
   "rulesMode": "recent-free-only",
   "freeRecentDrawsByGame": {
@@ -15,11 +15,11 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-09-20T23:19:46.981Z",
-    "sourceFetchedAt": "2026-09-20T23:19:46.981Z",
+    "generatedAt": "2026-09-21T12:19:07.540Z",
+    "sourceFetchedAt": "2026-09-21T12:19:07.540Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "284b18fd4e1e05a3",
-    "updatedAt": "2026-09-20",
+    "snapshotVersion": "78c1fa453cbe40ae",
+    "updatedAt": "2026-09-21",
     "latestDrawByGame": {
       "lotto": "2026-09-19",
       "vikinglotto": "2026-09-16",
@@ -8808,49 +8808,49 @@
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": 1000000,
+            "prizeAmount": null,
             "winners": 1
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": 10000,
+            "prizeAmount": null,
             "winners": 5
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": 599,
+            "prizeAmount": null,
             "winners": 144
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": 200,
+            "prizeAmount": null,
             "winners": 360
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": 10,
+            "prizeAmount": null,
             "winners": 8049
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": 10,
+            "prizeAmount": null,
             "winners": 7558
           },
           {
             "match": "1+1",
             "label": "1+1",
-            "prizeAmount": 4,
+            "prizeAmount": null,
             "winners": 58945
           },
           {
             "match": "0+1",
             "label": "0+1",
-            "prizeAmount": 2,
+            "prizeAmount": null,
             "winners": 145569
           }
         ],
