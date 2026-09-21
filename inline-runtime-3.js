@@ -434,6 +434,12 @@
       finally{avatarBusy=false;if(busy)busy.classList.remove('on');if(saveBtn)saveBtn.disabled=false;}
     },
     async removeAvatar(){
+      if(avatarBusy)return;
+      // Фото профиля удаляется с сервера безвозвратно, поэтому спрашиваем до, а не после.
+      // Диалог асинхронный, и за время ответа могла начаться загрузка нового фото — отсюда
+      // вторая проверка занятости уже после подтверждения.
+      if(!(await customConfirm('Вы действительно хотите удалить фото профиля?','Удалить',
+        {title:'Удалить фото профиля?',cancelLabel:'Отмена'})))return;
       if(avatarBusy)return;avatarBusy=true;
       const b=$('acc-avatar-busy');if(b)b.hidden=false;msg('acc-avatar-msg','',null);
       try{await window.LotoAuth.removeAvatar();avatarRevision++;profileRequestSeq++;profileCache={...(profileCache||{}),avatarUrl:null,avatarPath:null};setAvatar(null);msg('acc-avatar-msg','Фото профиля удалено.','success');}
@@ -526,12 +532,18 @@
       else if(ov)ov.classList.remove('show');
       if(resolve)resolve(choice);
     },
+    // Кнопка кабинета: сначала подтверждение (тот же диалог, что и в PRO-окне), потом выход.
+    async requestSignOut(){
+      if(!(await window.confirmSignOut()))return false;
+      await AccountUI.signOut();
+      return true;
+    },
     async signOut(){try{await window.LotoCommercial.signOut();avatarRevision++;profileRequestSeq++;setAvatar(null);profileCache=null;loadedUid=null;const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}msg('acc-auth-msg','',null);msg('acc-avatar-msg','',null);msg('acc-data-msg','',null);render();}catch(_e){}},
     async deleteAccount(){
       // Two explicit confirmations before an irreversible deletion. The first spells out exactly
       // what is removed and warns that the store subscription must be cancelled separately.
       const ok1=await customConfirm(
-        appText('Профиль, аватар, сохранённые комбинации и настройки будут удалены без возможности восстановления. Активную подписку нужно отменить отдельно в App Store или Google Play.'),
+        appText('Вы действительно хотите удалить свой аккаунт? Профиль, аватар, сохранённые комбинации и настройки будут удалены без возможности восстановления. Активную подписку нужно отменить отдельно в App Store или Google Play.'),
         appText('Продолжить'),{title:appText('Удаление аккаунта'),cancelLabel:appText('Отмена')});
       if(!ok1)return;
       const ok2=await customConfirm(appText('Это действие необратимо. Удалить аккаунт навсегда?'),

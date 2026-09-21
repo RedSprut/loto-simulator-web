@@ -3033,7 +3033,7 @@ async function openOfficialResults(){
   if(!url)return;
   closeSourceInfo();
   const ok=await customConfirm('Вы переходите на внешний официальный источник опубликованных результатов.','Перейти');
-  if(ok)window.open(url,'_blank','noopener');
+  if(ok)(window.LotoLinks?window.LotoLinks.open(url):window.open(url,'_blank','noopener'));
 }
 
 async function addDraw(){
@@ -4287,6 +4287,16 @@ function ccAnswer(val){
 }
 function ccOut(){}
 window.customConfirm=customConfirm;
+
+// Выход из аккаунта обрывает сессию на всех устройствах этого браузера/приложения, поэтому одно
+// случайное нажатие не должно его выполнять. Обе кнопки выхода (PRO-окно и личный кабинет) идут
+// через ОДИН этот диалог, так что формулировка и поведение одинаковы на Web, iOS и Android.
+// Возвращает true только после явного подтверждения.
+function confirmSignOut(){
+  return customConfirm('Вы действительно хотите выйти из аккаунта?','Выйти',
+    {title:'Выход из аккаунта',cancelLabel:'Отмена'});
+}
+window.confirmSignOut=confirmSignOut;
 
 function showFeedback(title,msg,icon='✅',autoMs=2200,options){
   const ov=document.getElementById('fb-ov');
