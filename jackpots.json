@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-09-21T22:39:50.066Z",
+  "updated": "2026-09-22T00:10:58.683Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-09-19",
       "expectedLastDraw": "2026-09-19",
       "nextDrawDate": "2026-09-26",
-      "updatedAt": "2026-09-21T22:39:50.066Z",
-      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
+      "updatedAt": "2026-09-22T00:10:58.683Z",
+      "sourceUpdatedAt": "2026-09-22T00:10:58.683Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -29,8 +29,8 @@
       "lastDrawDate": "2026-09-16",
       "expectedLastDraw": "2026-09-16",
       "nextDrawDate": "2026-09-23",
-      "updatedAt": "2026-09-21T22:39:50.066Z",
-      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
+      "updatedAt": "2026-09-22T00:10:58.683Z",
+      "sourceUpdatedAt": "2026-09-22T00:10:58.683Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -46,8 +46,8 @@
       "lastDrawDate": "2026-09-18",
       "expectedLastDraw": "2026-09-18",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-21T22:39:50.066Z",
-      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
+      "updatedAt": "2026-09-22T00:10:58.683Z",
+      "sourceUpdatedAt": "2026-09-22T00:10:58.683Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -63,8 +63,8 @@
       "lastDrawDate": "2026-09-19",
       "expectedLastDraw": "2026-09-19",
       "nextDrawDate": "2026-09-21",
-      "updatedAt": "2026-09-21T22:39:50.066Z",
-      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
+      "updatedAt": "2026-09-22T00:10:58.683Z",
+      "sourceUpdatedAt": "2026-09-22T00:10:58.683Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -80,8 +80,8 @@
       "lastDrawDate": "2026-09-18",
       "expectedLastDraw": "2026-09-18",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-21T22:39:50.066Z",
-      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
+      "updatedAt": "2026-09-22T00:10:58.683Z",
+      "sourceUpdatedAt": "2026-09-22T00:10:58.683Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -97,8 +97,8 @@
       "lastDrawDate": "2026-09-18",
       "expectedLastDraw": "2026-09-18",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-21T22:39:50.066Z",
-      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
+      "updatedAt": "2026-09-22T00:10:58.683Z",
+      "sourceUpdatedAt": "2026-09-22T00:10:58.683Z",
       "sourceNextDraw": "2026-09-22",
       "status": "fresh",
       "synced": true,
@@ -114,8 +114,8 @@
       "lastDrawDate": "2026-09-19",
       "expectedLastDraw": "2026-09-19",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-21T22:39:50.066Z",
-      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
+      "updatedAt": "2026-09-22T00:10:58.683Z",
+      "sourceUpdatedAt": "2026-09-22T00:10:58.683Z",
       "sourceNextDraw": "2026-09-22",
       "status": "fresh",
       "synced": true,
@@ -127,43 +127,42 @@
           "source": "superenalotto.it risultati",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-19-settembre-2026",
-          "error": "fetch failed"
+          "error": "HTTP 403"
         },
         {
           "source": "superenalotto.it",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/",
-          "error": "fetch failed"
+          "error": "HTTP 403"
         },
         {
           "source": "superenalotto.it estrazioni",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/estrazioni",
-          "error": "fetch failed"
+          "error": "HTTP 403"
         },
         {
           "source": "superenalotto.it archivio estrazioni",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/archivio-estrazioni/2026/settembre",
-          "error": "fetch failed"
+          "error": "HTTP 403"
         },
         {
           "source": "superenalotto.it bollettini ufficiali",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/archivio-estrazioni/bollettini",
-          "error": "fetch failed"
+          "error": "HTTP 403"
         },
         {
           "source": "superenalotto.it news",
           "ok": false,
           "sourceUrl": "https://www.superenalotto.it/news/risultati",
-          "error": "fetch failed"
+          "error": "HTTP 403"
         },
         {
           "source": "superenalotto.net",
           "ok": false,
-          "sourceUrl": "https://www.superenalotto.net/",
-          "error": "fetch failed"
+          "sourceUrl": "https://www.superenalotto.net/"
         },
         {
           "source": "sisal.it ultima estrazione",
@@ -200,8 +199,8 @@
       "lastDrawDate": "2026-09-18",
       "expectedLastDraw": "2026-09-18",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-21T22:39:50.066Z",
-      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
+      "updatedAt": "2026-09-22T00:10:58.683Z",
+      "sourceUpdatedAt": "2026-09-22T00:10:58.683Z",
       "sourceNextDraw": "2026-09-22",
       "status": "fresh",
       "synced": true,
@@ -230,8 +229,8 @@
       "lastDrawDate": "2026-09-17",
       "expectedLastDraw": "2026-09-17",
       "nextDrawDate": "2026-09-24",
-      "updatedAt": "2026-09-21T22:39:50.066Z",
-      "sourceUpdatedAt": "2026-09-21T22:39:50.066Z",
+      "updatedAt": "2026-09-22T00:10:58.683Z",
+      "sourceUpdatedAt": "2026-09-22T00:10:58.683Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
