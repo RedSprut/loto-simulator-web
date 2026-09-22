@@ -41,7 +41,8 @@
   // dirty; the actual request is coalesced into one call per REFRESH_DEBOUNCE_MS window.
   var REFRESH_DEBOUNCE_MS = 4000;
 
-  var state = { unread: 0, rows: [], prefs: null, open: false, filter: 'all', unreadOnly: false, view: 'list', busy: false, error: null, lastSync: null, more: true };
+  var state = { unread: 0, rows: [], prefs: null, open: false, filter: 'all', unreadOnly: false, view: 'list', busy: false, error: null, lastSync: null, more: true,
+    ownerTest: null, ownerTestLink: '', ownerTestNote: '' };
   var panel = null, pollTimer = null, wired = false;
   var running = false, refreshTimer = null, refreshPending = false, refreshInFlight = false;
 
@@ -106,7 +107,12 @@
       '#ow-ov[data-ow-theme="dark"] #own-center .own-chip{background:#12223a;border-color:#22405f}',
       '#own-center .own-chip[aria-pressed="true"]{background:#1d4ed8;border-color:#1d4ed8;color:#fff}',
       '#own-center .own-body{flex:1;overflow:auto;padding:10px 14px 24px}',
-      '#own-center .own-card{display:grid;grid-template-columns:34px 1fr auto;gap:10px;padding:10px 12px;border-radius:14px;border:1px solid #bcd7f2;background:#fff;margin-bottom:8px;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}',
+      // The ✓ / ↺ circle is ABSOLUTE in the card's top-right corner and the card reserves its lane
+      // with padding-right, so no title, body or meta length and no viewport width can push it out
+      // of place or clip it. The text column is min-width:0 and breaks long words instead of
+      // widening the card.
+      '#own-center .own-card{position:relative;display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;padding:10px 46px 10px 12px;border-radius:14px;border:1px solid #bcd7f2;background:#fff;margin-bottom:8px;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%;box-sizing:border-box}',
+      '#own-center .own-card .own-main{min-width:0;overflow-wrap:anywhere;word-break:break-word}',
       '#ow-ov[data-ow-theme="dark"] #own-center .own-card{background:#12223a;border-color:#22405f}',
       '#own-center .own-card.unread{border-color:#4f8ff7;box-shadow:inset 3px 0 0 #4f8ff7}',
       '#own-center .own-card .own-ico{font-size:22px;line-height:1.2;text-align:center}',
@@ -118,7 +124,7 @@
       '#own-center .own-sev{display:inline-block;padding:0 6px;border-radius:999px;font-size:10px;font-weight:800;background:#e3effc}',
       '#ow-ov[data-ow-theme="dark"] #own-center .own-sev{background:#183050}',
       '#own-center .own-sev-critical{color:#c62a5a}#own-center .own-sev-important{color:#a8730b}',
-      '#own-center .own-mark{align-self:start;width:28px;height:28px;border-radius:50%;border:1px solid #bcd7f2;background:transparent;color:inherit;cursor:pointer;font-size:13px}',
+      '#own-center .own-mark{position:absolute;top:10px;right:10px;width:28px;height:28px;flex:none;box-sizing:border-box;padding:0;border-radius:50%;border:1px solid #bcd7f2;background:transparent;color:inherit;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;user-select:none}',
       '#own-center .own-empty{color:#3f6690;text-align:center;padding:24px 10px}',
       '#own-center .own-err{background:rgba(242,120,154,.14);border:1px solid #c62a5a;border-radius:12px;padding:10px;margin:8px 0}',
       '#own-center .own-sec{background:#fff;border:1px solid #bcd7f2;border-radius:14px;padding:12px;margin-bottom:10px}',
@@ -300,7 +306,7 @@
       var t = event.target;
       if (t.closest('#own-close')) { close(); return; }
       if (t.closest('#own-readall')) { markAll(); return; }
-      if (t.closest('#own-view')) { state.view = state.view === 'list' ? 'settings' : 'list'; if (state.view === 'settings' && !state.prefs) loadPrefs(); render(); return; }
+      if (t.closest('#own-view')) { state.view = state.view === 'list' ? 'settings' : 'list'; if (state.view === 'settings') { if (!state.prefs) loadPrefs(); if (!state.ownerTest) loadOwnerTest(); } render(); return; }
       var chip = t.closest('.own-chip[data-filter]');
       if (chip) { var f = chip.getAttribute('data-filter'); if (f === '__unread') state.unreadOnly = !state.unreadOnly; else state.filter = f; loadList(false); return; }
       var mark = t.closest('.own-mark[data-id]');
@@ -311,6 +317,9 @@
       if (card) { var cid = card.getAttribute('data-id'); var crow = state.rows.filter(function (r) { return r.id === cid; })[0]; if (crow && !crow.read) markRead([cid], true); openLink(crow && crow.deep_link); return; }
       var test = t.closest('#own-test');
       if (test) { testPush(); return; }
+      if (t.closest('#own-test-issue')) { issueOwnerTestCode(); return; }
+      var forget = t.closest('[data-own-forget]');
+      if (forget) { forgetOwnerTest(forget.getAttribute('data-own-forget')); return; }
       var modeLabel = t.closest('.own-mode label[data-mode]');
       if (modeLabel && state.prefs) { savePrefs({ mode: modeLabel.getAttribute('data-mode') }); return; }
     });
@@ -351,7 +360,7 @@
       if (data.platform) meta.push({ web: 'Веб', ios: 'iOS', android: 'Android' }[data.platform] || data.platform);
       return '<button class="own-card' + (row.read ? '' : ' unread') + '" type="button" data-id="' + esc(row.id) + '" title="Открыть панель владельца: ' + esc(row.deep_link || '') + '">' +
         '<span class="own-ico" aria-hidden="true">' + esc(catIcon(row.category)) + '</span>' +
-        '<span><h4>' + esc(row.title || catLabel(row.category)) + '</h4><p>' + esc(prettyBody(row)) + '</p>' +
+        '<span class="own-main"><h4>' + esc(row.title || catLabel(row.category)) + '</h4><p>' + esc(prettyBody(row)) + '</p>' +
           '<span class="own-meta">' + meta.map(esc).join(' · ') + ' <span class="own-sev own-sev-' + esc(row.severity) + '">' + esc((LIB.SEVERITY_RU && LIB.SEVERITY_RU[row.severity]) || row.severity || '') + '</span>' + (row.day ? ' · ' + esc(row.day) : '') + '</span></span>' +
         '<span class="own-mark" role="button" tabindex="0" data-id="' + esc(row.id) + '" aria-label="' + (row.read ? 'Отметить непрочитанным' : 'Отметить прочитанным') + '">' + (row.read ? '↺' : '✓') + '</span></button>';
     }).join('');
@@ -360,6 +369,53 @@
     if (state.lastSync) html += '<div class="own-note" style="text-align:center">Обновлено ' + esc(when(state.lastSync)) + ' · Europe/Oslo</div>';
     body.innerHTML = html;
   }
+  // ── owner / self-test installations ────────────────────────────────────────────────────────
+  // The owner's own guest browsers and devices. Claiming one takes the owner's own account (the
+  // code is minted behind public.is_owner) and one visit to the link in that browser.
+  async function loadOwnerTest() {
+    try { state.ownerTest = await api({ owner_test: { op: 'list' } }); }
+    catch (e) { state.ownerTest = { installs: [], error: (e && e.message) || 'ошибка' }; }
+    render();
+  }
+  async function issueOwnerTestCode() {
+    state.busy = true; state.ownerTestNote = ''; render();
+    try {
+      var out = await api({ owner_test: { op: 'issue' } });
+      var code = (out && out.issued && out.issued.code) || '';
+      state.ownerTestLink = code ? (location.origin + location.pathname + '#owner-test=' + code) : '';
+      state.ownerTestNote = code ? 'Ссылка действует 30 минут и срабатывает один раз.' : 'Не удалось получить код.';
+      try { if (navigator.clipboard && state.ownerTestLink) await navigator.clipboard.writeText(state.ownerTestLink); } catch (e) {}
+    } catch (e) { state.ownerTestNote = 'Не удалось получить код: ' + ((e && e.message) || 'ошибка'); }
+    state.busy = false; render();
+  }
+  async function forgetOwnerTest(id) {
+    try { await api({ owner_test: { op: 'forget', install_id: id } }); } catch (e) {}
+    try { if (W.LotoTelemetry && W.LotoTelemetry.isOwnerTest && W.LotoTelemetry.isOwnerTest() && id === '__self') W.LotoTelemetry.forgetOwnerTest(); } catch (e) {}
+    loadOwnerTest();
+  }
+  function renderOwnerTest() {
+    var t = state.ownerTest;
+    var mine = false;
+    try { mine = !!(W.LotoTelemetry && W.LotoTelemetry.isOwnerTest && W.LotoTelemetry.isOwnerTest()); } catch (e) {}
+    var list = (t && Array.isArray(t.installs)) ? t.installs : [];
+    return '<div class="own-sec"><h3>Мои браузеры и устройства для проверки</h3>' +
+      '<div class="own-note">Этот браузер: <b>' + (mine ? 'помечен как тестовый' : 'обычный посетитель') + '</b>. ' +
+      'Пока браузер не помечен, каждое открытие сайта в нём считается человеком: приходит «Новый / Вернувшийся пользователь» и он попадает в статистику. ' +
+      'Помеченный браузер не создаёт уведомлений и не входит в реальные показатели — он учитывается отдельно, как внутренний трафик. ' +
+      'Метка привязана к установке (браузеру или приложению), а не к человеку, и не даёт никакого доступа.</div>' +
+      '<button class="own-btn" type="button" id="own-test-issue"' + (state.busy ? ' disabled' : '') + '>Получить ссылку для другого браузера</button>' +
+      (state.ownerTestLink ? '<div class="own-note"><code id="own-test-link">' + esc(state.ownerTestLink) + '</code><br>Откройте эту ссылку один раз в том браузере или на том устройстве, которое хотите пометить.</div>' : '') +
+      (state.ownerTestNote ? '<div class="own-note">' + esc(state.ownerTestNote) + '</div>' : '') +
+      (list.length
+        ? '<table class="own-t"><thead><tr><th>Установка</th><th>Последний раз</th><th class="c"></th></tr></thead><tbody>' +
+          list.map(function (i) {
+            return '<tr><td><code>' + esc(String(i.install_id || '').slice(0, 8)) + '</code></td><td>' + esc(when(i.last_seen_at)) + '</td>' +
+              '<td class="c"><button class="own-btn" type="button" data-own-forget="' + esc(i.install_id) + '">Убрать</button></td></tr>';
+          }).join('') + '</tbody></table>'
+        : '<div class="own-note">Помеченных установок пока нет.</div>') +
+      '</div>';
+  }
+
   function renderSettings() {
     var body = panel.querySelector('#own-body');
     var p = state.prefs;
@@ -385,6 +441,7 @@
           '<td class="c"><input type="checkbox" data-cat="' + esc(c) + '" data-channel="push"' + (cur.push !== false ? ' checked' : '') + ' aria-label="Push: ' + esc(catLabel(c)) + '"></td></tr>';
       }).join('') + '</tbody></table>' +
       '<div class="own-note">Переключатели категорий действуют в любом режиме; режим дополнительно фильтрует push по важности. «Только важное» — важные и критичные; «Дайджест» — итоги дня и критичные сбои.</div></div>' +
+      renderOwnerTest() +
       '<div class="own-sec"><h3>Проверка</h3><button class="own-btn" type="button" id="own-test"' + (state.busy ? ' disabled' : '') + '>Отправить тестовое уведомление</button>' +
       (state.testResult ? '<div class="own-note">' + esc(state.testResult) + '</div>' : '') +
       '<div class="own-note">Настройки, прочитанное и счётчик синхронизируются между всеми устройствами, где вы вошли как владелец. Push не содержит e-mail, IP, идентификаторов устройств и аккаунтов.</div></div>';
