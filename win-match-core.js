@@ -136,14 +136,35 @@
   }
 
   // ── matching (false-positive guards) ──
-  function eligibleForDraw(entry, draw) {
+  // A row was "live" for a draw when it already existed before that draw closed, measured on the
+  // game's own clock exactly like nextDrawDate (same tz, same cut-off), so the two can never
+  // disagree about which side of a draw a row was created on.
+  function rowWasLiveBefore(entry, draw, schedule) {
+    if (!schedule || !schedule.tz || !entry || !Number.isFinite(entry.createdAt)) return false;
+    const created = partsInTz(new Date(entry.createdAt), schedule.tz);
+    if (created.ymd < draw.date) return true;
+    return created.ymd === draw.date && (!schedule.time || created.hm < schedule.time);
+  }
+  function eligibleForDraw(entry, draw, schedule) {
     if (!entry || !draw) return false;
     if (entry.gameId !== draw.gameId) return false;          // wrong game never matches
     if (!entry.targetDrawDate) return false;                 // must be associated with a draw
-    if (entry.targetDrawDate !== draw.date) return false;    // ONLY the exact associated draw (no stale/retroactive)
-    if (entry.targetDrawId != null && draw.drawId != null && String(entry.targetDrawId) !== String(draw.drawId)) return false;
-    if (entry.lastMatchedDrawDate === draw.date) return false; // already processed → no repeat
-    return true;
+    // One row belongs to ONE draw: once it has been processed against a draw it is spent, and a
+    // later draw can never pick it up again.
+    if (entry.lastMatchedDrawDate) return false;
+    if (entry.targetDrawDate === draw.date) {
+      if (entry.targetDrawId != null && draw.drawId != null && String(entry.targetDrawId) !== String(draw.drawId)) return false;
+      return true;
+    }
+    // OFF-SCHEDULE OFFICIAL DRAW. targetDrawDate is the next date of the game's regular weekly
+    // schedule, but some operators add draws outside it: SuperEnalotto holds public-holiday
+    // Monday draws (17 since 2024) and Lotto Max moved 2025-01-01 to 2025-01-02. Such a draw
+    // lands BEFORE the scheduled date the row was aimed at, so under a strict date equality the
+    // row was silently never checked and a real win produced no notification. The row was
+    // already live when that draw closed, so it is the draw the row actually belongs to.
+    // Strictly one-directional: a draw AFTER the target, or one that closed before the row was
+    // created, still never matches — there are no retroactive wins.
+    return draw.date < entry.targetDrawDate && rowWasLiveBefore(entry, draw, schedule);
   }
   function matchEntry(entry, draw, gameRule, checkPrizeFn) {
     if (!Array.isArray(draw.main) || !draw.main.length) return null;
@@ -169,11 +190,15 @@
       notifiedAt: null,
     };
   }
-  // Scans one official draw against history; MUTATES entries' lastMatchedDrawDate (dedup) and returns new matches.
-  function scanDrawAgainstHistory(store, draw, gameRule, checkPrizeFn) {
+  // Scans one official draw against history; MUTATES entries' lastMatchedDrawDate (dedup) and
+  // returns new matches. `schedule` ({days,tz,time}, the same object nextDrawDate takes) lets an
+  // off-schedule official draw reach the rows that were live for it; without it the behaviour is
+  // exactly the strict target-date match. Draws must be fed oldest-first, so the earliest draw a
+  // row was live for claims it.
+  function scanDrawAgainstHistory(store, draw, gameRule, checkPrizeFn, schedule) {
     const matches = [];
     for (const e of (store || [])) {
-      if (!eligibleForDraw(e, draw)) continue;
+      if (!eligibleForDraw(e, draw, schedule)) continue;
       const m = matchEntry(e, draw, gameRule, checkPrizeFn);
       e.lastMatchedDrawDate = draw.date; // processed regardless of prize → no repeat scans
       if (m) matches.push(m);

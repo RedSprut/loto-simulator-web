@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the 29898b8 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 9cf71c0 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-auto-20260922-tlqolg';
+const CACHE_VERSION='loto-shell-v9cf71c0';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -19,7 +19,7 @@ const CORE_PRECACHE=[
 // screen wait until loadCourtApp() gave up after 20s.
 
 const OPTIONAL_PRECACHE=[
-  './win-match-core.js','./court-core.js','./court-ui.js',
+  './win-match-core.js','./court-core.js','./court-ui.js','./calendar-core.js','./calendar-ui.js',
   './safe-payment.html','./safe-payment-runtime.js','./auth-client.js','./native-bridge.js','./billing-web.js',
   './privacy.html','./terms.html','./subscription-terms.html','./legal.css','./legal-runtime.js',
   './jackpots.json','./prizes.json',

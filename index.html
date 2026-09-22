@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="29898b8" data-build-ts="2026-09-21T17:58:58.046Z">
+<html lang="en" data-build="9cf71c0" data-build-ts="2026-09-22T02:54:23.802Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=29898b8"></script>
+<script src="./boot-runtime.js?v=9cf71c0"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=29898b8">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=9cf71c0">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=29898b8">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=9cf71c0">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -1659,6 +1659,99 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
     .lot-tabs,.sched-strip,.horo-signs{scrollbar-width:none!important}
   }
 }
+/* ═══ Календарный анализ (calendar-ui.js) ═══ */
+/* Mobile-first: one column that never scrolls sideways (every grid is minmax(0,1fr) and every
+   ball row wraps), widening to two columns from 700px. Colours are the app's own tokens only —
+   this screen introduces no new palette, and both themes come out of the same variables. */
+.calan-pro-badge{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.3px;background:rgba(233,180,76,.18);color:var(--gold);border:1px solid rgba(233,180,76,.5);vertical-align:middle}
+/* The title bar is the sheet's own scroller header: it sticks at the top and spans the full
+   sheet width (negative gutters), so a long draw list can never scroll visibly behind the ✕ —
+   the defect the court sheet solves the same way with its stage band. */
+.calan-ov .calan-sheet{position:relative;padding-top:0;--calan-gutter:16px}
+@media(min-width:700px){.calan-ov .calan-sheet{--calan-gutter:24px}}
+.calan-topbar{position:sticky;top:0;z-index:6;display:flex;align-items:flex-start;gap:10px;
+  margin:0 calc(var(--calan-gutter)*-1) 4px;padding:12px var(--calan-gutter) 10px;
+  background:var(--modal-bg);border-bottom:1px solid var(--border)}
+.calan-head{flex:1 1 auto;min-width:0}
+.calan-x{flex:0 0 auto}
+.calan-title{font-family:'Unbounded',sans-serif;font-size:19px;font-weight:900;margin:0;line-height:1.25;background:none;border:0;padding:0}
+.calan-title:focus{outline:none}
+.calan-sub{font-size:13px;font-weight:700;color:var(--sub2);margin-top:4px;overflow-wrap:anywhere}
+.calan-h3{font-family:'Unbounded',sans-serif;font-size:15px;font-weight:800;margin:22px 0 10px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.calan-h4{font-size:12px;font-weight:800;margin:0 0 8px;color:var(--sub2);text-transform:uppercase;letter-spacing:.04em}
+.calan-dim{font-size:12px;font-weight:700;color:var(--sub2)}
+.calan-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:12px;margin:10px 0;min-width:0}
+.calan-note{font-size:12.5px;line-height:1.55;color:var(--sub2);margin:8px 0}
+.calan-note-top{margin:10px 0 0}
+.calan-note-warn{background:rgba(233,180,76,.14);border:1px solid rgba(233,180,76,.42);border-radius:12px;padding:10px 12px;color:var(--fg)}
+.calan-note-final{margin:20px 0 4px;padding:12px;border:1px dashed var(--border);border-radius:14px}
+.calan-empty{font-size:12.5px;color:var(--sub2);padding:6px 0}
+.calan-empty-big{text-align:center;font-size:13.5px;padding:22px 14px}
+.calan-loading{text-align:center;font-size:30px;padding:60px 0;color:var(--sub2)}
+.calan-loading div{font-size:13.5px;font-weight:700;margin-top:10px}
+/* PRO band: the FREE preview says exactly what it is showing and what PRO adds. */
+.calan-pro-band{margin:12px 0 4px;padding:14px;border-radius:16px;border:1px solid rgba(233,180,76,.5);background:rgba(233,180,76,.12)}
+.calan-pro-h{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:800}
+.calan-pro-btn{margin-top:10px}
+/* Filters */
+.calan-filters{margin:14px 0 6px;display:grid;gap:10px}
+.calan-presets{display:flex;flex-wrap:wrap;gap:6px}
+.calan-preset{min-height:40px;padding:8px 12px;border-radius:999px;border:1.5px solid var(--border);background:var(--bg3);color:var(--fg);font:700 12.5px 'Manrope',sans-serif;cursor:pointer}
+.calan-preset.on{border-color:var(--gold);background:var(--sg-algo-sel-bg,rgba(233,180,76,.2))}
+.calan-preset:focus-visible,.calan-x:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.calan-selects,.calan-range{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.calan-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.calan-field>span{font-size:11.5px;font-weight:800;color:var(--sub2)}
+.calan-field-wide{grid-column:1/-1}
+.calan-hidden{display:none}
+/* Summary tiles */
+.calan-summary{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:12px 0}
+.calan-summary-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.calan-sum{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:10px;min-width:0}
+.calan-sum b{display:block;font-family:'Unbounded',sans-serif;font-size:15px;font-weight:900;overflow-wrap:anywhere}
+.calan-sum span{display:block;font-size:11.5px;color:var(--sub2);margin-top:3px;line-height:1.35}
+.calan-duo{display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+/* Frequency bars */
+.calan-bar-row{display:flex;align-items:center;gap:8px;margin:5px 0;min-width:0}
+.calan-bar{flex:1 1 auto;min-width:0;height:10px;border-radius:999px;background:var(--bg3);overflow:hidden}
+.calan-bar-fill{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),#F5CE7B)}
+.calan-bar-n{flex:0 0 auto;font-size:12.5px;font-weight:800;min-width:30px;text-align:right}
+.calan-chips{display:flex;flex-wrap:wrap;gap:8px}
+.calan-chip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:800;color:var(--sub2)}
+.calan-chip b{font-size:11.5px;font-weight:800;color:var(--fg);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:1px 6px}
+.calan-list{display:grid;gap:8px}
+.calan-li{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px}
+.calan-ball{flex:0 0 auto}
+/* Calendar matches */
+.calan-matches{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.calan-match-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:12px;min-width:0}
+.calan-match-off{opacity:.78}
+.calan-match-h{font-size:13.5px;font-weight:800;margin-bottom:6px}
+.calan-match-big{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:900;line-height:1.1}
+.calan-match-pct{font-size:13px;font-weight:800;color:var(--gold);margin-top:2px}
+/* Matched balls + legend. Each rule has its own ring colour, and the legend spells it out. */
+.calan-ball-hit{box-shadow:0 0 0 3px var(--calan-hit,var(--gold))}
+.calan-hit-day{--calan-hit:#34c759}
+.calan-hit-month{--calan-hit:#e9b44c}
+.calan-hit-year{--calan-hit:#a078ff}
+.calan-hit-time{--calan-hit:#3aa0ff}
+.calan-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.calan-tag{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;border:1px solid var(--calan-hit,var(--border));color:var(--fg);background:var(--bg3)}
+/* Draw list */
+.calan-draws{display:grid;gap:8px}
+.calan-draw{border:1px solid var(--border);border-radius:14px;padding:10px;background:var(--bg2);min-width:0}
+.calan-draw-hit{border-color:rgba(233,180,76,.55)}
+.calan-draw-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px;margin-bottom:6px}
+.calan-draw-balls{display:flex;flex-wrap:wrap;align-items:center;gap:5px}
+.calan-draw-balls .mb{width:34px;height:34px;font-size:13px}
+.calan-draw-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.calan-sep{opacity:.45;font-size:12px;padding:0 2px}
+@media(min-width:700px){
+  .calan-duo{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+  .calan-matches{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .calan-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .calan-selects{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
 /* ═══ Analytical court: jury · defense counsel · judge · models (court-ui.js) ═══ */
 /* The court sheet is the scroller for a sticky section header (.ct-stage), so it must not keep a
    top padding of its own: sticky top:0 resolves against the content box, and any top padding
@@ -1668,7 +1761,9 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 .ct-ov .ct-sheet{position:relative;padding-top:0;--ct-gutter:16px}
 @media(min-width:700px){.ct-ov .ct-sheet{--ct-gutter:24px}}
 .ct-ov .ct-head{margin-top:10px}
-.ct-x{width:44px;height:44px;min-width:44px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+/* .calan-x (Календарный анализ) shares the look, but never the .ct-x class: the court's own
+   close control is addressed as document.querySelector('.ct-x'). */
+.ct-x,.calan-x{width:44px;height:44px;min-width:44px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg2);color:var(--fg);font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 /* The sheet no longer has a top padding, so the ✕ carries its own inset: margin at rest, the
    matching sticky inset while scrolling. It floats above the analysed-row band (z-index), which
    reserves room for it on the right. The negative bottom margin keeps it out of the flow. */
@@ -2153,6 +2248,10 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
         <div class="ndb-l"><div class="ndb-title">🛡 Адвокаты защиты</div><div class="ndb-sub">Назначенный адвокат — бесплатно</div></div>
       </button>
     </div>
+    <button type="button" class="ndb euro" id="calan-btn" data-calan-open>
+      <div class="ndb-l"><div class="ndb-title">📅 Календарный анализ <span class="calan-pro-badge">PRO</span></div><div class="ndb-sub">Тиражи по месяцам и годам · частоты · календарные совпадения</div></div>
+      <div style="font-size:20px">→</div>
+    </button>
     <button class="ndb euro" id="wheel-btn" data-loto-event-click="GENN_open('wheel')">
       <div class="ndb-l"><div class="ndb-title">Колесная матрица</div><div class="ndb-sub" id="wheel-sub">10 рядов · покрытие пар</div></div>
       <div style="font-size:20px">⠿</div>
@@ -2814,6 +2913,20 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <button type="button" class="btn-exp wide" data-mres-judge>Получить вердикт Верховного судьи</button>
     </div>
     <div class="if-note" style="margin-top:14px">Ряды сгенерированы математической моделью. Это математическое моделирование, а не прогноз и не гарантия — вероятность каждого тиража одинакова для любой комбинации.</div>
+  </div>
+</div>
+
+<!-- КАЛЕНДАРНЫЙ АНАЛИЗ: месяц/год/диапазон · частоты · календарные совпадения (calendar-ui.js) -->
+<div class="if-ov calan-ov" id="calan-ov" role="dialog" aria-modal="true" aria-labelledby="calan-title">
+  <div class="if-sheet calan-sheet">
+    <div class="calan-topbar">
+      <div class="calan-head">
+        <h2 class="calan-title" id="calan-title" tabindex="-1">📅 Календарный анализ</h2>
+        <div class="calan-sub" id="calan-sub" data-i18n-ignore></div>
+      </div>
+      <button type="button" class="calan-x" data-calan-close aria-label="Закрыть">✕</button>
+    </div>
+    <div id="calan-body"></div>
   </div>
 </div>
 
@@ -3481,23 +3594,23 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=29898b8"></script>
-<script src="./commercial-config.js?v=29898b8"></script>
-<script src="./event-runtime.js?v=29898b8"></script>
-<script src="./external-link-runtime.js?v=29898b8"></script>
-<script src="./auth-client.js?v=29898b8"></script>
-<script src="./native-loader.js?v=29898b8"></script>
-<script src="./i18n-catalog.js?v=29898b8"></script>
-<script src="./lang-detect.js?v=29898b8"></script>
-<script src="./i18n-runtime.js?v=29898b8"></script>
-<script src="./consent-runtime.js?v=29898b8"></script>
-<script src="./analytics-telemetry.js?v=29898b8"></script>
-<script src="./win-match-core.js?v=29898b8"></script>
-<script src="./court-core.js?v=29898b8"></script>
-<script src="./app-runtime.js?v=29898b8"></script>
-<script src="./inline-runtime-2.js?v=29898b8"></script>
-<script src="./commercial-runtime.js?v=29898b8"></script>
-<script src="./inline-runtime-3.js?v=29898b8"></script>
+<script src="./version.js?v=9cf71c0"></script>
+<script src="./commercial-config.js?v=9cf71c0"></script>
+<script src="./event-runtime.js?v=9cf71c0"></script>
+<script src="./external-link-runtime.js?v=9cf71c0"></script>
+<script src="./auth-client.js?v=9cf71c0"></script>
+<script src="./native-loader.js?v=9cf71c0"></script>
+<script src="./i18n-catalog.js?v=9cf71c0"></script>
+<script src="./lang-detect.js?v=9cf71c0"></script>
+<script src="./i18n-runtime.js?v=9cf71c0"></script>
+<script src="./consent-runtime.js?v=9cf71c0"></script>
+<script src="./analytics-telemetry.js?v=9cf71c0"></script>
+<script src="./win-match-core.js?v=9cf71c0"></script>
+<script src="./court-core.js?v=9cf71c0"></script>
+<script src="./app-runtime.js?v=9cf71c0"></script>
+<script src="./inline-runtime-2.js?v=9cf71c0"></script>
+<script src="./commercial-runtime.js?v=9cf71c0"></script>
+<script src="./inline-runtime-3.js?v=9cf71c0"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3646,9 +3759,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=29898b8"></script>
-<script src="./notifications-runtime.js?v=29898b8"></script>
-<script src="./pwa-runtime.js?v=29898b8"></script>
+<script src="./notification-center.js?v=9cf71c0"></script>
+<script src="./notifications-runtime.js?v=9cf71c0"></script>
+<script src="./pwa-runtime.js?v=9cf71c0"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3659,8 +3772,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=29898b8"></script>
-<script src="./inline-runtime-5.js?v=29898b8"></script>
-<script src="./inline-runtime-6.js?v=29898b8"></script>
+<script src="./inline-runtime-4.js?v=9cf71c0"></script>
+<script src="./inline-runtime-5.js?v=9cf71c0"></script>
+<script src="./inline-runtime-6.js?v=9cf71c0"></script>
 </body>
 </html>

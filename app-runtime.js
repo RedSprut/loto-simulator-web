@@ -115,6 +115,10 @@ function normalizeResultDraw(draw){
     sourceUrl:draw.sourceUrl||'',
     isUserOwned:draw.isUserOwned===true||!String(draw.source||'').trim(),
     drawId:draw.drawId??null,
+    // The operator's own draw label ("LOTTO-19.09.2026 18:30") is the ONLY trustworthy source of
+    // a real draw TIME, and it genuinely changes when the operator moves the draw. Calendar
+    // Analysis reads the time from here; games whose feed has no time simply never get one.
+    drawName:draw.drawName||'',
     ruleVersion:draw.ruleVersion||'',
     ruleEra:draw.ruleEra||'',
     extraGroups:Array.isArray(draw.extraGroups)?draw.extraGroups.map(group=>({
@@ -1776,6 +1780,36 @@ document.addEventListener('click',event=>{
   // THIS row instead of only describing what happened.
   else if(kind==='row-history'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur,null,{kind:'rows',index:rowIndex});}
   else if(kind==='ball'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur,Number(button.getAttribute('data-n')),{kind:'rows',index:rowIndex});}
+});
+
+// ── Календарный анализ (calendar-core.js + calendar-ui.js) ──
+// A PRO screen with its own full-page overlay. Both files load ONLY on the first tap of the home
+// card, so they add nothing to the startup payload; the analysis runs over the draws the existing
+// archive pipeline already serves (loadFullHistory / loadD) — there is no second data source.
+let calendarAppPromise=null;
+function loadCalendarApp(){
+  if(window.LotoCalendarApp)return Promise.resolve(window.LotoCalendarApp);
+  if(!calendarAppPromise){
+    calendarAppPromise=(window.LotoCalendarCore?Promise.resolve():loadRuntimeScript('calendar-core.js'))
+      .then(()=>(window.LotoCalendarApp?null:loadRuntimeScript('calendar-ui.js')))
+      .then(()=>{if(!window.LotoCalendarApp)throw new Error('calendar_ui_missing');return window.LotoCalendarApp;})
+      .catch(error=>{calendarAppPromise=null;throw error;});
+  }
+  return calendarAppPromise;
+}
+window.LotoCalendar=Object.freeze({
+  load:loadCalendarApp,
+  open:async function(){
+    try{const app=await loadCalendarApp();return app.open();}
+    catch(_error){showFeedback('Календарный анализ недоступен','Не удалось загрузить экран анализа. Проверьте подключение и попробуйте ещё раз.','⚠️',0);return null;}
+  },
+  close:()=>{if(window.LotoCalendarApp)window.LotoCalendarApp.close();},
+});
+document.addEventListener('click',event=>{
+  const button=event.target&&event.target.closest&&event.target.closest('[data-calan-open]');
+  if(!button)return;
+  event.preventDefault();
+  window.LotoCalendar.open();
 });
 
 // ── Combination provenance (court-core.js) ──
@@ -5632,7 +5666,11 @@ const LotoWinMatch=(function(){
       const lk='loto_wm_lastscan_'+id, last=localStorage.getItem(lk)||'';
       const nd=draws.filter(d=>d&&d.date&&d.date>last).sort((a,b)=>a.date.localeCompare(b.date));
       for(const d of nd){ const drawObj={gameId:id,date:d.date,main:d.main||[],bonus:d.bonus||[],drawId:d.drawId!=null?d.drawId:null};
-        const ms=CORE.scanDrawAgainstHistory(h,drawObj,l,checkPrize); changed=true;
+        /* The game schedule is passed so an OFF-SCHEDULE official draw (SuperEnalotto's
+           public-holiday Monday draws, Lotto Max's 2025-01-02) still reaches the rows that were
+           already live for it. `nd` is sorted oldest-first above, so the earliest draw a row was
+           live for claims it and the next scheduled draw cannot count it twice. */
+        const ms=CORE.scanDrawAgainstHistory(h,drawObj,l,checkPrize,sched(id)); changed=true;
         for(const m of ms){ const po=payoutFor(d,m); if(po&&po.amount!=null){m.payout=po.amount;m.payoutState='available';m.winners=po.winners;} fresh.push(m); }
       }
       if(draws[0]&&draws[0].date)localStorage.setItem(lk,draws[0].date);
@@ -5676,7 +5714,11 @@ const LotoWinMatch=(function(){
       `<div style="margin-top:8px;opacity:.85">${T('Выигрышные числа')}</div>`+
       ballRow(m.drawMain,new Set(m.userMain),cls,bcls,bonusGame?m.drawBonus:null,new Set(m.userBonus))+
       `<div style="margin-top:10px">${matchLine}</div>`+
-      `<div>${T('Призовая категория')}: <b data-i18n-ignore>${escapeHtml(m.tier||'')}</b></div>`+
+      /* The prize-category name is prose ("2-й приз · 6+tillegg", "ДЖЕКПОТ 🏆") and every game's
+         categories are in the translation catalog — but data-i18n-ignore used to pin it here, so a
+         German or Norwegian winner read the category in Russian. Translate it and leave the node
+         localizable so a language switch re-renders it too. */
+      `<div>${T('Призовая категория')}: <b>${escapeHtml(T(m.tier||''))}</b></div>`+
       `<div style="margin-top:6px">${payoutLine}</div>`+
       `<div style="margin-top:10px;font-size:12.5px;opacity:.8">${statusLine}</div>`+
       wmProvenanceHtml(m,T(srcLabel(m)))+
