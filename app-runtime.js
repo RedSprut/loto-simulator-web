@@ -1787,6 +1787,24 @@ document.addEventListener('click',event=>{
 // card, so they add nothing to the startup payload; the analysis runs over the draws the existing
 // archive pipeline already serves (loadFullHistory / loadD) — there is no second data source.
 let calendarAppPromise=null;
+function hideAuthCaptcha(){
+  const host=document.getElementById('acc-captcha');
+  if(!host)return;
+  host.hidden=true;
+  const box=document.getElementById('acc-captcha-box');
+  if(box)box.innerHTML='';
+}
+async function authCaptchaToken(){
+  try{
+    if(!window.LotoTurnstile){try{await loadRuntimeScript('turnstile-runtime.js');}catch(_error){return'';}}
+    const api=window.LotoTurnstile;
+    if(!api||!api.available())return'';
+    const host=document.getElementById('acc-captcha'),box=document.getElementById('acc-captcha-box');
+    if(!host||!box)return'';
+    box.innerHTML='';host.hidden=false;
+    return await api.getToken(box,{action:'account_link'});
+  }catch(_error){return'';}
+}
 function loadCalendarApp(){
   if(window.LotoCalendarApp)return Promise.resolve(window.LotoCalendarApp);
   if(!calendarAppPromise){

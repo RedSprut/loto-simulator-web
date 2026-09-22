@@ -448,6 +448,12 @@
     },
     register(){return this.sendMagic('register');},
     signIn(){return this.sendMagic('login');},
+    // A sign-in challenge, but only where one is actually configured AND switched on: with no
+    // site key nothing loads and this resolves to '' in a few microseconds, so the flow is
+    // byte-for-byte what it is today. The token is meaningful only once Attack Protection →
+    // CAPTCHA is enabled in the Supabase dashboard, which is deliberately the LAST step of the
+    // rollout — flipping it before clients send a token would break every sign-in, native first.
+    // A distinct action means a token solved here can never be redeemed as a Calendar trial.
     // Both actions use the SAME passwordless email/Magic-Link flow; `mode` only decides whether a
     // brand-new account may be created ("register") or the link is for an existing account only
     // ("login"). Either way the callback signs the user into the SAME auth.users.id and restores
@@ -459,12 +465,13 @@
       magicSending=true;
       const rb=$('acc-register-btn'),lb=$('acc-login-btn');if(rb)rb.disabled=true;if(lb)lb.disabled=true;
       msg('acc-auth-msg','Отправляем ссылку…','info');
-      try{await window.LotoCommercial.sendMagicLink(email,mode);
+      try{const captcha=await authCaptchaToken();
+        await window.LotoCommercial.sendMagicLink(email,mode,captcha);
         msg('acc-auth-msg',mode==='login'
           ?'Ссылка для входа отправлена на указанный e-mail. Откройте её на этом устройстве.'
           :'Ссылка для подтверждения отправлена на указанный e-mail. Откройте её на этом устройстве.','success');}
       catch(_err){msg('acc-auth-msg','Не удалось отправить ссылку. Проверьте адрес и попробуйте ещё раз.','error');}
-      finally{magicSending=false;if(rb)rb.disabled=false;if(lb)lb.disabled=false;}
+      finally{magicSending=false;if(rb)rb.disabled=false;if(lb)lb.disabled=false;hideAuthCaptcha();}
     },
     async manage(){try{await window.LotoCommercial.accountPortal();}catch(_e){}},
     async restore(){try{await window.LotoCommercial.restorePurchase();}catch(_e){}},
