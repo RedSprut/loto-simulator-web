@@ -7034,11 +7034,19 @@ async function JC_continue(){
     if(locked)return;
     locked=true;lockY=window.scrollY||window.pageYOffset||0;
     document.body.style.top='-'+lockY+'px';
+    // Measured BEFORE the lock: the width the page scrollbar is currently taking out of the
+    // viewport. 0 on an overlay-scrollbar platform, ~15 on a classic one. The lock is about to
+    // remove that bar, so reserve exactly this much and the page behind the modal cannot move.
+    // Reserving unconditionally would shift it the other way wherever the bar was already 0 —
+    // see the `html.loto-modal-locked` rule.
+    var lane=window.innerWidth-document.documentElement.clientWidth;
     document.body.classList.add('loto-modal-open');
+    if(lane>0)document.documentElement.classList.add('loto-modal-locked');
   }
   function unlockBody(){
     if(!locked)return;
     locked=false;document.body.classList.remove('loto-modal-open');document.body.style.top='';
+    document.documentElement.classList.remove('loto-modal-locked');
     window.scrollTo(0,lockY);
   }
   function restoreFocus(id){
