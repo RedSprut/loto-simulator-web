@@ -1800,10 +1800,17 @@ function loadCalendarApp(){
 window.LotoCalendar=Object.freeze({
   load:loadCalendarApp,
   open:async function(){
-    try{const app=await loadCalendarApp();return app.open();}
+    try{
+      const app=await loadCalendarApp();
+      const result=await app.open();
+      /* A run may have just been spent; refresh the card counter from the server snapshot
+         whoever emitted it (the archive walk emits, but the card must never lag behind). */
+      refreshCalendarTrialBadge();
+      return result;
+    }
     catch(_error){showFeedback('Календарный анализ недоступен','Не удалось загрузить экран анализа. Проверьте подключение и попробуйте ещё раз.','⚠️',0);return null;}
   },
-  close:()=>{if(window.LotoCalendarApp)window.LotoCalendarApp.close();},
+  close:()=>{if(window.LotoCalendarApp)window.LotoCalendarApp.close();refreshCalendarTrialBadge();},
 });
 document.addEventListener('click',event=>{
   const button=event.target&&event.target.closest&&event.target.closest('[data-calan-open]');
@@ -1811,6 +1818,23 @@ document.addEventListener('click',event=>{
   event.preventDefault();
   window.LotoCalendar.open();
 });
+/* The free-run counter on the home card. It is the ONLY place that can show the package before
+   anything is spent («Осталось 3 из 3»), because opening the screen IS the first run. The number
+   is always what is LEFT and it comes from the server snapshot — the client never counts. PRO,
+   PRO Lifetime and the owner keep the plain PRO badge and see no counter at all. */
+function refreshCalendarTrialBadge(){
+  const line=document.getElementById('calan-btn-left');
+  if(!line)return;
+  let trial=null;
+  try{trial=window.LotoCommercial?.calendarTrial?.()||null;}catch(_e){trial=null;}
+  const show=!!trial&&!trial.entitled&&!trial.needsAccount&&Number(trial.remaining)>0;
+  line.hidden=!show;
+  if(show)line.textContent=appText('Бесплатных анализов осталось: {{0}} из {{1}}')
+    .replace('{{0}}',String(trial.remaining)).replace('{{1}}',String(trial.limit));
+}
+window.addEventListener('loto:accesschange',refreshCalendarTrialBadge);
+window.addEventListener('loto:languagechange',refreshCalendarTrialBadge);
+setTimeout(refreshCalendarTrialBadge,1200);
 
 // ── Combination provenance (court-core.js) ──
 // Every visible row records where it came from. A source is never invented: a row whose origin

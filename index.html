@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="9cf71c0" data-build-ts="2026-09-22T02:54:23.802Z">
+<html lang="en" data-build="90106cc" data-build-ts="2026-09-22T13:30:50.567Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=9cf71c0"></script>
+<script src="./boot-runtime.js?v=90106cc"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=9cf71c0">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=90106cc">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=9cf71c0">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=90106cc">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -1663,6 +1663,8 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 /* Mobile-first: one column that never scrolls sideways (every grid is minmax(0,1fr) and every
    ball row wraps), widening to two columns from 700px. Colours are the app's own tokens only —
    this screen introduces no new palette, and both themes come out of the same variables. */
+.calan-btn-left{margin-top:5px;font-size:12px;font-weight:800;color:var(--gold)}
+.calan-btn-left[hidden]{display:none}
 .calan-pro-badge{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.3px;background:rgba(233,180,76,.18);color:var(--gold);border:1px solid rgba(233,180,76,.5);vertical-align:middle}
 /* The title bar is the sheet's own scroller header: it sticks at the top and spans the full
    sheet width (negative gutters), so a long draw list can never scroll visibly behind the ✕ —
@@ -1729,14 +1731,35 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 .calan-match-h{font-size:13.5px;font-weight:800;margin-bottom:6px}
 .calan-match-big{font-family:'Unbounded',sans-serif;font-size:20px;font-weight:900;line-height:1.1}
 .calan-match-pct{font-size:13px;font-weight:800;color:var(--gold);margin-top:2px}
-/* Matched balls + legend. Each rule has its own ring colour, and the legend spells it out. */
+/* Matched balls. Each rule keeps its own colour; a ball that satisfies several rules gets one
+   concentric ring per rule (built inline from these tokens), so no match type is ever painted
+   over by another. The same tokens colour the filter chips and the per-draw badges. */
+:root{--calan-c-day:#34c759;--calan-c-month:#e9b44c;--calan-c-year:#a078ff;--calan-c-time:#3aa0ff}
 .calan-ball-hit{box-shadow:0 0 0 3px var(--calan-hit,var(--gold))}
-.calan-hit-day{--calan-hit:#34c759}
-.calan-hit-month{--calan-hit:#e9b44c}
-.calan-hit-year{--calan-hit:#a078ff}
-.calan-hit-time{--calan-hit:#3aa0ff}
-.calan-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.calan-hit-day{--calan-hit:var(--calan-c-day)}
+.calan-hit-month{--calan-hit:var(--calan-c-month)}
+.calan-hit-year{--calan-hit:var(--calan-c-year)}
+.calan-hit-time{--calan-hit:var(--calan-c-time)}
 .calan-tag{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;border:1px solid var(--calan-hit,var(--border));color:var(--fg);background:var(--bg3)}
+/* A detected type the filter currently hides stays visible but muted — the card must never
+   look as if the draw had fewer matches than it really has. */
+.calan-tag-off{opacity:.42;border-style:dashed}
+/* Match-type filters: real controls (44px touch target, focus ring, aria-pressed). */
+.calan-mfilters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.calan-mfilter{display:inline-flex;align-items:center;gap:5px;min-height:44px;padding:8px 13px;border-radius:999px;
+  border:1.5px solid var(--border);background:var(--bg3);color:var(--fg);font:800 12.5px 'Manrope',sans-serif;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .15s ease,background-color .15s ease,box-shadow .15s ease}
+.calan-mfilter:hover{border-color:var(--calan-hit,var(--gold))}
+.calan-mfilter[aria-pressed="true"]{border-color:var(--calan-hit,var(--gold));background:color-mix(in srgb,var(--calan-hit,var(--gold)) 18%,var(--bg3));box-shadow:inset 0 0 0 1px var(--calan-hit,var(--gold))}
+.calan-mfilter:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.calan-mfilter:active{transform:scale(.97)}
+.calan-mfilter-all{--calan-hit:var(--gold)}
+.calan-mfilter-note{margin:0 0 10px}
+/* Free-run status: one compact line, never a banner. */
+.calan-trial{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0 2px}
+.calan-trial-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:999px;font-size:12px;font-weight:800;
+  background:rgba(233,180,76,.16);color:var(--fg);border:1px solid rgba(233,180,76,.45)}
+.calan-trial-left{font-size:12px;font-weight:700;color:var(--sub2)}
 /* Draw list */
 .calan-draws{display:grid;gap:8px}
 .calan-draw{border:1px solid var(--border);border-radius:14px;padding:10px;background:var(--bg2);min-width:0}
@@ -2249,7 +2272,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       </button>
     </div>
     <button type="button" class="ndb euro" id="calan-btn" data-calan-open>
-      <div class="ndb-l"><div class="ndb-title">📅 Календарный анализ <span class="calan-pro-badge">PRO</span></div><div class="ndb-sub">Тиражи по месяцам и годам · частоты · календарные совпадения</div></div>
+      <div class="ndb-l"><div class="ndb-title">📅 Календарный анализ <span class="calan-pro-badge">PRO</span></div><div class="ndb-sub">Тиражи по месяцам и годам · частоты · календарные совпадения</div><div class="calan-btn-left" id="calan-btn-left" data-i18n-ignore hidden></div></div>
       <div style="font-size:20px">→</div>
     </button>
     <button class="ndb euro" id="wheel-btn" data-loto-event-click="GENN_open('wheel')">
@@ -3594,23 +3617,23 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=9cf71c0"></script>
-<script src="./commercial-config.js?v=9cf71c0"></script>
-<script src="./event-runtime.js?v=9cf71c0"></script>
-<script src="./external-link-runtime.js?v=9cf71c0"></script>
-<script src="./auth-client.js?v=9cf71c0"></script>
-<script src="./native-loader.js?v=9cf71c0"></script>
-<script src="./i18n-catalog.js?v=9cf71c0"></script>
-<script src="./lang-detect.js?v=9cf71c0"></script>
-<script src="./i18n-runtime.js?v=9cf71c0"></script>
-<script src="./consent-runtime.js?v=9cf71c0"></script>
-<script src="./analytics-telemetry.js?v=9cf71c0"></script>
-<script src="./win-match-core.js?v=9cf71c0"></script>
-<script src="./court-core.js?v=9cf71c0"></script>
-<script src="./app-runtime.js?v=9cf71c0"></script>
-<script src="./inline-runtime-2.js?v=9cf71c0"></script>
-<script src="./commercial-runtime.js?v=9cf71c0"></script>
-<script src="./inline-runtime-3.js?v=9cf71c0"></script>
+<script src="./version.js?v=90106cc"></script>
+<script src="./commercial-config.js?v=90106cc"></script>
+<script src="./event-runtime.js?v=90106cc"></script>
+<script src="./external-link-runtime.js?v=90106cc"></script>
+<script src="./auth-client.js?v=90106cc"></script>
+<script src="./native-loader.js?v=90106cc"></script>
+<script src="./i18n-catalog.js?v=90106cc"></script>
+<script src="./lang-detect.js?v=90106cc"></script>
+<script src="./i18n-runtime.js?v=90106cc"></script>
+<script src="./consent-runtime.js?v=90106cc"></script>
+<script src="./analytics-telemetry.js?v=90106cc"></script>
+<script src="./win-match-core.js?v=90106cc"></script>
+<script src="./court-core.js?v=90106cc"></script>
+<script src="./app-runtime.js?v=90106cc"></script>
+<script src="./inline-runtime-2.js?v=90106cc"></script>
+<script src="./commercial-runtime.js?v=90106cc"></script>
+<script src="./inline-runtime-3.js?v=90106cc"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3759,9 +3782,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=9cf71c0"></script>
-<script src="./notifications-runtime.js?v=9cf71c0"></script>
-<script src="./pwa-runtime.js?v=9cf71c0"></script>
+<script src="./notification-center.js?v=90106cc"></script>
+<script src="./notifications-runtime.js?v=90106cc"></script>
+<script src="./pwa-runtime.js?v=90106cc"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3772,8 +3795,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=9cf71c0"></script>
-<script src="./inline-runtime-5.js?v=9cf71c0"></script>
-<script src="./inline-runtime-6.js?v=9cf71c0"></script>
+<script src="./inline-runtime-4.js?v=90106cc"></script>
+<script src="./inline-runtime-5.js?v=90106cc"></script>
+<script src="./inline-runtime-6.js?v=90106cc"></script>
 </body>
 </html>
