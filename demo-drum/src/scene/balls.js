@@ -248,7 +248,6 @@ export class Balls {
         meshPosition: vec(it.mesh.position), meshRotation: quat(it.mesh.quaternion),
         tracker: it.tracker ? { ...it.tracker } : null,
         ts: it.ts ? { ...it.ts } : null,
-        audioExit: !!it._audioExit, audioRack: !!it._audioRack,
       })),
     };
   }
@@ -273,7 +272,6 @@ export class Balls {
         drawn: !!saved.drawn, parked: !!saved.parked, lifecycle: saved.lifecycle,
         settledTime: saved.settledTime || 0, facingDot: saved.facingDot || 0,
         resultPool: saved.resultPool || null,
-        _audioExit: !!saved.audioExit, _audioRack: !!saved.audioRack,
         ts: saved.ts ? { ...saved.ts } : undefined,
       });
       if (saved.tracker) Object.assign(it.tracker, saved.tracker);

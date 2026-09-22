@@ -152,6 +152,8 @@ async function main() {
     p.then(() => syncAudioHud(audio.status())).catch(() => syncAudioHud(audio.status()));
   };
   const markAudioNeedsGesture = () => { audio.markNeedsUserUnlock(); syncAudioHud(audio.status()); };
+  // Drawn-ball physical-event tracking (real state, not timers) for one-shot sounds.
+  let lastWinnerId = null, lastLifecycle = null, winnerStopped = false;
   const director = new CameraDirector(engine.camera);
   const stats = new FrameStats();
   const focus = new THREE.Vector3();
@@ -438,20 +440,20 @@ async function main() {
     } else {
       focus.set(0, 0, 0);
     }
-    // GUARANTEED per-ball sounds, bound to each ball's OWN animation lifecycle with
-    // one-shot flags stored ON the ball (unique per ballId) — deterministic, never a
-    // timer, never dependent on collision force, frame rate or the shared voice pool:
-    //  • EXIT: lifecycle → 'in-transit' == the ball physically passed the throat/exit.
-    //  • RACK: lifecycle → 'in-rack'     == the ball arrived + seated in its rack slot.
-    // Every drawn ball fires exactly one exit + one rack (2 sounds/ball). The lifecycle
-    // (not the physics contact) is the deterministic driver, so a low-speed or missed
-    // collision callback can never leave a ball silent.
+    // Discrete drawn-ball sounds bound to REAL physics/lifecycle events (never timers):
+    //  • EXIT: DrawController._watchCapture assigns this.winner ONLY once a ball has
+    //    fallen below the exit throat (captureY); its lifecycle becomes 'in-transit' at
+    //    that exact instant — so a new winner id WITH lifecycle 'in-transit' == the ball
+    //    physically passing through the throat/exit.
+    //  • RACK: lifecycle → 'in-rack' == the ball has arrived and seated in its rack slot.
+    //  • STOP: real winner-mesh linear+angular speed ≈ 0.
     if (audioLive) {
       const w = draw.winner;
-      if (w) {
-        if (!w._audioExit && (w.lifecycle === 'in-transit' || w.lifecycle === 'in-rack')) { w._audioExit = true; audio.ballEvent('exit'); }
-        if (!w._audioRack && w.lifecycle === 'in-rack') { w._audioRack = true; audio.ballEvent('rack'); }
+      if (w && w.id !== lastWinnerId && w.lifecycle === 'in-transit') {
+        lastWinnerId = w.id; lastLifecycle = 'in-transit'; winnerStopped = false; audio.ballEvent('exit');
       }
+      if (w && w.lifecycle === 'in-rack' && lastLifecycle !== 'in-rack') { lastLifecycle = 'in-rack'; audio.ballEvent('rack'); }
+      if (w && w.parked && !winnerStopped && (w._linSpeed ?? 1) < 0.06 && (w._angSpeed ?? 1) < 0.3) { winnerStopped = true; audio.ballEvent('stop'); }
     }
   }
 

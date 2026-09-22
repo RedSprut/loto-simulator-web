@@ -281,8 +281,14 @@ export class AudioManager {
     }
   }
 
-  _voice(buffer, gain, rate, bus = this.master) {
-    if (!buffer || !this._canPlay() || this.activeVoices >= this.MAX_VOICES) return;
+  /** `guaranteed` marks a RESULT-BALL one-shot (rack / stop). Those two are the only
+   *  sounds the user is promised for every drawn ball, so the shared collision voice
+   *  budget may never refuse them — MAX_VOICES is a ceiling for the tumbling mix, not
+   *  for the draw's own land/settle. A guaranteed voice still counts towards
+   *  `activeVoices`, so collision density backs off exactly as it did before. */
+  _voice(buffer, gain, rate, bus = this.master, guaranteed = false) {
+    if (!buffer || !this._canPlay()) return;
+    if (!guaranteed && this.activeVoices >= this.MAX_VOICES) return;
     const src = this.ctx.createBufferSource();
     src.buffer = buffer; src.playbackRate.value = rate;
     const g = this.ctx.createGain(); g.gain.value = gain;
@@ -297,8 +303,8 @@ export class AudioManager {
     const bank = this._bank();
     if (!this._canPlay() || this.muted || !bank) return;
     if (type === 'exit') return; // no added falling/exit sound for now
-    else if (type === 'rack' && bank.rack.length) this._voice(bank.rack[(Math.random() * bank.rack.length) | 0], 0.8, rnd(0.98, 1.02));
-    else if (type === 'stop' && bank.rack.length) this._voice(bank.rack[0], 0.4, rnd(1.0, 1.04));
+    else if (type === 'rack' && bank.rack.length) this._voice(bank.rack[(Math.random() * bank.rack.length) | 0], 0.8, rnd(0.98, 1.02), this.master, true);
+    else if (type === 'stop' && bank.rack.length) this._voice(bank.rack[0], 0.4, rnd(1.0, 1.04), this.master, true);
   }
 
   // Integration shim: main.js calls this on warm-up. The Demo has no ball-sound counter,
