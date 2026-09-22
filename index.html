@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="e06c89d" data-build-ts="2026-09-22T13:47:10.714Z">
+<html lang="en" data-build="9dea0f1" data-build-ts="2026-09-22T13:58:07.066Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com; script-src-elem 'self' https://cdn.paddle.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=e06c89d"></script>
+<script src="./boot-runtime.js?v=9dea0f1"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=e06c89d">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=9dea0f1">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=e06c89d">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=9dea0f1">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -1621,11 +1621,26 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
        ::-webkit-scrollbar pseudo-elements do the styling.
      • Firefox has no ::-webkit-scrollbar, so it gets the standard properties instead
        (@supports below). `scrollbar-gutter:stable` keeps the lane reserved in either engine.
-   Applied to EVERY element, not a hand-maintained list, so any long page, shell or modal body
-   (My account, the analytical court and its history layer, About, the calendar, …) is covered;
-   the horizontal chip strips opt out below because their bar is decoration, not navigation. */
+   Scoped to the page scroller and the app's REAL scrolling surfaces — never `*`. `scrollbar-gutter`
+   reserves a lane inside ANY box the engine treats as a scroll container, and `overflow:hidden`
+   makes one, so `*` silently ate a lane inside chrome that never scrolls: measured 12px inside
+   `.bnav` and inside every `.bn` in Chromium, and on a Firefox desktop (where `scrollbar-width`/
+   `scrollbar-color` below switch the scroller to a real platform bar) the same reservation eats
+   the bottom of the fixed-height bar, which is the reported clipped bottom navigation.
+   The ::-webkit-scrollbar rules below stay broad on purpose: they are paint-only, they render
+   nothing on a box that has no scrollbar, and narrowing them would change the look of scrollers
+   that are not on this list. Anything added later opts in with `.loto-scroll` — not with `*`.
+   The horizontal chip strips opt out further down because their bar is decoration, not navigation. */
 @media (min-width:900px) and (pointer:fine){
-  html,body,*{
+  /* Every REAL scrolling surface of the app, plus the page scroller itself. */
+  html,
+  .loto-scroll,
+  .about-scroll,.acc-scroll,.accq-box,.aved-box,.cal-box,.cal-yearsel,.cc-box,.cc-msg,
+  .cele-box,.cmp-wrap,.cov-sheet,.ct-layer-sheet,.ct-picker-list,.fb-box,.freq-wrap,
+  .horo-sheet,.horo-signs,.if-sheet,.lang-box,.lnc-detail-card,.lnc-list,.lnc-settings,
+  .lnc-table-wrap,.lot-tabs,.ow-body,.ow-sheet-in,.ow-tabs,.ow-tw,.own-body,.own-filters,
+  .pair-wrap,.pro-sheet,.sched-strip,.sg-sheet,
+  .if-ov.jc-intro-mode #jc-mount{
     scrollbar-width:auto!important;
     scrollbar-color:auto!important;
     scrollbar-gutter:stable;
@@ -1652,7 +1667,15 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
   }
   /* Firefox: no ::-webkit-scrollbar, so the standard properties are the only way to style it. */
   @supports not selector(::-webkit-scrollbar){
-    html,body,*{
+  /* Every REAL scrolling surface of the app, plus the page scroller itself. */
+  html,
+  .loto-scroll,
+  .about-scroll,.acc-scroll,.accq-box,.aved-box,.cal-box,.cal-yearsel,.cc-box,.cc-msg,
+  .cele-box,.cmp-wrap,.cov-sheet,.ct-layer-sheet,.ct-picker-list,.fb-box,.freq-wrap,
+  .horo-sheet,.horo-signs,.if-sheet,.lang-box,.lnc-detail-card,.lnc-list,.lnc-settings,
+  .lnc-table-wrap,.lot-tabs,.ow-body,.ow-sheet-in,.ow-tabs,.ow-tw,.own-body,.own-filters,
+  .pair-wrap,.pro-sheet,.sched-strip,.sg-sheet,
+  .if-ov.jc-intro-mode #jc-mount{
       scrollbar-width:thin!important;
       scrollbar-color:color-mix(in srgb,var(--gold) 68%,transparent) color-mix(in srgb,var(--gold) 8%,transparent)!important;
     }
@@ -3617,23 +3640,23 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=e06c89d"></script>
-<script src="./commercial-config.js?v=e06c89d"></script>
-<script src="./event-runtime.js?v=e06c89d"></script>
-<script src="./external-link-runtime.js?v=e06c89d"></script>
-<script src="./auth-client.js?v=e06c89d"></script>
-<script src="./native-loader.js?v=e06c89d"></script>
-<script src="./i18n-catalog.js?v=e06c89d"></script>
-<script src="./lang-detect.js?v=e06c89d"></script>
-<script src="./i18n-runtime.js?v=e06c89d"></script>
-<script src="./consent-runtime.js?v=e06c89d"></script>
-<script src="./analytics-telemetry.js?v=e06c89d"></script>
-<script src="./win-match-core.js?v=e06c89d"></script>
-<script src="./court-core.js?v=e06c89d"></script>
-<script src="./app-runtime.js?v=e06c89d"></script>
-<script src="./inline-runtime-2.js?v=e06c89d"></script>
-<script src="./commercial-runtime.js?v=e06c89d"></script>
-<script src="./inline-runtime-3.js?v=e06c89d"></script>
+<script src="./version.js?v=9dea0f1"></script>
+<script src="./commercial-config.js?v=9dea0f1"></script>
+<script src="./event-runtime.js?v=9dea0f1"></script>
+<script src="./external-link-runtime.js?v=9dea0f1"></script>
+<script src="./auth-client.js?v=9dea0f1"></script>
+<script src="./native-loader.js?v=9dea0f1"></script>
+<script src="./i18n-catalog.js?v=9dea0f1"></script>
+<script src="./lang-detect.js?v=9dea0f1"></script>
+<script src="./i18n-runtime.js?v=9dea0f1"></script>
+<script src="./consent-runtime.js?v=9dea0f1"></script>
+<script src="./analytics-telemetry.js?v=9dea0f1"></script>
+<script src="./win-match-core.js?v=9dea0f1"></script>
+<script src="./court-core.js?v=9dea0f1"></script>
+<script src="./app-runtime.js?v=9dea0f1"></script>
+<script src="./inline-runtime-2.js?v=9dea0f1"></script>
+<script src="./commercial-runtime.js?v=9dea0f1"></script>
+<script src="./inline-runtime-3.js?v=9dea0f1"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3782,9 +3805,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=e06c89d"></script>
-<script src="./notifications-runtime.js?v=e06c89d"></script>
-<script src="./pwa-runtime.js?v=e06c89d"></script>
+<script src="./notification-center.js?v=9dea0f1"></script>
+<script src="./notifications-runtime.js?v=9dea0f1"></script>
+<script src="./pwa-runtime.js?v=9dea0f1"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3795,8 +3818,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=e06c89d"></script>
-<script src="./inline-runtime-5.js?v=e06c89d"></script>
-<script src="./inline-runtime-6.js?v=e06c89d"></script>
+<script src="./inline-runtime-4.js?v=9dea0f1"></script>
+<script src="./inline-runtime-5.js?v=9dea0f1"></script>
+<script src="./inline-runtime-6.js?v=9dea0f1"></script>
 </body>
 </html>
