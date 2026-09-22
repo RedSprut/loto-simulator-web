@@ -19,7 +19,20 @@
     '#drum3d-overlay{position:fixed;inset:0;z-index:100000;background:#05060c;display:flex}' +
     '#drum3d-frame{flex:1;width:100%;height:100%;border:0;display:block}' +
     '#drum3d-back{position:absolute;top:calc(8px + env(safe-area-inset-top,0px));left:calc(8px + env(safe-area-inset-left,0px));z-index:100001;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.28);background:rgba(10,12,22,.55);color:#fff;font-size:26px;line-height:1;cursor:pointer;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}' +
-    'body.drum3d-open{overflow:hidden}' +
+    // The 3D draw is a full-viewport, fixed overlay: it must FIT the viewport exactly, with no
+    // page scroll and no vertical scrollbar behind it. `body{overflow:hidden}` alone never did
+    // that: the root element carries `overflow-x:hidden`, so it — not <body> — is the element
+    // the viewport takes its overflow from, and the body's own value is not propagated. The
+    // document kept scrolling the shell behind the overlay and painting a scrollbar over it.
+    // Locking the root is not enough on its own either: `overflow:hidden` only stops the USER,
+    // the document still has scrollable overflow. So the shell is also clamped to the viewport
+    // — `height:100%` on both (the root's resolves against the ICB, the body's against the now
+    // definite root height) and none of the 88px of bottom-nav padding, which exists to keep the
+    // bar off the page content and has nothing to keep off here. scrollHeight then equals
+    // clientHeight: nothing to scroll, in any engine. Everything behind is covered anyway — the
+    // overlay, the backdrop and the docked nav are all `position:fixed`.
+    'html.drum-overlay-open,html.drum-overlay-open body{overflow:hidden;height:100%;min-height:0}' +
+    'html.drum-overlay-open body{padding-bottom:0}' +
     // When the PRO paywall is opened from inside the drum, lift it (and its scrim) ABOVE
     // the drum overlay (z 100000) + docked nav (z 100003) so it is actually visible; the
     // drum iframe stays alive underneath so isPro/limit can be pushed back without reload.

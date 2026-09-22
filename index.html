@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="8bbec9c" data-build-ts="2026-09-22T16:33:50.171Z">
+<html lang="en" data-build="450e1fa" data-build-ts="2026-09-22T16:43:19.387Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=8bbec9c"></script>
+<script src="./boot-runtime.js?v=450e1fa"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=8bbec9c">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=450e1fa">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=8bbec9c">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=450e1fa">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -1282,12 +1282,17 @@ body.light .mb[class*="miss-"]{text-shadow:none}
 .scroll-anchors.show{display:flex}
 .sa-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--gold);background:var(--modal-bg);color:var(--gold);font-size:18px;font-weight:900;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;transition:transform .12s}
 .sa-btn:active{transform:scale(.9)}
-/* ══ КАСТОМНЫЙ СКРОЛЛБАР (десктоп) ══ */
-@media(min-width:900px){
-  ::-webkit-scrollbar{width:10px;height:10px}
-  ::-webkit-scrollbar-track{background:transparent}
-  ::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#E9B44C,#B07E1F);border-radius:5px;border:2px solid var(--bg)}
-}
+/* ══ КАСТОМНЫЙ СКРОЛЛБАР (десктоп) ══
+   Was: a UNIVERSAL `::-webkit-scrollbar{width:10px}` here. That is what pushed the whole site
+   left. Styling the pseudo-element switches a Chromium/WebKit scroller from the platform OVERLAY
+   bar to a custom CLASSIC one, and a classic bar on the root scroller is subtracted from the
+   VIEWPORT: `documentElement.clientWidth` lost 10px, so every centred box — the 430px shell, the
+   header, the bottom bar — sat 5px off centre with a dead strip down the right edge. Because the
+   selector was universal it did the same inside every other scroller on the page.
+   The page scroller now has NO scrollbar styling at all, in any rule, so it keeps the platform
+   overlay bar that costs zero width. The desktop block further down still paints a visible,
+   grabbable bar — but only inside the app's own scrolling sheets and panels, where the bar lives
+   in the sheet's own box and cannot move the page. See its comment for the engine details. */
 
 /* ══ БАННЕР ПОДПИСКИ ══ */
 .sub-banner{position:relative;border-radius:18px;padding:16px;margin-bottom:12px;cursor:pointer;overflow:hidden;border:1.5px solid var(--gold);background:linear-gradient(150deg,rgba(233,180,76,.16),rgba(176,126,31,.06)),var(--bg2);transition:transform .15s}
@@ -1611,71 +1616,135 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
     width:0!important;height:0!important;display:none!important;background:transparent!important;
   }
 }
-/* ══ DESKTOP SCROLLBARS — one rule for every scroll container on the page ══════════════════
-   The touch rules above hard-hide the bar; on a real pointer it must come back as a bar the user
-   can SEE and GRAB. Two engine facts decide how:
-     • Chromium/WebKit paint a *custom* scrollbar — always visible, taking its own lane — only
-       while `scrollbar-width` and `scrollbar-color` are `auto`. Setting either (the previous
-       `scrollbar-width:thin`) switches the scroller to the *platform* bar, which on macOS is an
-       overlay that fades out and cannot be dragged. So here they are reset to `auto` and the
-       ::-webkit-scrollbar pseudo-elements do the styling.
-     • Firefox has no ::-webkit-scrollbar, so it gets the standard properties instead
-       (@supports below). `scrollbar-gutter:stable` keeps the lane reserved in either engine.
-   Scoped to the page scroller and the app's REAL scrolling surfaces — never `*`. `scrollbar-gutter`
-   reserves a lane inside ANY box the engine treats as a scroll container, and `overflow:hidden`
-   makes one, so `*` silently ate a lane inside chrome that never scrolls: measured 12px inside
-   `.bnav` and inside every `.bn` in Chromium, and on a Firefox desktop (where `scrollbar-width`/
-   `scrollbar-color` below switch the scroller to a real platform bar) the same reservation eats
-   the bottom of the fixed-height bar, which is the reported clipped bottom navigation.
-   The ::-webkit-scrollbar rules below stay broad on purpose: they are paint-only, they render
-   nothing on a box that has no scrollbar, and narrowing them would change the look of scrollers
-   that are not on this list. Anything added later opts in with `.loto-scroll` — not with `*`.
-   The horizontal chip strips opt out further down because their bar is decoration, not navigation. */
+/* ══ DESKTOP SCROLLBARS — visible inside the sheets, OVERLAY on the page ══════════════════
+   Two different jobs, and the previous revision ran them together on one selector list that
+   included `html`. That is what put a permanent empty lane down the right of the site.
+
+   THE PAGE (`html`) gets nothing here — no `::-webkit-scrollbar`, no `scrollbar-width`, no
+   `scrollbar-color`, no `scrollbar-gutter` — so every engine keeps its PLATFORM OVERLAY bar,
+   painted on top of the content for zero width. Two facts make that the only way:
+     • Chromium/WebKit leave the overlay bar only while `::-webkit-scrollbar` is unstyled and
+       `scrollbar-width`/`scrollbar-color` are `auto`. Touch any of them and the scroller falls
+       back to a CUSTOM CLASSIC bar, which is part of the layout: on the root scroller it is
+       subtracted from the viewport (`innerWidth - documentElement.clientWidth` > 0), the shell
+       loses width and every centred box slides left by half a bar.
+     • `scrollbar-gutter` only does anything to a classic bar, and then it reserves that width
+       whether or not the page scrolls. It was the visible symptom, not the cause, and it is gone
+       from every rule here: no box — the page, a sheet, `.bnav`, or anything `overflow:hidden`
+       quietly turns into a scroll container — reserves width it is not using.
+
+   THE SHEETS AND PANELS get the visible, grabbable bar back, because the touch design hides it
+   (`scrollbar-width:none` + `::-webkit-scrollbar{display:none}` in their own rules) and a mouse
+   user then has no way to tell a long sheet scrolls at all. A bar inside a sheet lives in the
+   sheet's own box: it cannot move the page, and it appears only while that sheet overflows.
+   `scrollbar-width` stays `auto` so the styled pseudo-elements below are the ones that paint;
+   Firefox, which has no `::-webkit-scrollbar`, gets the standard properties in the `@supports`.
+   Anything added later opts in with `.loto-scroll` — never with `*`, which reserved a lane
+   inside `.bnav` and inside every `.bn`, and never with `html`, which is this whole bug.
+   The horizontal chip strips stay clean: they are dragged, their bar is decoration. */
 @media (min-width:900px) and (pointer:fine){
-  /* Every REAL scrolling surface of the app, plus the page scroller itself. */
-  html,
-  .loto-scroll,
-  .about-scroll,.acc-scroll,.accq-box,.aved-box,.cal-box,.cal-yearsel,.cc-box,.cc-msg,
-  .cele-box,.cmp-wrap,.cov-sheet,.ct-layer-sheet,.ct-picker-list,.fb-box,.freq-wrap,
-  .horo-sheet,.horo-signs,.if-sheet,.lang-box,.lnc-detail-card,.lnc-list,.lnc-settings,
-  .lnc-table-wrap,.lot-tabs,.ow-body,.ow-sheet-in,.ow-tabs,.ow-tw,.own-body,.own-filters,
-  .pair-wrap,.pro-sheet,.sched-strip,.sg-sheet,
-  .if-ov.jc-intro-mode #jc-mount{
+  /* Every REAL scrolling surface of the app. The page scroller is deliberately absent. */
+  .loto-scroll,.about-scroll,.acc-scroll,.accq-box,.aved-box,.cal-box,.cal-yearsel,.cc-box,.cc-msg,.cele-box,
+  .cmp-wrap,.cov-sheet,.ct-layer-sheet,.ct-picker-list,.ct-sheet,.fb-box,.freq-wrap,.horo-sheet,.if-sheet,
+  .lang-box,.lnc-detail-card,.lnc-list,.lnc-settings,.lnc-table-wrap,.ow-body,.ow-sheet-in,.ow-tabs,.ow-tw,
+  .own-body,.own-filters,.pair-wrap,.pro-sheet,.sg-sheet,.if-ov.jc-intro-mode #jc-mount{
     scrollbar-width:auto!important;
     scrollbar-color:auto!important;
-    scrollbar-gutter:stable;
   }
-  html::-webkit-scrollbar,body::-webkit-scrollbar,*::-webkit-scrollbar{
+  .loto-scroll::-webkit-scrollbar,.about-scroll::-webkit-scrollbar,.acc-scroll::-webkit-scrollbar,
+  .accq-box::-webkit-scrollbar,.aved-box::-webkit-scrollbar,.cal-box::-webkit-scrollbar,
+  .cal-yearsel::-webkit-scrollbar,.cc-box::-webkit-scrollbar,.cc-msg::-webkit-scrollbar,
+  .cele-box::-webkit-scrollbar,.cmp-wrap::-webkit-scrollbar,.cov-sheet::-webkit-scrollbar,
+  .ct-layer-sheet::-webkit-scrollbar,.ct-picker-list::-webkit-scrollbar,.ct-sheet::-webkit-scrollbar,
+  .fb-box::-webkit-scrollbar,.freq-wrap::-webkit-scrollbar,.horo-sheet::-webkit-scrollbar,
+  .if-sheet::-webkit-scrollbar,.lang-box::-webkit-scrollbar,.lnc-detail-card::-webkit-scrollbar,
+  .lnc-list::-webkit-scrollbar,.lnc-settings::-webkit-scrollbar,.lnc-table-wrap::-webkit-scrollbar,
+  .ow-body::-webkit-scrollbar,.ow-sheet-in::-webkit-scrollbar,.ow-tabs::-webkit-scrollbar,
+  .ow-tw::-webkit-scrollbar,.own-body::-webkit-scrollbar,.own-filters::-webkit-scrollbar,
+  .pair-wrap::-webkit-scrollbar,.pro-sheet::-webkit-scrollbar,.sg-sheet::-webkit-scrollbar,
+  .if-ov.jc-intro-mode #jc-mount::-webkit-scrollbar{
     display:block!important;width:12px!important;height:12px!important;background:transparent!important;
   }
-  html::-webkit-scrollbar-track,body::-webkit-scrollbar-track,*::-webkit-scrollbar-track{
+  .loto-scroll::-webkit-scrollbar-track,.about-scroll::-webkit-scrollbar-track,
+  .acc-scroll::-webkit-scrollbar-track,.accq-box::-webkit-scrollbar-track,.aved-box::-webkit-scrollbar-track,
+  .cal-box::-webkit-scrollbar-track,.cal-yearsel::-webkit-scrollbar-track,.cc-box::-webkit-scrollbar-track,
+  .cc-msg::-webkit-scrollbar-track,.cele-box::-webkit-scrollbar-track,.cmp-wrap::-webkit-scrollbar-track,
+  .cov-sheet::-webkit-scrollbar-track,.ct-layer-sheet::-webkit-scrollbar-track,
+  .ct-picker-list::-webkit-scrollbar-track,.ct-sheet::-webkit-scrollbar-track,
+  .fb-box::-webkit-scrollbar-track,.freq-wrap::-webkit-scrollbar-track,.horo-sheet::-webkit-scrollbar-track,
+  .if-sheet::-webkit-scrollbar-track,.lang-box::-webkit-scrollbar-track,
+  .lnc-detail-card::-webkit-scrollbar-track,.lnc-list::-webkit-scrollbar-track,
+  .lnc-settings::-webkit-scrollbar-track,.lnc-table-wrap::-webkit-scrollbar-track,
+  .ow-body::-webkit-scrollbar-track,.ow-sheet-in::-webkit-scrollbar-track,.ow-tabs::-webkit-scrollbar-track,
+  .ow-tw::-webkit-scrollbar-track,.own-body::-webkit-scrollbar-track,.own-filters::-webkit-scrollbar-track,
+  .pair-wrap::-webkit-scrollbar-track,.pro-sheet::-webkit-scrollbar-track,.sg-sheet::-webkit-scrollbar-track,
+  .if-ov.jc-intro-mode #jc-mount::-webkit-scrollbar-track{
     background:color-mix(in srgb,var(--gold) 8%,transparent)!important;border-radius:10px!important;
   }
-  html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb,*::-webkit-scrollbar-thumb{
+  .loto-scroll::-webkit-scrollbar-thumb,.about-scroll::-webkit-scrollbar-thumb,
+  .acc-scroll::-webkit-scrollbar-thumb,.accq-box::-webkit-scrollbar-thumb,.aved-box::-webkit-scrollbar-thumb,
+  .cal-box::-webkit-scrollbar-thumb,.cal-yearsel::-webkit-scrollbar-thumb,.cc-box::-webkit-scrollbar-thumb,
+  .cc-msg::-webkit-scrollbar-thumb,.cele-box::-webkit-scrollbar-thumb,.cmp-wrap::-webkit-scrollbar-thumb,
+  .cov-sheet::-webkit-scrollbar-thumb,.ct-layer-sheet::-webkit-scrollbar-thumb,
+  .ct-picker-list::-webkit-scrollbar-thumb,.ct-sheet::-webkit-scrollbar-thumb,
+  .fb-box::-webkit-scrollbar-thumb,.freq-wrap::-webkit-scrollbar-thumb,.horo-sheet::-webkit-scrollbar-thumb,
+  .if-sheet::-webkit-scrollbar-thumb,.lang-box::-webkit-scrollbar-thumb,
+  .lnc-detail-card::-webkit-scrollbar-thumb,.lnc-list::-webkit-scrollbar-thumb,
+  .lnc-settings::-webkit-scrollbar-thumb,.lnc-table-wrap::-webkit-scrollbar-thumb,
+  .ow-body::-webkit-scrollbar-thumb,.ow-sheet-in::-webkit-scrollbar-thumb,.ow-tabs::-webkit-scrollbar-thumb,
+  .ow-tw::-webkit-scrollbar-thumb,.own-body::-webkit-scrollbar-thumb,.own-filters::-webkit-scrollbar-thumb,
+  .pair-wrap::-webkit-scrollbar-thumb,.pro-sheet::-webkit-scrollbar-thumb,.sg-sheet::-webkit-scrollbar-thumb,
+  .if-ov.jc-intro-mode #jc-mount::-webkit-scrollbar-thumb{
     background:color-mix(in srgb,var(--gold) 68%,transparent)!important;
     border-radius:10px!important;border:3px solid transparent!important;background-clip:padding-box!important;
     min-height:36px!important;
   }
-  html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover,*::-webkit-scrollbar-thumb:hover{
+  .loto-scroll::-webkit-scrollbar-thumb:hover,.about-scroll::-webkit-scrollbar-thumb:hover,
+  .acc-scroll::-webkit-scrollbar-thumb:hover,.accq-box::-webkit-scrollbar-thumb:hover,
+  .aved-box::-webkit-scrollbar-thumb:hover,.cal-box::-webkit-scrollbar-thumb:hover,
+  .cal-yearsel::-webkit-scrollbar-thumb:hover,.cc-box::-webkit-scrollbar-thumb:hover,
+  .cc-msg::-webkit-scrollbar-thumb:hover,.cele-box::-webkit-scrollbar-thumb:hover,
+  .cmp-wrap::-webkit-scrollbar-thumb:hover,.cov-sheet::-webkit-scrollbar-thumb:hover,
+  .ct-layer-sheet::-webkit-scrollbar-thumb:hover,.ct-picker-list::-webkit-scrollbar-thumb:hover,
+  .ct-sheet::-webkit-scrollbar-thumb:hover,.fb-box::-webkit-scrollbar-thumb:hover,
+  .freq-wrap::-webkit-scrollbar-thumb:hover,.horo-sheet::-webkit-scrollbar-thumb:hover,
+  .if-sheet::-webkit-scrollbar-thumb:hover,.lang-box::-webkit-scrollbar-thumb:hover,
+  .lnc-detail-card::-webkit-scrollbar-thumb:hover,.lnc-list::-webkit-scrollbar-thumb:hover,
+  .lnc-settings::-webkit-scrollbar-thumb:hover,.lnc-table-wrap::-webkit-scrollbar-thumb:hover,
+  .ow-body::-webkit-scrollbar-thumb:hover,.ow-sheet-in::-webkit-scrollbar-thumb:hover,
+  .ow-tabs::-webkit-scrollbar-thumb:hover,.ow-tw::-webkit-scrollbar-thumb:hover,
+  .own-body::-webkit-scrollbar-thumb:hover,.own-filters::-webkit-scrollbar-thumb:hover,
+  .pair-wrap::-webkit-scrollbar-thumb:hover,.pro-sheet::-webkit-scrollbar-thumb:hover,
+  .sg-sheet::-webkit-scrollbar-thumb:hover,.if-ov.jc-intro-mode #jc-mount::-webkit-scrollbar-thumb:hover{
     background:var(--gold)!important;background-clip:padding-box!important;
   }
-  html::-webkit-scrollbar-corner,body::-webkit-scrollbar-corner,*::-webkit-scrollbar-corner{background:transparent!important}
+  .loto-scroll::-webkit-scrollbar-corner,.about-scroll::-webkit-scrollbar-corner,
+  .acc-scroll::-webkit-scrollbar-corner,.accq-box::-webkit-scrollbar-corner,
+  .aved-box::-webkit-scrollbar-corner,.cal-box::-webkit-scrollbar-corner,
+  .cal-yearsel::-webkit-scrollbar-corner,.cc-box::-webkit-scrollbar-corner,.cc-msg::-webkit-scrollbar-corner,
+  .cele-box::-webkit-scrollbar-corner,.cmp-wrap::-webkit-scrollbar-corner,
+  .cov-sheet::-webkit-scrollbar-corner,.ct-layer-sheet::-webkit-scrollbar-corner,
+  .ct-picker-list::-webkit-scrollbar-corner,.ct-sheet::-webkit-scrollbar-corner,
+  .fb-box::-webkit-scrollbar-corner,.freq-wrap::-webkit-scrollbar-corner,
+  .horo-sheet::-webkit-scrollbar-corner,.if-sheet::-webkit-scrollbar-corner,
+  .lang-box::-webkit-scrollbar-corner,.lnc-detail-card::-webkit-scrollbar-corner,
+  .lnc-list::-webkit-scrollbar-corner,.lnc-settings::-webkit-scrollbar-corner,
+  .lnc-table-wrap::-webkit-scrollbar-corner,.ow-body::-webkit-scrollbar-corner,
+  .ow-sheet-in::-webkit-scrollbar-corner,.ow-tabs::-webkit-scrollbar-corner,.ow-tw::-webkit-scrollbar-corner,
+  .own-body::-webkit-scrollbar-corner,.own-filters::-webkit-scrollbar-corner,
+  .pair-wrap::-webkit-scrollbar-corner,.pro-sheet::-webkit-scrollbar-corner,
+  .sg-sheet::-webkit-scrollbar-corner,.if-ov.jc-intro-mode #jc-mount::-webkit-scrollbar-corner{background:transparent!important}
   /* Horizontal chip strips are dragged, not scrolled with a bar: they keep their clean edge. */
-  .lot-tabs,.sched-strip,.horo-signs{scrollbar-gutter:auto!important}
+  .lot-tabs,.sched-strip,.horo-signs{scrollbar-width:none!important}
   .lot-tabs::-webkit-scrollbar,.sched-strip::-webkit-scrollbar,.horo-signs::-webkit-scrollbar{
     display:none!important;width:0!important;height:0!important;
   }
   /* Firefox: no ::-webkit-scrollbar, so the standard properties are the only way to style it. */
   @supports not selector(::-webkit-scrollbar){
-  /* Every REAL scrolling surface of the app, plus the page scroller itself. */
-  html,
-  .loto-scroll,
-  .about-scroll,.acc-scroll,.accq-box,.aved-box,.cal-box,.cal-yearsel,.cc-box,.cc-msg,
-  .cele-box,.cmp-wrap,.cov-sheet,.ct-layer-sheet,.ct-picker-list,.fb-box,.freq-wrap,
-  .horo-sheet,.horo-signs,.if-sheet,.lang-box,.lnc-detail-card,.lnc-list,.lnc-settings,
-  .lnc-table-wrap,.lot-tabs,.ow-body,.ow-sheet-in,.ow-tabs,.ow-tw,.own-body,.own-filters,
-  .pair-wrap,.pro-sheet,.sched-strip,.sg-sheet,
-  .if-ov.jc-intro-mode #jc-mount{
+    .loto-scroll,.about-scroll,.acc-scroll,.accq-box,.aved-box,.cal-box,.cal-yearsel,.cc-box,.cc-msg,
+    .cele-box,.cmp-wrap,.cov-sheet,.ct-layer-sheet,.ct-picker-list,.ct-sheet,.fb-box,.freq-wrap,.horo-sheet,
+    .if-sheet,.lang-box,.lnc-detail-card,.lnc-list,.lnc-settings,.lnc-table-wrap,.ow-body,.ow-sheet-in,
+    .ow-tabs,.ow-tw,.own-body,.own-filters,.pair-wrap,.pro-sheet,.sg-sheet,.if-ov.jc-intro-mode #jc-mount{
       scrollbar-width:thin!important;
       scrollbar-color:color-mix(in srgb,var(--gold) 68%,transparent) color-mix(in srgb,var(--gold) 8%,transparent)!important;
     }
@@ -3648,23 +3717,23 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=8bbec9c"></script>
-<script src="./commercial-config.js?v=8bbec9c"></script>
-<script src="./event-runtime.js?v=8bbec9c"></script>
-<script src="./external-link-runtime.js?v=8bbec9c"></script>
-<script src="./auth-client.js?v=8bbec9c"></script>
-<script src="./native-loader.js?v=8bbec9c"></script>
-<script src="./i18n-catalog.js?v=8bbec9c"></script>
-<script src="./lang-detect.js?v=8bbec9c"></script>
-<script src="./i18n-runtime.js?v=8bbec9c"></script>
-<script src="./consent-runtime.js?v=8bbec9c"></script>
-<script src="./analytics-telemetry.js?v=8bbec9c"></script>
-<script src="./win-match-core.js?v=8bbec9c"></script>
-<script src="./court-core.js?v=8bbec9c"></script>
-<script src="./app-runtime.js?v=8bbec9c"></script>
-<script src="./inline-runtime-2.js?v=8bbec9c"></script>
-<script src="./commercial-runtime.js?v=8bbec9c"></script>
-<script src="./inline-runtime-3.js?v=8bbec9c"></script>
+<script src="./version.js?v=450e1fa"></script>
+<script src="./commercial-config.js?v=450e1fa"></script>
+<script src="./event-runtime.js?v=450e1fa"></script>
+<script src="./external-link-runtime.js?v=450e1fa"></script>
+<script src="./auth-client.js?v=450e1fa"></script>
+<script src="./native-loader.js?v=450e1fa"></script>
+<script src="./i18n-catalog.js?v=450e1fa"></script>
+<script src="./lang-detect.js?v=450e1fa"></script>
+<script src="./i18n-runtime.js?v=450e1fa"></script>
+<script src="./consent-runtime.js?v=450e1fa"></script>
+<script src="./analytics-telemetry.js?v=450e1fa"></script>
+<script src="./win-match-core.js?v=450e1fa"></script>
+<script src="./court-core.js?v=450e1fa"></script>
+<script src="./app-runtime.js?v=450e1fa"></script>
+<script src="./inline-runtime-2.js?v=450e1fa"></script>
+<script src="./commercial-runtime.js?v=450e1fa"></script>
+<script src="./inline-runtime-3.js?v=450e1fa"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3813,9 +3882,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=8bbec9c"></script>
-<script src="./notifications-runtime.js?v=8bbec9c"></script>
-<script src="./pwa-runtime.js?v=8bbec9c"></script>
+<script src="./notification-center.js?v=450e1fa"></script>
+<script src="./notifications-runtime.js?v=450e1fa"></script>
+<script src="./pwa-runtime.js?v=450e1fa"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3826,8 +3895,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=8bbec9c"></script>
-<script src="./inline-runtime-5.js?v=8bbec9c"></script>
-<script src="./inline-runtime-6.js?v=8bbec9c"></script>
+<script src="./inline-runtime-4.js?v=450e1fa"></script>
+<script src="./inline-runtime-5.js?v=450e1fa"></script>
+<script src="./inline-runtime-6.js?v=450e1fa"></script>
 </body>
 </html>
