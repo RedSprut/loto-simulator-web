@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-09-22T09:27:06.029Z",
+  "updated": "2026-09-22T22:19:09.363Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-09-19",
       "expectedLastDraw": "2026-09-19",
       "nextDrawDate": "2026-09-26",
-      "updatedAt": "2026-09-22T09:27:06.029Z",
-      "sourceUpdatedAt": "2026-09-22T09:27:06.029Z",
+      "updatedAt": "2026-09-22T22:19:09.363Z",
+      "sourceUpdatedAt": "2026-09-22T22:19:09.363Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -29,25 +29,25 @@
       "lastDrawDate": "2026-09-16",
       "expectedLastDraw": "2026-09-16",
       "nextDrawDate": "2026-09-23",
-      "updatedAt": "2026-09-22T09:27:06.029Z",
-      "sourceUpdatedAt": "2026-09-22T09:27:06.029Z",
+      "updatedAt": "2026-09-22T22:19:09.363Z",
+      "sourceUpdatedAt": "2026-09-22T22:19:09.363Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "norsk-tipping.no"
     },
     "euro": {
-      "amount": "735",
+      "amount": "864",
       "prefix": "Ca. ",
       "sub": "MILLIONER NOK",
       "cur": "NOK",
       "currency": "NOK",
-      "display": "Ca. 735 MILLIONER NOK",
-      "lastDrawDate": "2026-09-18",
-      "expectedLastDraw": "2026-09-18",
-      "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-22T09:27:06.029Z",
-      "sourceUpdatedAt": "2026-09-22T09:27:06.029Z",
+      "display": "Ca. 864 MILLIONER NOK",
+      "lastDrawDate": "2026-09-22",
+      "expectedLastDraw": "2026-09-22",
+      "nextDrawDate": "2026-09-25",
+      "updatedAt": "2026-09-22T22:19:09.363Z",
+      "sourceUpdatedAt": "2026-09-22T22:19:09.363Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -63,8 +63,8 @@
       "lastDrawDate": "2026-09-21",
       "expectedLastDraw": "2026-09-21",
       "nextDrawDate": "2026-09-23",
-      "updatedAt": "2026-09-22T09:27:06.029Z",
-      "sourceUpdatedAt": "2026-09-22T09:27:06.029Z",
+      "updatedAt": "2026-09-22T22:19:09.363Z",
+      "sourceUpdatedAt": "2026-09-22T22:19:09.363Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -80,53 +80,53 @@
       "lastDrawDate": "2026-09-18",
       "expectedLastDraw": "2026-09-18",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-22T09:27:06.029Z",
-      "sourceUpdatedAt": "2026-09-22T09:27:06.029Z",
+      "updatedAt": "2026-09-22T22:19:09.363Z",
+      "sourceUpdatedAt": "2026-09-22T22:19:09.363Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "megamillions.com"
     },
     "euromillions": {
-      "amount": "37",
+      "amount": "130",
       "prefix": "€",
       "sub": "MILLION",
       "cur": "EUR",
       "currency": "EUR",
-      "display": "€37 MILLION",
-      "lastDrawDate": "2026-09-18",
-      "expectedLastDraw": "2026-09-18",
-      "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-22T09:27:06.029Z",
-      "sourceUpdatedAt": "2026-09-22T09:27:06.029Z",
-      "sourceNextDraw": "2026-09-22",
+      "display": "€130 MILLION",
+      "lastDrawDate": "2026-09-22",
+      "expectedLastDraw": "2026-09-22",
+      "nextDrawDate": "2026-09-25",
+      "updatedAt": "2026-09-22T22:19:09.363Z",
+      "sourceUpdatedAt": "2026-09-22T22:19:09.363Z",
+      "sourceNextDraw": "2026-09-25",
       "status": "fresh",
       "synced": true,
       "source": "fdj.fr"
     },
     "superenalotto": {
-      "amount": "30.4",
+      "amount": "31.1",
       "prefix": "€",
       "sub": "MILLION",
       "cur": "EUR",
       "currency": "EUR",
-      "display": "€30.4 MILLION",
-      "lastDrawDate": "2026-09-19",
-      "expectedLastDraw": "2026-09-19",
-      "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-22T09:27:06.029Z",
-      "sourceUpdatedAt": "2026-09-22T09:27:06.029Z",
-      "sourceNextDraw": "2026-09-22",
+      "display": "€31.1 MILLION",
+      "lastDrawDate": "2026-09-22",
+      "expectedLastDraw": "2026-09-22",
+      "nextDrawDate": "2026-09-24",
+      "updatedAt": "2026-09-22T22:19:09.363Z",
+      "sourceUpdatedAt": "2026-09-22T22:19:09.363Z",
+      "sourceNextDraw": "2026-09-24",
       "status": "fresh",
       "synced": true,
-      "source": "official backend",
-      "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-09-19&next=2026-09-22",
-      "extractedText": "Jackpot che si stabilisce a &lt;b>30,4 milioni di euro",
+      "source": "superenalotto.net",
+      "sourceUrl": "https://www.superenalotto.net/",
+      "extractedText": "jackpot di giovedì vale circa 31,1 milioni di Euro",
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
           "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-19-settembre-2026",
+          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-22-settembre-2026",
           "error": "HTTP 403"
         },
         {
@@ -161,31 +161,8 @@
         },
         {
           "source": "superenalotto.net",
-          "ok": false,
-          "sourceUrl": "https://www.superenalotto.net/"
-        },
-        {
-          "source": "sisal.it ultima estrazione",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/superenalotto/ultima-estrazione",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it estrazioni",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/estrazioni/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it news",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/news/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "official backend",
           "ok": true,
-          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-09-19&next=2026-09-22"
+          "sourceUrl": "https://www.superenalotto.net/"
         }
       ]
     },
@@ -199,13 +176,13 @@
       "lastDrawDate": "2026-09-18",
       "expectedLastDraw": "2026-09-18",
       "nextDrawDate": "2026-09-22",
-      "updatedAt": "2026-09-22T09:27:06.029Z",
-      "sourceUpdatedAt": "2026-09-22T09:27:06.029Z",
+      "updatedAt": "2026-09-22T22:19:09.363Z",
+      "sourceUpdatedAt": "2026-09-22T22:19:09.363Z",
       "sourceNextDraw": "2026-09-22",
       "status": "fresh",
       "synced": true,
-      "source": "wclc.com",
-      "sourceUrl": "https://www.wclc.com/",
+      "source": "wclc.com lotto max",
+      "sourceUrl": "https://www.wclc.com/winning-numbers/lotto-max-extra.htm",
       "sourceAttempts": [
         {
           "source": "olg.ca",
@@ -214,8 +191,13 @@
         },
         {
           "source": "wclc.com",
-          "ok": true,
+          "ok": false,
           "sourceUrl": "https://www.wclc.com/"
+        },
+        {
+          "source": "wclc.com lotto max",
+          "ok": true,
+          "sourceUrl": "https://www.wclc.com/winning-numbers/lotto-max-extra.htm"
         }
       ]
     },
@@ -229,8 +211,8 @@
       "lastDrawDate": "2026-09-17",
       "expectedLastDraw": "2026-09-17",
       "nextDrawDate": "2026-09-24",
-      "updatedAt": "2026-09-22T09:27:06.029Z",
-      "sourceUpdatedAt": "2026-09-22T09:27:06.029Z",
+      "updatedAt": "2026-09-22T22:19:09.363Z",
+      "sourceUpdatedAt": "2026-09-22T22:19:09.363Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
