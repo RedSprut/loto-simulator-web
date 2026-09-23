@@ -3,6 +3,32 @@
    скрипт, поэтому build выносит его в boot-runtime.js (parser-blocking, исполняется
    раньше <body>). Скрытие/удаление splash — в IIFE в конце этого же скрипта. */
 document.documentElement.classList.add('loto-booting');
+/* THE PAGE SCROLLBAR MAY NEVER TAKE LAYOUT WIDTH.
+   A platform CLASSIC scrollbar is part of the layout: the browser subtracts it from the viewport,
+   so the header, the page background and every centred box stop short of the window's right edge
+   and the engine paints its track in the strip that is left — a permanent light band down the
+   right of the site, straight across the dark header. No CSS turns a classic bar into an overlay
+   one: the engine picks that from the OS ("Show scroll bars" on macOS), and `scrollbar-gutter`
+   and `::-webkit-scrollbar` only ever made it worse. The only way for the page to keep its full
+   width is for its bar to be zero-width.
+   So: measure once, here, whether this platform's scrollbars take space, and if they do, hide the
+   PAGE one (`html.loto-overlay-bars`, next to the `.loto-booting` rules). Where the platform
+   already overlays — Safari, every touch device, a Mac set to "show scroll bars when scrolling" —
+   nothing is touched and the native bar keeps working, because there it costs no width. The probe
+   is on documentElement so it runs before <body> exists, and before the first paint, so the strip
+   never flashes. Long pages keep their own affordance either way: #scroll-anchors shows a
+   jump-to-top/bottom control whenever the document is over two viewports tall.
+   Inner sheets and panels are NOT affected — they keep the desktop bar the app draws for them. */
+(function(){
+  try{
+    var probe=document.createElement('div');
+    probe.style.cssText='position:absolute;top:-9999px;left:-9999px;width:100px;height:100px;overflow:scroll';
+    document.documentElement.appendChild(probe);
+    var takesSpace=probe.offsetWidth-probe.clientWidth>0;
+    probe.remove();
+    if(takesSpace)document.documentElement.classList.add('loto-overlay-bars');
+  }catch(_){}
+})();
 /* No FREE-before-PRO flash: the body starts `access-pending` (tier badges hidden); reveal them
    only once the real access level has resolved. refreshAccess() awaits the backend before its
    first emit, so the first accesschange already carries the true tier. A timeout is a safety net
