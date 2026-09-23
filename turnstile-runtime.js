@@ -15,9 +15,13 @@
  *
  * Without a configured site key nothing is rendered and getToken() resolves to '' — the server
  * then reports the challenge as unconfigured and the account, mailbox and installation pools stay
- * the real gates. On localhost and in automated browsers the OFFICIAL Cloudflare test key is used
- * (documented, always-passes, and only ever accepted by a deployment whose SECRET is the matching
- * test secret) — never a production bypass.
+ * the real gates. On a LOCAL page talking to a LOCAL backend the OFFICIAL Cloudflare test key is
+ * used (documented, always-passes) so the flow can be exercised in development. Both halves of
+ * that condition matter: the test key mints the literal token `XXXX.DUMMY.TOKEN.XXXX`, which only
+ * a deployment holding Cloudflare's matching TEST SECRET accepts. Sent to production it is just a
+ * bad token — and a bad token is charged to the VISITOR as a failed challenge. A Capacitor
+ * WebView is served from hostname `localhost` as well, so "we are on localhost" alone must never
+ * be the reason to mint one.
  */
 (function () {
   'use strict';
@@ -37,10 +41,24 @@
       return host === 'localhost' || host === '127.0.0.1' || host === '' || navigator.webdriver === true;
     } catch (e) { return false; }
   }
+  // Is the configured backend one whose Turnstile SECRET can only be the test secret? A hosted
+  // Supabase project is a real backend with a real secret; an empty config reaches no backend at
+  // all, so nothing it mints can ever be charged to anybody.
+  function backendIsLocal() {
+    try {
+      var url = String(config().supabaseUrl || '').trim();
+      if (!url) return true;
+      var host = new URL(url).hostname;
+      return host === 'localhost' || host === '127.0.0.1';
+    } catch (e) { return false; }
+  }
   function siteKey() {
     var key = String(config().turnstileSiteKey || '').trim();
     if (key) return key;
-    return isLocal() ? TEST_SITE_KEY : '';
+    // A native build shipped without the site key lands here: it renders NO widget rather than a
+    // test one, so the server sees no token instead of a bad one. The person is still gated by
+    // the risk score, but our packaging mistake never becomes their recorded challenge failure.
+    return isLocal() && backendIsLocal() ? TEST_SITE_KEY : '';
   }
   function available() { return !!siteKey(); }
 
