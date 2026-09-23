@@ -861,30 +861,32 @@ async function restoreTicket(game){
     }
     if(record.sessions&&typeof record.sessions==='object')courtSessions=courtSessionsTrim({...record.sessions});
     renderSim();
-    // A ticket that comes back with its first rows already reviewed points at the next one to do.
-    try{focusFirstUnreviewedRow();}catch(_e){}
+    // A ticket that comes back with its first rows already analysed points at the first one that
+    // has not been touched yet.
+    try{focusFirstUntouchedRow();}catch(_e){}
   }
   ticketSaveReady=true;
 }
-// The ticket's own idea of "where the user is": the first row that still has to be reviewed.
-// Rows 1 and 2 settled and row 3 untouched means the main screen points at row 3. It only ever
-// moves off a row that is FINISHED, so a row the user is still working on is never taken away,
-// and every row — finished or not — stays selectable by hand.
-function firstUnreviewedRowIndex(){
-  const ui=window.LotoCourtUI;if(!ui||typeof ui.reviewStatus!=='function')return -1;
-  const l=L();
-  const state=index=>{
-    const row=rows[index];
-    if(!row||!Array.isArray(row.m)||row.m.length!==l.pM)return null;
-    try{const review=ui.reviewStatus(row);return review?review.state:null;}catch(_e){return null;}
-  };
-  if(state(act)!=='done')return -1;
-  for(let i=act+1;i<rows.length;i++)if(state(i)&&state(i)!=='done')return i;
-  for(let i=0;i<rows.length;i++)if(state(i)&&state(i)!=='done')return i;
+// ONE rule for "where the user is", shared by the main screen and every court room: the first
+// complete row that has had NO court action at all. A row is untouched only when its own history
+// records no analysis (reviewStatus 'none'); being the current row, or having a saved session,
+// does not make a row reviewed and does not make it the default. Rows 1-2 settled, row 3
+// untouched and row 4 half-done therefore give row 3 — never row 4.
+function courtRowState(index){
+  const ui=window.LotoCourtUI;if(!ui||typeof ui.reviewStatus!=='function')return null;
+  const row=rows[index],l=L();
+  if(!row||!Array.isArray(row.m)||row.m.length!==l.pM)return null;
+  try{const review=ui.reviewStatus(row);return review?review.state:null;}catch(_e){return null;}
+}
+function firstUntouchedRowIndex(){
+  for(let i=0;i<rows.length;i++)if(courtRowState(i)==='none')return i;
   return -1;
 }
-function focusFirstUnreviewedRow(){
-  const next=firstUnreviewedRowIndex();
+// Moving the selection is only ever a DEFAULT: it never takes the user off a row that has not
+// been touched yet, and a row picked by hand stays picked until the next time a default applies.
+function focusFirstUntouchedRow(){
+  if(courtRowState(act)==='none')return false;
+  const next=firstUntouchedRowIndex();
   if(next<0||next===act)return false;
   act=next;renderSim();return true;
 }
@@ -1803,7 +1805,8 @@ window.LotoCourtUI=Object.freeze({
   openSaved:(favIndex,rowIndex)=>withCourtApp(app=>app.openSaved(favIndex,rowIndex)),
   openRowHistory:(row,gameId,focus,ctx)=>withCourtApp(app=>app.openRowHistory(row,gameId,focus,ctx)),
   flushTicket:()=>flushTicketNow(),
-  focusFirstUnreviewed:()=>{try{return focusFirstUnreviewedRow();}catch(_e){return false;}},
+  focusFirstUntouched:()=>{try{return focusFirstUntouchedRow();}catch(_e){return false;}},
+  firstUntouchedRow:()=>{try{return firstUntouchedRowIndex();}catch(_e){return -1;}},
   close:()=>{if(window.LotoCourtApp)window.LotoCourtApp.close();},
   revealForResult:()=>{if(window.LotoCourtApp)window.LotoCourtApp.revealForResult();},
   resume:(action,response)=>withCourtApp(app=>app.resume(action,response)),
@@ -1832,7 +1835,31 @@ document.addEventListener('click',event=>{
   // THIS row instead of only describing what happened.
   else if(kind==='row-history'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur,null,{kind:'rows',index:rowIndex});}
   else if(kind==='ball'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur,Number(button.getAttribute('data-n')),{kind:'rows',index:rowIndex});}
+  else if(kind==='clear-ticket')confirmClearTicket();
 });
+// Wiping the ticket of THIS lottery: the combinations and everything the court recorded about
+// them. It is irreversible and it is asked for first. Nothing else the user owns — saved
+// combinations, ROI, notification settings, the other lotteries' tickets — is touched.
+function clearTicketNow(){
+  const game=cur;
+  if(window.LotoCourtApp)try{window.LotoCourtApp.close();}catch(_e){}
+  clearTimeout(ticketSaveTimer);
+  courtSessions=Object.create(null);
+  initRows();
+  try{if(typeof clearGroupAnalysisState==='function')clearGroupAnalysisState();}catch(_e){}
+  renderSim();
+  try{resetBanner();}catch(_e){}
+  try{storageSet(TICKET_KEY(game),ticketPayload(),true).catch(()=>{});}catch(_e){}
+  try{showCopyToast(appText('Билет очищен.'));}catch(_e){}
+}
+function confirmClearTicket(){
+  showFeedback(
+    appText('Очистить билет'),
+    appText('Все комбинации этой лотереи и вся история их рассмотрения в суде будут удалены. Это действие нельзя отменить.'),
+    '🗑',0,
+    {primaryText:'Отмена',secondaryText:'Удалить',secondaryAction:()=>clearTicketNow()}
+  );
+}
 
 // ── Календарный анализ (calendar-core.js + calendar-ui.js) ──
 // A PRO screen with its own full-page overlay. Both files load ONLY on the first tap of the home
@@ -1990,10 +2017,11 @@ function renderRowProvenance(){
     const status=review&&review.state==='done'?appText('Разобран')
       :review&&review.state==='in_progress'?appText(`Разбирается · нерешённых: ${review.pending}`):'';
     label.textContent=appText(`Ряд ${act+1}`)+(status?' · '+status:'')+(badge?' · '+badge:'');
-    box.append(label,button('🔍 '+appText(review&&review.reviewed?'Рассмотреть снова':'Анализ'),'row'),button('🕘 '+appText('История'),'row-history'));
+    box.append(label,button('🔍 '+appText(review&&review.reviewed?'Рассмотреть снова':'Анализ'),'row'),button('🕘 '+appText('История'),'row-history'),button('🗑 '+appText('Очистить'),'clear-ticket'));
   }else{
     label.textContent=`${act+1} · ${appText('Ряд не заполнен')}`;
     box.append(label,button('👥 '+appText('Ряды от присяжных'),'generate'));
+    if(rows.some(r=>(r.m||[]).length||(r.b||[]).length))box.append(button('🗑 '+appText('Очистить'),'clear-ticket'));
   }
   box.hidden=false;
 }
