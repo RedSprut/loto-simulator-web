@@ -744,7 +744,11 @@ async function saveFavs(arr){
 // record — nothing about it is invented.
 const TICKET_KEY=game=>'ticket_'+(game||cur);
 const TICKET_MAX_CHARS=250000;
-const COURT_SESSION_MAX=12;
+// One review per row, for a ticket that may hold 50 of them. A session that is dropped costs the
+// user the working set of that review (the votes, the aggregate, the evidence) — the DECISIONS
+// live in the row's own provenance and are never dropped — so the cap is the whole ticket and the
+// overflow path below gives up the cheapest thing first instead of everything at once.
+const COURT_SESSION_MAX=MAX_ROWS;
 let courtSessions=Object.create(null);
 let ticketGeneration=0,ticketSaveTimer=0,ticketSaveReady=false;
 function courtSessionsTrim(store){
@@ -783,12 +787,30 @@ function slimCourtSessions(store){
   }
   return out;
 }
+// Oldest first: what the user touched least recently is what goes when the record will not fit.
+function dropOldestSession(store){
+  const keys=Object.keys(store);
+  if(!keys.length)return false;
+  let oldest=keys[0];
+  for(const key of keys)if(((store[key]&&store[key].at)||0)<((store[oldest]&&store[oldest].at)||0))oldest=key;
+  delete store[oldest];
+  return true;
+}
 function ticketPayload(){
   const base={v:1,at:Date.now(),act,rows:rows.map(ticketRowSnapshot)};
   let text=JSON.stringify({...base,sessions:courtSessions});
   if(text.length<=TICKET_MAX_CHARS)return text;
-  text=JSON.stringify({...base,sessions:slimCourtSessions(courtSessions)});
+  // The per-persona evidence is by far the biggest part and can be recomputed by re-running the
+  // analysis; the votes, the aggregate and the decisions cannot.
+  const slim=slimCourtSessions(courtSessions);
+  text=JSON.stringify({...base,sessions:slim});
   if(text.length<=TICKET_MAX_CHARS)return text;
+  // Still too big: give up the least recently used reviews ONE at a time, so a long ticket keeps
+  // as many of them as it can instead of losing every one of them at the first overflow.
+  while(dropOldestSession(slim)){
+    text=JSON.stringify({...base,sessions:slim});
+    if(text.length<=TICKET_MAX_CHARS)return text;
+  }
   return JSON.stringify({...base,sessions:{}});
 }
 function scheduleTicketSave(){
@@ -839,15 +861,43 @@ async function restoreTicket(game){
     }
     if(record.sessions&&typeof record.sessions==='object')courtSessions=courtSessionsTrim({...record.sessions});
     renderSim();
+    // A ticket that comes back with its first rows already reviewed points at the next one to do.
+    try{focusFirstUnreviewedRow();}catch(_e){}
   }
   ticketSaveReady=true;
 }
-window.addEventListener('pagehide',()=>{
-  // A debounced save can still be pending when the tab goes away.
-  if(!ticketSaveReady)return;
+// The ticket's own idea of "where the user is": the first row that still has to be reviewed.
+// Rows 1 and 2 settled and row 3 untouched means the main screen points at row 3. It only ever
+// moves off a row that is FINISHED, so a row the user is still working on is never taken away,
+// and every row — finished or not — stays selectable by hand.
+function firstUnreviewedRowIndex(){
+  const ui=window.LotoCourtUI;if(!ui||typeof ui.reviewStatus!=='function')return -1;
+  const l=L();
+  const state=index=>{
+    const row=rows[index];
+    if(!row||!Array.isArray(row.m)||row.m.length!==l.pM)return null;
+    try{const review=ui.reviewStatus(row);return review?review.state:null;}catch(_e){return null;}
+  };
+  if(state(act)!=='done')return -1;
+  for(let i=act+1;i<rows.length;i++)if(state(i)&&state(i)!=='done')return i;
+  for(let i=0;i<rows.length;i++)if(state(i)&&state(i)!=='done')return i;
+  return -1;
+}
+function focusFirstUnreviewedRow(){
+  const next=firstUnreviewedRowIndex();
+  if(next<0||next===act)return false;
+  act=next;renderSim();return true;
+}
+// The open court holds the newest state of the review in memory; it writes it into courtSessions
+// here, BEFORE the record is built, so a tab that goes away never takes the last analysis with it.
+function flushTicketNow(){
+  if(!ticketSaveReady)return false;
+  try{if(window.LotoCourtApp&&typeof window.LotoCourtApp.flushSession==='function')window.LotoCourtApp.flushSession();}catch(_e){}
   clearTimeout(ticketSaveTimer);
   try{storageSet(TICKET_KEY(cur),ticketPayload(),true).catch(()=>{});}catch(_e){}
-});
+  return true;
+}
+window.addEventListener('pagehide',()=>{flushTicketNow();});
 
 // ─── PERSONAL STORAGE (ROI — stays only on this device) ───
 const loadROI=()=>{try{return JSON.parse(localStorage.getItem(ROI_KEY()))||{spent:0,won:0}}catch{return{spent:0,won:0}}};
@@ -1752,6 +1802,8 @@ window.LotoCourtUI=Object.freeze({
   openHome:(kind,source)=>withCourtApp(app=>app.openHome(kind,source)),
   openSaved:(favIndex,rowIndex)=>withCourtApp(app=>app.openSaved(favIndex,rowIndex)),
   openRowHistory:(row,gameId,focus,ctx)=>withCourtApp(app=>app.openRowHistory(row,gameId,focus,ctx)),
+  flushTicket:()=>flushTicketNow(),
+  focusFirstUnreviewed:()=>{try{return focusFirstUnreviewedRow();}catch(_e){return false;}},
   close:()=>{if(window.LotoCourtApp)window.LotoCourtApp.close();},
   revealForResult:()=>{if(window.LotoCourtApp)window.LotoCourtApp.revealForResult();},
   resume:(action,response)=>withCourtApp(app=>app.resume(action,response)),
