@@ -5770,7 +5770,11 @@ function NOTIF_render(s){
   show('notif-main',s.supported&&s.phase!==P.NEEDS_INSTALL&&s.phase!==P.DENIED);
   const master=document.getElementById('notif-master');if(master)master.checked=s.prefs.enabled&&s.permission==='granted';
   show('notif-cats',s.prefs.enabled&&s.permission==='granted');
-  ['draw_results','jackpot_updates','prize_breakdown','deadline_reminders','saved_ticket_results'].forEach(k=>{const el=document.getElementById('notif-cat-'+k);if(el)el.checked=s.prefs[k]!==false;});
+  /* Render from the runtime's resolver, never from an ad-hoc `!==false` guess: an unset key
+     must read as ITS default (the same one the runtime stores and the server gates on), so a
+     checkbox can never show ON while the stored/effective value is OFF. */
+  const cp=(window.LotoNotifications.normalizePrefs?window.LotoNotifications.normalizePrefs(s.prefs):s.prefs);
+  ['draw_results','jackpot_updates','prize_breakdown','deadline_reminders','saved_ticket_results'].forEach(k=>{const el=document.getElementById('notif-cat-'+k);if(el)el.checked=cp[k]===true;});
   const picked=NOTIF_selectedGames(s.prefs.selected_lotteries);const all=picked.length===NOTIF_lotList().length;const allEl=document.getElementById('notif-all-lots');if(allEl)allEl.checked=all;
   const wrap=document.getElementById('notif-lot-chips');
   if(wrap){wrap.style.display=all?'none':'flex';wrap.innerHTML='';NOTIF_lotList().forEach(id=>{const l=LOTS[id];const chip=document.createElement('div');chip.className='notif-lot-chip'+(picked.indexOf(id)>=0?' on':'');chip.textContent=(l.flag||'')+' '+(l.short||l.name||id);chip.onclick=()=>NOTIF_toggleLot(id);wrap.appendChild(chip);});}
