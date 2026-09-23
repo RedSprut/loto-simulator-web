@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-22",
+  "updatedAt": "2026-09-23",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
@@ -84950,6 +84950,70 @@
     ],
     "megaMillions": [
       {
+        "date": "2026-09-22",
+        "lotteryId": "megaMillions",
+        "currency": "USD",
+        "jackpot": 261,
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 261000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 1
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 10000,
+            "winners": 8
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 599,
+            "winners": 128
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 200,
+            "winners": 368
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 10,
+            "winners": 9024
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 10,
+            "winners": 8187
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 60671
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 2,
+            "winners": 140317
+          }
+        ],
+        "source": "Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-09-22"
+      },
+      {
         "date": "2026-09-18",
         "lotteryId": "megaMillions",
         "currency": "USD",
@@ -85540,49 +85604,49 @@
           {
             "match": "5+0",
             "label": "5+0",
-            "prizeAmount": null,
+            "prizeAmount": 1000000,
             "winners": 0
           },
           {
             "match": "4+1",
             "label": "4+1",
-            "prizeAmount": null,
+            "prizeAmount": 10000,
             "winners": 4
           },
           {
             "match": "4+0",
             "label": "4+0",
-            "prizeAmount": null,
+            "prizeAmount": 599,
             "winners": 120
           },
           {
             "match": "3+1",
             "label": "3+1",
-            "prizeAmount": null,
+            "prizeAmount": 200,
             "winners": 460
           },
           {
             "match": "3+0",
             "label": "3+0",
-            "prizeAmount": null,
+            "prizeAmount": 10,
             "winners": 8776
           },
           {
             "match": "2+1",
             "label": "2+1",
-            "prizeAmount": null,
+            "prizeAmount": 10,
             "winners": 8599
           },
           {
             "match": "1+1",
             "label": "1+1",
-            "prizeAmount": null,
+            "prizeAmount": 4,
             "winners": 66870
           },
           {
             "match": "0+1",
             "label": "0+1",
-            "prizeAmount": null,
+            "prizeAmount": 2,
             "winners": 154638
           }
         ],
@@ -85849,7 +85913,7 @@
         "date": "2026-07-31",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 50,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85906,8 +85970,8 @@
             "winners": 138837
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-07-31"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2026-07-28",
