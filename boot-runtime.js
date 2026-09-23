@@ -10,17 +10,18 @@ document.documentElement.classList.add('loto-booting');
    right of the site, straight across the dark header. No CSS turns a classic bar into an overlay
    one: the engine picks that from the OS ("Show scroll bars" on macOS), and `scrollbar-gutter`
    and `::-webkit-scrollbar` only ever made it worse.
-   So: measure once, here, whether this platform's scrollbars take space. If they do, the native
-   PAGE bar is switched off (`html.loto-overlay-bars`, next to the `.loto-booting` rules) AND
-   replaced by a real overlay one — see LotoPageScrollbar further down, which draws a draggable
-   thumb over the right edge and keeps it in sync with the document. Hiding without replacing is
-   not a fix: the bar is how you see where you are in a long page and how you drag to somewhere
-   else, and the ↑↓ anchors are a shortcut, not a substitute.
-   Where the platform ALREADY overlays — Safari, every touch device, a Mac set to "show scroll
-   bars when scrolling" — nothing is touched at all: the native bar already floats over the
-   content for zero width, so it stays, and no second bar is drawn next to it.
-   The probe runs on documentElement, before <body> exists and before the first paint, so the
-   strip never flashes. Inner sheets and panels are NOT affected — they keep their own bar. */
+   So on any desktop pointer the native PAGE bar is switched off (`html.loto-overlay-bars`, next
+   to the `.loto-booting` rules) and replaced by a real overlay one — see LotoPageScrollbar
+   further down, which draws a draggable thumb over the right edge and keeps it in sync with the
+   document. Hiding without replacing is not a fix: the bar is how you see where you are in a
+   long page and how you drag to somewhere else, and the ↑↓ anchors are a shortcut, not a
+   substitute. Touch keeps the platform's own bar, which is transient by design and costs
+   nothing.
+   The probe still runs, because "does this platform's bar take layout width" is the reason the
+   native one CANNOT be kept on Chromium and Firefox here; on Safari it does not, and the reason
+   is instead that its overlay bar fades to nothing a second after you stop scrolling.
+   It runs on documentElement, before <body> exists and before the first paint, so the strip
+   never flashes. Inner sheets and panels are NOT affected — they keep their own bar. */
 (function(){
   try{
     var probe=document.createElement('div');
@@ -28,7 +29,17 @@ document.documentElement.classList.add('loto-booting');
     document.documentElement.appendChild(probe);
     var takesSpace=probe.offsetWidth-probe.clientWidth>0;
     probe.remove();
-    if(takesSpace)document.documentElement.classList.add('loto-overlay-bars');
+    /* Two reasons to take over the page bar, and a mouse is enough on its own. Where the native
+       one takes layout width it has to go, or the site loses that width. Where it does not —
+       Safari — the native overlay bar fades out a second after you stop scrolling, so at rest
+       there is nothing to see and nothing to grab; the app's bar stays put and can be dragged
+       at any time, which is what a scrollbar is for. Doing both gives every desktop browser the
+       same bar instead of one behaviour per engine.
+       A coarse pointer keeps the platform's own: touch scrollbars are transient by design, the
+       app hides them everywhere else on touch, and mobile must not change. */
+    var fine=false;
+    try{fine=matchMedia('(pointer:fine)').matches;}catch(_e){}
+    if(takesSpace||fine)document.documentElement.classList.add('loto-overlay-bars');
   }catch(_){}
 })();
 /* No FREE-before-PRO flash: the body starts `access-pending` (tier badges hidden); reveal them
