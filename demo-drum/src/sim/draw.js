@@ -171,10 +171,10 @@ export class DrawController {
 
   /** The mixer (rotor phases + air field) — runs CONTINUOUSLY through every state
    *  of an active draw so the bed never goes calm between picks. */
-  _driveMixer(dt, liftScale = 1) {
+  _driveMixer(dt, flowScale = 1, draining = false) {
     this.balls.keepAwake();
     this._runMixPhases(dt);
-    this.air.apply(this.balls.activeItems(), dt, liftScale);
+    this.air.apply(this.balls.activeItems(), dt, flowScale, draining);
     this._trackActivity(dt);
   }
 
@@ -194,7 +194,7 @@ export class DrawController {
         if (this.timer > CONFIG.draw.mixSeconds) { this.drum.openGate(); this._set(State.CAPTURING); }
         break;
       case State.CAPTURING:
-        this._driveMixer(dt, CONFIG.air.captureLiftScale); // keep mixing, just ease the updraft
+        this._driveMixer(dt, CONFIG.air.captureFlowScale, true); // keep mixing, just throttle the blower
         this._captureDrain();
         this._watchCapture();
         break;

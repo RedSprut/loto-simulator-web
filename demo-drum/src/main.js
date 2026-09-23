@@ -3,9 +3,11 @@
  * machine, wires the HUD + camera director, loads a game profile, and runs the
  * fixed-order sim/render loop.
  *
- * Loop order matters: draw logic (kinematic winner + anti-stall forces + wake)
- * and the rotor both act BEFORE the physics step; meshes sync AFTER it.
- *   draw.update → rotor.update → physics.step → balls.sync → director → render
+ * Loop order matters: draw logic (kinematic winner + air forces + wake) and the
+ * drum wall act BEFORE the physics step, the rotor is re-targeted inside every
+ * sub-step of it, and meshes sync AFTER it.
+ *   draw.update → balls.applyWall → physics.step (rotor.update per sub-step)
+ *     → balls.sync → director → render
  */
 import * as THREE from 'three';
 import { CONFIG } from './config.js';
@@ -25,7 +27,7 @@ import { CameraDirector } from './ui/director.js';
 import { HUD } from './ui/hud.js';
 import { resolveTheme, applyTheme } from './ui/theme.js';
 import { initLocale, setLocale, t } from './i18n/index.js';
-import { AudioManager } from './sim/audio.js';
+import { AudioManager, createDrumAudioContext } from './sim/audio.js';
 import { createHostCombinationStore } from './store/host-store.js';
 import { SavePrompt } from './ui/save-prompt.js';
 import { SavedList } from './ui/saved-list.js';
@@ -117,6 +119,10 @@ async function main() {
   // Collision sounds are driven by Rapier's own contact-force events (physics.js);
   // the mechanical sound follows the EXISTING physical rotor's speed. No new physics,
   // no airflow. Silent until the Start gesture resumes the AudioContext (autoplay-safe).
+  // Build the AudioContext ourselves, with the interactive latency profile, BEFORE
+  // three.js lazily creates a default one for the listener. Sound in this drum is
+  // bound to physical events, so the output buffer is part of the sync budget.
+  try { const c = createDrumAudioContext(); if (c) THREE.AudioContext.setContext(c); } catch (e) {}
   const listener = new THREE.AudioListener();
   engine.camera.add(listener);
   const audio = new AudioManager(listener);
@@ -379,7 +385,12 @@ async function main() {
         minx = Math.min(minx, p.x); maxx = Math.max(maxx, p.x); miny = Math.min(miny, p.y); maxy = Math.max(maxy, p.y);
       }
       const published = (draw.resultsByPool[w.resultPool] || []).includes(w.value);
-      return { minx, maxx, miny, maxy, state: draw.state, revealed: !!draw._revealed, published, value: w.value };
+      const q = w.mesh.quaternion;
+      // Ball IDENTITY + live physical state, so an automated check can bind each
+      // audio event to the physical event of that specific ball (tests/3d-audio-sync.mjs).
+      return { minx, maxx, miny, maxy, state: draw.state, revealed: !!draw._revealed, published,
+        value: w.value, id: w.id, lifecycle: w.lifecycle, parked: !!w.parked,
+        quat: [q.x, q.y, q.z, q.w], linSpeed: w._linSpeed ?? null, angSpeed: w._angSpeed ?? null };
     };
   } catch (e) {}
 
@@ -409,13 +420,21 @@ async function main() {
     document.body.appendChild(img);
   }
 
+  // The simulation's own monotonic clock. Every sound this step produces belongs to
+  // THIS instant, not to the wall-clock moment the step happened to run — the loop
+  // below runs several steps inside one animation frame to catch up after a hitch.
+  let simTime = 0;
   function stepSim(dt) {
     if (paused) return;
+    audio.beginStep(simTime);
+    simTime += dt;
     balls.resetForces(); // clear last frame's forces so stale mixing forces can't linger
     draw.update(dt);     // kinematic targets + forces BEFORE the step
-    if (getActiveForcePolicy(draw.state).wall) balls.applyWall(); // drum wall only while balls can reach it
-    rotor.update(dt);
-    physics.step(dt);
+    if (getActiveForcePolicy(draw.state).wall) balls.applyWall(dt); // drum wall only while balls can reach it
+    // The rotor is re-targeted inside EVERY physics sub-step (see PhysicsWorld.step):
+    // a position-controlled kinematic body that is targeted once per frame runs the
+    // whole frame's rotation in sub-step 1, at n× its commanded speed, then freezes.
+    physics.step(dt, (h) => rotor.update(h));
     // Ball-vs-ball / ball-vs-wall sounds — straight from Rapier's contact-force events.
     // Fewer balls in play ⇒ Rapier reports fewer contacts ⇒ the soundscape thins out on
     // its own (no ball-count term in any volume formula).
@@ -461,6 +480,7 @@ async function main() {
 
   // ── Normal interactive loop (fixed-step physics, decoupled from FPS) ──
   const FIXED = 1 / 60;
+  const MAX_STEPS = 5;   // most catch-up steps one frame may simulate
   let hudTick = 0;
   let readySent = false;
   function frame() {
@@ -472,8 +492,17 @@ async function main() {
       return;
     }
     acc += dt;
+    // Bound the backlog. `acc` used to grow without limit whenever a frame cost more
+    // than MAX_STEPS could simulate, so on a slow device the loop saturated at five
+    // steps every frame FOREVER and the simulation slid permanently behind the wall
+    // clock (measured at a 20× CPU throttle: every frame capped, simulation running
+    // at 0.43× real time and falling further behind each second). Sound is produced
+    // when a step runs, so that debt is exactly what turns every ball event into a
+    // late "echo". Dropping unrecoverable time keeps physics, render and audio on
+    // the same clock; on any device that can keep up this never triggers.
+    if (acc > MAX_STEPS * FIXED) acc = MAX_STEPS * FIXED;
     let steps = 0;
-    while (acc >= FIXED && steps < 5) { stepSim(FIXED); acc -= FIXED; steps++; }
+    while (acc >= FIXED && steps < MAX_STEPS) { stepSim(FIXED); acc -= FIXED; steps++; }
     // Mechanism sound tracks the EXISTING physical rotor's live speed (0 at idle, ramps
     // up while mixing, coasts to 0 when stopping); rolling tracks the drawn ball's real
     // mesh speed while it travels the exit path. Nothing here drives the physics.

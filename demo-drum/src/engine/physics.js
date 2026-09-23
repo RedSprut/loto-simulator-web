@@ -23,6 +23,12 @@ export class PhysicsWorld {
     this.RAPIER = RAPIER;
     this.world = new RAPIER.World({ x: 0, y: CONFIG.physics.gravity, z: 0 });
     this.world.integrationParameters.numSolverIterations = 6;
+    // Rapier normalises its length tolerances against `lengthUnit` (units per
+    // metre). This scene is built at 1 unit = 10 cm, so leaving it at the default
+    // 1 made every tolerance ten times tighter than intended — in particular the
+    // speculative-contact prediction distance, which is why fast balls could reach
+    // 8 mm into the glass shell before a contact existed.
+    this.world.integrationParameters.lengthUnit = CONFIG.physics.lengthUnit;
     this.bodies = []; // {body, collider, kind, ...}
     // Rapier's OWN contact-force events (used by the drum audio). We do not compute any
     // custom collision maths — the engine's solver decides which impacts are strong
@@ -161,13 +167,28 @@ export class PhysicsWorld {
     if (collider) this.world.removeCollider(collider, true);
   }
 
-  step(dt) {
+  /**
+   * Advance the world by `dt`, in `CONFIG.physics.subSteps` equal sub-steps.
+   *
+   * `onSubStep(h)` re-targets the position-controlled kinematic bodies (the rotor)
+   * before EVERY sub-step, and that is not optional. Rapier derives a kinematic
+   * body's velocity from (nextPosition − position) / timestep inside the step, and
+   * `nextPosition` is not consumed: target it once per frame and the body performs
+   * the whole frame's rotation during sub-step 1 — at n× its commanded angular
+   * speed — then stands perfectly still for the rest. Measured on the mixer: a
+   * commanded 2.108 rad/s arrived at the solver as 4.216 rad/s, then 0. Balls were
+   * being struck by pushers moving at twice their visible surface speed, half the
+   * time.
+   */
+  step(dt, onSubStep) {
     // Sub-step for stability with fast small bodies; clamp huge frame gaps.
     const clamped = Math.min(dt, CONFIG.physics.maxDt);
     const n = CONFIG.physics.subSteps;
-    this.world.timestep = clamped / n;
+    const h = clamped / n;
+    this.world.timestep = h;
     if (this.collectContacts) this.contacts.length = 0;
     for (let i = 0; i < n; i++) {
+      onSubStep?.(h);
       this.world.step(this.eventQueue);
       // Drain Rapier's contact-force events every sub-step. When audio is on we record
       // each impact's force magnitude; when off we drain-and-discard so the queue can

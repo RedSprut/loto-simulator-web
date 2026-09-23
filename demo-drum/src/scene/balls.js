@@ -6,7 +6,7 @@
  * range and colour for whatever pool the game profile asks for.
  */
 import * as THREE from 'three';
-import { CONFIG } from '../config.js';
+import { BALL_MASS, CONFIG } from '../config.js';
 import { ballTexture, numberStickerTexture } from '../util/numbers.js';
 import { secureRandom } from '../util/prng.js';
 
@@ -497,27 +497,98 @@ export class Balls {
     }
   }
 
-  /** Smooth analytic spherical wall as a penalty force (spring + damping on the
-   *  outward velocity). It engages a hair inside the faceted trimesh so balls ride
-   *  a perfect sphere and never catch on a facet crease — applied every step, for
-   *  mixing and settling alike. Uniform for all balls; it is the drum wall. */
-  applyWall() {
+  /**
+   * The smooth analytic spherical wall — the drum boundary. It engages a hair
+   * inside the faceted trimesh so balls ride a perfect sphere and never catch on
+   * a facet crease; it is applied every frame, for mixing and settling alike, and
+   * is identical for every ball.
+   *
+   * It is solved at the VELOCITY level, exactly as a contact solver would: over
+   * this frame the wall removes the ball's outward radial speed, returns it
+   * scaled by the combined restitution, pushes out any residual penetration at a
+   * capped speed, and applies Coulomb friction at the contact point so the ball
+   * ROLLS on the glass instead of sliding. Because `addForce` persists across the
+   * frame's sub-steps, force = mass · Δv / dt delivers precisely that impulse.
+   *
+   * It used to be a penalty spring/damper (k = 600, damp = 24). That is
+   * unconditionally unstable for a 0.0335-unit-mass ball at this timestep — the
+   * explicit damping gain damp/m·dt is ≈ 12 — and the wall's measured restitution
+   * was 11.9× at a 0.5 u/s impact: every touch threw the ball back an order of
+   * magnitude faster than it arrived. The whole mix ran on that injected energy,
+   * with `clampSpeeds` clipping 6–8 % of all ball-samples flat against
+   * `maxLinSpeed`.
+   */
+  applyWall(dt = 1 / 60) {
     const maxR = CONFIG.drum.radius - CONFIG.ball.radius - CONFIG.wall.margin;
     const throatR = CONFIG.drum.throatRadius + CONFIG.ball.radius * 0.5;
     const throatY = -CONFIG.drum.radius * 0.6;
-    const { k, damp } = CONFIG.wall;
+    const W = CONFIG.wall;
+    const br = CONFIG.ball.radius;
+    const invDt = 1 / Math.max(1e-4, dt);
+    // Conservative early-out radius: `clampSpeeds` caps a ball's travel at
+    // maxLinSpeed·dt, so anything nearer the centre than this cannot reach the wall
+    // this frame. The extra margin is slack for the part of a frame's acceleration
+    // that lands before the next clamp.
+    const reach = maxR - (CONFIG.ball.maxLinSpeed * dt + W.margin);
     for (const it of this.items) {
       if (it.drawn || it.parked) continue;
       const p = it.body.translation();
       // Leave the bottom-centre throat open so a ball can drop through to capture.
       if (p.y < throatY && Math.hypot(p.x, p.z) < throatR) continue;
       const r = Math.hypot(p.x, p.y, p.z);
-      if (r <= maxR || r < 1e-4) continue;
-      const nx = p.x / r, ny = p.y / r, nz = p.z / r;
+      if (r < reach || r < 1e-4) continue;
+      const nx = p.x / r, ny = p.y / r, nz = p.z / r;   // outward contact normal
       const v = it.body.linvel();
-      const vn = v.x * nx + v.y * ny + v.z * nz;      // outward radial speed
-      const f = -(k * (r - maxR) + damp * Math.max(0, vn)); // inward
-      it.body.addForce({ x: nx * f, y: ny * f, z: nz * f }, true);
+      const vn = v.x * nx + v.y * ny + v.z * nz;        // outward radial speed
+      // SPECULATIVE contact: the fastest outward radial speed that still leaves the
+      // ball on or inside the wall at the end of this frame. Testing overlap alone
+      // is not enough — a ball at 8 u/s covers 0.13 units per frame and would cross
+      // the whole band before anything saw it. If the ball is already overlapping,
+      // the allowance is the (capped) inward speed that bleeds the penetration off
+      // over a few frames instead of ejecting it.
+      const pen = r - maxR;
+      const vAllowed = pen > 0
+        ? -Math.min(W.maxCorrection, W.bias * pen * invDt)
+        : -pen * invDt;
+      if (vn <= vAllowed) continue;                     // will not reach the wall
+      // Restitution: the ball's own (which drops during settling) averaged with
+      // the shell's, matching Rapier's default Average combine rule. Below the
+      // slop speed it is zero, so a ball resting against the glass cannot buzz.
+      const e = vn > W.restitutionSlop
+        ? 0.5 * ((it.collider?.restitution?.() ?? CONFIG.ball.restitution) + W.restitution)
+        : 0;
+      const dvN = vn - Math.min(vAllowed, -e * vn);     // inward Δv this frame
+      const m = BALL_MASS;
+      const fn = m * dvN * invDt;                       // normal force magnitude
+      let fx = -nx * fn, fy = -ny * fn, fz = -nz * fn;
+
+      // ── Coulomb friction at the contact point (this is what makes balls roll) ──
+      // Contact point sits at −r_ball·n̂ from the centre; its surface velocity is
+      // v + ω × (−r_ball·n̂). Kill the tangential part of that, capped by μ·fn.
+      const w = it.body.angvel();
+      const cx = -br * nx, cy = -br * ny, cz = -br * nz;
+      let sx = v.x + (w.y * cz - w.z * cy);
+      let sy = v.y + (w.z * cx - w.x * cz);
+      let sz = v.z + (w.x * cy - w.y * cx);
+      const sn = sx * nx + sy * ny + sz * nz;
+      sx -= sn * nx; sy -= sn * ny; sz -= sn * nz;      // tangential slip
+      const slip = Math.hypot(sx, sy, sz);
+      if (slip > 1e-5) {
+        const mu = 0.5 * ((it.collider?.friction?.() ?? CONFIG.ball.friction) + W.friction);
+        // A tangential impulse J at a sphere's surface changes the contact-point
+        // velocity by 3.5·J/m, so stopping the slip outright costs (2/7)·m·slip.
+        const jt = Math.min(mu * m * dvN, (2 / 7) * m * slip);
+        const ft = jt * invDt / slip;                   // force per unit slip vector
+        fx -= sx * ft; fy -= sy * ft; fz -= sz * ft;
+        // …and the matching torque about the centre: τ = r_contact × F_friction.
+        const tfx = -sx * ft, tfy = -sy * ft, tfz = -sz * ft;
+        it.body.addTorque({
+          x: cy * tfz - cz * tfy,
+          y: cz * tfx - cx * tfz,
+          z: cx * tfy - cy * tfx,
+        }, true);
+      }
+      it.body.addForce({ x: fx, y: fy, z: fz }, true);
     }
   }
 

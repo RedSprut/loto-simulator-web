@@ -20,6 +20,20 @@
  */
 import { AudioContext as ThreeAudioContext } from 'three';
 
+/**
+ * An AudioContext explicitly asked for the smallest practical output buffer.
+ * three.js builds its context with `new AudioContext()` and no options, which on
+ * some engines lands on a playback-sized buffer — every sound then trails its
+ * physical event by that buffer. Sound here is bound to physical events, so ask
+ * for the interactive profile up front. Creating (not resuming) a context needs
+ * no user gesture, so this stays autoplay-safe.
+ */
+export function createDrumAudioContext() {
+  const Ctor = window.AudioContext || window.webkitAudioContext;
+  if (!Ctor) return null;
+  try { return new Ctor({ latencyHint: 'interactive' }); } catch (e) { return new Ctor(); }
+}
+
 const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 const rnd = (a, b) => a + Math.random() * (b - a);
 
@@ -54,8 +68,38 @@ export class AudioManager {
     this.activeVoices = 0;
     this.lastHitAt = 0;
 
+    // ── One timeline shared with the simulation ──────────────────────────────
+    // Every sound belongs to a SIMULATION instant, not to the wall-clock moment
+    // the JS happened to run. main.js advances physics on a fixed 1/60 step and
+    // may run several steps inside one animation frame to catch up after a hitch;
+    // `_epoch` maps that sim clock onto the audio clock so each voice is
+    // scheduled at its own moment instead of every voice in the burst starting
+    // at once. See `beginStep`.
+    this._simTime = 0;
+    this._epoch = null;      // ctx time that corresponds to simTime 0
+    this._blockAt = -1;      // ctx time of the JS block the epoch was taken in
+    // A catch-up burst is at most 5 steps (main.js), i.e. 83 ms of simulation; this
+    // caps how far ahead of the audio clock a burst may ever schedule.
+    this.MAX_AHEAD = 0.1;
+
     this.mech = null;               // {src, gain} once a mechanism recording exists
+    this._loadPromise = null;
     this._bindContext(this.ctx);
+    // Fetch and decode the samples NOW, before any gesture. decodeAudioData works
+    // on a suspended context, so this costs nothing in autoplay terms and does not
+    // make a sound — but it means the bank is ready when the first ball actually
+    // hits something. Loading it inside the Start gesture instead left the drum
+    // silent while it was already mixing: measured 268 ms on a fast desktop and
+    // 2963 ms with the CPU throttled to a phone-like rate.
+    this._preload();
+  }
+
+  /** Start (or join) the one sample-bank load. Safe to call before any gesture. */
+  _preload() {
+    if (!this._loadPromise) {
+      this._loadPromise = this._loadManifest().catch(() => { this.loaded = true; });
+    }
+    return this._loadPromise;
   }
 
   _bindContext(ctx) {
@@ -109,8 +153,11 @@ export class AudioManager {
     this.banks = {};
     this.mechBuffer = null;
     this.activeVoices = 0;
+    this._loadPromise = null;
+    this._epoch = null;
+    this._blockAt = -1;
 
-    const ctx = new Ctor();
+    const ctx = createDrumAudioContext() || new Ctor();
     ThreeAudioContext.setContext(ctx);
     this.listener.context = ctx;
     try { this.listener.gain?.disconnect(); } catch (e) {}
@@ -146,7 +193,18 @@ export class AudioManager {
       return null;
     };
     const loadList = async (arr) => (await Promise.all((arr || []).map((f) => load(f)))).filter(Boolean);
-    for (const [dir, groups] of Object.entries(manifest)) {
+    // Serve the CURRENT game's folder next, every time round — `_bank()` becomes
+    // usable the moment its four lists are decoded, so the drum is audible without
+    // waiting for the other profiles. Re-checking `this.dir` on each iteration (as
+    // opposed to sorting once) means a setGame() that lands while the manifest is
+    // still in flight still gets its own samples first. The quiet mechanism loop
+    // goes last; nothing waits on it.
+    const pending = new Map(Object.entries(manifest));
+    while (pending.size) {
+      const dir = pending.has(this.dir) ? this.dir
+        : ([...pending.keys()].find((k) => k !== 'mechanism') ?? pending.keys().next().value);
+      const groups = pending.get(dir);
+      pending.delete(dir);
       if (dir === 'mechanism') { const b = await loadList(groups); this.mechBuffer = b[0] || null; continue; }
       this.banks[dir] = {
         ballBall: await loadList(groups.ballBall),
@@ -183,7 +241,7 @@ export class AudioManager {
     this.needsUserUnlock = !running;
     this.enabled = running;
     if (running) {
-      if (!this.loaded) { try { await this._loadManifest(); } catch (e) { this.loaded = true; } }
+      if (!this.loaded) { try { await this._preload(); } catch (e) { this.loaded = true; } }
       if (!this.started) { this._buildMech(); this.started = true; }
       this._ramp(this.master.gain, this.muted ? 0 : 1.0, 0.12);
     } else {
@@ -218,6 +276,7 @@ export class AudioManager {
   setGame(gameId) {
     const profile = GAME_AUDIO_PROFILE[gameId] || DEFAULT_PROFILE;
     this.dir = PROFILE_DIR[profile] || PROFILE_DIR[DEFAULT_PROFILE];
+    this._preload();   // no-op once running; makes the very first setGame start it
   }
 
   _bank() { return this.banks[this.dir] || null; }
@@ -236,6 +295,42 @@ export class AudioManager {
   }
 
   _canPlay() { return this.enabled && !this.needsUserUnlock && this.ctx.state === 'running'; }
+
+  /**
+   * Announce the simulation instant the next audio calls belong to. main.js calls
+   * this once per fixed physics step, BEFORE the step's contacts and ball events.
+   *
+   * Why this exists: the render loop advances physics in fixed 1/60 steps and runs
+   * up to five of them inside a single animation frame to catch up after a frame
+   * hitch. `ctx.currentTime` does not advance inside that JS block, so without a
+   * mapping every sound produced by the burst starts at the same instant — the
+   * whole burst collapses, and the 32 ms spacing test below throws most of it away
+   * (measured: 54–60 % of contact batches produced no voice at all, and per-voice
+   * desync reached 81 ms under load). Anchoring the sim clock to the audio clock
+   * lets the later steps of a burst schedule into the near future, where they keep
+   * their real spacing.
+   *
+   * The anchor is re-taken on every new JS block — `ctx.currentTime` only advances
+   * between animation frames, so a changed clock means a new frame — and the epoch
+   * is then exactly `now - simTime`. In the steady state (one step per frame) that
+   * makes `_when()` return `ctx.currentTime`, i.e. the behaviour this replaced,
+   * with NO latency added. Only the extra steps of a catch-up burst map forward,
+   * and only as far as the burst itself is long.
+   */
+  beginStep(simTime) {
+    this._simTime = simTime;
+    if (!this.ctx || this.ctx.state === 'closed') return;
+    const now = this.ctx.currentTime;
+    if (this._epoch === null || now !== this._blockAt) { this._epoch = now - simTime; this._blockAt = now; }
+  }
+
+  /** The audio-clock time for the simulation instant currently being stepped. */
+  _when() {
+    const now = this.ctx.currentTime;
+    if (this._epoch === null) return now;
+    const t = this._epoch + this._simTime;
+    return t < now ? now : (t > now + this.MAX_AHEAD ? now + this.MAX_AHEAD : t);
+  }
 
   /** Read-only: is a sound ACTUALLY being produced this instant? Drives the sound
    *  button's "playing" pulse. Never influences what/whether anything plays. */
@@ -271,9 +366,12 @@ export class AudioManager {
       const ballBall = ballColliders && ballColliders.has(c.c1) && ballColliders.has(c.c2);
       const set = ballBall ? bank.ballBall : (bank.ballWall.length ? bank.ballWall : bank.ballBall);
       if (!set || !set.length) { started++; continue; }
-      const now = this.ctx.currentTime;
-      if (now - this.lastHitAt < 0.032) break;
-      this.lastHitAt = now;
+      // Space hits on the SCHEDULED timeline. Comparing against ctx.currentTime
+      // discarded whole catch-up steps, because that clock is frozen for the
+      // duration of the JS block that runs them.
+      const when = this._when();
+      if (when - this.lastHitAt < 0.032) break;
+      this.lastHitAt = when;
       const shaped = Math.pow(s, 0.75);
       const base = ballBall ? 0.045 : 0.055, range = ballBall ? 0.16 : 0.18;
       this._voice(set[(Math.random() * set.length) | 0], (base + range * shaped) * rnd(0.88, 1.0), rnd(0.94, 1.0), this.collisionBus);
@@ -295,7 +393,8 @@ export class AudioManager {
     src.connect(g); g.connect(bus);
     this.activeVoices++;
     src.onended = () => { this.activeVoices--; try { src.disconnect(); g.disconnect(); } catch (e) {} };
-    try { src.start(); } catch (e) { this.activeVoices--; }
+    // Start at the SIMULATION instant this sound belongs to (never in the past).
+    try { src.start(this._when()); } catch (e) { this.activeVoices--; }
   }
 
   // ── Discrete drawn-ball events (bound to real lifecycle/physics in main.js) ──
