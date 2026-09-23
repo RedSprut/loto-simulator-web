@@ -593,12 +593,19 @@
     AccountUI.cancelEdit();
     return true;
   }
+  // openSignIn() nominates the e-mail field for the modal manager's focus step. The manager can
+  // re-run that step (its observer re-activates the overlay after the class change), so the
+  // marker has to survive as long as the sign-in screen does — and never outlive it, or a plain
+  // trip to the cabinet would try to focus a field that is hidden for a signed-in user.
+  function clearSignInFocus(){const input=$('acc-email-input');if(input)input.removeAttribute('autofocus');}
   window.openAccount=function(){
+    clearSignInFocus();
     const el=$('account-ov');
     if(el)el.__lotoClose=()=>{
       // Escape / native Back / the modal manager all come through here, so the unsaved guard has
       // to live here too — otherwise it is trivially bypassed.
       if(profileDirty()){void confirmLeaveProfile().then(ok=>{if(ok)window.closeAccount();});return;}
+      clearSignInFocus();
       el.classList.remove('show');document.body.classList.remove('account-open');const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','false');
     };
     document.body.classList.add('account-open');
@@ -607,8 +614,25 @@
     render();loadAvatar(true);
     try{window.LotoCommercial&&window.LotoCommercial.refreshAccess&&window.LotoCommercial.refreshAccess();}catch(_e){}
   };
+  // The single sign-in destination for every "требуется вход" gate in the app
+  // (LotoCommercial.requestSignIn calls this). It opens the account screen the app already
+  // has and puts the user ON the e-mail form — sign in and registration are the same
+  // passwordless flow, so one screen serves both.
+  window.openSignIn=function(reason){
+    window.openAccount();
+    // openAccount() renders synchronously, so the card's real visibility is known here — and
+    // still before the manager's focus frame, which is where the e-mail field actually gets
+    // focus. An already signed-in user just gets the plain cabinet.
+    const card=$('acc-signin');
+    if(!card||card.hidden)return;
+    const input=$('acc-email-input');
+    if(input)input.setAttribute('autofocus','');
+    if(reason)msg('acc-auth-msg',reason,'info');
+    requestAnimationFrame(()=>{try{card.scrollIntoView({block:'center'});}catch(_e){}});
+  };
   window.closeAccount=function(){
     if(profileDirty()){void confirmLeaveProfile().then(ok=>{if(ok)window.closeAccount();});return;}
+    clearSignInFocus();
     const el=$('account-ov');
     if(el)el.__lotoClose=null;
     if(window.LotoModals)window.LotoModals.closeModal('account-ov');else if(el)el.classList.remove('show');
@@ -628,7 +652,10 @@
       try{
         const am=window.LotoCommercial&&window.LotoCommercial.authMessage;
         const st=accountState();
-        if(am&&am.justConfirmed&&st.confirmed&&!window.__accAutoOpened){
+        // A sign-in that was asked for BY a feature owes the user that feature, not the
+        // cabinet: the commercial runtime is about to reopen it (see AUTH_RESUME_KEY).
+        const owed=!!(window.LotoCommercial&&window.LotoCommercial.authResumePending);
+        if(am&&am.justConfirmed&&st.confirmed&&!owed&&!window.__accAutoOpened){
           window.__accAutoOpened=true;
           const ov=document.getElementById('account-ov');
           if(ov&&!ov.classList.contains('show'))window.openAccount();
