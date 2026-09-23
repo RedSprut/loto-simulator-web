@@ -5869,6 +5869,106 @@ document.addEventListener('DOMContentLoaded',()=>{
   setTimeout(updateLotteryNavArrows,80);
   setTimeout(()=>{PERIOD_refreshLabel();NOTIF_boot();},500);
   setTimeout(autoCheckFavorites,4500);
+  /* ══ OVERLAY PAGE SCROLLBAR ══════════════════════════════════════════════════════════════
+     Only runs where the probe in the first inline script found that this platform's scrollbars
+     take layout width and therefore switched the native page bar off. Everywhere else — Safari,
+     touch, a Mac set to "show scroll bars when scrolling" — the native bar already floats over
+     the content for free and this does nothing, so there is never a second bar.
+     It is a real scrollbar, not an indicator: the thumb is draggable, the track is clickable
+     (page at a time, like the platform default), and wheel/keyboard/trackpad are untouched
+     because nothing here intercepts them — the bar only ever READS window.scrollY and writes it
+     back through the same scrollTo() the browser would use.
+     Geometry is recomputed on scroll, on resize and whenever the document's height changes, all
+     coalesced into one rAF so a long page does not pay for it twice in a frame. */
+  (function(){
+    /* `html.loto-overlay-bars` is the single source of truth: the bar exists exactly while that
+       class does. The guard is checked on every sync rather than once at startup, so the widget
+       cannot drift out of step with the class — and a test can turn it on in any engine, instead
+       of only in whichever ones happen to use space-taking scrollbars on the machine running it.
+       Until it is on, this costs one class check per rAF-coalesced scroll and builds nothing. */
+    var MIN_THUMB=34,bar=null,thumb=null,raf=0,drag=null;
+    var enabled=function(){return document.documentElement.classList.contains('loto-overlay-bars');};
+    var metrics=function(){
+      var de=document.documentElement;
+      var view=window.innerHeight;
+      var full=Math.max(de.scrollHeight,document.body?document.body.scrollHeight:0);
+      var max=Math.max(0,full-view);
+      /* The thumb is as big a share of the track as the viewport is of the document — the same
+         proportion a native bar uses, so it reads as "how much of the page you can see". */
+      var size=max>0?Math.max(MIN_THUMB,Math.round(view*view/full)):0;
+      return {view:view,max:max,size:size,travel:Math.max(0,view-size),
+        y:Math.min(max,Math.max(0,window.scrollY||de.scrollTop||0))};
+    };
+    var paint=function(){
+      raf=0;
+      if(!enabled())return;
+      if(!bar){if(!document.body)return;build();}
+      var m=metrics();
+      var on=m.max>1;
+      if(bar.classList.contains('on')!==on)bar.classList.toggle('on',on);
+      if(!on)return;
+      thumb.style.height=m.size+'px';
+      thumb.style.transform='translateY('+(m.max?Math.round(m.y/m.max*m.travel):0)+'px)';
+    };
+    var sync=function(){if(!raf)raf=requestAnimationFrame(paint);};
+    var onMove=function(e){
+      if(!drag)return;
+      var m=metrics();
+      if(!m.travel||!m.max)return;
+      var top=Math.min(m.travel,Math.max(0,drag.top+(e.clientY-drag.y)));
+      window.scrollTo(0,Math.round(top/m.travel*m.max));
+      e.preventDefault();
+    };
+    var onUp=function(e){
+      if(!drag)return;
+      thumb.classList.remove('drag');
+      try{thumb.releasePointerCapture(drag.id);}catch(_){}
+      drag=null;e.preventDefault();
+    };
+    var build=function(){
+      bar=document.createElement('div');
+      bar.className='loto-sbar';
+      /* Decoration for assistive tech: the document is already scrollable and reachable by
+         keyboard, and a second announced control would only add noise. */
+      bar.setAttribute('aria-hidden','true');
+      thumb=document.createElement('div');
+      thumb.className='loto-sbar-thumb';
+      bar.appendChild(thumb);
+      document.body.appendChild(bar);
+      thumb.addEventListener('pointerdown',function(e){
+        if(e.button)return;
+        var m=metrics();
+        drag={id:e.pointerId,y:e.clientY,top:m.max?m.y/m.max*m.travel:0};
+        thumb.classList.add('drag');
+        try{thumb.setPointerCapture(e.pointerId);}catch(_){}
+        e.preventDefault();e.stopPropagation();
+      });
+      thumb.addEventListener('pointermove',onMove);
+      thumb.addEventListener('pointerup',onUp);
+      thumb.addEventListener('pointercancel',onUp);
+      /* Clicking the track pages towards the click, which is what the platform does by default. */
+      bar.addEventListener('pointerdown',function(e){
+        if(e.button||drag)return;
+        var m=metrics();if(!m.max)return;
+        var top=thumb.getBoundingClientRect();
+        var dir=e.clientY<top.top?-1:(e.clientY>top.bottom?1:0);
+        if(!dir)return;
+        window.scrollTo({top:Math.min(m.max,Math.max(0,m.y+dir*m.view*0.9)),behavior:'smooth'});
+        e.preventDefault();
+      });
+    };
+    addEventListener('scroll',sync,{passive:true});
+    addEventListener('resize',sync);
+    /* The document grows and shrinks on its own — a route change, a lottery switch, an archive
+       that finished loading — and none of that fires scroll or resize. */
+    var observe=function(){
+      if(!window.ResizeObserver||!document.body)return;
+      try{new ResizeObserver(sync).observe(document.body);}catch(_){}
+    };
+    if(document.body){observe();sync();}
+    else addEventListener('DOMContentLoaded',function(){observe();sync();},{once:true});
+    window.LotoPageScrollbar={sync:sync,el:function(){return bar;}};
+  })();
   let saRaf=0;
   const saUpd=()=>{
     if(saRaf)return; /* защита от каскада мутаций: не чаще кадра */
