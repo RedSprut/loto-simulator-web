@@ -689,6 +689,17 @@ function storageSet(key,value,shared=true){
   localStorage.setItem(key,value);
   return Promise.resolve(true);
 }
+// Removing a record. A shared-storage host is only required to provide get/set, so when it offers
+// no removal the record is emptied instead — readers treat an empty value as absent.
+function storageDrop(key,shared=true){
+  if(hasSharedStorage()){
+    const remove=window.storage.remove||window.storage.delete;
+    if(typeof remove==='function')return Promise.resolve(remove.call(window.storage,key,shared)).catch(()=>false);
+    return Promise.resolve(window.storage.set(key,'',shared)).catch(()=>false);
+  }
+  localStorage.removeItem(key);
+  return Promise.resolve(true);
+}
 
 async function loadD(id){
   try{
@@ -744,18 +755,26 @@ async function saveFavs(arr){
 // record — nothing about it is invented.
 const TICKET_KEY=game=>'ticket_'+(game||cur);
 const TICKET_MAX_CHARS=250000;
-// One review per row, for a ticket that may hold 50 of them. A session that is dropped costs the
-// user the working set of that review (the votes, the aggregate, the evidence) — the DECISIONS
-// live in the row's own provenance and are never dropped — so the cap is the whole ticket and the
-// overflow path below gives up the cheapest thing first instead of everything at once.
+// ── One case per combination ─────────────────────────────────────────────────────────────
+// Every reviewed row keeps its own stored record. They used to live together inside the ticket
+// record, and a fully reviewed row weighs ~27 KB of per-persona evidence: the ninth one took the
+// shared record to the 250 000-char cap, and the overflow path then stripped the evidence out of
+// EVERY row at once and went on to delete whole reviews. One row's growth must never cost another
+// row its case, so each one is written on its own, under its own key, with its own budget. The
+// ticket record keeps the rows and the index of those keys, and stays a few KB whatever happens.
+const COURT_RECORD_KEY=(game,key)=>'court1_'+(game||cur)+'_'+encodeURIComponent(key);
+// A single case that will not fit even alone loses its own evidence — never anyone else's.
+const COURT_RECORD_MAX_CHARS=200000;
 const COURT_SESSION_MAX=MAX_ROWS;
 let courtSessions=Object.create(null);
 let ticketGeneration=0,ticketSaveTimer=0,ticketSaveReady=false;
-function courtSessionsTrim(store){
+// Which cases are dirty, and which have been dropped, since the last write.
+let courtDirty=new Set(),courtRemoved=new Set(),courtSaveTimer=0;
+function courtSessionsTrim(store,forget){
   const keys=Object.keys(store);
   if(keys.length<=COURT_SESSION_MAX)return store;
   keys.sort((a,b)=>((store[a]&&store[a].at)||0)-((store[b]&&store[b].at)||0));
-  for(const key of keys.slice(0,keys.length-COURT_SESSION_MAX))delete store[key];
+  for(const key of keys.slice(0,keys.length-COURT_SESSION_MAX)){delete store[key];if(forget)forget(key);}
   return store;
 }
 function ticketRowSnapshot(row){
@@ -774,44 +793,32 @@ function slimEvaluation(evaluation){
   const {metrics,sources,...rest}=evaluation;
   return rest;
 }
-function slimCourtSessions(store){
-  const out={};
-  for(const [key,value] of Object.entries(store||{})){
-    const copy=JSON.parse(JSON.stringify(value));
-    for(const part of ['jury','defense','models','judge']){
-      const result=copy[part]&&copy[part].result;
-      if(result&&Array.isArray(result.evaluations))result.evaluations=result.evaluations.map(slimEvaluation);
-      if(result&&Array.isArray(result.rows))result.rows=result.rows.map(slimEvaluation);
-    }
-    out[key]=copy;
+function slimCourtSession(value){
+  const copy=JSON.parse(JSON.stringify(value));
+  for(const part of ['jury','defense','models','judge']){
+    const result=copy[part]&&copy[part].result;
+    if(result&&Array.isArray(result.evaluations))result.evaluations=result.evaluations.map(slimEvaluation);
+    if(result&&Array.isArray(result.rows))result.rows=result.rows.map(slimEvaluation);
   }
-  return out;
+  return copy;
 }
-// Oldest first: what the user touched least recently is what goes when the record will not fit.
-function dropOldestSession(store){
-  const keys=Object.keys(store);
-  if(!keys.length)return false;
-  let oldest=keys[0];
-  for(const key of keys)if(((store[key]&&store[key].at)||0)<((store[oldest]&&store[oldest].at)||0))oldest=key;
-  delete store[oldest];
-  return true;
+// One case, serialised. Only this case's own evidence is given up when it will not fit, and the
+// votes, the aggregate and the decisions on it are kept whatever happens.
+function courtRecordPayload(value){
+  let text=JSON.stringify(value);
+  if(text.length<=COURT_RECORD_MAX_CHARS)return text;
+  return JSON.stringify(slimCourtSession(value));
 }
+// The ticket record: the rows, and the index of the cases that belong to them. Court evidence is
+// NOT in here, so this can no longer be pushed over its cap by a review.
 function ticketPayload(){
-  const base={v:1,at:Date.now(),act,rows:rows.map(ticketRowSnapshot)};
-  let text=JSON.stringify({...base,sessions:courtSessions});
+  const base={v:1,at:Date.now(),act,rows:rows.map(ticketRowSnapshot),sessionKeys:Object.keys(courtSessions)};
+  let text=JSON.stringify(base);
   if(text.length<=TICKET_MAX_CHARS)return text;
-  // The per-persona evidence is by far the biggest part and can be recomputed by re-running the
-  // analysis; the votes, the aggregate and the decisions cannot.
-  const slim=slimCourtSessions(courtSessions);
-  text=JSON.stringify({...base,sessions:slim});
-  if(text.length<=TICKET_MAX_CHARS)return text;
-  // Still too big: give up the least recently used reviews ONE at a time, so a long ticket keeps
-  // as many of them as it can instead of losing every one of them at the first overflow.
-  while(dropOldestSession(slim)){
-    text=JSON.stringify({...base,sessions:slim});
-    if(text.length<=TICKET_MAX_CHARS)return text;
-  }
-  return JSON.stringify({...base,sessions:{}});
+  // Nothing here is recomputable except the provenance chain a row carried before its last manual
+  // edit, so that is what goes first.
+  text=JSON.stringify({...base,rows:base.rows.map(({provPrev,...rest})=>rest)});
+  return text;
 }
 function scheduleTicketSave(){
   if(!ticketSaveReady)return;
@@ -823,6 +830,29 @@ function scheduleTicketSave(){
     if(!ticketSaveReady||game!==cur)return;
     try{storageSet(TICKET_KEY(game),ticketPayload(),true).catch(()=>{});}catch(_e){}
   },300);
+}
+// Each touched case is written to its own record; a dropped one is removed from storage too.
+function writeCourtRecords(game){
+  for(const key of courtDirty){
+    const value=courtSessions[key];
+    if(!value)continue;
+    try{storageSet(COURT_RECORD_KEY(game,key),courtRecordPayload(value),true).catch(()=>{});}catch(_e){}
+  }
+  for(const key of courtRemoved){
+    try{storageDrop(COURT_RECORD_KEY(game,key));}catch(_e){}
+  }
+  courtDirty=new Set();courtRemoved=new Set();
+}
+function scheduleCourtSave(){
+  if(!ticketSaveReady)return;
+  clearTimeout(courtSaveTimer);
+  const game=cur;
+  courtSaveTimer=setTimeout(()=>{if(ticketSaveReady&&game===cur)writeCourtRecords(game);},300);
+}
+function flushCourtRecords(){
+  if(!ticketSaveReady)return;
+  clearTimeout(courtSaveTimer);
+  writeCourtRecords(cur);
 }
 // Applied only while the ticket is still the empty one selLot() just created: a restore must never
 // overwrite numbers the user has already typed in the moment the read took.
@@ -841,11 +871,28 @@ function restoreTicketRows(stored,l){
   }
   return out;
 }
+// Read back every case this ticket lists, each from its own record, in parallel. A record written
+// by an older build still lives inside the ticket record; it is adopted here and written out on
+// its own from the next save, so nothing a user already has is lost.
+async function loadCourtSessions(game,record){
+  const store=Object.create(null);
+  const embedded=record&&record.sessions&&typeof record.sessions==='object'?record.sessions:null;
+  if(embedded)for(const [key,value] of Object.entries(embedded))if(value&&typeof value==='object')store[key]=value;
+  const keys=Array.isArray(record&&record.sessionKeys)?record.sessionKeys.slice(0,COURT_SESSION_MAX):[];
+  await Promise.all(keys.map(async key=>{
+    try{
+      const stored=await withTimeout(storageGet(COURT_RECORD_KEY(game,key),true));
+      const value=stored&&stored.value?JSON.parse(stored.value):null;
+      if(value&&typeof value==='object')store[key]=value;
+    }catch(_e){}
+  }));
+  return store;
+}
 async function restoreTicket(game){
   const generation=++ticketGeneration;
   ticketSaveReady=false;
-  clearTimeout(ticketSaveTimer);
-  courtSessions=Object.create(null);
+  clearTimeout(ticketSaveTimer);clearTimeout(courtSaveTimer);
+  courtSessions=Object.create(null);courtDirty=new Set();courtRemoved=new Set();
   let record=null;
   try{
     const stored=await withTimeout(storageGet(TICKET_KEY(game),true));
@@ -859,13 +906,21 @@ async function restoreTicket(game){
       rows=restored;
       act=Number.isInteger(record.act)&&record.act>=0&&record.act<rows.length?record.act:0;
     }
-    if(record.sessions&&typeof record.sessions==='object')courtSessions=courtSessionsTrim({...record.sessions});
+    const sessions=await loadCourtSessions(game,record);
+    if(generation!==ticketGeneration||game!==cur)return;
+    courtSessions=courtSessionsTrim(sessions);
+    // A case adopted from an older ticket record has no record of its own yet.
+    if(record.sessions&&typeof record.sessions==='object')for(const key of Object.keys(courtSessions))courtDirty.add(key);
     renderSim();
     // A ticket that comes back with its first rows already analysed points at the first one that
     // has not been touched yet.
     try{focusFirstUntouchedRow();}catch(_e){}
   }
   ticketSaveReady=true;
+  // A ticket written by an older build carries its cases inside itself. Each one gets its own
+  // record NOW, not on a debounce: the ticket record is rewritten WITHOUT them the moment anything
+  // schedules a save, and a second restore would then find nothing left to adopt.
+  if(courtDirty.size)writeCourtRecords(game);
 }
 // ONE rule for "where the user is", shared by the main screen and every court room: the first
 // complete row that has had NO court action at all. A row is untouched only when its own history
@@ -897,6 +952,7 @@ function flushTicketNow(){
   try{if(window.LotoCourtApp&&typeof window.LotoCourtApp.flushSession==='function')window.LotoCourtApp.flushSession();}catch(_e){}
   clearTimeout(ticketSaveTimer);
   try{storageSet(TICKET_KEY(cur),ticketPayload(),true).catch(()=>{});}catch(_e){}
+  flushCourtRecords();
   return true;
 }
 window.addEventListener('pagehide',()=>{flushTicketNow();});
@@ -1795,8 +1851,17 @@ window.LotoCourtUI=Object.freeze({
   // store, so a session can never outlive or drift away from its combination.
   sessions:Object.freeze({
     get:key=>(key&&courtSessions[key])||null,
-    set:(key,value)=>{if(!key)return;courtSessions[key]=value;courtSessionsTrim(courtSessions);scheduleTicketSave();},
-    drop:key=>{if(key&&courtSessions[key]){delete courtSessions[key];scheduleTicketSave();}},
+    set:(key,value)=>{
+      if(!key)return;
+      courtSessions[key]=value;courtDirty.add(key);courtRemoved.delete(key);
+      courtSessionsTrim(courtSessions,dropped=>{courtDirty.delete(dropped);courtRemoved.add(dropped);});
+      scheduleTicketSave();scheduleCourtSave();
+    },
+    drop:key=>{
+      if(!key||!courtSessions[key])return;
+      delete courtSessions[key];courtDirty.delete(key);courtRemoved.add(key);
+      scheduleTicketSave();scheduleCourtSave();
+    },
   }),
   provenanceOf:(row,gameId)=>{const C=courtCore();return C?C.provenanceOf(row,courtRulesFor(gameId||cur)):{v:1,sourceType:'SAVED_LEGACY',unavailable:true,events:[]};},
   load:loadCourtApp,
@@ -1843,8 +1908,10 @@ document.addEventListener('click',event=>{
 function clearTicketNow(){
   const game=cur;
   if(window.LotoCourtApp)try{window.LotoCourtApp.close();}catch(_e){}
-  clearTimeout(ticketSaveTimer);
-  courtSessions=Object.create(null);
+  clearTimeout(ticketSaveTimer);clearTimeout(courtSaveTimer);
+  // Every case of this lottery goes with its combinations, record by record.
+  for(const key of Object.keys(courtSessions)){try{storageDrop(COURT_RECORD_KEY(game,key));}catch(_e){}}
+  courtSessions=Object.create(null);courtDirty=new Set();courtRemoved=new Set();
   initRows();
   try{if(typeof clearGroupAnalysisState==='function')clearGroupAnalysisState();}catch(_e){}
   renderSim();
