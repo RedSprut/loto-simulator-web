@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the d9d2975 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 3b4f80a placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-auto-20260925-tlx71f';
+const CACHE_VERSION='loto-shell-v3b4f80a';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -200,16 +200,25 @@ self.addEventListener('push',event=>{
   const type=payload.notificationType||payload.eventType||payload.type||'';
   const destination=payload.destination||PUSH_DESTINATIONS[type]||'simulator';
   const title=payload.title||'Lotto Simulator';
+  // Custom icon when the payload carries one, the app icon otherwise. Decoration only — see
+  // the showNotification() fallback below: an icon must never cost the user the notification.
+  const icon=typeof payload.icon==='string'&&/^(https:|\.\/)/.test(payload.icon)?payload.icon:'./icon-192.png';
   const options={
     body:payload.body||'',
-    icon:'./icon-192.png',
+    icon:icon,
     badge:'./favicon-64.png',
     tag:payload.tag||(payload.notificationId||[type,payload.lotteryId||'',payload.drawId||payload.date||''].join('-')),
     data:{notificationId:payload.notificationId||payload.id||'',notificationType:type,eventType:type,lotteryId:payload.lotteryId||'',drawId:payload.drawId||payload.date||'',destination:destination,deepLink:payload.deepLink||payload.deeplink||destination,createdAt:payload.createdAt||new Date().toISOString(),title:title,body:payload.body||'',payload:payload.payload||payload},
   };
   const full={notificationId:payload.notificationId||payload.id||'',notificationType:type,eventType:type,lotteryId:payload.lotteryId||'',drawId:payload.drawId||payload.date||'',destination:destination,deepLink:payload.deepLink||payload.deeplink||destination,title:title,body:payload.body||'',createdAt:payload.createdAt||new Date().toISOString(),unread:payload.unread,payload:payload.payload||payload};
+  // If the icon/badge cannot be fetched or decoded, show the notification again with no
+  // decoration at all rather than letting the whole handler reject — a rejected push handler
+  // is what makes Chrome replace the message with its generic "site updated in the background".
+  const bare=Object.assign({},options); delete bare.icon; delete bare.badge;
   event.waitUntil(Promise.all([
-    self.registration.showNotification(title,options),
+    self.registration.showNotification(title,options)
+      .catch(()=>self.registration.showNotification(title,bare))
+      .catch(()=>self.registration.showNotification(title,{body:options.body})),
     // Also hand the payload to any open window so the in-app center + bell badge update live.
     self.clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>cs.forEach(c=>c.postMessage({type:'LOTO_PUSH_RECEIVED',data:full})))
   ]));

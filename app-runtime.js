@@ -5729,7 +5729,7 @@ function NOTIF_consumeUrlDeepLink(){
   try{const q=new URLSearchParams(location.search);if(q.get('n_dest')){NOTIF_openDestination({destination:q.get('n_dest'),lotteryId:q.get('n_lot'),notificationType:q.get('n_type'),drawId:q.get('n_draw'),deepLink:q.get('n_link')});history.replaceState(null,'',location.pathname+(q.get('n_dest')==='owner'&&q.get('n_link')?q.get('n_link'):''));}}catch(e){}
 }
 function NOTIF_master(on){
-  if(on){document.getElementById('notif-explain').style.display='block';const m=document.getElementById('notif-master');if(m)m.checked=false;}
+  if(on){document.getElementById('notif-explain').style.display='block';const p=document.getElementById('notif-problem');if(p)p.style.display='none';const m=document.getElementById('notif-master');if(m)m.checked=false;}
   else{window.LotoNotifications.disableMaster().then(NOTIF_mirrorLegacy);}
 }
 function NOTIF_allow(){document.getElementById('notif-explain').style.display='none';window.LotoNotifications.enableMaster().then(NOTIF_mirrorLegacy);}
@@ -5754,6 +5754,19 @@ function NOTIF_allLots(on){window.LotoNotifications.setSelectedLotteries(on?[]:[
 function NOTIF_toggleLot(id){const s=window.LotoNotifications.getState();const sel=NOTIF_selectedGames(s.prefs.selected_lotteries);const i=sel.indexOf(id);if(i>=0)sel.splice(i,1);else sel.push(id);window.LotoNotifications.setSelectedLotteries(NOTIF_canonLots(sel));}
 function NOTIF_openSettings(){if(!window.LotoNotifications.openAppSettings())showFeedback('Настройки','Откройте настройки устройства → приложение → Уведомления.','🔔',4200);}
 function NOTIF_mirrorLegacy(){const s=window.LotoNotifications.getState();const on=s.prefs.enabled&&s.prefs.saved_ticket_results&&s.permission==='granted';try{localStorage.setItem('loto_notify',on?'1':'0');}catch(e){}}
+/* The permission flow must never fail silently. Every outcome that is not «delivering» gets a
+   sentence naming what happened and where the user answers it: the browser's own site permission,
+   signing in, or simply waiting for the server. Without this the consent block just collapsed and
+   the switch stayed empty with no explanation — the reported bug. */
+function NOTIF_problemText(s){
+  const P=window.LotoNotifications.PHASE;
+  if(s.phase===P.ACTIVE||s.phase===P.DENIED||s.phase===P.NOT_SUPPORTED||s.phase===P.NEEDS_INSTALL||s.phase===P.REGISTERING)return'';
+  if(s.error==='permission_dismissed')return'Браузер не показал запрос разрешения. Откройте настройки сайта в браузере и разрешите уведомления.';
+  if(s.error==='sign_in_required')return'Войдите в аккаунт, чтобы получать push-уведомления.';
+  if(s.error==='backend_unreachable'||s.error==='backend_not_configured'||s.error==='save_failed')return'Разрешение получено, но сервер уведомлений недоступен. Повторим попытку позже.';
+  if(s.error==='register_failed')return'Не удалось подписаться на уведомления. Попробуйте ещё раз.';
+  return'';
+}
 function NOTIF_render(s){
   const card=document.getElementById('notif-card');if(!card)return;
   card.style.display='';
@@ -5778,10 +5791,15 @@ function NOTIF_render(s){
   const picked=NOTIF_selectedGames(s.prefs.selected_lotteries);const all=picked.length===NOTIF_lotList().length;const allEl=document.getElementById('notif-all-lots');if(allEl)allEl.checked=all;
   const wrap=document.getElementById('notif-lot-chips');
   if(wrap){wrap.style.display=all?'none':'flex';wrap.innerHTML='';NOTIF_lotList().forEach(id=>{const l=LOTS[id];const chip=document.createElement('div');chip.className='notif-lot-chip'+(picked.indexOf(id)>=0?' on':'');chip.textContent=(l.flag||'')+' '+(l.short||l.name||id);chip.onclick=()=>NOTIF_toggleLot(id);wrap.appendChild(chip);});}
+  const problem=document.getElementById('notif-problem');
+  if(problem){const msg=NOTIF_problemText(s);problem.textContent=msg;problem.style.display=msg?'':'none';}
   const lbl=document.getElementById('notif-state-label');
   if(lbl){
-    const preparing=s.phase===P.GRANTED&&s.prefs.enabled&&!s.transportReady;
-    lbl.textContent=s.phase===P.ACTIVE?'· Включены':preparing?'· Готовим уведомления':s.phase===P.DENIED?'· Отключены системой':s.phase===P.NOT_SUPPORTED?(native?'· Недоступны в приложении':'· Недоступны в этом браузере'):'';
+    /* «Готовим» only while it is actually still being prepared: once a reason is known the
+       label must not keep promising progress the problem note is denying. */
+    const trouble=s.phase!==P.ACTIVE&&!!s.error;
+    const preparing=!trouble&&(s.phase===P.REGISTERING||(s.phase===P.GRANTED&&s.prefs.enabled&&!s.transportReady));
+    lbl.textContent=s.phase===P.ACTIVE?'· Включены':preparing?'· Готовим уведомления':s.phase===P.DENIED?'· Отключены системой':trouble?'· Не включены':s.phase===P.NOT_SUPPORTED?(native?'· Недоступны в приложении':'· Недоступны в этом браузере'):'';
   }
 }
 /* ══ PERSONAL WIN / MATCH SYSTEM ══════════════════════════════════════════════════════════════
