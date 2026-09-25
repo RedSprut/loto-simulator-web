@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the dd5b1b9 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 4dc4d3f placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-vdd5b1b9';
+const CACHE_VERSION='loto-shell-v4dc4d3f';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -174,6 +174,14 @@ self.addEventListener('fetch',event=>{
   // Both carry a ?v= build revision, but the ignoreSearch match above would still hand back the
   // previous deploy first. Owner-only, loaded lazily, small: network-first, cache only offline.
   if(/\/owner-map\.js$|\/owner-notifications\.js$|\/vendor\/world\//.test(url.pathname)){
+    event.respondWith(networkFirst(request,SHELL_CACHE));
+    return;
+  }
+  // commercial-config.js carries the billing flags/environment and is rebuilt from deploy vars, so
+  // it can change while the commit (and therefore CACHE_VERSION and this worker) stays the same.
+  // Served from the shell cache it would keep a returning visitor on the previous config for good:
+  // billing could neither be switched on nor killed. Tiny file: network-first, cache only offline.
+  if(/\/commercial-config\.js$/.test(url.pathname)){
     event.respondWith(networkFirst(request,SHELL_CACHE));
     return;
   }
