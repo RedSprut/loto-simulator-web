@@ -16,6 +16,12 @@
  * visit counters (people / suspicious / bots per country), exact account and purchase metrics from the
  * auth + entitlement tables, and a country choropleth with hover, whole-territory selection, continent
  * view and a scrollable country card. Still Russian only, owner only, real data only.
+ *
+ * 2026-09-24: the «AI-агенты» section. AI agents acting for a person are shown APART from people:
+ * whether the agent's identity was cryptographically proven (Web Bot Auth) or merely claimed, which
+ * operator, which account, what it did (visit / login / purchase with plan and amount / simulation)
+ * and — the number to watch — what refused it and why. It reads its own ledger
+ * (public.agent_activity via owner_agent_activity); no other section's numbers change.
  */
 (function () {
   'use strict';
@@ -44,6 +50,7 @@
     { id: 'funnels', label: 'Воронки' },
     { id: 'retention', label: 'Удержание' },
     { id: 'bots', label: 'Боты и QA' },
+    { id: 'agents', label: 'AI-агенты' },
     { id: 'consent', label: 'Согласия' },
     { id: 'quality', label: 'Качество данных' }
   ];
@@ -1578,11 +1585,111 @@
     lineChart(data.timeseries || [], ['accepted', 'only_necessary'], ['Согласились', 'Только необходимое']);
   }
 
+  // ── AI-агенты ───────────────────────────────────────────────────────────────────────────────
+  // Деятельность автоматизации, НЕ смешанная с людьми: люди в остальных разделах считаются по
+  // traffic_class, куда агент никогда не попадает как human. Здесь показано ровно то, что сервер
+  // действительно наблюдал: доказана ли личность агента подписью (Web Bot Auth), какой оператор,
+  // какой аккаунт, что он делал и чем именно его остановили.
+  var AGENT_CLASS_RU = {
+    agent_verified: 'Проверенный AI-агент', agent_unverified: 'Непроверенная автоматизация', bot: 'Краулер / бот'
+  };
+  var AGENT_KIND_RU = {
+    visit: 'Визит', login: 'Вход', signup: 'Регистрация', purchase: 'Покупка',
+    simulation: 'Симуляция', feature: 'Функция', blocked: 'Отказ'
+  };
+  var AGENT_EVIDENCE_RU = {
+    web_bot_auth_verified: 'Подпись Web Bot Auth проверена',
+    web_bot_auth_signature_mismatch: 'Подпись не совпала',
+    web_bot_auth_directory_unavailable: 'Каталог ключей недоступен',
+    web_bot_auth_unknown_key: 'Ключ не опубликован в каталоге',
+    web_bot_auth_expired: 'Подпись просрочена',
+    web_bot_auth_no_web_bot_auth_tag: 'Подпись не для Web Bot Auth',
+    web_bot_auth_authority_not_covered: 'Подпись не покрывает домен',
+    web_bot_auth_signature_agent_not_covered: 'Подпись не покрывает Signature-Agent',
+    user_agent_claim: 'Заявлено только в User-Agent',
+    automation_engine: 'Движок автоматизации (headless)',
+    client_declared_webdriver: 'Страница сообщила navigator.webdriver',
+    attributed_by_recent_agent_session: 'Связано с недавней сессией агента'
+  };
+  function agentEvidenceRu(key) {
+    if (AGENT_EVIDENCE_RU[key]) return AGENT_EVIDENCE_RU[key];
+    if (key.indexOf('agent_operator:') === 0) return 'Оператор: ' + key.slice(15);
+    if (key.indexOf('declared_bot:') === 0) return 'Объявленный бот: ' + key.slice(13);
+    return LIB.evidenceRu ? LIB.evidenceRu(key) : key;
+  }
+  function money(value, currency) {
+    var n = +value || 0;
+    if (!n) return '—';
+    return n.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + (currency ? ' ' + esc(currency) : '');
+  }
+  function renderAgents(data) {
+    var s = data.summary || {};
+    var evidence = {};
+    Object.keys(data.evidence || {}).forEach(function (key) { evidence[agentEvidenceRu(key)] = data.evidence[key]; });
+    var reasons = {};
+    Object.keys(data.blocked_reasons || {}).forEach(function (key) { reasons[key] = data.blocked_reasons[key]; });
+    return '<div class="ow-cards">' +
+      card('Запросы автоматизации', num(s.requests), num(s.accounts) + ' аккаунт(ов) · ' + num(s.operators) + ' оператор(ов)') +
+      card('Проверенные агенты', num(s.verified_requests), 'подпись Web Bot Auth проверена сервером') +
+      card('Непроверенная автоматизация', num(s.unverified_requests), 'заявлено, но не доказано') +
+      card('Краулеры и боты', num(s.bot_requests), 'объявленные индексаторы и скрипты') +
+      card('Визиты и входы', num(s.visits) + ' / ' + num(s.logins), 'визит · вход или регистрация') +
+      card('Симуляции', num(s.simulations), 'запуски моделей и разборов') +
+      card('Покупки агентами', num(s.purchases), 'подтверждено магазином: ' + money(s.revenue)) +
+      card('Отказы агентам', num(s.blocked), 'см. причины ниже') +
+    '</div>' +
+    (Object.keys(reasons).length
+      ? barList(reasons, null, null, 'Чем именно остановлен агент (причина отказа)')
+      : '<div class="ow-block"><div class="ow-block-h">Чем именно остановлен агент</div>' +
+        '<div class="ow-empty">За период ни один агент не получил отказ</div></div>') +
+    barList(data.by_class, AGENT_CLASS_RU, null, 'Классы автоматизации') +
+    barList(data.by_kind, AGENT_KIND_RU, null, 'Что делали агенты') +
+    barList(evidence, null, null, 'На каком основании определён класс') +
+    '<div class="ow-block"><div class="ow-block-h">Операторы</div>' +
+      table([
+        { title: 'Оператор', key: 'operator' },
+        { title: 'Личность', key: 'verified', html: function (r) {
+          return r.verified ? '<span class="ow-conf ow-conf-high" title="Подпись проверена сервером">доказана</span>' +
+            (r.trusted ? ' · в списке доверия' : '')
+            : '<span class="ow-conf ow-conf-low" title="Только заявление клиента">не доказана</span>';
+        } },
+        { title: 'Класс', key: 'class', html: function (r) { return esc(label(AGENT_CLASS_RU, r.class)); } },
+        { title: 'Запросы', key: 'requests', numeric: true },
+        { title: 'Аккаунты', key: 'accounts', numeric: true },
+        { title: 'Симуляции', key: 'simulations', numeric: true },
+        { title: 'Покупки', key: 'purchases', numeric: true },
+        { title: 'Сумма', key: 'revenue', numeric: true, html: function (r) { return money(r.revenue); } },
+        { title: 'Отказы', key: 'blocked', numeric: true },
+        { title: 'Последний', key: 'last_seen', html: function (r) { return esc(timeText(r.last_seen)); } }
+      ], data.operators, 'Автоматизация за период не обращалась') + '</div>' +
+    barList(data.by_platform, { web: 'Веб', ios: 'iOS', android: 'Android' }, null, 'Платформа') +
+    '<div class="ow-block"><div class="ow-block-h">Действия</div>' +
+      table([
+        { title: 'Время', key: 'last_seen', html: function (r) { return esc(timeText(r.last_seen)); } },
+        { title: 'Действие', key: 'kind', html: function (r) { return esc(label(AGENT_KIND_RU, r.kind)); } },
+        { title: 'Класс', key: 'class', html: function (r) { return esc(label(AGENT_CLASS_RU, r.class)); } },
+        { title: 'Оператор', key: 'operator' },
+        { title: 'Личность', key: 'verified', html: function (r) { return r.verified ? 'доказана' : 'не доказана'; } },
+        { title: 'Аккаунт', key: 'account', html: function (r) { return esc(r.account || 'без входа'); } },
+        { title: 'Деталь', key: 'detail', html: function (r) { return esc(r.detail || '—'); } },
+        { title: 'Запросы', key: 'requests', numeric: true },
+        { title: 'Сумма', key: 'amount', numeric: true, html: function (r) { return money(r.amount, r.currency); } },
+        { title: 'Источник', key: 'source', html: function (r) {
+          return esc({ client: 'клиент', server: 'сервер', store: 'магазин' }[r.source] || r.source);
+        } },
+        { title: 'Основание', key: 'evidence', html: function (r) {
+          return esc((r.evidence || []).map(agentEvidenceRu).join(' · '));
+        } }
+      ], data.rows, 'Автоматизация за период не обращалась') + '</div>' +
+    lineChart(data.timeseries || [], ['verified', 'unverified', 'bot', 'blocked'],
+      ['Проверенные', 'Непроверенные', 'Боты', 'Отказы']);
+  }
+
   var RENDERERS = {
     day: renderDay, overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
     devices: renderDevices, sessions: renderSessions, acquisition: renderAcquisition, geography: renderGeography,
     map: renderMap, games: renderGames, features: renderFeatures, funnels: renderFunnels,
-    retention: renderRetention, bots: renderBots, consent: renderConsent, quality: renderQuality
+    retention: renderRetention, bots: renderBots, agents: renderAgents, consent: renderConsent, quality: renderQuality
   };
 
   function render() {
