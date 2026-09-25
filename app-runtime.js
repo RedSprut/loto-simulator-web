@@ -4468,10 +4468,11 @@ let rollTimers=[];
 /* ═══ МУЛЬТИЯЗЫЧНОСТЬ: страны всех лотерей каталога ═══ */
 const LOCALE_CATALOG=window.LOTO_I18N_CATALOG?.locales||{};
 const LANG_ORDER=Object.keys(LOCALE_CATALOG);
-/* Language-PICKER display order only: Українська first, Русский last, all others in their existing
-   catalog order. LANG_ORDER itself stays the raw catalog order (source of truth for flags/logic);
-   translations, flags, switching logic and count are untouched. */
-const LANG_PICKER_ORDER=['uk',...LANG_ORDER.filter(c=>c!=='uk'&&c!=='ru'),'ru'].filter(c=>LOCALE_CATALOG[c]);
+/* Language-PICKER display order only: English, Norsk, Українська first, Русский last, all others in
+   their existing catalog order. LANG_ORDER itself stays the raw catalog order (source of truth for
+   flags/logic); translations, flags, switching logic and count are untouched. */
+const LANG_PICKER_HEAD=['en','no','uk'];
+const LANG_PICKER_ORDER=[...LANG_PICKER_HEAD,...LANG_ORDER.filter(c=>!LANG_PICKER_HEAD.includes(c)&&c!=='ru'),'ru'].filter(c=>LOCALE_CATALOG[c]);
 const LANG_FLAGS=Object.fromEntries(LANG_ORDER.map(code=>[code,LOCALE_CATALOG[code].flag]));
 /* Язык интерфейса определяет ОДИН общий детектор (lang-detect.js / LotoLang), одинаковый для
    Web, iOS и Android: сохранённый ручной выбор → exact locale → base language → English.
