@@ -284,6 +284,8 @@ window.addEventListener('loto:accesschange',event=>{
      keeps its pre-PRO restricted pack. */
   if(analyticsAccessLevel!==next)clearAnalyticsHistoryCache();
   analyticsAccessLevel=next;
+  /* Ticket rows covered by the FREE group-analysis limit («Доступно в PRO») unlock as soon as PRO is confirmed. */
+  if(next==='pro'&&groupAnalysisState.active){clearGroupAnalysisState();try{renderSim();}catch(_g){}}
   /* The FIRST time PRO is confirmed on this device, drop any FREE-era Period-Analysis settings
      (saved scope / window / range) so every one of the 9 lotteries opens on the PRO default
      «Вся история» (scope 'all'). A stale saved 'free'/'current'/last-N/date-range must NOT
