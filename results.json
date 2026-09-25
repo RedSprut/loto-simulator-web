@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-09-24",
+  "updatedAt": "2026-09-25",
   "generatedBy": "Lotto Simulator secure public bundle",
   "rulesMode": "recent-free-only",
   "freeRecentDrawsByGame": {
@@ -15,11 +15,11 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-09-24T13:41:40.608Z",
-    "sourceFetchedAt": "2026-09-24T13:41:40.608Z",
+    "generatedAt": "2026-09-25T12:36:47.594Z",
+    "sourceFetchedAt": "2026-09-25T12:36:47.594Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "f2e751623dfa1420",
-    "updatedAt": "2026-09-24",
+    "snapshotVersion": "81c60831511cc198",
+    "updatedAt": "2026-09-25",
     "latestDrawByGame": {
       "lotto": "2026-09-19",
       "vikinglotto": "2026-09-23",
@@ -27,7 +27,7 @@
       "powerball": "2026-09-23",
       "megaMillions": "2026-09-22",
       "euroMillions": "2026-09-22",
-      "superEnalotto": "2026-09-22",
+      "superEnalotto": "2026-09-24",
       "lottoMax": "2026-09-22",
       "powerballAustralia": "2026-09-24"
     },
@@ -38,7 +38,7 @@
       "powerball": 1406,
       "megaMillions": 153,
       "euroMillions": 1043,
-      "superEnalotto": 4271,
+      "superEnalotto": 4272,
       "lottoMax": 47,
       "powerballAustralia": 441
     },
@@ -82,8 +82,8 @@
       "superEnalotto": {
         "status": "ok",
         "source": "National-Lottery.com / Lottologia",
-        "fetched": 4271,
-        "merged": 4271
+        "fetched": 4272,
+        "merged": 4272
       },
       "lottoMax": {
         "status": "ok",
@@ -11797,6 +11797,67 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-09-24",
+        "main": [
+          1,
+          28,
+          31,
+          50,
+          63,
+          85
+        ],
+        "bonus": [
+          86
+        ],
+        "jackpot": 31.1,
+        "lotteryId": "superEnalotto",
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/24-09-2026",
+        "drawId": null,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 31100000,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 42243.75,
+            "winners": 4
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 401.19,
+            "winners": 429
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 29.53,
+            "winners": 17542
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 5.47,
+            "winners": 293744
+          }
+        ],
+        "superStar": 48,
+        "currency": "EUR",
+        "ruleVersion": "superenalotto-6-90",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-09-22",
         "main": [
           12,
@@ -12663,10 +12724,10 @@
         "bonus": [
           60
         ],
-        "jackpot": 215.9,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/28-08-2026",
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
         "drawId": null,
         "payoutTiers": [
           {
@@ -13562,66 +13623,6 @@
         "currency": "EUR",
         "ruleVersion": "superenalotto-6-90",
         "ruleEra": "current"
-      },
-      {
-        "date": "2026-08-01",
-        "main": [
-          8,
-          11,
-          21,
-          24,
-          72,
-          88
-        ],
-        "bonus": [
-          33
-        ],
-        "jackpot": null,
-        "lotteryId": "superEnalotto",
-        "source": "Lottologia",
-        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni",
-        "drawId": null,
-        "ruleVersion": "superenalotto-6-90",
-        "ruleEra": "current",
-        "payoutTiers": [
-          {
-            "match": "6",
-            "label": "Match 6",
-            "prizeAmount": 203147276.27,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "Match 5 + Jolly",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "Match 5",
-            "prizeAmount": 16296.19,
-            "winners": 13
-          },
-          {
-            "match": "4",
-            "label": "Match 4",
-            "prizeAmount": 127,
-            "winners": 1699
-          },
-          {
-            "match": "3",
-            "label": "Match 3",
-            "prizeAmount": 14.43,
-            "winners": 45010
-          },
-          {
-            "match": "2",
-            "label": "Match 2",
-            "prizeAmount": 5,
-            "winners": 541091
-          }
-        ],
-        "currency": "EUR"
       }
     ],
     "lottoMax": [

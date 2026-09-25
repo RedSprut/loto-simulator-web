@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-24",
+  "updatedAt": "2026-09-25",
   "freeRecentDrawsByGame": {
     "lotto": 15,
     "vikinglotto": 15,
@@ -385,7 +385,7 @@
       "freeDraws": 51
     },
     "superEnalotto": {
-      "availableDraws": 4271,
+      "availableDraws": 4272,
       "freeDraws": 30
     },
     "lottoMax": {

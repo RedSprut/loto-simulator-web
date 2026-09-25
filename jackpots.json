@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-09-24T13:40:08.928Z",
+  "updated": "2026-09-25T12:35:25.307Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-09-19",
       "expectedLastDraw": "2026-09-19",
       "nextDrawDate": "2026-09-26",
-      "updatedAt": "2026-09-24T13:40:08.928Z",
-      "sourceUpdatedAt": "2026-09-24T13:40:08.928Z",
+      "updatedAt": "2026-09-25T12:35:25.307Z",
+      "sourceUpdatedAt": "2026-09-25T12:35:25.307Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -29,8 +29,8 @@
       "lastDrawDate": "2026-09-23",
       "expectedLastDraw": "2026-09-23",
       "nextDrawDate": "2026-09-30",
-      "updatedAt": "2026-09-24T13:40:08.928Z",
-      "sourceUpdatedAt": "2026-09-24T13:40:08.928Z",
+      "updatedAt": "2026-09-25T12:35:25.307Z",
+      "sourceUpdatedAt": "2026-09-25T12:35:25.307Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -46,8 +46,8 @@
       "lastDrawDate": "2026-09-22",
       "expectedLastDraw": "2026-09-22",
       "nextDrawDate": "2026-09-25",
-      "updatedAt": "2026-09-24T13:40:08.928Z",
-      "sourceUpdatedAt": "2026-09-24T13:40:08.928Z",
+      "updatedAt": "2026-09-25T12:35:25.307Z",
+      "sourceUpdatedAt": "2026-09-25T12:35:25.307Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -63,8 +63,8 @@
       "lastDrawDate": "2026-09-23",
       "expectedLastDraw": "2026-09-23",
       "nextDrawDate": "2026-09-26",
-      "updatedAt": "2026-09-24T13:40:08.928Z",
-      "sourceUpdatedAt": "2026-09-24T13:40:08.928Z",
+      "updatedAt": "2026-09-25T12:35:25.307Z",
+      "sourceUpdatedAt": "2026-09-25T12:35:25.307Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -80,8 +80,8 @@
       "lastDrawDate": "2026-09-22",
       "expectedLastDraw": "2026-09-22",
       "nextDrawDate": "2026-09-25",
-      "updatedAt": "2026-09-24T13:40:08.928Z",
-      "sourceUpdatedAt": "2026-09-24T13:40:08.928Z",
+      "updatedAt": "2026-09-25T12:35:25.307Z",
+      "sourceUpdatedAt": "2026-09-25T12:35:25.307Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -97,36 +97,36 @@
       "lastDrawDate": "2026-09-22",
       "expectedLastDraw": "2026-09-22",
       "nextDrawDate": "2026-09-25",
-      "updatedAt": "2026-09-24T13:40:08.928Z",
-      "sourceUpdatedAt": "2026-09-24T13:40:08.928Z",
+      "updatedAt": "2026-09-25T12:35:25.307Z",
+      "sourceUpdatedAt": "2026-09-25T12:35:25.307Z",
       "sourceNextDraw": "2026-09-25",
       "status": "fresh",
       "synced": true,
       "source": "fdj.fr"
     },
     "superenalotto": {
-      "amount": "31.1",
+      "amount": "31.7",
       "prefix": "€",
       "sub": "MILLION",
       "cur": "EUR",
       "currency": "EUR",
-      "display": "€31.1 MILLION",
-      "lastDrawDate": "2026-09-22",
-      "expectedLastDraw": "2026-09-22",
-      "nextDrawDate": "2026-09-24",
-      "updatedAt": "2026-09-24T13:40:08.928Z",
-      "sourceUpdatedAt": "2026-09-24T13:40:08.928Z",
-      "sourceNextDraw": "2026-09-24",
+      "display": "€31.7 MILLION",
+      "lastDrawDate": "2026-09-24",
+      "expectedLastDraw": "2026-09-24",
+      "nextDrawDate": "2026-09-25",
+      "updatedAt": "2026-09-25T12:35:25.307Z",
+      "sourceUpdatedAt": "2026-09-25T12:35:25.307Z",
+      "sourceNextDraw": "2026-09-25",
       "status": "fresh",
       "synced": true,
       "source": "official backend",
-      "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-09-22&next=2026-09-24",
-      "extractedText": "Jackpot sale a &lt;b>31,1 milioni di euro",
+      "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-09-24&next=2026-09-25",
+      "extractedText": "Jackpot per l'estrazione di domani sera fino a quota&lt;/span>&lt;b>&lt;span>&nbsp;&lt;/span>&lt;/b>&lt;span>&lt;b>31,7 milioni di euro",
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
           "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-22-settembre-2026",
+          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-24-settembre-2026",
           "error": "HTTP 403"
         },
         {
@@ -185,7 +185,7 @@
         {
           "source": "official backend",
           "ok": true,
-          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-09-22&next=2026-09-24"
+          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-09-24&next=2026-09-25"
         }
       ]
     },
@@ -199,13 +199,13 @@
       "lastDrawDate": "2026-09-22",
       "expectedLastDraw": "2026-09-22",
       "nextDrawDate": "2026-09-25",
-      "updatedAt": "2026-09-24T13:40:08.928Z",
-      "sourceUpdatedAt": "2026-09-24T13:40:08.928Z",
+      "updatedAt": "2026-09-25T12:35:25.307Z",
+      "sourceUpdatedAt": "2026-09-25T12:35:25.307Z",
       "sourceNextDraw": "2026-09-25",
       "status": "fresh",
       "synced": true,
-      "source": "wclc.com",
-      "sourceUrl": "https://www.wclc.com/",
+      "source": "wclc.com lotto max",
+      "sourceUrl": "https://www.wclc.com/winning-numbers/lotto-max-extra.htm",
       "sourceAttempts": [
         {
           "source": "olg.ca",
@@ -214,8 +214,13 @@
         },
         {
           "source": "wclc.com",
-          "ok": true,
+          "ok": false,
           "sourceUrl": "https://www.wclc.com/"
+        },
+        {
+          "source": "wclc.com lotto max",
+          "ok": true,
+          "sourceUrl": "https://www.wclc.com/winning-numbers/lotto-max-extra.htm"
         }
       ]
     },
@@ -229,8 +234,8 @@
       "lastDrawDate": "2026-09-24",
       "expectedLastDraw": "2026-09-24",
       "nextDrawDate": "2026-10-01",
-      "updatedAt": "2026-09-24T13:40:08.928Z",
-      "sourceUpdatedAt": "2026-09-24T13:40:08.928Z",
+      "updatedAt": "2026-09-25T12:35:25.307Z",
+      "sourceUpdatedAt": "2026-09-25T12:35:25.307Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
