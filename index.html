@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="fe8cb46" data-build-ts="2026-09-25T20:10:30.570Z">
+<html lang="en" data-build="ea31e25" data-build-ts="2026-09-25T20:32:26.899Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=fe8cb46"></script>
+<script src="./boot-runtime.js?v=ea31e25"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=fe8cb46">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=ea31e25">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=fe8cb46">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=ea31e25">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -2087,7 +2087,8 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
 .ticket-row{flex-wrap:wrap}
 .rsrc{flex-basis:100%;order:5;font-size:11px;line-height:1.35;color:var(--sub2);padding:3px 2px 0 25px;overflow-wrap:anywhere}
 .rb-changed,.if-rball.rb-changed{position:relative;border:0;padding:0;margin:0;font:inherit;font-weight:800;cursor:pointer;box-shadow:0 0 0 2px var(--gold)}
-.rb-changed::after{content:'↺';position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;background:var(--gold);color:#1c1c1e;font-size:10px;line-height:16px;text-align:center;font-weight:900}
+/* The replaced-ball marker is drawn, not written: a numeric component never carries generated text (scripts/audit-lottery-numbers.mjs); the button's aria-label names it. */
+.rb-changed::after{content:'';position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;background:var(--gold) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%231c1c1e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12.4 8.6A4.5 4.5 0 1 1 10.9 4.3'/%3E%3Cpath d='M11.4 1.9v2.8H8.6'/%3E%3C/svg%3E") center/11px no-repeat}
 .rb-changed:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
 .ct-table{--seat:60px;position:relative;width:min(100%,420px);aspect-ratio:1/1;margin:10px auto 22px}
 .ct-table-disc{position:absolute;left:50%;top:50%;width:46%;aspect-ratio:1/1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(240,165,0,.28),rgba(154,102,6,.18));border:2px solid rgba(233,180,76,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;padding:8px}
@@ -3764,24 +3765,25 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=fe8cb46"></script>
-<script src="./commercial-config.js?v=fe8cb46"></script>
-<script src="./event-runtime.js?v=fe8cb46"></script>
-<script src="./external-link-runtime.js?v=fe8cb46"></script>
-<script src="./auth-client.js?v=fe8cb46"></script>
-<script src="./native-loader.js?v=fe8cb46"></script>
-<script src="./billing-web.js?v=fe8cb46"></script>
-<script src="./i18n-catalog.js?v=fe8cb46"></script>
-<script src="./lang-detect.js?v=fe8cb46"></script>
-<script src="./i18n-runtime.js?v=fe8cb46"></script>
-<script src="./consent-runtime.js?v=fe8cb46"></script>
-<script src="./analytics-telemetry.js?v=fe8cb46"></script>
-<script src="./win-match-core.js?v=fe8cb46"></script>
-<script src="./court-core.js?v=fe8cb46"></script>
-<script src="./app-runtime.js?v=fe8cb46"></script>
-<script src="./inline-runtime-2.js?v=fe8cb46"></script>
-<script src="./commercial-runtime.js?v=fe8cb46"></script>
-<script src="./inline-runtime-3.js?v=fe8cb46"></script>
+<script src="./version.js?v=ea31e25"></script>
+<script src="./commercial-config.js?v=ea31e25"></script>
+<script src="./event-runtime.js?v=ea31e25"></script>
+<script src="./external-link-runtime.js?v=ea31e25"></script>
+<script src="./auth-client.js?v=ea31e25"></script>
+<script src="./native-loader.js?v=ea31e25"></script>
+<script src="./billing-web.js?v=ea31e25"></script>
+<script src="./i18n-catalog.js?v=ea31e25"></script>
+<script src="./lang-detect.js?v=ea31e25"></script>
+<script src="./i18n-runtime.js?v=ea31e25"></script>
+<script src="./consent-runtime.js?v=ea31e25"></script>
+<script src="./analytics-telemetry.js?v=ea31e25"></script>
+<script src="./win-match-core.js?v=ea31e25"></script>
+<script src="./court-core.js?v=ea31e25"></script>
+<script src="./smart-start.js?v=ea31e25"></script>
+<script src="./app-runtime.js?v=ea31e25"></script>
+<script src="./inline-runtime-2.js?v=ea31e25"></script>
+<script src="./commercial-runtime.js?v=ea31e25"></script>
+<script src="./inline-runtime-3.js?v=ea31e25"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3933,9 +3935,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=fe8cb46"></script>
-<script src="./notifications-runtime.js?v=fe8cb46"></script>
-<script src="./pwa-runtime.js?v=fe8cb46"></script>
+<script src="./notification-center.js?v=ea31e25"></script>
+<script src="./notifications-runtime.js?v=ea31e25"></script>
+<script src="./pwa-runtime.js?v=ea31e25"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3946,8 +3948,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=fe8cb46"></script>
-<script src="./inline-runtime-5.js?v=fe8cb46"></script>
-<script src="./inline-runtime-6.js?v=fe8cb46"></script>
+<script src="./inline-runtime-4.js?v=ea31e25"></script>
+<script src="./inline-runtime-5.js?v=ea31e25"></script>
+<script src="./inline-runtime-6.js?v=ea31e25"></script>
 </body>
 </html>

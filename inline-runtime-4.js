@@ -84,8 +84,16 @@
     try { return window.LotoCommercial.access.accessLevel === 'pro'; } catch (e) { return false; }
   }
   // A 3D-drum combination keeps its source (SIMULATED_3D_DRAW) wherever it is saved or used.
+  // The drum's `additional` balls are the DRAW's extras. Only a game whose player picks a bonus
+  // (Powerball, stars, Viking…) carries them on a ticket; the drawn tillegg / Jolly / Lotto Max
+  // Bonus is never part of one — a row holding it is rejected by the server (invalid_row) and
+  // breaks the Judge and the Court. Favourites keep the exact draw separately (`add`).
+  function drumTicketBonus(combo, appLot) {
+    var l = LOTS[appLot] || L();
+    return (combo.additional || []).slice(0, drawBonusCount(l));
+  }
   function drumRowWithProvenance(combo, appLot) {
-    var row = { m: (combo.main || []).slice(), b: (combo.additional || []).slice() };
+    var row = { m: (combo.main || []).slice(), b: drumTicketBonus(combo, appLot) };
     try { var prov = createRowProv(row, { sourceType: 'SIMULATED_3D_DRAW', simulationId: combo.resultId || undefined }, appLot); if (prov) row.prov = prov; } catch (e) {}
     return row;
   }
@@ -215,7 +223,7 @@
     try {
       var appLot = DRUM_TO_APP[combo.lotteryId] || combo.lotteryId;
       if (appLot !== currentAppId()) return 'skip';        // never mix lotteries
-      var m = (combo.main || []).slice(), b = (combo.additional || []).slice();
+      var m = (combo.main || []).slice(), b = drumTicketBonus(combo, appLot);
       if (!m.length) return 'skip';
       var eq = function (x, y) { return x.length === y.length && x.every(function (v, i) { return v === y[i]; }); };
       for (var i = 0; i < rows.length; i++) if (eq(rows[i].m, m) && eq(rows[i].b, b)) return 'dup'; // no duplicate row
@@ -235,7 +243,7 @@
   function drumBulkApply(lotteryId, combos, labels) {
     labels = labels || {};
     var appLot = DRUM_TO_APP[lotteryId] || lotteryId;
-    try { if (appLot && appLot !== currentAppId()) selLot(appLot); } catch (e) {}
+    try { if (appLot && appLot !== currentAppId()) selLot(appLot); smartStartRecord(appLot); } catch (e) {}
     closeDrum3D();                                          // back to the Simulator main screen
     try { clearGroupAnalysisState(); } catch (e) {}
     var applied = 0, already = 0, capped = false;
@@ -310,7 +318,7 @@
       if (d.type === 'DRUM_GAME_CHANGED') {
         var nextApp = DRUM_TO_APP[d.game];
         if (nextApp && nextApp !== currentAppId()) {
-          try { selLot(nextApp); } catch (err) {}
+          try { selLot(nextApp); smartStartRecord(nextApp); } catch (err) {}
           try { document.querySelectorAll('.bn').forEach(function (x) { x.classList.remove('on'); }); navItem.classList.add('on'); } catch (err2) {}
         }
         try { pushDrumFavorites(); } catch (err3) {} // new game's favorites → drum snapshot
@@ -325,7 +333,7 @@
       // the Judge/Consensus UI is visible in the host; budgets/paywall are the app's own.
       else if (d.type === 'DRUM_JUDGE_COMBINATION') {
         var jc = d.combo || {}; closeDrum3D();
-        try { window.judgeGeneratedRows && window.judgeGeneratedRows([{ main: (jc.main || []).slice(), bonus: (jc.additional || []).slice() }]); } catch (err5) {}
+        try { window.judgeGeneratedRows && window.judgeGeneratedRows([{ main: (jc.main || []).slice(), bonus: drumTicketBonus(jc, DRUM_TO_APP[jc.lotteryId] || jc.lotteryId || currentAppId()) }]); } catch (err5) {}
       }
       else if (d.type === 'DRUM_CONSENSUS_COMBINATION') {
         closeDrum3D();

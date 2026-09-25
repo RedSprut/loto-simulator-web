@@ -174,7 +174,10 @@
     const prize = checkPrizeFn(entry.main, entry.bonus || [], draw.main, draw.bonus || [], gameRule);
     if (!prize) return null;
     const mainHit = entry.main.filter((n) => draw.main.includes(n)).length;
-    const bonusHit = (entry.bonus || []).filter((n) => (draw.bonus || []).includes(n)).length;
+    // A drawn tillegg / Jolly / Lotto Max Bonus (same drum, never picked: pBo 0, offBo > 0) is
+    // matched by one of the ticket's MAIN numbers — that is what makes a 6+tillegg a 6+1.
+    const extraFromMain = !(gameRule && gameRule.pBo) && ((gameRule && gameRule.offBo) || 0) > 0;
+    const bonusHit = (extraFromMain ? entry.main : (entry.bonus || [])).filter((n) => (draw.bonus || []).includes(n)).length;
     return {
       id: 'm_' + entry.id + '_' + draw.date,
       rowId: entry.id, gameId: entry.gameId, drawDate: draw.date, drawId: draw.drawId != null ? draw.drawId : null,

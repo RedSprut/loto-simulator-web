@@ -11,7 +11,11 @@ const LOTTERY_CONFIG={
   lottoMax:{name:'Lotto Max',range:{min:1,max:52},ballCount:7,extraBall:{count:1,range:{min:1,max:52}}},
   powerballAustralia:{name:'Powerball Australia',range:{min:1,max:35},ballCount:7,extraBall:{count:1,range:{min:1,max:20}}}
 };
+// Canonical (results/backend) id → app id, for ALL nine games. Norsk Lotto's ids coincide, and it
+// was once left out: resolveConfigKey('lotto') gave null, so its FREE history limit read as 0,
+// analytics filed Lotto under the previous game and the owner filter listed eight lotteries.
 const LOTTERY_APP_KEYS={
+  lotto:'lotto',
   powerball:'powerball',
   megaMillions:'mega',
   euroMillions:'euromillions',
@@ -211,6 +215,21 @@ function ruleEraForDraw(draw,eras=[]){
     ||eras.find(era=>draw.date>=era.from&&(!era.to||draw.date<=era.to))
     ||null;
 }
+/* «Вся история» for statistics and models: every draw whose era used today's MAIN rule (count +
+   range), its extras kept only when that era's extra groups were today's too — a 1–15 Mega Ball is
+   not a 1–24 one, a 5/59 Powerball row is not a 5/69 row. Same rule as eraComparability() in
+   supabase/functions/_shared/rule-registry.js, over the eras it publishes (tests/era-comparability.mjs). */
+function comparableHistory(draws,eras){
+  const list=Array.isArray(draws)?draws:[],current=(eras||[]).find(era=>era.current||!era.to);
+  if(!current)return list;
+  const extrasOf=era=>JSON.stringify((era.extraGroups||[]).map(g=>[g.type,g.count,g.min,g.max]));
+  const mainOf=era=>[era.mainCount,era.mainMin,era.mainMax].join('/');
+  return list.flatMap(draw=>{
+    const era=ruleEraForDraw(draw,eras);
+    if(!era||mainOf(era)!==mainOf(current))return[];
+    return extrasOf(era)===extrasOf(current)?[draw]:[{...draw,bonus:[]}];
+  });
+}
 async function loadFullHistory(gameKey){
   const options=arguments[1]||{};
   const cacheKey=resolveConfigKey(gameKey)||gameKey;
@@ -254,7 +273,7 @@ async function loadFullHistory(gameKey){
 function hasHydratedAnalyticsHistory(gameKey){return analyticsHistoryReady.has(resolveConfigKey(gameKey)||gameKey);}
 async function loadAnalyticsDraws(gameKey){
   const pack=await loadFullHistory(gameKey);
-  const source=IF_getScope()==='all'?pack.draws:IF_getScope()==='free'?await loadD(gameKey):(Array.isArray(pack.currentDraws)?pack.currentDraws:pack.draws);
+  const source=IF_getScope()==='all'?comparableHistory(pack.draws,pack.eras):IF_getScope()==='free'?await loadD(gameKey):(Array.isArray(pack.currentDraws)?pack.currentDraws:pack.draws);
   return IF_window(source);
 }
 function clearAnalyticsHistoryCache(){analyticsHistoryCache.clear();analyticsHistoryReady.clear();}
@@ -647,7 +666,7 @@ function clearProtectedHistoryView(){
   Object.keys(drawsCache||{}).forEach(key=>{drawsCache[key]=[];});
   const freeLimit=Number(window.LOTO_COMMERCIAL_CONFIG?.freeRecentDrawsByGame?.[resolveConfigKey(cur)]||0);
   loadHistoricalResults(cur).then(recent=>{
-    draws=(recent||[]).slice(0,freeLimit);
+    const draws=(recent||[]).slice(0,freeLimit);
     drawsCache[cur]=draws;
     if(typeof renderHistory==='function')renderHistory();
   }).catch(()=>{});
@@ -1176,8 +1195,58 @@ function initLottery(gameKey){
   syncRulesFromConfig(id);
   clearAnalysisUI();
   selLot(id);
+  smartStartRecord(id);
   return{gameKey:id,config:getLotteryConfig(id),rules:LOTS[id]};
 }
+/* ═══ SMART START: the lottery the app opens on (rules + weights live in smart-start.js) ═══
+   Behaviour = only lotteries the USER picks (tabs, schedule strip, the drum's own switcher). The
+   start-up choice, notification opens and deep links go through selLot() and are never recorded,
+   otherwise the app would teach itself its own guesses. localStorage, so guests and signed-in
+   users alike keep it across launches; sign-out does not touch it. */
+const SMART_START_SESSION=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+function smartStartRecord(id){
+  try{
+    const S=window.LotoSmartStart;
+    if(S&&LOTS[id])S.save(localStorage,S.recordPick(S.load(localStorage),id,Date.now(),SMART_START_SESSION));
+  }catch(e){}
+}
+/* An explicitly requested game: ?game=<id> (or ?lottery=), a web-push cold start (?n_dest=…&n_lot=…),
+   or lotosimulator://game/<id> stashed by the native bridge before this script ran. `game`/`lottery`
+   are one-shot and removed from the address bar; the n_* parameters stay for NOTIF_consumeUrlDeepLink. */
+function smartStartExplicitGame(){
+  let id=null;
+  try{
+    const q=new URLSearchParams(location.search);
+    id=resolveGameKey(q.get('game')||q.get('lottery')||'')||(q.get('n_dest')?resolveGameKey(q.get('n_lot')||''):null);
+    if(q.has('game')||q.has('lottery')){
+      q.delete('game');q.delete('lottery');
+      const rest=q.toString();
+      history.replaceState(history.state,'',location.pathname+(rest?'?'+rest:'')+location.hash);
+    }
+  }catch(e){}
+  if(!id&&window.__lotoPendingGameLink)id=resolveGameKey(window.__lotoPendingGameLink);
+  window.__lotoPendingGameLink=null;
+  return id;
+}
+function smartStartGame(){
+  const explicit=smartStartExplicitGame();
+  try{
+    const S=window.LotoSmartStart;
+    if(!S)return explicit||'euro';
+    let timeZone='';try{timeZone=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}
+    let picks=null;try{picks=S.load(localStorage);}catch(e){}
+    const pick=S.resolve({ids:Object.keys(LOTS),explicit,history:picks,timeZone,now:Date.now(),
+      deadlineAfter:(id,at)=>nextDraw(id,new Date(at)).date.getTime()});
+    window.__lotoSmartStart=pick;   // read-only diagnostics: {game, reason, region}
+    return pick.game;
+  }catch(e){return explicit||'euro';}
+}
+/* A game link that arrives while the app is already running (native appUrlOpen). */
+window.addEventListener('loto:open-game',e=>{
+  const id=resolveGameKey(e&&e.detail&&e.detail.game);
+  window.__lotoPendingGameLink=null;
+  if(id)revealUpcomingDraw(id);
+});
 /* ═══ ГЕРОЙСКИЙ БАННЕР: джекпоты только из единого jackpots.json ═══ */
 /* Jackpot/draw metadata from the ONE remote pipeline (jackpots.json). Native reads it
    from the Pages URL (fresh online), falls back to the bundled copy + last cache when
@@ -1366,6 +1435,11 @@ function initRows(){rows=[nr(),nr()];act=0;}
 const nr=()=>({m:[],b:[]});
 function drawBonusCount(l){return l.pBo||0;} /* БИЛЕТ: сколько доп-чисел ОТМЕЧАЕТ ИГРОК (lotto/superenalotto/lottomax = 0) */
 function drawnBonusCount(l){return l.offBo||l.pBo||0;} /* ТИРАЖ: сколько доп-чисел ВЫТЯГИВАЕТСЯ (tillegg/jolly/bonus) */
+/* Tillegg / Jolly / Bonus: drawn but never picked, from the SAME drum after the main numbers —
+   so a drawn extra can never repeat a main number (tests/bonus-pool-rules.mjs, demo-drum registry
+   `same-main-pool`, server GAME_SPECS). Separate pools (Powerball, stars, Viking…) may coincide. */
+function drawBonusFromMainPool(l){return !drawBonusCount(l)&&drawnBonusCount(l)>0;}
+function drawDrawnBonus(l,dM){return drawnBonusCount(l)>0?rnd(l.bB,drawnBonusCount(l),drawBonusFromMainPool(l)?dM:[]):[];}
 
 function renderSim(){updatePickLabels();renderRows();renderMainGrid();renderBonusCol();renderSimBtns();updateHdr();scheduleTicketSave();}
 
@@ -2156,7 +2230,8 @@ function genBonus(l,draws,mode='bayes'){
 }
 function rangeNums(max){return Array.from({length:max},(_,i)=>i+1);}
 function defaultSumRange(l){
-  if(l.officialGame==='lotto')return{min:95,max:150};
+  /* One formula for all nine games (±≈2σ of a random row's sum). Lotto used to have a fixed 95–150
+     from the days it was the only game — it rejected 23 % of real Lotto draws since 2015. */
   const avg=l.pM*(l.mB+1)/2;
   const spread=Math.max(18,Math.round(l.mB*l.pM*.22));
   return{min:Math.max(l.pM,Math.round(avg-spread)),max:Math.min(l.pM*l.mB,Math.round(avg+spread))};
@@ -2560,7 +2635,7 @@ async function applyWheelMatrix(){
     return {...matrix,draws};
   });
   if(!built)return;
-  rows=filterGeneratedRows(built.rows,count,l,draws);
+  rows=filterGeneratedRows(built.rows,count,l,built.draws);
   if(!rows.length)rows=[nr()];
   attachRowProvenance(rows,{sourceType:'WHEEL_MATRIX'});
   act=0;
@@ -2579,7 +2654,7 @@ async function applyWheelMatrix(){
 async function doDraw(){
   return withBusy('Симуляция тиража…',async()=>{
     const l=L();fillAll();
-    const dM=nextUniqueMain(l,'simulation'),dB=drawnBonusCount(l)>0?rnd(l.bB,drawnBonusCount(l)):[];
+    const dM=nextUniqueMain(l,'simulation'),dB=drawDrawnBonus(l,dM);
     lastDraw={main:dM,bonus:dB};
     showBanner(dM,dB);renderSim();
     // track ROI: add spending
@@ -2802,7 +2877,7 @@ function runLifeSim(){
   const step=()=>{
     if(runToken!==lifeRunToken)return;
     for(let x=0;x<batch&&done<total;x++,done++){
-      const dM=rnd(l.mB,l.pM),dB=drawnBonusCount(l)>0?rnd(l.bB,drawnBonusCount(l)):[];
+      const dM=rnd(l.mB,l.pM),dB=drawDrawnBonus(l,dM);
       spent+=ticket.length*l.price;
       ticket.forEach(row=>{
         const p=checkPrize(row.m,row.b,dM,dB,l),v=estimatePrizeNok(p,l,true);
@@ -2835,7 +2910,8 @@ function closeLifeSim(){
 // ═══════════════════════════════════════════════
 function buildCheckFields(){
   const l=L();
-  const dBo=drawBonusCount(l);
+  /* the DRAW's extras: for Lotto/SuperEnalotto/Lotto Max the drawn tillegg/Jolly/Bonus (never picked) */
+  const dBo=drawnBonusCount(l);
   document.getElementById('chk-lbl-m').textContent=`Выпавшие главные числа (${l.pM} из ${l.mB})`;
   const mi=document.getElementById('chk-main-inp');mi.innerHTML='';mi.className=`check-inp-row ticket-count-${l.pM}`;
   for(let i=0;i<l.pM;i++){
@@ -2860,7 +2936,8 @@ function buildCheckFields(){
 
 function checkTicket(){
   const l=L();
-  const dBo=drawBonusCount(l);
+  /* the DRAW's extras: for Lotto/SuperEnalotto/Lotto Max the drawn tillegg/Jolly/Bonus (never picked) */
+  const dBo=drawnBonusCount(l);
   const dM=[];
   for(let i=0;i<l.pM;i++){
     const v=+document.getElementById('chk-m'+i).value;
@@ -2875,6 +2952,7 @@ function checkTicket(){
       const v=+document.getElementById('chk-b'+i).value;
       if(!v||v<1||v>l.bB){showFeedback('Проверьте бонус',`Бонус ${i+1}: введите от 1 до ${l.bB}.`,'⚠️',3200);return;}
       if(dB.includes(v)){showFeedback('Повтор бонуса',`Бонус ${v} повторяется.`,'⚠️',2800);return;}
+      if(drawBonusFromMainPool(l)&&dM.includes(v)){showFeedback('Повтор числа',`Число ${v} повторяется.`,'⚠️',2800);return;}
       dB.push(v);
     }
     dB.sort((a,b)=>a-b);
@@ -3040,7 +3118,8 @@ async function renderCompleteAnalytics(){
 
 function buildInpFields(){
   const l=L();
-  const dBo=drawBonusCount(l);
+  /* the DRAW's extras: for Lotto/SuperEnalotto/Lotto Max the drawn tillegg/Jolly/Bonus (never picked) */
+  const dBo=drawnBonusCount(l);
   if(!document.getElementById('inp-date').value)document.getElementById('inp-date').valueAsDate=new Date();
   if(typeof refreshLocalizedDates==='function')refreshLocalizedDates();
   document.getElementById('lbl-m-inp').textContent=`Главные числа (${l.pM}) — 1 до ${l.mB}`;
@@ -3411,14 +3490,15 @@ async function openOfficialResults(){
 
 async function addDraw(){
   const l=L();
-  const dBo=drawBonusCount(l);
+  /* the DRAW's extras: for Lotto/SuperEnalotto/Lotto Max the drawn tillegg/Jolly/Bonus (never picked) */
+  const dBo=drawnBonusCount(l);
   const date=document.getElementById('inp-date').value;
   if(!date){showFeedback('Нужна дата','Введите дату тиража.','⚠️',2800);return;}
   const main=[];
   for(let i=0;i<l.pM;i++){const v=+document.getElementById('bm'+i).value;if(!v||v<1||v>l.mB){showFeedback('Проверьте число',`Главное число ${i+1}: 1–${l.mB}.`,'⚠️',3200);return;}if(main.includes(v)){showFeedback('Повтор числа',`Число ${v} повторяется.`,'⚠️',2800);return;}main.push(v);}
   main.sort((a,b)=>a-b);
   const bonus=[];
-  if(dBo>0){for(let i=0;i<dBo;i++){const v=+document.getElementById('bb'+i).value;if(!v||v<1||v>l.bB){showFeedback('Проверьте бонус',`Бонус ${i+1}: 1–${l.bB}.`,'⚠️',3200);return;}if(bonus.includes(v)){showFeedback('Повтор бонуса',`Бонус ${v} повторяется.`,'⚠️',2800);return;}bonus.push(v);}bonus.sort((a,b)=>a-b);}
+  if(dBo>0){for(let i=0;i<dBo;i++){const v=+document.getElementById('bb'+i).value;if(!v||v<1||v>l.bB){showFeedback('Проверьте бонус',`Бонус ${i+1}: 1–${l.bB}.`,'⚠️',3200);return;}if(bonus.includes(v)){showFeedback('Повтор бонуса',`Бонус ${v} повторяется.`,'⚠️',2800);return;}if(drawBonusFromMainPool(l)&&main.includes(v)){showFeedback('Повтор числа',`Число ${v} повторяется.`,'⚠️',2800);return;}bonus.push(v);}bonus.sort((a,b)=>a-b);}
   const jackpot=parseFloat(document.getElementById('inp-jackpot').value)||null;
   const payoutTiers=readPayoutInp();
   const draws=await loadD(cur);
@@ -4322,8 +4402,8 @@ function zonedDateTimeToUtc(year,month,day,hour,minute,timeZone){
   return guess;
 }
 function scheduleTime(l){return l.dl+(l.tzLabel?' '+l.tzLabel:'');}
-function nextDraw(lotId){
-  const now=new Date(),l=LOTS[lotId],tz=l.timeZone||Intl.DateTimeFormat().resolvedOptions().timeZone;
+function nextDraw(lotId,at){
+  const now=at instanceof Date?at:new Date(),l=LOTS[lotId],tz=l.timeZone||Intl.DateTimeFormat().resolvedOptions().timeZone;
   const local=zonedParts(now,tz),[hh,mm]=l.dl.split(':').map(Number);
   let nd=null;
   for(const weekday of l.drawDays){
@@ -4737,7 +4817,7 @@ function fbOut(){}
 // ═══════════════════════════════════════════════
 initTheme();
 initGenControls();
-selLot('euro');
+selLot(smartStartGame());
 selPage('sim');
 buildCheckFields();
 window.addEventListener('DOMContentLoaded',()=>{
@@ -4812,7 +4892,7 @@ function IF_window(draws){
 }
 async function IF_baseDraws(gameKey=cur){
   const pack=await loadFullHistory(gameKey),scope=IF_getScope();
-  if(scope==='all'&&!pack.restricted)return pack.draws||[];
+  if(scope==='all'&&!pack.restricted)return comparableHistory(pack.draws,pack.eras);
   if(scope==='free')return loadD(gameKey);
   return Array.isArray(pack.currentDraws)?pack.currentDraws:(pack.draws||[]);
 }
@@ -5901,7 +5981,7 @@ const LotoWinMatch=(function(){
     const body=title+' · '+gname(matches[0].gameId)+(matches.length>1?(' · '+matches.length):'');
     // Persist the local result in the shared notification center. This keeps the exact match
     // reopenable after the celebration is dismissed and uses the same stable dedup identity.
-    try{if(window.LotoNotifCenter&&LotoNotifCenter.add){const first=matches[0];LotoNotifCenter.add({id:'wm:'+CORE.notificationKey(first),lotteryId:first.gameId,eventType:'saved_ticket_results',drawId:first.drawId!=null?first.drawId:first.drawDate,title,body,createdAt:new Date().toISOString(),payload:{winMatch:true,title,body,matchId:matches.length===1?first.id:null,matchIds:matches.map(m=>m.id),drawDate:first.drawDate}});}}catch(_e){}
+    try{if(window.LotoNotifCenter&&LotoNotifCenter.add){const first=matches[0];LotoNotifCenter.add({id:'wm:'+CORE.notificationKey(first),lotteryId:first.gameId,eventType:'saved_ticket_results',drawId:first.drawId!=null?first.drawId:first.drawDate,title,body,createdAt:new Date().toISOString(),payload:{winMatch:true,played:s.playedWins>0,title,body,matchId:matches.length===1?first.id:null,matchIds:matches.map(m=>m.id),drawDate:first.drawDate}});}}catch(_e){}
     if(notifyAllowed())try{ new Notification('🎰 Lotto Simulator',{body}); }catch(_e){}
     if(matches.length===1)openDetail(matches[0].id); else renderSummary(matches);
   }catch(_e){} }
@@ -5912,8 +5992,11 @@ const LotoWinMatch=(function(){
     const dMain=new Set(m.drawMain||[]),dBon=new Set(m.drawBonus||[]);
     const created=new Date(m.createdAt); const cdate=isNaN(created)?'':created.toLocaleDateString(appLocale?appLocale():'en')+' '+created.toLocaleTimeString(appLocale?appLocale():'en',{hour:'2-digit',minute:'2-digit'});
     const bonusGame=(l.pBo||l.offBo||0)>0;
+    // Tillegg / Jolly / Lotto Max Bonus: never picked, matched by a ticket MAIN number.
+    const extraFromMain=drawBonusFromMainPool(l);
+    const bonusHit=extraFromMain?(m.userMain||[]).filter(n=>dBon.has(n)).length:m.bonusHit;
     const title=m.played?('🎉 '+T('У вас выигрыш!')):('🎯 '+T('Есть призовое совпадение'));
-    const matchLine=T('Совпало')+': <b data-i18n-ignore>'+m.mainHit+(bonusGame?(' + '+m.bonusHit):'')+'</b>';
+    const matchLine=T('Совпало')+': <b data-i18n-ignore>'+m.mainHit+(bonusGame?(' + '+bonusHit):'')+'</b>';
     let payoutLine;
     if(m.payoutState==='available'&&m.payout!=null){ payoutLine=(m.played?T('Выигрыш'):T('Приз этой категории в тираже'))+': <b data-i18n-ignore>'+fmtMoney(m.payout,l.currency)+'</b>'; }
     else { payoutLine='<span style="opacity:.85">'+T('Совпадение подтверждено. Размер приза этой категории ещё не опубликован.')+'</span>'; }
@@ -5922,9 +6005,9 @@ const LotoWinMatch=(function(){
       `<div style="margin-top:12px;font-size:14px;line-height:1.7">`+
       `<div><b data-i18n-ignore>${escapeHtml(gname(m.gameId))}</b> · ${T('Тираж')} <span data-i18n-ignore>${escapeHtml(m.drawDate)}${m.drawId!=null?(' · #'+m.drawId):''}</span></div>`+
       `<div style="margin-top:10px;opacity:.85">${T('Ваша комбинация')}${m.played?'':(' · '+T(srcLabel(m)))}${cdate?(' · <span data-i18n-ignore>'+escapeHtml(cdate)+'</span>'):''}</div>`+
-      ballRow(m.userMain,dMain,cls,bcls,bonusGame?m.userBonus:null,dBon)+
+      ballRow(m.userMain,extraFromMain?new Set([...dMain,...dBon]):dMain,cls,bcls,bonusGame?m.userBonus:null,dBon)+
       `<div style="margin-top:8px;opacity:.85">${T('Выигрышные числа')}</div>`+
-      ballRow(m.drawMain,new Set(m.userMain),cls,bcls,bonusGame?m.drawBonus:null,new Set(m.userBonus))+
+      ballRow(m.drawMain,new Set(m.userMain),cls,bcls,bonusGame?m.drawBonus:null,new Set(extraFromMain?m.userMain:m.userBonus))+
       `<div style="margin-top:10px">${matchLine}</div>`+
       /* The prize-category name is prose ("2-й приз · 6+tillegg", "ДЖЕКПОТ 🏆") and every game's
          categories are in the translation catalog — but data-i18n-ignore used to pin it here, so a
@@ -6177,14 +6260,14 @@ async function crowdStats(){
     n++;
     for(const p of payouts){
       if(!p||!p.label)continue;
-      (agg[p.label]=agg[p.label]||{w:[],v:[]});
+      (agg[p.label]=agg[p.label]||{w:[],v:[],key:p.match!=null?String(p.match):''});
       if(isFinite(p.winners))agg[p.label].w.push(p.winners);
       const amount=prizeTierAmount(p);
       if(isFinite(amount)&&amount>0)agg[p.label].v.push(amount);
     }
   }
   let tiers=Object.entries(agg).map(([label,a])=>({
-    label,
+    label,key:a.key,
     avgW:a.w.length?a.w.reduce((s,x)=>s+x,0)/a.w.length:0,
     avgV:a.v.length?a.v.reduce((s,x)=>s+x,0)/a.v.length:0
   })).filter(t=>t.avgV>0||t.avgW>0);
@@ -6196,7 +6279,7 @@ async function crowdStats(){
     tiers=getPrizeTiers(l).map(t=>{
       const prob=tierProbability(l,t.match);
       const v=estimatePrizeNok({key:t.match,name:t.label,lvl:0},l)||0;
-      return{label:t.label,avgW:prob>0?vol*prob:0,avgV:v};
+      return{label:t.label,key:String(t.match),avgW:prob>0?vol*prob:0,avgV:v};
     }).filter(t=>t.avgW>=0.05&&t.avgV>0);
   }
   tiers.sort((a,b)=>b.avgV-a.avgV);
@@ -6215,7 +6298,7 @@ async function renderCrowd(dM,dB){
   const jitter=x=>Math.max(0,Math.round(x*(0.82+Math.random()*0.36)));
   box.innerHTML='<div class="crowd-t">🌍 Картина тиража</div>'+
     tiers.slice(0,10).map(t=>{
-      const isMe=my&&my.name&&t.label&&my.name.replace(/\s/g,'')===t.label.replace(/\s/g,'');
+      const isMe=!!(my&&my.key&&t.key&&String(my.key)===t.key);   /* checkPrize keys = payout tier `match` keys */
       const w=jitter(t.avgW);
       return '<div class="crowd-row'+(isMe?' me':'')+'"><span class="crowd-tier">'+t.label+(isMe?' · + ты! 🎉':'')+'</span><span class="crowd-n">'+(w>0?w.toLocaleString(appLocale())+' чел.':'—')+'</span><span class="crowd-p">'+(t.avgV?fmtInt(t.avgV)+' '+(l.currency||'NOK'):'')+'</span></div>';
     }).join('')+
