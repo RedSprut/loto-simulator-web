@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="ea31e25" data-build-ts="2026-09-25T20:32:26.899Z">
+<html lang="en" data-build="da23946" data-build-ts="2026-09-25T20:55:52.001Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=ea31e25"></script>
+<script src="./boot-runtime.js?v=da23946"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=ea31e25">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=da23946">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=ea31e25">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=da23946">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -1535,6 +1535,34 @@ body.light .mb[class*="miss-"]{text-shadow:none}
 .pro-pay-status{min-height:20px;margin-top:9px;text-align:center;color:#7A1410;font-size:12.5px;font-weight:800;line-height:1.4}
 .pro-signin-prompt{margin-top:10px;padding:12px;border-radius:14px;border:1.5px solid #D9A441;background:#FFF8E8;color:#7A1410;text-align:center;font-size:13px;font-weight:800;line-height:1.4;display:flex;flex-direction:column;gap:10px}
 .pro-signin-prompt[hidden]{display:none}
+/* Root cause of the always-visible «Повторить загрузку» / «Восстановить покупку» / «Выйти»: their own
+   display (.pro-offering-retry{display:block}, .btn-exp{display:flex}) beats the UA [hidden] rule, so
+   updateUi() set hidden=true and nothing disappeared. Inside the paywall, hidden means hidden. */
+#pro-ov [hidden]{display:none!important}
+/* «Тарифы и возможности»: the four store plans must be on screen when the sheet opens, on a phone
+   too. Compact header (crown · title · tag · status), then the plans and the one next step (guest
+   sign-in prompt or the secure-payment button); the reason text, demo, benefits and the Free list
+   follow the plans, legal copy stays last. 58px crown: the sticky ✕ reserves padding-right:58px on
+   it (.modal-static-close-clearance), so a smaller box would stop being a circle. */
+#pro-ov .pro-sheet{padding-top:16px}
+#pro-ov .pro-crown{width:58px;height:58px;margin:0 auto 4px;font-size:30px;box-shadow:0 0 16px rgba(233,180,76,.5),inset 0 -4px 10px rgba(90,60,10,.35)}
+#pro-ov .pro-title{font-size:21px;margin-bottom:0}
+#pro-ov .pro-tag{font-size:11px;letter-spacing:1.2px;margin-bottom:8px}
+#pro-ov .pro-access-status{margin:0 auto 4px;padding:5px 12px;font-size:11.5px}
+#pro-ov #pro-purchase-area{margin-top:8px}
+#pro-ov .pro-prices{gap:9px}
+#pro-ov .pro-price{padding:11px 8px 9px}
+#pro-ov .pro-price .pro-amt{min-height:32px;margin-top:3px}
+#pro-ov .pro-permonth{min-height:16px;margin-top:2px}
+#pro-ov #pro-purchase-btn{margin-top:12px;min-height:48px}
+#pro-ov #pro-purchase-btn:disabled{opacity:.45;cursor:not-allowed}
+#pro-ov .pro-pay-status:empty{min-height:0;margin-top:0}
+#pro-ov .pro-signin-prompt{margin-top:12px}
+#pro-ov .pro-signin-prompt .btn-draw{margin-top:0}
+#pro-ov .pro-details{margin-top:18px;display:grid;gap:12px}
+#pro-ov .pro-details .pro-preview{margin-top:0}
+#pro-ov .pro-benefits{margin-top:10px}
+@media(max-height:700px){#pro-ov .pro-tag{display:none}}
 @media(max-width:380px){.pro-methods{grid-template-columns:1fr}.pro-method{min-height:46px}.pro-prices{gap:8px}.pro-price{padding:13px 6px}}
 .pro-access-status{width:max-content;max-width:100%;margin:0 auto 12px;padding:7px 13px;border-radius:999px;background:rgba(90,62,12,.10);border:1px solid #C9A55A;color:#5A3E0C;font-size:12px;font-weight:900;text-align:center}
 .pro-access-status[data-level="trial"]{background:rgba(233,180,76,.28)}
@@ -3008,16 +3036,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="pro-title" id="pro-title">Lotto Simulator</div>
     <div class="pro-tag">Твоя лаборатория тиражей</div>
     <div class="pro-access-status" id="pro-access-status" data-level="free">Постоянный Free</div>
-    <div class="pro-context" id="pro-context">Откройте PRO, чтобы использовать полную лабораторию.</div>
-    <div class="pro-preview" id="pro-preview"><b>Демонстрационный пример PRO — не расчёт по вашим данным</b><span>Полный результат появляется только после серверной проверки PRO.</span></div>
     <div class="pro-step" id="pro-plans-step">
-      <div class="pro-sec">
-        <div class="pro-sec-t"><span class="pro-sec-ic">✨</span><span class="pro-sec-tx">Постоянный Free</span></div>
-        <div class="pro-li"><span class="pro-ic">◆</span><span>Симулятор всех <b>9 лотерей</b> без ограничений</span></div>
-        <div class="pro-li"><span class="pro-ic">◆</span><span>Официальное FREE-окно каждой игры — и все FREE-расчёты только по нему</span></div>
-        <div class="pro-li"><span class="pro-ic">◆</span><span>Проверка билета, базовая частота и случайный генератор</span></div>
-        <div class="pro-li"><span class="pro-ic">◆</span><span>Никаких ежедневных, еженедельных или месячных сбросов лимита</span></div>
-      </div>
       <div class="pro-sec" id="pro-purchase-area">
         <div class="pro-sec-t"><span class="pro-sec-ic">👑</span><span class="pro-sec-tx">PRO · полная база</span></div>
         <div class="pro-prices" id="pro-subscription-plans" aria-label="Срок подписки PRO">
@@ -3030,10 +3049,29 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
         <div class="pro-fine" id="pro-price-note">Тарифы сейчас недоступны. Покупка отключена до получения действующего Offering.</div>
         <button type="button" class="btn-exp pro-offering-retry" id="pro-offering-retry" data-loto-event-click="LotoCommercial.retryOffering()" hidden>Повторить загрузку</button>
         <div class="pro-fine" id="pro-provider-trial" hidden></div>
+        <div class="pro-signin-prompt" id="pro-signin-prompt" role="alert" hidden>
+          <div>Для оплаты выбранной подписки войдите или создайте аккаунт</div>
+          <button type="button" class="btn-draw" id="pro-signin-prompt-btn" data-loto-event-click="LotoCommercial.goToPaywallSignIn()">Войти или создать аккаунт</button>
+        </div>
+        <button type="button" class="btn-exp wide" id="pro-purchase-btn" data-loto-event-click="LotoCommercial.purchase()">Открыть безопасную оплату PRO</button>
+        <div class="pro-pay-status" id="pro-pay-status" aria-live="polite"></div>
         <div class="pro-renewal-copy">Подписка продлевается автоматически на выбранный срок. Отменить её можно в магазине или кабинете; после отмены PRO работает до оплаченной даты, а затем закрывается. Итоговая локальная цена и валюта всегда подтверждаются платёжным магазином.</div>
+      </div>
+      <div class="pro-details">
+        <div class="pro-context" id="pro-context">Откройте PRO, чтобы использовать полную лабораторию.</div>
+        <div class="pro-preview" id="pro-preview"><b>Демонстрационный пример PRO — не расчёт по вашим данным</b><span>Полный результат появляется только после серверной проверки PRO.</span></div>
+      </div>
+      <div class="pro-sec pro-benefits" id="pro-benefits">
         <div class="pro-li"><span class="pro-ic">◆</span><span>Вся доступная история и <b>все эпохи правил</b></span></div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>PRO-модели считают по полному набору; Free никогда не получает эти данные и результаты</span></div>
         <div class="pro-li"><span class="pro-ic">◆</span><span>Структурное поле, Консенсус, Судья, Парадоксы, мировой анализ и экспорт</span></div>
+      </div>
+      <div class="pro-sec">
+        <div class="pro-sec-t"><span class="pro-sec-ic">✨</span><span class="pro-sec-tx">Постоянный Free</span></div>
+        <div class="pro-li"><span class="pro-ic">◆</span><span>Симулятор всех <b>9 лотерей</b> без ограничений</span></div>
+        <div class="pro-li"><span class="pro-ic">◆</span><span>Официальное FREE-окно каждой игры — и все FREE-расчёты только по нему</span></div>
+        <div class="pro-li"><span class="pro-ic">◆</span><span>Проверка билета, базовая частота и случайный генератор</span></div>
+        <div class="pro-li"><span class="pro-ic">◆</span><span>Никаких ежедневных, еженедельных или месячных сбросов лимита</span></div>
       </div>
       <div class="pro-account">
         <div class="pro-account-state" id="pro-account-state">Вход не требуется для бесплатного режима.</div>
@@ -3047,15 +3085,9 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
         <div class="pro-auth-message" id="pro-auth-message" aria-live="polite" hidden></div>
       </div>
       <div class="pro-actions">
-        <button type="button" class="btn-exp wide" id="pro-purchase-btn" data-loto-event-click="LotoCommercial.purchase()">Открыть безопасную оплату PRO</button>
         <button type="button" class="btn-exp" id="pro-restore-btn" data-loto-event-click="LotoCommercial.restorePurchase()">Восстановить покупку</button>
         <button type="button" class="btn-exp" id="pro-account-portal-btn" data-loto-event-click="LotoCommercial.accountPortal()">Управление подпиской</button>
         <button type="button" class="btn-exp wide" id="pro-signout-btn" data-loto-event-click="LotoCommercial.requestSignOut()" hidden>Выйти из аккаунта</button>
-      </div>
-      <div class="pro-pay-status" id="pro-pay-status" aria-live="polite"></div>
-      <div class="pro-signin-prompt" id="pro-signin-prompt" role="alert" hidden>
-        <div>Для покупки выбранной подписки необходимо войти или создать аккаунт.</div>
-        <button type="button" class="btn-draw" id="pro-signin-prompt-btn" data-loto-event-click="LotoCommercial.goToPaywallSignIn()">Войти или создать аккаунт</button>
       </div>
       <div class="pro-fine">На iOS оплата проходит через Apple, на Android — через Google Play, в браузере — через RevenueCat и Paddle. Способ оплаты выбирается только в защищённом системном или провайдерском окне.</div>
       <div class="pro-fine">PRO оплачивает только дополнительные программные функции. Lotto Simulator не продаёт билеты, не принимает ставки и не гарантирует выигрыш.</div>
@@ -3765,25 +3797,25 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=ea31e25"></script>
-<script src="./commercial-config.js?v=ea31e25"></script>
-<script src="./event-runtime.js?v=ea31e25"></script>
-<script src="./external-link-runtime.js?v=ea31e25"></script>
-<script src="./auth-client.js?v=ea31e25"></script>
-<script src="./native-loader.js?v=ea31e25"></script>
-<script src="./billing-web.js?v=ea31e25"></script>
-<script src="./i18n-catalog.js?v=ea31e25"></script>
-<script src="./lang-detect.js?v=ea31e25"></script>
-<script src="./i18n-runtime.js?v=ea31e25"></script>
-<script src="./consent-runtime.js?v=ea31e25"></script>
-<script src="./analytics-telemetry.js?v=ea31e25"></script>
-<script src="./win-match-core.js?v=ea31e25"></script>
-<script src="./court-core.js?v=ea31e25"></script>
-<script src="./smart-start.js?v=ea31e25"></script>
-<script src="./app-runtime.js?v=ea31e25"></script>
-<script src="./inline-runtime-2.js?v=ea31e25"></script>
-<script src="./commercial-runtime.js?v=ea31e25"></script>
-<script src="./inline-runtime-3.js?v=ea31e25"></script>
+<script src="./version.js?v=da23946"></script>
+<script src="./commercial-config.js?v=da23946"></script>
+<script src="./event-runtime.js?v=da23946"></script>
+<script src="./external-link-runtime.js?v=da23946"></script>
+<script src="./auth-client.js?v=da23946"></script>
+<script src="./native-loader.js?v=da23946"></script>
+<script src="./billing-web.js?v=da23946"></script>
+<script src="./i18n-catalog.js?v=da23946"></script>
+<script src="./lang-detect.js?v=da23946"></script>
+<script src="./i18n-runtime.js?v=da23946"></script>
+<script src="./consent-runtime.js?v=da23946"></script>
+<script src="./analytics-telemetry.js?v=da23946"></script>
+<script src="./win-match-core.js?v=da23946"></script>
+<script src="./court-core.js?v=da23946"></script>
+<script src="./smart-start.js?v=da23946"></script>
+<script src="./app-runtime.js?v=da23946"></script>
+<script src="./inline-runtime-2.js?v=da23946"></script>
+<script src="./commercial-runtime.js?v=da23946"></script>
+<script src="./inline-runtime-3.js?v=da23946"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3935,9 +3967,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=ea31e25"></script>
-<script src="./notifications-runtime.js?v=ea31e25"></script>
-<script src="./pwa-runtime.js?v=ea31e25"></script>
+<script src="./notification-center.js?v=da23946"></script>
+<script src="./notifications-runtime.js?v=da23946"></script>
+<script src="./pwa-runtime.js?v=da23946"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3948,8 +3980,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=ea31e25"></script>
-<script src="./inline-runtime-5.js?v=ea31e25"></script>
-<script src="./inline-runtime-6.js?v=ea31e25"></script>
+<script src="./inline-runtime-4.js?v=da23946"></script>
+<script src="./inline-runtime-5.js?v=da23946"></script>
+<script src="./inline-runtime-6.js?v=da23946"></script>
 </body>
 </html>
