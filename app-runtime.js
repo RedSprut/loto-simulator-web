@@ -3938,6 +3938,15 @@ async function resetROI(){if(!(await customConfirm('Сбросить ROI?')))ret
 // ─── PRIZE TIERS (real payout data) ────────────
 const prizeVisibleCounts={};
 function prizeTierAmount(tier){return tier?.prizeAmount??tier?.prizeNOK??null;}
+/* The official source does NOT provide this draw's prize table: no category (the jackpot row aside)
+   carries an amount, while a LATER draw of the same game already has its table — the operator has
+   moved on, so it is absent, not late. The newest draw without amounts is still awaited. Shown as
+   «Данные недоступны»: never $0, a dash or a substituted value. */
+function prizeTableUnavailable(draw,draws){
+  const hasTable=d=>Array.isArray(d&&d.payoutTiers)&&d.payoutTiers.slice(1).some(t=>{const a=prizeTierAmount(t)??t?.prize;return a!==null&&a!==undefined;});
+  if(!draw||!Array.isArray(draw.payoutTiers)||hasTable(draw))return false;
+  return (draws||[]).some(d=>d&&d.date>draw.date&&hasTable(d));
+}
 function escapePrizeHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
 async function showMorePrizes(){
   prizeVisibleCounts[cur]=(prizeVisibleCounts[cur]||15)+15;
@@ -3978,7 +3987,8 @@ async function renderPrizes(){
     let balls=(d.main||[]).map(n=>`<div class="hball ${l.cls}-m">${n}</div>`).join('');
     if(d.bonus&&d.bonus.length){balls+=`<div style="font-size:9px;opacity:.4;margin:0 2px">|</div>`;balls+=d.bonus.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}
     let rowsH='';
-    d.payoutTiers.forEach(t=>{
+    if(prizeTableUnavailable(d,withPayouts))rowsH=`<div class="prize-tier-row prize-unavailable"><div class="prize-tier-name">${escapePrizeHtml(appText('Данные недоступны'))}</div></div>`;
+    else d.payoutTiers.forEach(t=>{
       const known=getPrizeTiers(l).find(item=>item.match===t.match);
       const label=known?.label||t.label||t.match;
       const amount=prizeTierAmount(t);
@@ -5948,6 +5958,7 @@ const LotoWinMatch=(function(){
     for(const m of store){ if(m.payoutState==='available')continue;
       const draws=drawsByGame[m.gameId]; if(!draws)continue; const d=draws.find(x=>x&&x.date===m.drawDate); if(!d)continue;
       const po=payoutFor(d,m); if(po&&po.amount!=null){m.payout=po.amount;m.payoutState='available';m.winners=po.winners;}
+      else m.payoutState=prizeTableUnavailable(d,draws)?'unavailable':'pending';
     }
   }catch(_e){} }
   async function scan(){ if(!ON)return; try{
@@ -6000,6 +6011,7 @@ const LotoWinMatch=(function(){
     const matchLine=T('Совпало')+': <b data-i18n-ignore>'+m.mainHit+(bonusGame?(' + '+bonusHit):'')+'</b>';
     let payoutLine;
     if(m.payoutState==='available'&&m.payout!=null){ payoutLine=(m.played?T('Выигрыш'):T('Приз этой категории в тираже'))+': <b data-i18n-ignore>'+fmtMoney(m.payout,l.currency)+'</b>'; }
+    else if(m.payoutState==='unavailable'){ payoutLine='<span style="opacity:.85">'+T('Данные недоступны')+'</span>'; }
     else { payoutLine='<span style="opacity:.85">'+T('Совпадение подтверждено. Размер приза этой категории ещё не опубликован.')+'</span>'; }
     const statusLine=(m.played?('✅ '+T('Отмечено как сыгранный билет')):('ℹ️ '+T('Эта комбинация не была отмечена как сыгранный билет.')));
     return `<div class="cele-title" style="font-size:20px">${title}</div>`+
