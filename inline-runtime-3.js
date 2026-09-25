@@ -467,7 +467,11 @@
       msg('acc-auth-msg','Отправляем ссылку…','info');
       try{const captcha=await authCaptchaToken();
         await window.LotoCommercial.sendMagicLink(email,mode,captcha);
-        msg('acc-auth-msg',mode==='login'
+        // A plan was chosen before this sign-in: the link carries the purchase, and the user is told so.
+        const buying=!!(window.LotoCommercial&&window.LotoCommercial.purchaseIntentPending);
+        msg('acc-auth-msg',buying
+          ?'Ссылка отправлена. Откройте письмо и подтвердите e-mail — после этого оплата выбранного тарифа PRO продолжится автоматически.'
+          :mode==='login'
           ?'Ссылка для входа отправлена на указанный e-mail. Откройте её на этом устройстве.'
           :'Ссылка для подтверждения отправлена на указанный e-mail. Откройте её на этом устройстве.','success');}
       catch(_err){msg('acc-auth-msg','Не удалось отправить ссылку. Проверьте адрес и попробуйте ещё раз.','error');}
