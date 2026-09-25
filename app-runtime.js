@@ -982,7 +982,7 @@ function setThemePreference(mode,persist=true){
   document.body.classList.toggle('dark',resolved==='dark');
   document.documentElement.dataset.theme=resolved;
   document.documentElement.dataset.themeMode=mode;
-  const btn=document.getElementById('theme-btn');if(btn){btn.textContent=mode==='system'?'🌓':(resolved==='dark'?'☀️':'🌙');btn.setAttribute('aria-pressed',resolved==='dark'?'true':'false');btn.dataset.themeMode=mode;}
+  const btn=document.getElementById('theme-btn');if(btn){btn.textContent=resolved==='dark'?'🌞':'🌓';btn.setAttribute('aria-pressed',resolved==='dark'?'true':'false');btn.dataset.themeMode=mode;}
   if(persist)localStorage.setItem('loto_theme',mode);
   updateThemeColor();
   window.dispatchEvent(new CustomEvent('loto:themechange',{detail:{mode,resolved}}));
@@ -990,12 +990,11 @@ function setThemePreference(mode,persist=true){
 function applyDark(){setThemePreference('dark');}
 function applyLight(){setThemePreference('light');}
 function applySystemTheme(){setThemePreference('system');}
-// The existing header control cycles light → dark → system, so SYSTEM is reachable without any
-// new UI. In system mode the app follows the OS and keeps following it live (see initTheme's
-// prefers-color-scheme listener); 🌓 marks that state so it is distinguishable from a fixed theme.
+// The header control is a strict Light/Dark switch: every tap flips the theme the user SEES
+// (🌓 in light, 🌞 in dark). Until the first tap the app stays in system mode and follows the OS
+// live (see initTheme's prefers-color-scheme listener).
 function toggleDark(){
-  const mode=window.__lotoThemePreference||'system';
-  setThemePreference(mode==='light'?'dark':mode==='dark'?'system':'light');
+  setThemePreference(document.documentElement.dataset.theme==='dark'?'light':'dark');
 }
 
 // ═══════════════════════════════════════════════
@@ -1030,6 +1029,8 @@ function bottomNavRoute(p){
   }
   selPage(p);
 }
+// The header logo is a Home link on Analytics only; on the Simulator it stays inert.
+function logoHome(){if(curPage==='ana')handleBack();}
 async function handleBack(){
   if(window.LotoAnalyticsGate?.blocking)return;
   if(curPage==='ana')selPage('sim');
