@@ -373,8 +373,11 @@
   };
   var CONTINENT_ORDER = ['EU', 'AS', 'NA', 'SA', 'AF', 'OC', 'AN'];
   // Soft sequential blues (the restored «Голубая» character: calm, no acid tones). Index 0 = no data.
-  var BLUE_LIGHT = ['#dde6ee', '#cfe1f6', '#a9cbef', '#7fb0e6', '#5591db', '#3470cf', '#1d4ed8', '#173ba6'];
-  var BLUE_DARK = ['#26364a', '#22405f', '#245583', '#2b6ea9', '#3a89cd', '#5aa4e8', '#8cc1f4', '#c3ddfa'];
+  // Index 0 = «no data» (the map draws such a country under glass and never uses this colour for a
+  // value); 1..7 = the sequential ramp. The first active step must already read as «coloured» next
+  // to the glass fill, so the ramp starts saturated instead of one tint away from white.
+  var BLUE_LIGHT = ['#dde6ee', '#b7d2f1', '#90bae9', '#6aa1df', '#4a87d5', '#2f6dcb', '#1d4ed8', '#173ba6'];
+  var BLUE_DARK = ['#26364a', '#2c5384', '#336ba6', '#3f85c6', '#569de1', '#78b6ee', '#9dccf6', '#c3ddfa'];
   // Log scale: one dominant country must not flatten every other one into the palest tone.
   function choroplethColor(value, max, theme) {
     var scale = theme === 'dark' ? BLUE_DARK : BLUE_LIGHT;
@@ -468,13 +471,48 @@
     checkout_open: 'Открыл оплату', checkout_failed: 'Оплата не удалась', checkout_cancelled: 'Оплата отменена',
     purchase_success: 'Покупка PRO', renewal: 'Продление', cancellation: 'Отмена подписки', uncancellation: 'Отмена отозвана',
     expiration: 'Подписка истекла', refund: 'Возврат', payment_failed: 'Проблема с оплатой', plan_change: 'Смена тарифа',
-    transfer: 'Перенос покупки', billing_test: 'Тест RevenueCat', billing_webhook_failed: 'Сбой вебхука платежей', restore_success: 'Восстановление'
+    transfer: 'Перенос покупки', billing_test: 'Тест RevenueCat', billing_webhook_failed: 'Сбой вебхука платежей', restore_success: 'Восстановление',
+    // every other RevenueCat event type the ledger may file (billing_<type>): named, never shown raw
+    billing_invoice_issuance: 'Счёт выставлен', billing_subscription_paused: 'Подписка приостановлена',
+    billing_subscription_extended: 'Подписка продлена магазином', billing_temporary_entitlement_grant: 'Временный доступ (магазин)',
+    billing_virtual_currency_transaction: 'Виртуальная валюта', billing_refund_reversed: 'Возврат отменён'
   };
+  // What a ledger row IS (server field `kind`): only paid rows are sales.
+  var COMMERCE_KIND_RU = { paid: 'Оплачено', promo: 'Промо-доступ', sandbox: 'Sandbox / Test Store', trial: 'Пробный период', zero: 'Без оплаты' };
   function formatMoney(amount, currency) {
     var n = +amount;
     if (!isFinite(n)) return '—';
     try { return n.toLocaleString('ru-RU', { style: 'currency', currency: currency || 'USD', maximumFractionDigits: 2 }); }
     catch (e) { return n.toLocaleString('ru-RU') + ' ' + (currency || ''); }
+  }
+  // Money by currency, never summed across currencies: [{currency, amount}] → «4,99 € · 99,00 kr».
+  // Rows without an amount are skipped (unknown is unknown, not zero).
+  function moneyList(rows, key) {
+    var k = key || 'amount';
+    var parts = (Array.isArray(rows) ? rows : []).filter(function (r) { return r && r.currency && r[k] != null && isFinite(+r[k]); })
+      .map(function (r) { return formatMoney(r[k], r.currency); });
+    return parts.join(' · ');
+  }
+  // «≈ 5,68 $ по курсу RevenueCat» — the only cross-currency figure, always named as an estimate.
+  function usdEstimate(value) {
+    var n = +value;
+    if (value == null || !isFinite(n)) return '';
+    return '≈ ' + formatMoney(n, 'USD') + ' по курсу RevenueCat';
+  }
+  // Net of one ledger row: exact when the server computed it, «нет данных» otherwise — never 0 by default.
+  function netText(row) {
+    if (!row) return 'нет данных';
+    if (row.net != null && row.currency && isFinite(+row.net)) return formatMoney(row.net, row.currency);
+    return 'нет данных';
+  }
+  function deductionText(row) {
+    if (!row || row.price == null || row.net == null || !row.currency) return '';
+    var d = +row.price - +row.net;
+    if (!isFinite(d)) return '';
+    var shares = [];
+    if (row.commission_pct != null && isFinite(+row.commission_pct)) shares.push('комиссия ' + Math.round(+row.commission_pct * 1000) / 10 + '%');
+    if (row.tax_pct != null && isFinite(+row.tax_pct)) shares.push('налог ' + Math.round(+row.tax_pct * 1000) / 10 + '%');
+    return formatMoney(d, row.currency) + (shares.length ? ' (' + shares.join(' + ') + ')' : '');
   }
 
   return {
@@ -487,7 +525,8 @@
     BLUE_LIGHT: BLUE_LIGHT, BLUE_DARK: BLUE_DARK, choroplethColor: choroplethColor, flagEmoji: flagEmoji, kpiText: kpiText,
     dayRange: dayRange, todayYMD: todayYMD, shiftDay: shiftDay, delta: delta, parseOwnerLink: parseOwnerLink, buildOwnerLink: buildOwnerLink,
     CATEGORY_RU: CATEGORY_RU, CATEGORY_ICON: CATEGORY_ICON, SEVERITY_RU: SEVERITY_RU, MODE_RU: MODE_RU, STATUS_RU: STATUS_RU,
-    FEED_KIND_RU: FEED_KIND_RU, COMMERCE_RU: COMMERCE_RU, formatMoney: formatMoney,
+    FEED_KIND_RU: FEED_KIND_RU, COMMERCE_RU: COMMERCE_RU, COMMERCE_KIND_RU: COMMERCE_KIND_RU, formatMoney: formatMoney,
+    moneyList: moneyList, usdEstimate: usdEstimate, netText: netText, deductionText: deductionText,
     _zoneOffsetMinutes: zoneOffsetMinutes, _zoneCivilToUTC: zoneCivilToUTC, _zoneYMD: zoneYMD,
     _osloCivilToUTC: osloCivilToUTC, _osloYMD: osloYMD, _osloOffsetMinutes: osloOffsetMinutes
   };

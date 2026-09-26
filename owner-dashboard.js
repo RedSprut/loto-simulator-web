@@ -93,7 +93,10 @@
     authorizedVisits: 'Авторизованные визиты — загрузки страницы и запуски приложения, в которых был проверенный вход в аккаунт (по обезличенным счётчикам; какой именно аккаунт, не записывается). Это ВИЗИТЫ, а не люди: один человек за день даёт столько визитов, сколько раз открыл приложение. Число людей за ними — «Точные активные аккаунты» в блоке «Кто это был».',
     registered: 'Точное число: аккаунты в базе авторизации без анонимных сессий. Не зависит от согласия на аналитику и от фильтров трафика. Владелец учтён и показан отдельно.',
     levels: 'FREE / PRO / Lifetime — из серверной таблицы прав доступа (entitlements). PRO — активная платная подписка; Lifetime — бессрочный доступ владельца; истёкшие показаны отдельно. Клиентский флаг isPro не используется никогда.',
-    buyers: 'Покупатели — аккаунты с оплаченным правом доступа от магазина (Apple, Google, Paddle, Stripe, RevenueCat) в production. Клиентское событие «оплатил» доказательством не считается. Продления появятся после подключения журнала платёжных событий.',
+    buyers: 'Покупатели — аккаунты с оплаченным правом доступа от магазина (Apple, Google, Paddle, Stripe, RevenueCat) в production. Клиентское событие «оплатил» доказательством не считается. Покупки, продления, возвраты и суммы — из журнала событий магазина (вебхук RevenueCat), который ведётся с момента подключения; промо-доступ, пробные периоды и sandbox покупками не считаются.',
+    revenue: 'Сумма покупок (gross) — ровно то, что заплатил покупатель, в его валюте (например 4,99 €); суммы разных валют не складываются. «≈ USD по курсу RevenueCat» — пересчёт самого RevenueCat на момент события (поле price вебхука): ориентир, а не бухгалтерская выручка. Возвраты показаны отдельно и из суммы покупок не вычитаются молча.',
+    netRevenue: 'Чистыми (net) = сумма покупки минус удержания магазина по данным RevenueCat (поля tax_percentage и commission_percentage вебхука: налог и комиссия магазина). Показывается только для событий, где RevenueCat сообщил эти доли; иначе — «нет данных», ничего не домысливается. Комиссия RevenueCat за Web Billing и сборы Stripe выставляются отдельными счетами и в событиях отсутствуют.',
+    notSales: 'Не продажи: промо-доступ (магазин promotional — владелец выдал доступ бесплатно), пробные периоды (цена 0), события без оплаты и sandbox / Test Store (репетиции оплаты). Они показаны, чтобы было видно, что произошло, но в покупки, продления, отмены, возвраты и суммы не входят.',
     conversion: 'Оценка: новые регистрации за период ÷ обычные визиты за период; покупатели ÷ все аккаунты. Показывается только при достаточной выборке (≥ 20 визитов, ≥ 10 аккаунтов), иначе — «Недостаточно данных».',
     traffic: 'Боты — объявленные краулеры. Подозрительный трафик — headless-браузеры, сети дата-центров, VPN, Tor и всплески запросов с одной сети. Ни одна страна не удаляется вручную: видно, какой это трафик.',
     consented: 'Посетители с согласием — люди из данных, собранных после «Принять»: подтверждённые аккаунты и вероятные анонимные люди. Это часть всех посетителей, а не все посетители.',
@@ -106,7 +109,7 @@
     dayStatuses: 'Статусы активных за день аккаунтов — из серверной таблицы прав доступа: FREE, PRO (активная платная подписка), PRO Lifetime, PRO истёк/отменён. Гости — устройства без входа в аккаунт. Владелец и тестовые аккаунты считаются отдельно и в эти цифры не входят даже при включённом переключателе.',
     dayRegistrations: 'Регистрации — аккаунты, созданные в этот день (точно, из базы авторизации, без анонимных сессий и без владельца). Анонимная сессия, ставшая аккаунтом, считается по дате создания её записи.',
     dayLanguages: 'Язык интерфейса — из событий с согласием (locale приложения). Страна — из счётчиков визитов (сервер, по сети) и сессий с согласием. Это две независимые величины: язык не выводится из страны и наоборот.',
-    dayCommerce: 'Покупки, продления, отмены, возвраты, сбои оплаты, тариф (1/3/6/12 мес.), магазин и выручка — из журнала событий магазина (вебхук RevenueCat), записанного с момента подключения этого журнала. У исторических покупок без цены выручка не выдумывается: они показаны как «без суммы». Checkout started/failed — клиентские события экрана оплаты.',
+    dayCommerce: 'Покупки, продления, отмены, возвраты, сбои оплаты, тариф (1/3/6/12 мес.) и магазин — из журнала событий магазина (вебхук RevenueCat), только оплаченные события production. Промо-доступ, пробные периоды, sandbox и Test Store считаются отдельно и покупками не являются. У событий без цены сумма не выдумывается: они показаны как «без суммы». Checkout начат / не удался — клиентские события экрана оплаты.',
     dayFeatures: 'Функции — все события приложения за день: сколько раз произошло и сколько уникальных пользователей (аккаунт, человек или устройство) их совершили. Периодические отчёты об активности не показываются.',
     daySystem: 'Сбои за день: отклонённые и невалидные события приёма, ошибки разбора аналитики, недоставленные push, ошибки в приложении у пользователей и системные уведомления владельца.',
     identity: 'Шесть разных величин, которые не складываются друг в друга. Точные аккаунты — один auth-аккаунт = один пользователь, сколько бы визитов, сессий и устройств у него ни было (владелец отдельно). Оценка уникальных гостей — гостевые профили с согласием (одна стабильная анонимная идентичность) плюс дневные ключи гостей без согласия: HMAC суток, сети, браузера, ОС, устройства, платформы и языка; 50 загрузок одного такого гостя за день — 1 гость и 50 визитов, на следующий день — новый ключ. IP не хранится, ключ не считается доказанным человеком и не является аккаунтом; ключи, за которыми в тот же день был вход в аккаунт, исключены. Визиты, сессии, устройства и домохозяйства — отдельные метрики.',
@@ -181,6 +184,18 @@
     });
   }
   function num(value) { var n = +value || 0; return n.toLocaleString('ru-RU'); }
+  function money(value, currency) { return LIB.formatMoney ? LIB.formatMoney(value, currency) : (+value).toLocaleString('ru-RU') + ' ' + (currency || ''); }
+  function moneyList(rows, key) { return LIB.moneyList ? LIB.moneyList(rows, key) : ''; }
+  // Server money text «4.99 EUR + 99 NOK» → «4,99 € · 99,00 kr» (each currency on its own, never summed).
+  function moneyTextRu(text) {
+    if (!text) return '';
+    return String(text).split(' + ').map(function (part) {
+      var m = /^(-?[\d.]+)\s+([A-Z]{3})$/.exec(part.trim());
+      return m ? money(m[1], m[2]) : part;
+    }).join(' · ');
+  }
+  function usdEstimate(value) { return LIB.usdEstimate ? LIB.usdEstimate(value) : ''; }
+  var NONE = '<span class="ow-kpi-none">нет данных</span>';
   function dur(ms) { return LIB.formatDuration ? LIB.formatDuration(ms) : Math.round((+ms || 0) / 1000) + ' с'; }
   function pctText(part, total) { return total ? Math.round((part / total) * 100) + '%' : '—'; }
   function timeText(value) {
@@ -322,6 +337,12 @@
       '#ow-ov .ow-tabs{min-width:0;max-width:100%}',
       '#ow-ov .ow-cards,#ow-ov .ow-block,#ow-ov .ow-chart{min-width:0}',
       '@media (max-width:719px){#ow-ov .ow-status{flex:1 1 100%;margin-left:0;text-align:left}#ow-ov .ow-top .ow-btn{flex:1 1 auto}}',
+      // Phones: the filter bar folds away behind «Фильтры», so a section (and the map) starts on the first screen.
+      '#ow-ov .ow-filters-btn{display:none}',
+      '@media (max-width:719px){#ow-ov .ow-filters-btn{display:inline-block}#ow-ov .ow-controls{display:none}#ow-ov .ow-controls.open{display:flex}}',
+      '#ow-ov .ow-money .ow-card-v{font-size:22px}',
+      '#ow-ov .ow-tag-kind{background:rgba(242,193,78,.25);color:#a8730b}',
+      '#ow-ov .ow-cmp-l{font-weight:800;color:var(--ow-sub)}',
       '#ow-ov .ow-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}',
       '#ow-ov .ow-card{background:var(--ow-card);border:1px solid var(--ow-bd);border-radius:14px;padding:12px}',
       '#ow-ov .ow-card-h{display:flex;align-items:center;gap:6px;color:var(--ow-sub);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;flex-wrap:wrap}',
@@ -362,9 +383,12 @@
       '#ow-ov .ow-stages{color:var(--ow-sub);font-size:12px;text-align:center;max-width:280px}',
       '#ow-ov .ow-status{color:var(--ow-sub);font-size:12px;margin-left:auto;text-align:right}',
       '#ow-ov .ow-err{background:rgba(242,120,154,.14);border:1px solid var(--ow-down);border-radius:12px;padding:10px;margin-top:10px;display:flex;gap:10px;align-items:center}',
-      '#ow-ov .ow-map{height:min(70vh,560px);border-radius:14px;overflow:hidden;border:1px solid var(--ow-bd);margin-top:10px;background:var(--ow-card2)}',
-      // A phone shows the whole world in a short, wide box instead of a tall box with a tiny world in it.
-      '@media (max-width:719px){#ow-ov .ow-map{height:min(48vh,340px)}}',
+      // The map is the section: as tall as the viewport allows on a desktop, wide and short on a phone.
+      // The box follows the world's own proportions (≈1.9:1 between 56°S and 78°N): sizeMapBox() sets the
+      // height from the box's real width, so a phone gets a wide, short world with no empty ocean below it
+      // and a desktop the tallest box that still fits. These are only the fallback heights before that.
+      '#ow-ov .ow-map{height:clamp(300px,60vh,720px);border-radius:16px;overflow:hidden;border:1px solid var(--ow-bd);margin-top:10px;background:var(--ow-card2)}',
+      '@media (max-width:719px){#ow-ov .ow-map{height:220px;border-radius:12px}}',
       '#ow-ov .ow-map-note{color:var(--ow-sub);font-size:12px;margin-top:6px}',
       '#ow-ov .ow-pop{position:fixed;inset:auto 12px 12px 12px;max-width:560px;margin:0 auto;background:var(--ow-card);border:1px solid var(--ow-bd);border-radius:14px;padding:12px;box-shadow:0 18px 50px rgba(0,0,0,.35);z-index:20}',
       '#ow-ov .ow-pop h3{margin:0 0 6px;font-size:14px}',
@@ -386,6 +410,14 @@
       '#ow-ov .ow-map{position:relative}',
       '#ow-ov .ow-map-tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--ow-card);color:var(--ow-tx);border:1px solid var(--ow-bd);border-radius:10px;padding:6px 9px;font-size:12px;line-height:1.4;box-shadow:0 8px 24px rgba(13,37,64,.18);z-index:4;max-width:240px}',
       '#ow-ov .ow-map-tip[hidden]{display:none}',
+      // Label pills of the active countries (HTML markers: no glyph server, themed with the panel).
+      '#ow-ov .ow-map-pill{pointer-events:auto;cursor:pointer;border:1px solid rgba(29,78,216,.35);border-radius:999px;padding:2px 8px;font:700 11px/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:rgba(255,255,255,.92);color:#0d2540;box-shadow:0 4px 14px rgba(13,37,64,.18);white-space:nowrap;transform:translateZ(0)}',
+      '#ow-ov .ow-map-pill:hover,#ow-ov .ow-map-pill.is-selected{background:#1d4ed8;border-color:#1d4ed8;color:#fff}',
+      '#ow-ov .ow-map-pill.is-hidden{display:none}',
+      '#ow-ov [data-ow-map-theme="dark"] .ow-map-pill{background:rgba(18,34,58,.94);border-color:rgba(195,221,250,.45);color:#e6f0fb;box-shadow:0 4px 14px rgba(0,0,0,.45)}',
+      '#ow-ov [data-ow-map-theme="dark"] .ow-map-pill:hover,#ow-ov [data-ow-map-theme="dark"] .ow-map-pill.is-selected{background:#c3ddfa;border-color:#c3ddfa;color:#0b1624}',
+      '@media (max-width:719px){#ow-ov .ow-map-pill{font-size:10px;padding:1px 6px}}',
+      '#ow-ov .maplibregl-ctrl-attrib{font-size:10px}',
       '#ow-ov .ow-block-h{flex-wrap:wrap}#ow-ov .ow-block-h select{max-width:46vw}',
       '#ow-ov .ow-country-h{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:800;margin-bottom:8px;flex-wrap:wrap}',
       '#ow-ov .ow-country-h .ow-flag{font-size:28px;line-height:1}',
@@ -441,11 +473,12 @@
         '<button class="ow-btn ow-bell" id="owner-bell-btn" type="button" hidden aria-label="Уведомления владельца">' +
           '<span class="ow-bell-ico" aria-hidden="true">🔔</span>' +
           '<span class="ow-bell-badge" id="owner-bell-badge" hidden aria-hidden="true">0</span></button>' +
+        '<button class="ow-btn ow-filters-btn" id="ow-filters" type="button" aria-expanded="false">Фильтры</button>' +
         '<button class="ow-btn" id="ow-theme" type="button">Тема</button>' +
         '<button class="ow-btn" id="ow-export" type="button">Экспорт</button>' +
         '<button class="ow-btn ow-btn-primary" id="ow-refresh" type="button">Обновить</button>' +
       '</div>' +
-      '<div class="ow-controls">' +
+      '<div class="ow-controls" id="ow-controls">' +
         '<label>Период <select id="ow-preset"></select></label>' +
         '<span id="ow-daybar" class="ow-daybar" role="group" aria-label="Календарь">' +
           '<button class="ow-chip" type="button" data-day="0">Сегодня</button>' +
@@ -569,12 +602,19 @@
       tab.setAttribute('aria-selected', String(tab.getAttribute('data-section') === section));
     });
     stopLive();
+    // Leaving the map tab frees its WebGL context, markers and listeners at once; the next visit builds
+    // a fresh map into the freshly rendered box (an orphaned instance kept answering for a detached box).
+    if (section !== 'map' && mapApi) { mapApi.destroy(); mapApi = null; }
     if (section === 'overview') await loadMany(['overview', 'kpi'], extra);
     else if (section === 'map') { await loadMany(['countries'], extra); state.data.map = state.data.countries; }
     else await load(section, extra);
     render();
     if (section === 'live') startLive();
-    if (section === 'map') mountMap();
+    if (section === 'map') {
+      mountMap();
+      // On a phone the folded filter bar still leaves the tabs above the map: bring the map up.
+      try { if (W.innerWidth < 720) { var box = ovEl.querySelector('#ow-mapbox'); if (box) box.scrollIntoView({ block: 'start', behavior: 'smooth' }); } } catch (e) {}
+    }
     focusBlock();
   }
   // Deep links (#owner?d=…&s=day&b=commerce) land on a block of the day report.
@@ -727,9 +767,27 @@
       lines.filter(function (l) { if (seen[l[0]]) return false; seen[l[0]] = true; return true; })
         .map(function (l, i) { return '<br>' + esc(l[1]) + ': ' + (i === 0 ? '<b>' + num(row[l[0]]) + '</b>' : num(row[l[0]])); }).join('');
   }
+  // Height from the real width (world aspect ≈ 1.9:1), capped by the viewport; re-applied on resize.
+  function sizeMapBox(host) {
+    try {
+      var width = host.clientWidth || host.getBoundingClientRect().width;
+      if (!width) return;
+      var phone = W.innerWidth < 720;
+      var max = phone ? Math.min(460, Math.round(W.innerHeight * 0.6)) : Math.min(720, Math.round(W.innerHeight * 0.72));
+      var height = Math.round(Math.max(phone ? 200 : 300, Math.min(width / 1.9, max)));
+      host.style.height = height + 'px';
+    } catch (e) {}
+  }
+  var mapResizeTimer = null;
+  W.addEventListener('resize', function () {
+    if (!ovEl || !ovEl.classList.contains('show') || state.section !== 'map') return;
+    clearTimeout(mapResizeTimer);
+    mapResizeTimer = setTimeout(function () { var host = ovEl.querySelector('#ow-mapbox'); if (host) { sizeMapBox(host); if (mapApi) mapApi.resize(); } }, 120);
+  });
   async function mountMap(force) {
     var host = ovEl.querySelector('#ow-mapbox');
     if (!host || mapLoading) return;
+    sizeMapBox(host);
     var rows = countryRows();
     if (mapApi && !force && mapApi.map && mapApi.map.getContainer() === host) {
       mapApi.setData(rows, state.mapMetric); mapApi.setContinent(state.continent); mapApi.select(state.selectedCountry); mapApi.resize(); return;
@@ -748,6 +806,7 @@
         theme: ovEl.getAttribute('data-ow-theme'),
         colorFor: function (value, max, theme) { return LIB.choroplethColor ? LIB.choroplethColor(value, max, theme) : (value > 0 ? '#5591db' : '#dde6ee'); },
         onHover: hoverHtml,
+        nameOf: countryName,
         onSelect: function (iso) { state.selectedCountry = iso; openCountry(iso); }
       });
       mapApi.setData(rows, state.mapMetric);
@@ -912,8 +971,8 @@
   // ── sections ───────────────────────────────────────────────────────────────────────────────
   // KPI card: value text or an honest empty state, a precision tag and a «how» note.
   function kcard(title, value, sub, howKey, precision, opts) {
-    var k = LIB.kpiText ? LIB.kpiText(value, opts) : { text: num(value), state: 'ok' };
-    var text = k.state === 'ok' ? k.text + (opts && opts.suffix ? opts.suffix : '') : '<span class="ow-kpi-none">' + esc(k.text) + '</span>';
+    var k = opts && opts.text ? (value ? { text: String(value), state: 'ok' } : { text: 'нет данных', state: 'none' }) : (LIB.kpiText ? LIB.kpiText(value, opts) : { text: num(value), state: 'ok' });
+    var text = k.state === 'ok' ? esc(k.text) + (opts && opts.suffix ? opts.suffix : '') : '<span class="ow-kpi-none">' + esc(k.text) + '</span>';
     var tag = precision ? '<span class="ow-tag ow-tag-' + esc(precision) + '">' + esc(label(LIB.PRECISION_RU, precision)) + '</span>' : '';
     return '<div class="ow-card ow-kpi" data-kpi="' + esc(title) + '">' +
       '<div class="ow-card-h"><span>' + esc(title) + '</span>' + (howKey ? how(howKey) : '') + tag + '</div>' +
@@ -931,7 +990,8 @@
     }
     var d = response.data || {};
     var a = d.accounts || {}, t = d.traffic || {}, c = d.consented || {}, cs = d.consent || {}, cv = d.conversion || {};
-    var levels = a.levels || {};
+    var levels = a.levels || {}, rv = a.revenue || {};
+    var grossKpi = moneyList(rv.gross_by_currency || []), netKpi = moneyList(rv.net_by_currency || [], 'amount'), refundKpi = moneyList(rv.refunds_by_currency || []);
     var tv = function (key) { return t.available ? (t[key] == null ? 0 : t[key]) : null; };
     var un = { unavailable: !t.available };
     var pct = function (value) { return value == null ? null : value; };
@@ -945,7 +1005,9 @@
       kcard('PRO', levels.pro, 'истёкших: ' + num(levels.expired) + ' · пробных: ' + num(a.trials_active), 'levels', 'exact') +
       kcard('Lifetime', levels.lifetime, 'бессрочный доступ', 'levels', 'exact') +
       kcard('Покупатели', a.paying_customers, 'подписок активно: ' + num(a.active_subscriptions) + ' · тестовых аккаунтов: ' + num(a.test_accounts), 'buyers', 'exact') +
-      kcard('Покупки за период', a.purchases, 'продления: ' + (a.renewals == null ? 'нет данных' : num(a.renewals)), 'buyers', 'exact') +
+      kcard('Покупки за период', a.purchase_events != null ? a.purchase_events : a.purchases, 'оплачено · продления: ' + (a.renewals == null ? 'нет данных' : num(a.renewals)) + ' · возвраты: ' + num(rv.refund_events) + (rv.promo_grants || rv.trial_starts || rv.sandbox_events ? '<br>не продажи: промо ' + num(rv.promo_grants) + ' · пробных ' + num(rv.trial_starts) + ' · sandbox ' + num(rv.sandbox_events) : ''), 'buyers', 'exact') +
+      kcard('Сумма покупок (gross)', grossKpi || null, (rv.gross_usd != null ? esc(usdEstimate(rv.gross_usd)) + ' · ' : '') + 'в валюте покупателя, до удержаний' + (refundKpi ? ' · возвраты: ' + esc(refundKpi) : ''), 'revenue', 'exact', { text: true }) +
+      kcard('Чистыми (net)', netKpi || null, +rv.net_unknown ? 'RevenueCat не сообщил удержания для ' + num(rv.net_unknown) + ' из ' + num((+rv.net_known || 0) + (+rv.net_unknown || 0)) : (rv.net_usd != null ? esc(usdEstimate(rv.net_usd)) : 'после удержаний магазина по данным RevenueCat'), 'netRevenue', 'exact', { text: true }) +
       kcard('Конверсия в регистрацию', pct(cv.signup_rate_pct), 'регистрации ÷ обычные визиты · нужно ≥ ' + num(cv.min_visits) + ' визитов', 'conversion', 'estimate', { insufficient: true, suffix: '%' }) +
       kcard('Конверсия в покупку', pct(cv.purchase_rate_pct), 'покупатели ÷ аккаунты · нужно ≥ ' + num(cv.min_registered) + ' аккаунтов', 'conversion', 'estimate', { insufficient: true, suffix: '%' }) +
       kcard('Посетители с согласием', c.visitors, num(c.guest_profiles) + ' гостевых профилей · ' + num(c.registered_profiles) + ' с аккаунтом · ' + num(c.unknown_visitors) + ' без признаков', 'consented', 'consented') +
@@ -1010,8 +1072,10 @@
   }
   function feedWhat(row) {
     if (row.kind === 'commerce') {
-      var money = row.price != null && row.currency ? ' · ' + (LIB.formatMoney ? LIB.formatMoney(row.price, row.currency) : row.price + ' ' + row.currency) : '';
-      return esc(label(LIB.COMMERCE_RU, row.name)) + (row.plan ? ' · ' + esc(row.plan) + ' мес.' : '') + money + (row.reason ? ' · ' + esc(row.reason) : '');
+      var amount = row.price != null && row.currency ? ' · ' + esc(money(row.price, row.currency)) : '';
+      var net = row.net != null && row.currency ? ' · чистыми ' + esc(money(row.net, row.currency)) : '';
+      var kind = row.row_kind && row.row_kind !== 'paid' ? ' <span class="ow-tag ow-tag-kind">' + esc(label(LIB.COMMERCE_KIND_RU, row.row_kind)) + '</span>' : '';
+      return esc(label(LIB.COMMERCE_RU, row.name)) + kind + (row.plan ? ' · ' + esc(row.plan) + ' мес.' : '') + amount + net + (row.reason ? ' · ' + esc(row.reason) : '');
     }
     if (row.kind === 'account') return 'Новый аккаунт' + (row.platform ? ' · ' + esc(row.platform) : '');
     if (row.kind === 'visits') {
@@ -1028,7 +1092,8 @@
   function renderLive(data) {
     var s = data.today_scalars || {};
     var rows = feedRows(data).map(function (row) { return Object.assign({}, row, { __click: false, __class: 'ow-feed-' + (row.kind || 'event') }); });
-    var revenue = LIB.kpiText ? LIB.kpiText(s.revenue_usd) : { text: num(s.revenue_usd), state: 'ok' };
+    var gross = moneyTextRu(s.revenue_text), net = moneyTextRu(s.net_text);
+    var notSales = [s.promo_grants ? 'промо ' + num(s.promo_grants) : '', s.trial_starts ? 'пробных ' + num(s.trial_starts) : '', s.sandbox_events ? 'sandbox ' + num(s.sandbox_events) : ''].filter(Boolean).join(' · ');
     var cards = '<div class="ow-cards">' +
       card('Активны сейчас', '<span class="ow-live-dot" aria-hidden="true"></span>' + num(data.active_now), 'события за 5 минут · за 15 минут: ' + num(data.active_15m), 'live') +
       card('Точные аккаунты сегодня', num(s.exact_accounts), 'один аккаунт = один пользователь', 'identity') +
@@ -1037,8 +1102,9 @@
       card('Визиты сегодня', data.visits_available === false ? '—' : num(s.visits_human), 'обычные · за последний час: ' + num(data.visits_last_hour), 'visitsHuman') +
       card('Регистрации сегодня', num(s.registrations), 'точно', 'dayRegistrations') +
       card('Страны сегодня', num(s.countries), 'по визитам и сессиям', 'dayLanguages') +
-      card('Новые PRO сегодня', num(s.purchases), 'продлений: ' + num(s.renewals) + ' · сбоев оплаты: ' + num(s.payment_failures), 'dayCommerce') +
-      card('Выручка сегодня', revenue.state === 'ok' ? revenue.text + ' USD' : '<span class="ow-kpi-none">' + esc(revenue.text) + '</span>', 'по данным магазина', 'dayCommerce') +
+      card('Покупки PRO сегодня', num(s.purchases), 'оплачено · продлений: ' + num(s.renewals) + ' · возвратов: ' + num(s.refunds) + ' · сбоев оплаты: ' + num(s.payment_failures) + (notSales ? '<br>не продажи: ' + esc(notSales) : ''), 'dayCommerce') +
+      card('Сумма покупок сегодня', gross ? esc(gross) : NONE, (s.gross_usd != null ? esc(usdEstimate(s.gross_usd)) + ' · ' : '') + 'в валюте покупателя, до удержаний', 'revenue') +
+      card('Чистыми сегодня', net ? esc(net) : NONE, s.net_unknown ? 'RevenueCat не сообщил удержания для ' + num(s.net_unknown) + ' из ' + num((+s.net_known || 0) + (+s.net_unknown || 0)) : (s.net_usd != null ? esc(usdEstimate(s.net_usd)) : 'после удержаний магазина по данным RevenueCat'), 'netRevenue') +
       card('Owner-уведомления', num(data.unread_owner_notifications), 'непрочитанных', 'liveFeed') +
       card('Обновление', 'каждые 15 с', 'пока открыт раздел · ' + esc(data.today || '')) +
     '</div>';
@@ -1078,7 +1144,7 @@
       if (!block || !block.scalars || block.scalars[key] == null) return;
       var d = LIB.delta(cur, block.scalars[key]);
       if (!d) return;
-      var value = opts.money ? (LIB.formatMoney ? LIB.formatMoney(block.scalars[key], 'USD') : block.scalars[key]) : num(block.scalars[key]);
+      var value = opts.money ? money(block.scalars[key], 'USD') : num(block.scalars[key]);
       var sign = d.abs > 0 ? '+' : '';
       var change = d.pct == null ? (d.abs === 0 ? '±0' : sign + num(d.abs)) : sign + num(d.abs) + ' · ' + sign + num(d.pct) + '%';
       parts.push('<span>' + esc(title) + ' <b>' + esc(String(value)) + '</b> <span class="' + d.dir + '">' + esc(change) + '</span></span>');
@@ -1086,7 +1152,7 @@
     one('вчера', compare.prev_day);
     one('нед. назад', compare.same_weekday);
     one('ср. 7 дн.', compare.avg7);
-    return parts.length ? '<div class="ow-cmp">' + parts.join('') + '</div>' : '';
+    return parts.length ? '<div class="ow-cmp">' + (opts.label ? '<span class="ow-cmp-l">' + esc(opts.label) + ':</span>' : '') + parts.join('') + '</div>' : '';
   }
   // A day card: the value, its precision tag, the «how» note and the three comparisons.
   function dayCard(title, key, sub, howKey, precision, compare, opts) {
@@ -1094,7 +1160,7 @@
     var scalars = (compare && compare.__current) || {};
     var value = scalars[key];
     var text;
-    if (opts.money) { var k = LIB.kpiText ? LIB.kpiText(value) : { text: num(value), state: 'ok' }; text = k.state === 'ok' ? esc(LIB.formatMoney ? LIB.formatMoney(value, 'USD') : k.text) : '<span class="ow-kpi-none">' + esc(k.text) + '</span>'; }
+    if (opts.money) { var k = LIB.kpiText ? LIB.kpiText(value) : { text: num(value), state: 'ok' }; text = k.state === 'ok' ? esc(money(value, 'USD')) : '<span class="ow-kpi-none">' + esc(k.text) + '</span>'; }
     else if (opts.unavailable) text = '<span class="ow-kpi-none">Нет данных</span>';
     else text = num(value);
     var tag = precision ? '<span class="ow-tag ow-tag-' + esc(precision) + '">' + esc(label(LIB.PRECISION_RU, precision)) + '</span>' : '';
@@ -1226,33 +1292,55 @@
       }).join('') +
       '<div class="ow-card-s" style="margin-top:6px">Ступени с разной точностью не складываются в одну воронку буквально: визиты — счётчики, люди — только с согласием, регистрации и покупки — точные записи.</div>');
 
-    var byCurrency = (commerce.revenue_by_currency || []).map(function (r) { return (LIB.formatMoney ? LIB.formatMoney(r.amount, r.currency) : r.amount + ' ' + r.currency) + ' (' + num(r.n) + ')'; }).join(' · ');
+    // Money: gross by currency (what was paid), RevenueCat's USD estimate apart, net only where the
+    // store's deductions are known. Nothing is summed across currencies, nothing is invented.
+    var grossRows = commerce.gross_by_currency || commerce.revenue_by_currency || [];
+    var netRows = commerce.net_by_currency || [];
+    var grossText = moneyList(grossRows), netText = moneyList(netRows, 'amount'), dedText = moneyList(netRows, 'deductions'), refundText = moneyList(commerce.refunds_by_currency || []);
+    var netTotal = (+s.net_known || 0) + (+s.net_unknown || 0);
+    var notSalesRows = [['Промо-доступ', s.promo_grants], ['Пробные периоды', s.trial_starts], ['Без оплаты', s.zero_price_events], ['Sandbox / Test Store', s.sandbox_events]].filter(function (r) { return +r[1] > 0; });
     var commerceBlock = block('commerce', 'Платежи и подписки', 'dayCommerce',
       '<div class="ow-cards">' +
+        dayCard('Покупки PRO', 'purchases', 'оплачено · подтверждено магазином', 'dayCommerce', 'exact', compare) +
+        dayCard('Продления', 'renewals', 'оплачено · подтверждено магазином', 'dayCommerce', 'exact', compare) +
+        dayCard('Отмены', 'cancellations', 'истекло: ' + num(s.expirations), 'dayCommerce', 'exact', compare) +
+        dayCard('Возвраты', 'refunds', refundText ? 'на сумму ' + esc(refundText) + (commerce.refund_usd != null ? ' · ' + esc(usdEstimate(commerce.refund_usd)) : '') : (+s.refunds ? 'сумма неизвестна' : 'возвратов не было'), 'revenue', 'exact', compare) +
+        dayCard('Сбои оплаты', 'payment_failures', 'магазин + клиент', 'dayCommerce', 'exact', compare) +
         dayCard('Checkout начат', 'checkout_started', 'клиент открыл оплату · по телеметрии: ' + num((commerce.telemetry || {}).purchase_start), 'dayCommerce', 'exact', compare) +
         dayCard('Checkout не удался', 'checkout_failed', 'отменено пользователем: ' + num(s.checkout_cancelled), 'dayCommerce', 'exact', compare) +
-        dayCard('Покупки PRO', 'purchases', 'подтверждено магазином', 'dayCommerce', 'exact', compare) +
-        dayCard('Продления', 'renewals', 'подтверждено магазином', 'dayCommerce', 'exact', compare) +
-        dayCard('Отмены', 'cancellations', 'истекло: ' + num(s.expirations), 'dayCommerce', 'exact', compare) +
-        dayCard('Возвраты', 'refunds', commerce.refund_usd != null ? 'на сумму ' + esc(LIB.formatMoney ? LIB.formatMoney(commerce.refund_usd, 'USD') : commerce.refund_usd) : 'сумма неизвестна', 'dayCommerce', 'exact', compare) +
-        dayCard('Сбои оплаты', 'payment_failures', 'магазин + клиент', 'dayCommerce', 'exact', compare) +
-        dayCard('Выручка (USD)', 'revenue_usd', num(s.revenue_known) + ' событий с суммой · ' + num(s.revenue_unknown) + ' без суммы' + (byCurrency ? '<br>' + esc(byCurrency) : ''), 'dayCommerce', 'exact', compare, { money: true }) +
+        card('Не продажи (отдельно)', notSalesRows.length ? notSalesRows.map(function (r) { return esc(r[0]) + ': ' + num(r[1]); }).join('<br>') : '0', 'промо, пробные, без оплаты, sandbox — в покупки и суммы не входят', 'notSales') +
       '</div>' +
-      barList(commerce.by_plan, { 1: '1 месяц', 3: '3 месяца', 6: '6 месяцев', 12: '12 месяцев', unknown: 'Тариф не определён' }, 'dayCommerce', 'Тариф (покупки и продления)') +
-      barList(commerce.by_store, { apple: 'App Store', google: 'Google Play', paddle: 'Paddle (веб)', stripe: 'Stripe', revenuecat: 'RevenueCat', web: 'Веб', ios: 'iOS', android: 'Android', unknown: 'Не определено' }, 'dayCommerce', 'Платформа покупки') +
+      '<div class="ow-cards ow-money" style="margin-top:10px">' +
+        '<div class="ow-card ow-kpi" data-kpi="Сумма покупок (gross)"><div class="ow-card-h"><span>Сумма покупок (gross)</span>' + how('revenue') + '<span class="ow-tag ow-tag-exact">точно</span></div>' +
+          '<div class="ow-card-v">' + (grossText ? esc(grossText) : NONE) + '</div>' +
+          '<div class="ow-card-s">в валюте покупателя, до удержаний · ' + num(s.revenue_known) + ' с суммой · ' + num(s.revenue_unknown) + ' без суммы' + (s.gross_usd != null ? '<br>' + esc(usdEstimate(s.gross_usd)) : '') + '</div>' +
+          cmpLine('revenue_usd', compare, { money: true, label: '≈ USD' }) + '</div>' +
+        '<div class="ow-card ow-kpi" data-kpi="Удержания магазина"><div class="ow-card-h"><span>Удержания магазина</span>' + how('netRevenue') + '<span class="ow-tag ow-tag-estimate">оценка RevenueCat</span></div>' +
+          '<div class="ow-card-v">' + (dedText ? esc(dedText) : NONE) + '</div>' +
+          '<div class="ow-card-s">' + (netTotal ? 'налог + комиссия магазина · известно для ' + num(s.net_known) + ' из ' + num(netTotal) : 'налог + комиссия магазина по данным RevenueCat') + (s.deductions_usd != null ? '<br>' + esc(usdEstimate(s.deductions_usd)) : '') + '</div></div>' +
+        '<div class="ow-card ow-kpi" data-kpi="Чистыми (net)"><div class="ow-card-h"><span>Чистыми (net)</span>' + how('netRevenue') + '<span class="ow-tag ow-tag-exact">по данным RevenueCat</span></div>' +
+          '<div class="ow-card-v">' + (netText ? esc(netText) : NONE) + '</div>' +
+          '<div class="ow-card-s">' + (+s.net_unknown ? 'RevenueCat не сообщил удержания для ' + num(s.net_unknown) + ' из ' + num(netTotal) + ' — чистая сумма по ним неизвестна' : 'сумма покупок минус удержания магазина') + (s.net_usd != null ? '<br>' + esc(usdEstimate(s.net_usd)) : '') + '</div>' +
+          cmpLine('net_usd', compare, { money: true, label: '≈ USD' }) + '</div>' +
+      '</div>' +
+      barList(commerce.by_plan, { 1: '1 месяц', 3: '3 месяца', 6: '6 месяцев', 12: '12 месяцев', unknown: 'Тариф не определён' }, 'dayCommerce', 'Тариф (оплаченные покупки и продления)') +
+      barList(commerce.by_store, { apple: 'App Store', google: 'Google Play', paddle: 'Paddle (веб)', stripe: 'Stripe (RevenueCat Web Billing)', revenuecat: 'RevenueCat', promotional: 'Промо-доступ', test_store: 'Test Store', web: 'Веб', ios: 'iOS', android: 'Android', unknown: 'Не определено' }, 'dayCommerce', 'Магазин (оплаченные покупки и продления)') +
       '<div class="ow-block-h" style="margin-top:12px">События магазина</div>' +
       table([
         { title: 'Время', key: 'at', html: function (r) { return esc(clockText(r.at)); } },
-        { title: 'Событие', key: 'name', html: function (r) { return esc(label(LIB.COMMERCE_RU, r.name)); } },
+        { title: 'Событие', key: 'name', html: function (r) { return esc(label(LIB.COMMERCE_RU, r.name)) + (r.error ? '<br><span class="ow-card-s">' + esc(r.error) + '</span>' : ''); } },
+        { title: 'Вид', key: 'kind', html: function (r) { var k = r.kind || 'paid'; return '<span class="ow-tag' + (k === 'paid' ? ' ow-tag-exact' : ' ow-tag-kind') + '">' + esc(label(LIB.COMMERCE_KIND_RU, k)) + '</span>'; } },
         { title: 'Тариф', key: 'plan', html: function (r) { return r.plan ? esc(r.plan) + ' мес.' : '—'; } },
         { title: 'Магазин', key: 'store', html: function (r) { return esc(r.store || '—'); } },
-        { title: 'Сумма', key: 'price', html: function (r) { return r.price != null && r.currency ? esc(LIB.formatMoney ? LIB.formatMoney(r.price, r.currency) : r.price + ' ' + r.currency) : '<span class="ow-card-s">без суммы</span>'; }, numeric: true },
-        { title: 'USD', key: 'price_usd', html: function (r) { return r.price_usd != null ? num(r.price_usd) : '—'; }, numeric: true },
+        { title: 'Сумма (gross)', key: 'price', html: function (r) { return r.price != null && r.currency ? esc(money(r.price, r.currency)) : '<span class="ow-card-s">без суммы</span>'; }, numeric: true },
+        { title: 'Удержания', key: 'net', html: function (r) { var d = LIB.deductionText ? LIB.deductionText(r) : ''; return d ? esc(d) : '<span class="ow-card-s">нет данных</span>'; }, numeric: true },
+        { title: 'Чистыми (net)', key: 'net', html: function (r) { return r.net != null && r.currency ? esc(money(r.net, r.currency)) : '<span class="ow-card-s">нет данных</span>'; }, numeric: true },
+        { title: '≈ USD (RC)', key: 'price_usd', html: function (r) { return r.price_usd != null ? esc(money(r.price_usd, 'USD')) : '—'; }, numeric: true },
         { title: 'Статус', key: 'status', html: function (r) { return statusChip(r.status); } },
         { title: 'Страна', key: 'country', html: function (r) { return esc(r.country ? countryName(r.country) : '—'); } },
         { title: 'Причина', key: 'reason', html: function (r) { return esc(r.reason || '—'); } }
       ], commerce.events, 'Событий магазина в этот день не было') +
-      '<div class="ow-card-s" style="margin-top:6px">' + esc(commerce.note || '') + '</div>');
+      '<div class="ow-card-s" style="margin-top:6px">' + esc(commerce.note || '') + (commerce.net_source ? '<br>' + esc(commerce.net_source) : '') + (commerce.usd_source ? '<br>USD: ' + esc(commerce.usd_source) : '') + '</div>');
 
     var ingest = {};
     (system.ingest || []).forEach(function (row) { ingest[row.outcome + ': ' + (row.reason || '—')] = row.events; });
@@ -1490,9 +1578,13 @@
     var steps = data.steps || [];
     var first = steps.length ? (steps[0].people || 0) : 0;
     var titles = { landing: 'Зашли', game: 'Открыли лотерею', generator_open: 'Открыли генератор', generate: 'Сгенерировали', save: 'Сохранили', signup: 'Зарегистрировались', paywall: 'Увидели PRO', checkout: 'Начали оплату', purchase: 'Оплатили' };
+    // The funnel counts PEOPLE with analytics consent; the store's own sales live in «День» → Платежи.
+    var notes = { checkout: 'Люди с согласием, открывшие экран оплаты (клиент). Оплаченные покупки — точные записи магазина: «День» → Платежи.',
+      purchase: 'Люди с согласием, у которых клиент сообщил об оплате. Число оплаченных покупок — из журнала магазина: «День» → Платежи и «Обзор» → Покупки за период.' };
     return '<div class="ow-block"><div class="ow-block-h">Воронка по людям' + how('funnels') + '</div>' +
       steps.map(function (step) {
         var value = step.people || 0;
+        if (notes[step.step]) step = Object.assign({}, step, { note: notes[step.step] });
         return '<div class="ow-bar"><span class="ow-bar-l">' + esc(titles[step.step] || step.step) + '</span>' +
           '<span class="ow-bar-t"><i style="width:' + (first ? Math.max(1, Math.round((value / first) * 100)) : 0) + '%"></i></span>' +
           '<span class="ow-bar-v">' + num(value) + ' · ' + pctText(value, first) + '</span></div>' +
@@ -1617,7 +1709,8 @@
     if (key.indexOf('declared_bot:') === 0) return 'Объявленный бот: ' + key.slice(13);
     return LIB.evidenceRu ? LIB.evidenceRu(key) : key;
   }
-  function money(value, currency) {
+  // Agent ledger amounts (a plain number + currency code; the store ledger's own money() is above).
+  function agentMoney(value, currency) {
     var n = +value || 0;
     if (!n) return '—';
     return n.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + (currency ? ' ' + esc(currency) : '');
@@ -1635,7 +1728,7 @@
       card('Краулеры и боты', num(s.bot_requests), 'объявленные индексаторы и скрипты') +
       card('Визиты и входы', num(s.visits) + ' / ' + num(s.logins), 'визит · вход или регистрация') +
       card('Симуляции', num(s.simulations), 'запуски моделей и разборов') +
-      card('Покупки агентами', num(s.purchases), 'подтверждено магазином: ' + money(s.revenue)) +
+      card('Покупки агентами', num(s.purchases), 'подтверждено магазином: ' + agentMoney(s.revenue)) +
       card('Отказы агентам', num(s.blocked), 'см. причины ниже') +
     '</div>' +
     (Object.keys(reasons).length
@@ -1658,7 +1751,7 @@
         { title: 'Аккаунты', key: 'accounts', numeric: true },
         { title: 'Симуляции', key: 'simulations', numeric: true },
         { title: 'Покупки', key: 'purchases', numeric: true },
-        { title: 'Сумма', key: 'revenue', numeric: true, html: function (r) { return money(r.revenue); } },
+        { title: 'Сумма', key: 'revenue', numeric: true, html: function (r) { return agentMoney(r.revenue); } },
         { title: 'Отказы', key: 'blocked', numeric: true },
         { title: 'Последний', key: 'last_seen', html: function (r) { return esc(timeText(r.last_seen)); } }
       ], data.operators, 'Автоматизация за период не обращалась') + '</div>' +
@@ -1673,7 +1766,7 @@
         { title: 'Аккаунт', key: 'account', html: function (r) { return esc(r.account || 'без входа'); } },
         { title: 'Деталь', key: 'detail', html: function (r) { return esc(r.detail || '—'); } },
         { title: 'Запросы', key: 'requests', numeric: true },
-        { title: 'Сумма', key: 'amount', numeric: true, html: function (r) { return money(r.amount, r.currency); } },
+        { title: 'Сумма', key: 'amount', numeric: true, html: function (r) { return agentMoney(r.amount, r.currency); } },
         { title: 'Источник', key: 'source', html: function (r) {
           return esc({ client: 'клиент', server: 'сервер', store: 'магазин' }[r.source] || r.source);
         } },
@@ -1741,6 +1834,12 @@
     ovEl.querySelector('#ow-back').addEventListener('click', close);
     ovEl.querySelector('#ow-refresh').addEventListener('click', refresh);
     ovEl.querySelector('#ow-export').addEventListener('click', exportCurrent);
+    ovEl.querySelector('#ow-filters').addEventListener('click', function () {
+      var bar = ovEl.querySelector('#ow-controls');
+      var open = !bar.classList.contains('open');
+      bar.classList.toggle('open', open);
+      this.setAttribute('aria-expanded', String(open));
+    });
     ovEl.querySelector('#ow-theme').addEventListener('click', function () {
       var next = ovEl.getAttribute('data-ow-theme') === 'dark' ? 'light' : 'dark';
       ovEl.setAttribute('data-ow-theme', next);

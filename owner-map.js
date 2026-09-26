@@ -1,14 +1,20 @@
 // Owner Analytics map — lazy ES module, loaded only when the owner opens the Map tab.
 //
-// A COUNTRY CHOROPLETH on self-hosted MapLibre GL JS (vendor/maplibre, BSD-3-Clause) over OpenFreeMap
-// vector tiles. Country borders come from vendor/world/countries.json (Natural Earth 1:50m via
-// world-atlas, generated at build time with ISO 3166-1 alpha-2 ids), fetched once when the map opens —
-// never on the main screen. Every country is ONE feature (Polygon or MultiPolygon, islands included),
-// so hover and selection always light up the whole territory.
+// A COUNTRY CHOROPLETH on self-hosted MapLibre GL JS (vendor/maplibre, BSD-3-Clause) drawn ENTIRELY
+// from our own geometry: vendor/world/countries.json (Natural Earth 1:50m admin-0 map units, one
+// feature per ISO 3166-1 alpha-2 code, generated at build time). No basemap tiles, no glyph server,
+// no third-party request of any kind — the map works offline, inside the native shells and behind
+// any content blocker, and it never sends the owner's viewport to anyone.
 //
-// The map draws the batch of per-country aggregates the panel already holds (report section
-// `countries`): no request per country, no coordinates finer than a border. Colour is a calm blue
-// sequential scale (owner-analytics-lib.js choroplethColor); countries without data stay neutral.
+// The picture (2026-09-26 redesign):
+//   • the ocean is a calm flat colour and every country is drawn on top of it as one closed shape,
+//     so the continents read at a glance and every border is crisp;
+//   • countries WITHOUT activity are «under glass»: a translucent pale fill and a faint outline —
+//     present, recognisable, but quiet;
+//   • countries WITH activity carry the sequential blue of the selected metric at full strength, a
+//     brighter outline and a soft glow, plus a label pill «Норвегия · 88» at their mainland centre;
+//   • hover lifts the country (stronger outline + tooltip), click selects it (accent outline) and
+//     opens the country card; the continent filter dims everything outside the continent.
 //
 // Geometry model: one feature per ISO 3166-1 alpha-2 code from Natural Earth admin-0 MAP UNITS
 // (assets/world-units-50m.json). The analytics country key (what GeoIP reports) and the display
@@ -18,24 +24,21 @@
 //
 // Antimeridian: Natural Earth rings are NOT split at ±180° — Russia's mainland ring, Fiji and others
 // run from lon 179.9 straight to −180 inside one ring. Web Mercator draws that edge as a line across
-// the whole world and fills the wedge behind it (the horizontal stripes seen in production). Every
-// ring is therefore unwrapped into continuous longitude and clipped at ±180° into an eastern and a
-// western polygon before it reaches MapLibre (see splitAtAntimeridian).
-const STYLES = {
-  light: 'https://tiles.openfreemap.org/styles/positron',
-  dark: 'https://tiles.openfreemap.org/styles/dark',
-};
+// the whole world and fills the wedge behind it (the horizontal stripes seen in production once).
+// Every ring is therefore unwrapped into continuous longitude and clipped at ±180° into an eastern
+// and a western polygon before it reaches MapLibre (see splitAtAntimeridian).
 const WORLD_URL = './vendor/world/countries.json';
 // Build revision of the page (index.html data-build), so the geometry URL changes with every deploy.
 const buildRevision = () => { try { return document.documentElement.getAttribute('data-build') || ''; } catch (_e) { return ''; } };
 // The opening view: every inhabited continent, no Mercator-inflated Arctic, no polar band.
 const WORLD_VIEW = [[-168, -56], [180, 78]];
-const FILL = 'ow-country-fill', LINE = 'ow-country-line', SELECTED = 'ow-country-selected';
-const fallbackStyle = (theme) => ({
-  version: 8,
-  sources: {},
-  layers: [{ id: 'ow-bg', type: 'background', paint: { 'background-color': theme === 'dark' ? '#0f1c30' : '#eef4fb' } }],
-});
+const SOURCE = 'ow-countries';
+const FILL = 'ow-country-fill', LINE = 'ow-country-line', GLOW = 'ow-country-glow', SELECTED = 'ow-country-selected', BG = 'ow-bg';
+// Palette of the two panel themes (owner-dashboard.js «Голубая» light / blue night dark).
+const THEMES = {
+  light: { ocean: '#d6e6f5', glass: 'rgba(255,255,255,0.66)', glassLine: 'rgba(52,96,150,0.32)', dataLine: 'rgba(255,255,255,0.9)', glow: 'rgba(29,78,216,0.35)', hover: '#0f3fa8', accent: '#1d4ed8', dimLine: 'rgba(52,96,150,0.14)' },
+  dark: { ocean: '#08131f', glass: 'rgba(150,185,230,0.14)', glassLine: 'rgba(170,200,240,0.28)', dataLine: 'rgba(230,240,255,0.85)', glow: 'rgba(140,193,244,0.45)', hover: '#e6f0fb', accent: '#c3ddfa', dimLine: 'rgba(170,200,240,0.1)' },
+};
 let maplibrePromise = null;
 let worldPromise = null;
 
@@ -99,6 +102,20 @@ export function splitAtAntimeridian(polygon) {
   return result.flatMap((poly) => (poly[0].some((p) => p[0] < -180 || p[0] > 180) ? splitAtAntimeridian(poly) : [poly]));
 }
 
+// The point a label sits on: the area-weighted centre of the mainland (largest) polygon's outer ring.
+// For the few strongly concave mainlands (Chile, Norway, Vietnam) the centroid still lands on land.
+export function labelPoint(feature) {
+  const mainland = feature.geometry.coordinates.reduce((best, polygon) => (polygon[0].length > best[0].length ? polygon : best));
+  const ring = mainland[0];
+  let area = 0, cx = 0, cy = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const f = ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1];
+    area += f; cx += (ring[j][0] + ring[i][0]) * f; cy += (ring[j][1] + ring[i][1]) * f;
+  }
+  if (Math.abs(area) < 1e-9) return [ring[0][0], ring[0][1]];
+  return [cx / (3 * area), cy / (3 * area)];
+}
+
 // Minimal TopoJSON → GeoJSON: quantised, delta-encoded arcs; negative index = reversed arc; the first
 // point of every following arc repeats the previous arc's last point and is dropped.
 export function decodeWorld(bundle) {
@@ -139,7 +156,7 @@ export function decodeWorld(bundle) {
       type: 'Feature',
       properties: {
         iso: iso || '', name: (geometry.properties && geometry.properties.name) || '',
-        parent: (geometry.properties && geometry.properties.parent) || '', value: 0, color: null, dim: 0,
+        parent: (geometry.properties && geometry.properties.parent) || '', value: 0, color: null, dim: 0, has: 0,
       },
       geometry: { type: 'MultiPolygon', coordinates },
     });
@@ -159,19 +176,22 @@ function loadWorld() {
   return worldPromise;
 }
 
-// Continent view: the mainland centroid of every country in it (overseas islands and the far side
-// of a dateline split must not stretch Europe to the whole world), covered by the shortest longitude
-// interval on the circle. An interval that crosses the dateline (Oceania) is expressed as east > 180,
-// which fitBounds understands.
+// Continent views: fixed frames for the six inhabited continents (Europe is Europe, not Europe plus
+// Siberia because Russia's mainland centroid sits at 97°E; Oceania crosses the dateline, expressed as
+// east > 180, which fitBounds understands). Unknown codes fall back to the computed frame below.
+const CONTINENT_VIEWS = {
+  EU: [[-25, 34], [45, 72]],
+  AS: [[26, -11], [150, 60]],
+  NA: [[-170, 5], [-50, 75]],
+  SA: [[-92, -56], [-32, 13]],
+  AF: [[-20, -36], [52, 38]],
+  OC: [[110, -48], [190, 2]],
+};
+// Computed continent view: the mainland centroid of every country in it (overseas islands and the
+// far side of a dateline split must not stretch a continent to the whole world), covered by the
+// shortest longitude interval on the circle.
 function continentView(features) {
-  const points = [];
-  for (const feature of features) {
-    const mainland = feature.geometry.coordinates.reduce((best, polygon) => (polygon[0].length > best[0].length ? polygon : best));
-    const ring = mainland[0];
-    let lon = 0, lat = 0;
-    for (const p of ring) { lon += p[0]; lat += p[1]; }
-    points.push([lon / ring.length, lat / ring.length]);
-  }
+  const points = features.map(labelPoint);
   if (!points.length) return null;
   const lons = points.map((p) => p[0]).sort((a, b) => a - b);
   let gapStart = 0, gapSize = -1;
@@ -206,19 +226,18 @@ export function featureBounds(feature) {
   if (east < west) east += 360;
   return [[west, south], [east, north]];
 }
-function bboxOf(features) {
-  const box = [180, 90, -180, -90];
-  const visit = (coords) => {
-    if (typeof coords[0] === 'number') {
-      box[0] = Math.min(box[0], coords[0]); box[1] = Math.min(box[1], coords[1]);
-      box[2] = Math.max(box[2], coords[0]); box[3] = Math.max(box[3], coords[1]);
-    } else for (const c of coords) visit(c);
+
+// The whole style is ours: a background and our country source. Nothing is fetched from anywhere.
+function styleFor(theme, features) {
+  const t = THEMES[theme] || THEMES.light;
+  return {
+    version: 8,
+    sources: { [SOURCE]: { type: 'geojson', data: { type: 'FeatureCollection', features }, promoteId: 'iso' } },
+    layers: [{ id: BG, type: 'background', paint: { 'background-color': t.ocean } }],
   };
-  for (const feature of features) visit(feature.geometry.coordinates);
-  return box[0] <= box[2] ? box : null;
 }
 
-export async function createMap({ container, theme = 'light', colorFor, onHover, onSelect, continentOf }) {
+export async function createMap({ container, theme = 'light', colorFor, onHover, onSelect, continentOf, nameOf: nameOfOpt, labels = true }) {
   ensureCss();
   const [maplibre, world] = await Promise.all([loadMaplibre(), loadWorld()]);
   const gl = maplibre.default || maplibre;
@@ -228,7 +247,7 @@ export async function createMap({ container, theme = 'light', colorFor, onHover,
 
   const map = new gl.Map({
     container,
-    style: STYLES[theme] || STYLES.light,
+    style: styleFor(theme, world.features),
     bounds: WORLD_VIEW,
     fitBoundsOptions: { padding: 6 },
     minZoom: -1,              // a phone-wide container still shows the whole world
@@ -251,6 +270,71 @@ export async function createMap({ container, theme = 'light', colorFor, onHover,
   tooltip.className = 'ow-map-tip';
   tooltip.hidden = true;
   container.appendChild(tooltip);
+  const palette = () => THEMES[state.theme] || THEMES.light;
+  const nameOf = (iso, fallback) => {
+    if (typeof nameOfOpt === 'function') { try { const n = nameOfOpt(iso); if (n && n !== iso) return n; } catch (_e) {} }
+    const m = world.meta[iso] || {}; return m.ru || m.n || fallback || iso;
+  };
+
+  // Label pills for the countries that carry data: an HTML marker each (no glyph server needed),
+  // the biggest values first, capped so a busy day never becomes a wall of pills.
+  const markers = new Map();
+  const MAX_LABELS = 40;
+  function relabel() {
+    if (!labels) return;
+    const wanted = state.rows
+      .filter((row) => row.country && (+row[state.metric] || 0) > 0 && (state.continent === 'all' || continent(row.country) === state.continent))
+      .sort((a, b) => (+b[state.metric] || 0) - (+a[state.metric] || 0))
+      .slice(0, MAX_LABELS);
+    const keep = new Set();
+    for (const row of wanted) {
+      const feature = world.features.find((f) => f.properties.iso === row.country);
+      if (!feature) continue;
+      keep.add(row.country);
+      const text = nameOf(row.country, feature.properties.name) + ' · ' + (+row[state.metric] || 0).toLocaleString('ru-RU');
+      let marker = markers.get(row.country);
+      if (!marker) {
+        const el = document.createElement('button');
+        el.type = 'button';
+        el.className = 'ow-map-pill';
+        el.addEventListener('click', (event) => { event.stopPropagation(); api.select(row.country); if (typeof onSelect === 'function') onSelect(row.country); });
+        el.addEventListener('mouseenter', () => setHover(row.country));
+        el.addEventListener('mouseleave', () => setHover(null));
+        marker = new gl.Marker({ element: el, anchor: 'center' }).setLngLat(labelPoint(feature)).addTo(map);
+        markers.set(row.country, marker);
+      }
+      const el = marker.getElement();
+      if (el.textContent !== text) el.textContent = text;
+      el.setAttribute('data-iso', row.country);
+      el.setAttribute('aria-label', text);
+    }
+    for (const [iso, marker] of markers) if (!keep.has(iso)) { marker.remove(); markers.delete(iso); }
+    declutter();
+  }
+  // Pills must never pile up: at the current zoom the bigger value wins and an overlapping pill hides
+  // (its country is still coloured and still answers hover / click). Re-run after every move.
+  function declutter() {
+    if (!markers.size) return;
+    const placed = [];
+    const order = [...markers.entries()].sort((a, b) => (+((state.rows.find((r) => r.country === b[0]) || {})[state.metric]) || 0) - (+((state.rows.find((r) => r.country === a[0]) || {})[state.metric]) || 0));
+    const rect = container.getBoundingClientRect();
+    for (const [, marker] of order) {
+      const el = marker.getElement();
+      const p = map.project(marker.getLngLat());
+      const w = Math.max(40, el.textContent.length * 6.4 + 18), h = 20;
+      const box = { l: p.x - w / 2, r: p.x + w / 2, t: p.y - h / 2, b: p.y + h / 2 };
+      // A pill that would be cut by the edge of the box is hidden rather than clipped.
+      const offscreen = box.l < 0 || box.r > rect.width || box.t < 0 || box.b > rect.height;
+      const collides = placed.some((o) => !(box.r < o.l || box.l > o.r || box.b < o.t || box.t > o.b));
+      const hide = offscreen || collides;
+      el.classList.toggle('is-hidden', hide);
+      if (!hide) placed.push(box);
+    }
+  }
+  let declutterTimer = null;
+  map.on('move', () => { if (declutterTimer) return; declutterTimer = setTimeout(() => { declutterTimer = null; declutter(); }, 80); });
+  map.on('moveend', declutter);
+  map.on('resize', declutter);
 
   function recolor() {
     const byIso = new Map(state.rows.map((row) => [row.country, row]));
@@ -267,47 +351,80 @@ export async function createMap({ container, theme = 'light', colorFor, onHover,
       feature.properties.value = value;
       feature.properties.color = colorFor(inScope ? value : 0, max, state.theme);
       feature.properties.dim = inScope ? 0 : 1;
+      feature.properties.has = inScope && value > 0 ? 1 : 0;
     }
-    const source = map.getSource('ow-countries');
+    const source = map.getSource(SOURCE);
     if (source) source.setData({ type: 'FeatureCollection', features: world.features });
+    relabel();
     return max;
   }
-  const outline = () => (state.theme === 'dark' ? 'rgba(200,220,245,.45)' : 'rgba(29,78,216,.35)');
-  const accent = () => (state.theme === 'dark' ? '#c3ddfa' : '#1d4ed8');
+
+  function paintTheme() {
+    const t = palette();
+    if (map.getLayer(BG)) map.setPaintProperty(BG, 'background-color', t.ocean);
+    if (map.getLayer(FILL)) map.setPaintProperty(FILL, 'fill-color', ['case', ['==', ['get', 'has'], 1], ['coalesce', ['get', 'color'], t.glass], t.glass]);
+    if (map.getLayer(LINE)) {
+      map.setPaintProperty(LINE, 'line-color', ['case',
+        ['boolean', ['feature-state', 'hover'], false], t.hover,
+        ['==', ['get', 'dim'], 1], t.dimLine,
+        ['==', ['get', 'has'], 1], t.dataLine,
+        t.glassLine]);
+    }
+    if (map.getLayer(GLOW)) map.setPaintProperty(GLOW, 'line-color', t.glow);
+    if (map.getLayer(SELECTED)) map.setPaintProperty(SELECTED, 'line-color', t.accent);
+    container.setAttribute('data-ow-map-theme', state.theme);
+  }
 
   function addLayers() {
-    map.addSource('ow-countries', { type: 'geojson', data: { type: 'FeatureCollection', features: world.features }, promoteId: 'iso' });
-    // Below the base map's labels when the style has them, so country names stay readable.
-    const firstSymbol = (map.getStyle().layers || []).find((layer) => layer.type === 'symbol');
-    const before = firstSymbol ? firstSymbol.id : undefined;
+    const t = palette();
+    // Every country is drawn: «under glass» when it has no activity, in the metric's blue when it has.
     map.addLayer({
-      id: FILL, type: 'fill', source: 'ow-countries',
+      id: FILL, type: 'fill', source: SOURCE,
       paint: {
-        'fill-color': ['coalesce', ['get', 'color'], colorFor(0, 0, state.theme)],
+        'fill-color': ['case', ['==', ['get', 'has'], 1], ['coalesce', ['get', 'color'], t.glass], t.glass],
         'fill-opacity': ['case',
-          ['==', ['get', 'dim'], 1], 0.18,
-          ['boolean', ['feature-state', 'hover'], false], 0.96,
-          0.82],
+          ['==', ['get', 'dim'], 1], 0.22,
+          ['==', ['get', 'has'], 1], ['case', ['boolean', ['feature-state', 'hover'], false], 1, 0.96],
+          ['case', ['boolean', ['feature-state', 'hover'], false], 0.92, 0.72]],
+        'fill-antialias': true,
       },
-    }, before);
+    });
+    // A soft glow around active countries so they stand out at any zoom.
     map.addLayer({
-      id: LINE, type: 'line', source: 'ow-countries',
-      paint: { 'line-color': outline(), 'line-width': ['case', ['boolean', ['feature-state', 'hover'], false], 1.6, 0.6] },
-    }, before);
+      id: GLOW, type: 'line', source: SOURCE,
+      filter: ['all', ['==', ['get', 'has'], 1], ['==', ['get', 'dim'], 0]],
+      paint: { 'line-color': t.glow, 'line-width': ['interpolate', ['linear'], ['zoom'], 0, 3, 4, 7], 'line-blur': ['interpolate', ['linear'], ['zoom'], 0, 3, 4, 6], 'line-opacity': 0.9 },
+    });
     map.addLayer({
-      id: SELECTED, type: 'line', source: 'ow-countries',
+      id: LINE, type: 'line', source: SOURCE,
+      paint: {
+        'line-color': ['case',
+          ['boolean', ['feature-state', 'hover'], false], t.hover,
+          ['==', ['get', 'dim'], 1], t.dimLine,
+          ['==', ['get', 'has'], 1], t.dataLine,
+          t.glassLine],
+        // One zoom curve per expression (MapLibre allows a single zoom-based interpolate), the
+        // hover / data / glass choice inside each stop.
+        'line-width': ['interpolate', ['linear'], ['zoom'],
+          0, ['case', ['boolean', ['feature-state', 'hover'], false], 2.2, ['==', ['get', 'has'], 1], 0.9, 0.55],
+          4, ['case', ['boolean', ['feature-state', 'hover'], false], 2.6, ['==', ['get', 'has'], 1], 1.4, 0.9]],
+      },
+    });
+    map.addLayer({
+      id: SELECTED, type: 'line', source: SOURCE,
       filter: ['==', ['get', 'iso'], state.selected || '__none__'],
-      paint: { 'line-color': accent(), 'line-width': 2.6 },
+      paint: { 'line-color': t.accent, 'line-width': 3 },
     });
     recolor();
+    paintTheme();
     ready = true;
   }
 
   function setHover(iso) {
     if (state.hovered === iso) return;
-    if (state.hovered) { try { map.setFeatureState({ source: 'ow-countries', id: state.hovered }, { hover: false }); } catch (_e) {} }
+    if (state.hovered) { try { map.setFeatureState({ source: SOURCE, id: state.hovered }, { hover: false }); } catch (_e) {} }
     state.hovered = iso;
-    if (iso) { try { map.setFeatureState({ source: 'ow-countries', id: iso }, { hover: true }); } catch (_e) {} }
+    if (iso) { try { map.setFeatureState({ source: SOURCE, id: iso }, { hover: true }); } catch (_e) {} }
   }
   function featureAt(event) {
     const feature = event.features && event.features[0];
@@ -336,22 +453,12 @@ export async function createMap({ container, theme = 'light', colorFor, onHover,
     if (typeof onSelect === 'function') onSelect(feature.properties.iso);
   });
 
-  // The base map is decoration; the countries are the data. If the OpenFreeMap style cannot be
-  // fetched (offline, blocked, down), fall back to a plain background and still draw the choropleth.
-  let usingFallback = false;
   await new Promise((resolve) => {
     let done = false;
     const finish = () => { if (done) return; done = true; addLayers(); resolve(); };
-    map.on('load', finish);
-    map.on('error', () => {
-      if (done || usingFallback) return;
-      if (map.isStyleLoaded && map.isStyleLoaded()) return;      // a tile or glyph failed, not the style
-      usingFallback = true;
-      map.setStyle(fallbackStyle(state.theme));
-      map.once('load', finish);
-      map.on('styledata', () => { if (!done && map.isStyleLoaded()) setTimeout(finish, 0); });
-    });
-    setTimeout(() => { if (!done && !usingFallback) { usingFallback = true; map.setStyle(fallbackStyle(state.theme)); map.once('load', finish); map.on('styledata', () => { if (!done && map.isStyleLoaded()) setTimeout(finish, 0); }); } }, 8000);
+    if (map.loaded && map.loaded()) finish(); else map.on('load', finish);
+    // The style is inline and the only source is ours, so nothing can fail to arrive; this is a belt.
+    setTimeout(() => { if (!done && map.isStyleLoaded && map.isStyleLoaded()) finish(); }, 4000);
   });
 
   const api = {
@@ -371,25 +478,15 @@ export async function createMap({ container, theme = 'light', colorFor, onHover,
     select(iso) {
       state = { ...state, selected: iso || null };
       if (map.getLayer(SELECTED)) map.setFilter(SELECTED, ['==', ['get', 'iso'], state.selected || '__none__']);
+      for (const [code, marker] of markers) marker.getElement().classList.toggle('is-selected', code === state.selected);
     },
-    // Swap the base style and re-add the country layers only once the new style has really loaded
-    // (a `styledata` event fires before that; adding layers then throws and leaves an empty map).
+    // The palette swap is a paint update, not a style reload: no flash, no re-fetch, no empty map.
     async setTheme(next) {
       if (next === state.theme) return;
       state = { ...state, theme: next };
-      ready = false;
-      await new Promise((resolve) => {
-        let done = false;
-        const finish = () => { if (done) return; done = true; if (map.getLayer(FILL)) { resolve(); return; } addLayers(); resolve(); };
-        const onData = () => { if (!done && map.isStyleLoaded()) { map.off('styledata', onData); setTimeout(finish, 0); } };
-        map.on('styledata', onData);
-        map.once('error', () => { if (done) return; usingFallback = true; map.setStyle(fallbackStyle(next)); });
-        map.setStyle(usingFallback ? fallbackStyle(next) : (STYLES[next] || STYLES.light));
-        setTimeout(() => { if (!done) { usingFallback = true; map.setStyle(fallbackStyle(next)); } }, 8000);
-      });
-      api.select(state.selected);
+      if (ready) { recolor(); paintTheme(); }
     },
-    usingFallback() { return usingFallback; },
+    usingFallback() { return false; },
     // «Show all» and the opening view are always the same world view: fitting to whichever countries
     // happen to have data would zoom into one region and hide the rest of the picture.
     fit() {
@@ -397,7 +494,7 @@ export async function createMap({ container, theme = 'light', colorFor, onHover,
     },
     fitContinent(code) {
       const scope = world.features.filter((feature) => feature.properties.iso && continent(feature.properties.iso) === code);
-      const view = continentView(scope);
+      const view = CONTINENT_VIEWS[code] || continentView(scope);
       if (!view) return api.fit();
       try { map.fitBounds(view, { padding: 24, maxZoom: 4, duration: 600 }); } catch (_e) {}
     },
@@ -407,8 +504,9 @@ export async function createMap({ container, theme = 'light', colorFor, onHover,
       if (bounds) { try { map.fitBounds(bounds, { padding: 48, maxZoom: 5, duration: 600 }); } catch (_e) {} }
     },
     bounds(iso) { const feature = world.features.find((f) => f.properties.iso === iso); return feature ? featureBounds(feature) : null; },
+    labels() { return [...markers.keys()]; },
     resize() { try { map.resize(); } catch (_e) {} },
-    destroy() { try { tooltip.remove(); map.remove(); } catch (_e) {} },
+    destroy() { try { for (const marker of markers.values()) marker.remove(); markers.clear(); tooltip.remove(); map.remove(); } catch (_e) {} },
   };
   return api;
 }
