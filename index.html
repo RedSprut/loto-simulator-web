@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="cb957f9" data-build-ts="2026-09-26T13:27:15.027Z">
+<html lang="en" data-build="ff20499" data-build-ts="2026-09-26T14:18:13.410Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=cb957f9"></script>
+<script src="./boot-runtime.js?v=ff20499"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=cb957f9">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=ff20499">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=cb957f9">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=ff20499">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -1537,6 +1537,17 @@ body.light .mb[class*="miss-"]{text-shadow:none}
 .pro-pay-status{min-height:20px;margin-top:9px;text-align:center;color:#7A1410;font-size:12.5px;font-weight:800;line-height:1.4}
 .pro-signin-prompt{margin-top:10px;padding:12px;border-radius:14px;border:1.5px solid #D9A441;background:#FFF8E8;color:#7A1410;text-align:center;font-size:13px;font-weight:800;line-height:1.4;display:flex;flex-direction:column;gap:10px}
 .pro-signin-prompt[hidden]{display:none}
+/* Guest's next step: a gold light runs clockwise round the border; ::after = its blurred halo outside. Absolute layers, no layout shift. */
+@property --glow-a{syntax:'<angle>';inherits:false;initial-value:0deg}
+.pro-next-glow{position:relative;box-shadow:0 0 16px #f0a61452}
+.pro-next-glow::before,.pro-next-glow::after{content:"";position:absolute;pointer-events:none;background:conic-gradient(from var(--glow-a),#ffb00000 0deg 150deg,#d68a008c 235deg,#F0A000 290deg,#FFC62E 325deg,#FFF1B8 344deg,#FFB000 353deg,#ffb00000 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:proNextGlow 3.4s linear infinite}
+.pro-next-glow::before{inset:-1.5px;padding:2.5px;border-radius:15.5px}
+.pro-next-glow::after{inset:-8px;padding:6.5px;border-radius:22px;filter:blur(4px)}
+@keyframes proNextGlow{to{--glow-a:360deg}}
+@media (prefers-reduced-motion:reduce){
+  .pro-next-glow::before{animation:none;background:linear-gradient(135deg,#FFC62E,#D68A00 50%,#FFC62E)}
+  .pro-next-glow::after{display:none}
+}
 /* Root cause of the always-visible «Повторить загрузку» / «Восстановить покупку» / «Выйти»: their own
    display (.pro-offering-retry{display:block}, .btn-exp{display:flex}) beats the UA [hidden] rule, so
    updateUi() set hidden=true and nothing disappeared. Inside the paywall, hidden means hidden. */
@@ -2496,6 +2507,15 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <div id="fav-list"><div class="empty" style="padding:16px">Нет сохранённых. Добавь кнопкой ниже.</div></div>
     </div>
   </div>
+  <section id="home-pro-entry">
+    <button type="button" class="sub-banner" id="home-pro-btn" data-loto-event-click="openSubInfo()">
+      <span class="sub-badge">СКОРО</span>
+      <span class="sub-title">Lotto Simulator</span>
+      <span class="sub-desc">Максимально полная доступная база каждой игры · Квантово-астральный · безлимит Судьи и Консенсуса</span>
+      <span class="sub-price">Free · PRO <span>· цена и валюта показываются платёжным магазином</span></span>
+      <span class="sub-cta">Тарифы и возможности →</span>
+    </button>
+  </section>
   <section class="app-download" id="home-stores" hidden>
     <div class="acc-stores-title">Установить приложение</div>
     <div class="acc-stores-btns" id="home-stores-btns"></div>
@@ -3471,6 +3491,10 @@ body.account-open .bnav{z-index:570}
 .store-badge .sb-soon{margin-left:6px;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,.16)}
 .app-download{width:min(calc(100% - 28px),1120px);margin:22px auto 10px;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--bg2);box-shadow:var(--card-shadow);text-align:center}
 .app-download[hidden]{display:none}
+/* Home → PRO: the Analytics banner as a button */
+#home-pro-entry{width:min(calc(100% - 28px),1120px);margin:22px auto 10px}
+#home-pro-btn{display:block;width:100%;margin:0;font:inherit;color:var(--fg);text-align:left}
+#home-pro-btn>span{display:block}
 .app-download .acc-stores-title{font-size:15px;color:var(--fg)}
 .app-download .acc-stores-btns{display:flex;align-items:stretch;justify-content:center;gap:12px;flex-wrap:nowrap}
 .app-download .store-badge{min-width:0;width:min(240px,100%);justify-content:center}
@@ -3517,7 +3541,7 @@ body.account-open .bnav{z-index:570}
 /* No FREE-before-PRO flash: hide tier-dependent badges until the real access level resolves
    (the initial state is a default "free" that flips to PRO once the backend responds). */
 body.access-pending .acc-plan-badge,body.access-pending #acc-r-tier,
-body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility:hidden}
+body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility:hidden}
 /* Draws-database loading modal — covers the WHOLE screen (above header z260 and bottom-nav
    z100003) until the results feed + history load AND the tier resolves, so a cold start /
    reload never shows "0 тиражей", "тиражей нет", an empty base, or FREE→PRO underneath. Matte
@@ -3799,25 +3823,25 @@ body.access-pending #sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=cb957f9"></script>
-<script src="./commercial-config.js?v=cb957f9"></script>
-<script src="./event-runtime.js?v=cb957f9"></script>
-<script src="./external-link-runtime.js?v=cb957f9"></script>
-<script src="./auth-client.js?v=cb957f9"></script>
-<script src="./native-loader.js?v=cb957f9"></script>
-<script src="./billing-web.js?v=cb957f9"></script>
-<script src="./i18n-catalog.js?v=cb957f9"></script>
-<script src="./lang-detect.js?v=cb957f9"></script>
-<script src="./i18n-runtime.js?v=cb957f9"></script>
-<script src="./consent-runtime.js?v=cb957f9"></script>
-<script src="./analytics-telemetry.js?v=cb957f9"></script>
-<script src="./win-match-core.js?v=cb957f9"></script>
-<script src="./court-core.js?v=cb957f9"></script>
-<script src="./smart-start.js?v=cb957f9"></script>
-<script src="./app-runtime.js?v=cb957f9"></script>
-<script src="./inline-runtime-2.js?v=cb957f9"></script>
-<script src="./commercial-runtime.js?v=cb957f9"></script>
-<script src="./inline-runtime-3.js?v=cb957f9"></script>
+<script src="./version.js?v=ff20499"></script>
+<script src="./commercial-config.js?v=ff20499"></script>
+<script src="./event-runtime.js?v=ff20499"></script>
+<script src="./external-link-runtime.js?v=ff20499"></script>
+<script src="./auth-client.js?v=ff20499"></script>
+<script src="./native-loader.js?v=ff20499"></script>
+<script src="./billing-web.js?v=ff20499"></script>
+<script src="./i18n-catalog.js?v=ff20499"></script>
+<script src="./lang-detect.js?v=ff20499"></script>
+<script src="./i18n-runtime.js?v=ff20499"></script>
+<script src="./consent-runtime.js?v=ff20499"></script>
+<script src="./analytics-telemetry.js?v=ff20499"></script>
+<script src="./win-match-core.js?v=ff20499"></script>
+<script src="./court-core.js?v=ff20499"></script>
+<script src="./smart-start.js?v=ff20499"></script>
+<script src="./app-runtime.js?v=ff20499"></script>
+<script src="./inline-runtime-2.js?v=ff20499"></script>
+<script src="./commercial-runtime.js?v=ff20499"></script>
+<script src="./inline-runtime-3.js?v=ff20499"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3969,9 +3993,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=cb957f9"></script>
-<script src="./notifications-runtime.js?v=cb957f9"></script>
-<script src="./pwa-runtime.js?v=cb957f9"></script>
+<script src="./notification-center.js?v=ff20499"></script>
+<script src="./notifications-runtime.js?v=ff20499"></script>
+<script src="./pwa-runtime.js?v=ff20499"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -3982,8 +4006,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=cb957f9"></script>
-<script src="./inline-runtime-5.js?v=cb957f9"></script>
-<script src="./inline-runtime-6.js?v=cb957f9"></script>
+<script src="./inline-runtime-4.js?v=ff20499"></script>
+<script src="./inline-runtime-5.js?v=ff20499"></script>
+<script src="./inline-runtime-6.js?v=ff20499"></script>
 </body>
 </html>
