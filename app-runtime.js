@@ -301,7 +301,9 @@ window.addEventListener('loto:accesschange',event=>{
        pack (e.g. «Текущие правила · 30»). Now that PRO is confirmed, re-render it: the cache was
        just cleared, so IF_baseDraws reloads the full archive and the label flips to the PRO default
        «Вся история · N». Fire-and-forget; a no-op if the generator isn't mounted yet. */
-    try{if(typeof PERIOD_refreshLabel==='function')PERIOD_refreshLabel();}catch(_r){}
+    /* Async: a failed/cancelled archive load must not surface as an unhandled rejection; the label
+       simply keeps its previous text until the next refresh. */
+    try{if(typeof PERIOD_refreshLabel==='function')PERIOD_refreshLabel().catch(()=>{});}catch(_r){}
   }catch(_e){}}
 });
 function analyzeData(gameKey,historicalData=[]){
@@ -1408,7 +1410,7 @@ function selLot(id){
   cur=id;lastDraw=null;CROWD_cache=null;const _wc=document.getElementById('wb-crowd');if(_wc)_wc.innerHTML='';
   document.body.setAttribute('data-game',id);
   updateThemeColor();
-  setTimeout(()=>{try{PERIOD_refreshLabel();}catch(e){}},50);
+  setTimeout(()=>{PERIOD_refreshLabel().catch(()=>{});},50);
   IF_reset();CONS_reset();
   renderLotteryNav();
   renderHero();
@@ -6083,7 +6085,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(lotTabs)lotTabs.addEventListener('scroll',updateLotteryNavArrows,{passive:true});
   window.addEventListener('resize',updateLotteryNavArrows,{passive:true});
   setTimeout(updateLotteryNavArrows,80);
-  setTimeout(()=>{PERIOD_refreshLabel();NOTIF_boot();},500);
+  setTimeout(()=>{PERIOD_refreshLabel().catch(()=>{});NOTIF_boot();},500);
   setTimeout(autoCheckFavorites,4500);
   /* ══ OVERLAY PAGE SCROLLBAR ══════════════════════════════════════════════════════════════
      Only runs where the probe in the first inline script found that this platform's scrollbars
