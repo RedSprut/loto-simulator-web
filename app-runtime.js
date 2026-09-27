@@ -49,7 +49,7 @@ const RESULTS_ARCHIVE_URL='./results-archive.json';
 /* The 10 MB archive package is served only where it physically exists (repo checkout, native bundle
    when included). The public web deploy never publishes it (deploy-pages.yml asserts so), yet every
    cold visit fetched it and logged a 404. build-public-bundle.mjs stamps this to false. */
-const RESULTS_ARCHIVE_PUBLISHED=true;
+const RESULTS_ARCHIVE_PUBLISHED=false;
 const PRIZES_JSON_URL=IS_NATIVE_APP?`${NATIVE_DATA_BASE}prizes.json`:'./prizes.json';
 const RESULTS_JSON_BUNDLED='./results.json';   // offline fallback for native
 const PRIZES_JSON_BUNDLED='./prizes.json';     // offline fallback for native
