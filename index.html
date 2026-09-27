@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="f64fd90" data-build-ts="2026-09-27T19:46:23.389Z">
+<html lang="en" data-build="21e9bbb" data-build-ts="2026-09-27T20:22:54.520Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=f64fd90"></script>
+<script src="./boot-runtime.js?v=21e9bbb"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,15 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=f64fd90">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=21e9bbb">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=f64fd90">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=21e9bbb">
+<meta name="twitter:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -3342,6 +3344,17 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
 .about-box .about-ul li{font-size:13.5px;line-height:1.5;margin-bottom:4px;opacity:.92}
 .about-box .about-warn,.about-box .about-accept{border-left:3px solid var(--gold,#C9A55A);padding-left:10px;font-weight:600}
 .about-foot{text-align:center;font-size:11.5px;opacity:.6;padding:14px 0 4px}
+/* «Поделиться Lotto Simulator» — сразу под версией; FAQ — нативные <details>, без JS. */
+#about-ov .about-share{margin:0 0 4px;gap:9px;min-height:48px}
+#about-ov .about-share svg{width:19px;height:19px;flex:0 0 auto}
+.about-faq{display:flex;flex-direction:column;gap:6px;margin:0 0 8px}
+.about-faq-item{border:1px solid var(--exp-border);border-radius:12px;background:var(--exp-bg)}
+.about-faq-item>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;min-height:44px;padding:10px 12px;font-weight:800;font-size:13.5px;line-height:1.35;overflow-wrap:anywhere}
+.about-faq-item>summary::-webkit-details-marker{display:none}
+.about-faq-item>summary::after{content:'';flex:0 0 auto;width:8px;height:8px;margin-left:auto;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);opacity:.7;transition:transform .15s}
+.about-faq-item[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
+.about-faq-item>summary:focus-visible{outline:2px solid var(--gold,#E9B44C);outline-offset:2px;border-radius:12px}
+.about-faq-item>.about-p{padding:0 12px 10px;margin:0}
 .about-foot button{background:none;border:0;color:inherit;font:inherit;text-decoration:underline;cursor:pointer;padding:0}
 </style>
 <style id="account-styles">
@@ -3761,6 +3774,7 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
     <div class="lang-title" style="text-align:center;padding:0 44px">О приложении</div>
     <div style="text-align:center;font-weight:900;font-size:18px;margin-top:4px">Lotto Simulator</div>
     <div style="text-align:center;font-weight:800;opacity:.85;margin-bottom:14px">Версия <span id="about-version">1.0</span></div>
+    <button class="btn-exp about-share" id="about-share" type="button" data-loto-event-click="shareApp()"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 15V4M8 8l4-4 4 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 11H5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span>Поделиться Lotto Simulator</span></button>
 
     <div class="about-h">Что нового в версии 1.0</div>
     <ul class="about-ul">
@@ -3778,6 +3792,16 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
     <p class="about-p">Lotto Simulator — это математический, статистический, исследовательский и развлекательный симулятор. Приложение исследует различные варианты комбинаций чисел с помощью математики, статистики, вероятностных методов, анализа исторических данных, математических моделей, алгоритмической генерации, симуляций и сравнительного анализа.</p>
     <p class="about-p">Результаты моделей отражают математическое и статистическое моделирование возможных комбинаций и не являются обещанием будущего результата.</p>
     <p class="about-p about-warn">Каждый официальный тираж является независимым случайным событием. Исторические результаты, математические модели, частоты, статистика, симуляции, Верховный судья и другие инструменты Lotto Simulator не гарантируют будущий выигрыш.</p>
+
+    <div class="about-h" id="about-faq-title">Частые вопросы</div>
+    <div class="about-faq">
+      <details class="about-faq-item"><summary>Что такое Lotto Simulator?</summary><p class="about-p">Lotto Simulator — математический и статистический симулятор лотерей: генератор комбинаций, результаты и архив тиражей, статистика чисел, проверка своих рядов и 3D-барабан. Он создан для исследования, обучения и развлечения.</p></details>
+      <details class="about-faq-item"><summary>Продаёт ли Lotto Simulator билеты или принимает ставки?</summary><p class="about-p">Нет. Lotto Simulator не является оператором лотереи: не продаёт билеты, не принимает ставки и деньги на участие в розыгрышах и не выплачивает выигрыши. Реальные билеты продают только официальные операторы.</p></details>
+      <details class="about-faq-item"><summary>Гарантируют ли модели выигрыш?</summary><p class="about-p">Нет. Каждый официальный тираж — независимое случайное событие. Модели, статистика и симуляции помогают изучать комбинации, но не предсказывают будущие результаты и не повышают шанс на выигрыш.</p></details>
+      <details class="about-faq-item"><summary>Откуда берутся результаты тиражей?</summary><p class="about-p">Из общедоступных официальных результатов лотерейных операторов. Приложение обновляет их автоматически, а источник и дату обновления можно проверить в блоке «Официальные результаты». Действительным всегда остаётся результат, опубликованный оператором.</p></details>
+      <details class="about-faq-item"><summary>Чем отличаются FREE и PRO?</summary><p class="about-p">В FREE доступны симуляция, генерация рядов, результаты тиражей и базовая статистика. PRO открывает расширенные математические модели и инструменты анализа; некоторые из них можно бесплатно попробовать ограниченное число раз. Подписку можно отменить в любой момент в управлении подпиской.</p></details>
+      <details class="about-faq-item"><summary>Какие данные использует приложение?</summary><p class="about-p">Сохранённые комбинации и настройки хранятся на вашем устройстве. Для бесплатных функций регистрация не нужна; вход по e-mail требуется только для расширенных функций и PRO. Необязательная аналитика включается только с вашего согласия. Подробнее — в Политике конфиденциальности.</p></details>
+    </div>
 
     <div class="about-h">Правовая информация</div>
     <div class="about-sh">Дисклеймер</div>
@@ -3853,26 +3877,26 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=f64fd90"></script>
-<script src="./commercial-config.js?v=f64fd90"></script>
-<script src="./event-runtime.js?v=f64fd90"></script>
-<script src="./external-link-runtime.js?v=f64fd90"></script>
-<script src="./auth-client.js?v=f64fd90"></script>
-<script src="./native-loader.js?v=f64fd90"></script>
-<script src="./billing-web.js?v=f64fd90"></script>
-<script src="./i18n-catalog.js?v=f64fd90"></script>
-<script src="./lang-detect.js?v=f64fd90"></script>
-<script src="./i18n-runtime.js?v=f64fd90"></script>
-<script src="./consent-runtime.js?v=f64fd90"></script>
-<script src="./analytics-telemetry.js?v=f64fd90"></script>
-<script src="./ga4-runtime.js?v=f64fd90"></script>
-<script src="./win-match-core.js?v=f64fd90"></script>
-<script src="./court-core.js?v=f64fd90"></script>
-<script src="./smart-start.js?v=f64fd90"></script>
-<script src="./app-runtime.js?v=f64fd90"></script>
-<script src="./inline-runtime-2.js?v=f64fd90"></script>
-<script src="./commercial-runtime.js?v=f64fd90"></script>
-<script src="./inline-runtime-3.js?v=f64fd90"></script>
+<script src="./version.js?v=21e9bbb"></script>
+<script src="./commercial-config.js?v=21e9bbb"></script>
+<script src="./event-runtime.js?v=21e9bbb"></script>
+<script src="./external-link-runtime.js?v=21e9bbb"></script>
+<script src="./auth-client.js?v=21e9bbb"></script>
+<script src="./native-loader.js?v=21e9bbb"></script>
+<script src="./billing-web.js?v=21e9bbb"></script>
+<script src="./i18n-catalog.js?v=21e9bbb"></script>
+<script src="./lang-detect.js?v=21e9bbb"></script>
+<script src="./i18n-runtime.js?v=21e9bbb"></script>
+<script src="./consent-runtime.js?v=21e9bbb"></script>
+<script src="./analytics-telemetry.js?v=21e9bbb"></script>
+<script src="./ga4-runtime.js?v=21e9bbb"></script>
+<script src="./win-match-core.js?v=21e9bbb"></script>
+<script src="./court-core.js?v=21e9bbb"></script>
+<script src="./smart-start.js?v=21e9bbb"></script>
+<script src="./app-runtime.js?v=21e9bbb"></script>
+<script src="./inline-runtime-2.js?v=21e9bbb"></script>
+<script src="./commercial-runtime.js?v=21e9bbb"></script>
+<script src="./inline-runtime-3.js?v=21e9bbb"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -4024,9 +4048,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=f64fd90"></script>
-<script src="./notifications-runtime.js?v=f64fd90"></script>
-<script src="./pwa-runtime.js?v=f64fd90"></script>
+<script src="./notification-center.js?v=21e9bbb"></script>
+<script src="./notifications-runtime.js?v=21e9bbb"></script>
+<script src="./pwa-runtime.js?v=21e9bbb"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -4037,8 +4061,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=f64fd90"></script>
-<script src="./inline-runtime-5.js?v=f64fd90"></script>
-<script src="./inline-runtime-6.js?v=f64fd90"></script>
+<script src="./inline-runtime-4.js?v=21e9bbb"></script>
+<script src="./inline-runtime-5.js?v=21e9bbb"></script>
+<script src="./inline-runtime-6.js?v=21e9bbb"></script>
 </body>
 </html>

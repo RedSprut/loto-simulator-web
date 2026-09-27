@@ -1,30 +1,30 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="i18n-pending nf-page" data-build="21e9bbb">
 <head>
   <meta charset="utf-8">
+  <!-- GitHub Pages отдаёт эту страницу на ЛЮБОМ несуществующем пути (/a/b/c), поэтому все
+       относительные адреса (стили, скрипты, i18n-чанки, «домой») считаются от корня сайта. -->
+  <base href="/">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="robots" content="noindex">
   <meta name="color-scheme" content="light dark">
-  <title>Page not found · Lotto Simulator</title>
+  <meta name="robots" content="noindex">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; form-action 'none'">
+  <title>Страница не найдена | Lotto Simulator</title>
   <link rel="icon" href="./favicon-64.png?v=20260831">
-  <style>
-    :root{color-scheme:light dark;font-family:Manrope,system-ui,-apple-system,sans-serif}
-    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:#EFE8DC;color:#26121C}
-    @media (prefers-color-scheme:dark){body{background:#160A12;color:#F6EEF2}}
-    main{max-width:520px;text-align:center}
-    h1{font-size:clamp(28px,6vw,40px);margin:0 0 10px;line-height:1.1}
-    p{font-size:16px;line-height:1.55;margin:0 0 8px;opacity:.85}
-    a.button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:10px 22px;margin-top:22px;border-radius:12px;background:#B8860B;color:#160A12;font-weight:800;text-decoration:none}
-    .dice{font-size:56px;line-height:1;margin-bottom:12px}
-  </style>
+  <link rel="stylesheet" href="./legal.css?v=21e9bbb">
+  <!-- В <head>: тема из приложения ставится до первой отрисовки, без вспышки. -->
+  <script src="./legal-runtime.js?v=21e9bbb"></script>
 </head>
 <body>
-  <main>
-    <div class="dice" aria-hidden="true">🎲</div>
-    <h1>Page not found</h1>
-    <p>This address does not exist. The simulator, the 3D draw and the analytics live on the home page.</p>
-    <p lang="ru">Такой страницы нет. Симулятор, 3D-тираж и аналитика — на главной.</p>
-    <a class="button" href="./">Lotto Simulator</a>
+  <main class="nf-shell">
+    <a class="nf-brand" href="./"><img src="./icon-192.png?v=20260901b" alt="" width="40" height="40">Lotto Simulator</a>
+    <p class="nf-code" aria-hidden="true">404</p>
+    <h1 class="nf-title">Страница не найдена</h1>
+    <p class="nf-text">Такой страницы нет или она была перемещена. Симулятор, результаты тиражей и статистика доступны на главной странице.</p>
+    <a class="nf-action" href="./">Вернуться в Lotto Simulator</a>
   </main>
+  <script src="./i18n-catalog.js?v=21e9bbb"></script>
+  <script src="./lang-detect.js?v=21e9bbb"></script>
+  <script src="./i18n-runtime.js?v=21e9bbb"></script>
 </body>
 </html>

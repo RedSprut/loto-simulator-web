@@ -1,6 +1,12 @@
 (function(){
   'use strict';
   const config=window.LOTO_COMMERCIAL_CONFIG||{};
+  // 404.html: тема приложения (светлая / тёмная / системная) — до первой отрисовки.
+  if(document.documentElement.classList.contains('nf-page')){
+    let mode='';
+    try{mode=String(localStorage.getItem('loto_theme')||'');}catch(_error){}
+    if(mode==='light'||mode==='dark')document.documentElement.dataset.theme=mode;
+  }
   const select=document.getElementById('legal-language');
   const i18n=window.LotoI18n;
   if(select&&i18n){

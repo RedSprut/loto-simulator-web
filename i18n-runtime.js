@@ -84,7 +84,7 @@
   let languageRequest=0;
   const textSources=new WeakMap(),textLast=new WeakMap();
   const attributeState=new WeakMap();
-  const translatedAttrs=['placeholder','title','aria-label','aria-description'];
+  const translatedAttrs=['placeholder','title','aria-label','aria-description','alt'];
 
   function valueFor(entry,code=language,idx=appIndex){
     const index=idx.localeIndex.get(code);

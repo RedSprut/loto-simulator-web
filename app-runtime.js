@@ -5318,13 +5318,44 @@ function MATRIX_judge(){
 function rowsAsText(rws,l){
   return rws.map((r,i)=>(i+1)+') '+r.m.join(' ')+(r.b&&r.b.length?' | '+r.b.join(' '):'')).join('\n');
 }
+// Адрес, который уходит получателю. В Capacitor страница живёт на capacitor://localhost или
+// https://localhost — у получателя такая ссылка не откроется, поэтому там всегда канонический сайт.
+function appShareUrl(){
+  const canonical=document.querySelector('link[rel="canonical"]')?.href||'https://lottosimulator.app/';
+  const local=!/^https?:$/.test(location.protocol)||/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  return local?canonical:location.href.split(/[?#]/)[0];
+}
+// Системное меню «Поделиться»: native (Capacitor Share, iOS/Android) → Web Share API.
+// true — меню показано (или пользователь сам его закрыл), false — меню недоступно, нужен fallback.
+async function openShareSheet(payload){
+  const nativeShare=window.LotoNativeShare;
+  if(nativeShare&&typeof nativeShare.share==='function'){
+    try{await nativeShare.share(payload);return true;}
+    catch(e){if(/cancel/i.test(String(e&&(e.message||e))))return true;}
+  }
+  if(navigator.share&&(!navigator.canShare||navigator.canShare(payload))){
+    try{await navigator.share(payload);return true;}
+    catch(e){if(e&&e.name==='AbortError')return true;}
+  }
+  return false;
+}
 async function shareText(title,text){
-  const appUrl=location.href.split(/[?#]/)[0];
-  const payload={title,text:text+'\n\n🎰 Lotto Simulator · '+appUrl};
-  if(navigator.share){try{await navigator.share(payload);return;}catch(e){if(e&&e.name==='AbortError')return;}}
+  const payload={title,text:text+'\n\n🎰 Lotto Simulator · '+appShareUrl()};
+  if(await openShareSheet(payload))return;
   try{await navigator.clipboard.writeText(payload.text);showCopyToast('📋 Скопировано — вставь в любой мессенджер');}
   catch(e){showFeedback('Поделиться','Скопируй вручную:\n\n'+payload.text,'📤',9000);}
 }
+// «Поделиться Lotto Simulator» — само приложение: название, короткое описание на языке
+// интерфейса и канонический адрес. Без системного меню копируется только ссылка.
+async function shareApp(){
+  const tr=value=>window.LotoI18n?.translate?.(value)||value;
+  const url=document.querySelector('link[rel="canonical"]')?.href||'https://lottosimulator.app/';
+  const payload={title:'Lotto Simulator',text:tr('Симулятор лотерей со статистикой тиражей, генератором чисел и 3D-барабаном. Не продаёт билеты и не гарантирует выигрыш.'),url};
+  if(await openShareSheet(payload))return;
+  try{await navigator.clipboard.writeText(url);showCopyToast('🔗 Ссылка скопирована');}
+  catch(e){showFeedback('Поделиться','Скопируй вручную:\n\n'+url,'📤',9000);}
+}
+window.shareApp=shareApp;
 function shareRows(){
   const l=L();fillAll();
   const good=rows.filter(r=>r.m.length===l.pM);
