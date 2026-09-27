@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="08e4b4a" data-build-ts="2026-09-27T12:15:39.106Z">
+<html lang="en" data-build="1ddfd75" data-build-ts="2026-09-27T13:32:20.177Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=08e4b4a"></script>
+<script src="./boot-runtime.js?v=1ddfd75"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=08e4b4a">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=1ddfd75">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=08e4b4a">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=1ddfd75">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -1983,6 +1983,25 @@ button.ct-ball{cursor:pointer;min-width:44px;min-height:44px}
 .ct-badge{display:inline-block;font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:rgba(233,180,76,.18);color:var(--fg);border:1px solid rgba(233,180,76,.45)}
 .ct-badge-free{background:rgba(55,214,122,.16);border-color:rgba(55,214,122,.5)}
 .ct-badge-exp{background:rgba(160,120,255,.16);border-color:rgba(160,120,255,.5)}
+/* Character markers (court-ui.js TRAIT): the glyph shape + label carry the meaning, colour only echoes it. */
+.ct-trait{max-width:100%;overflow-wrap:anywhere}
+.ct-trait.is-bold{background:rgba(232,96,60,.16);border-color:rgba(232,96,60,.55)}
+.ct-trait.is-balanced{background:rgba(233,180,76,.18);border-color:rgba(233,180,76,.5)}
+.ct-trait.is-cautious{background:rgba(55,140,214,.16);border-color:rgba(55,140,214,.55)}
+.ct-trait.is-lawyer{background:rgba(40,170,140,.14);border-color:rgba(40,170,140,.5)}
+.ct-trait.is-judge{background:rgba(233,180,76,.26);border-color:rgba(233,180,76,.75)}
+.ct-roster-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.ct-roster-badges:empty{display:none}
+.ct-trait-card{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--bg2);border:1px solid var(--border);border-left-width:4px}
+.ct-trait-card.is-bold{border-left-color:rgba(232,96,60,.85)}
+.ct-trait-card.is-balanced{border-left-color:rgba(233,180,76,.85)}
+.ct-trait-card.is-cautious{border-left-color:rgba(55,140,214,.85)}
+.ct-trait-card.is-lawyer{border-left-color:rgba(40,170,140,.85)}
+.ct-trait-card.is-judge{border-left-color:var(--gold)}
+.ct-trait-card>div{min-width:0}
+.ct-trait-card b{display:block;font-size:14px}
+.ct-trait-card p{margin:2px 0 0;font-size:13px;line-height:1.45;color:var(--sub2)}
+.ct-trait-glyph{flex:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;background:var(--bg3)}
 .ct-link{background:none;border:0;padding:8px 0;min-height:44px;color:var(--fg);font:800 13.5px 'Manrope',sans-serif;text-decoration:underline;cursor:pointer;align-self:flex-start}
 .ct-analyzers{display:grid;gap:10px;margin:12px 0}
 .ct-analyzer{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:14px;border-radius:16px;border:1.5px solid var(--border);background:var(--bg3);color:var(--fg);cursor:pointer;min-height:64px;font:inherit}
@@ -2221,6 +2240,12 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
 .ct-seat-badge{position:absolute;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;pointer-events:none;border:2px solid var(--bg2);background:var(--bg3);color:var(--fg)}
 .ct-seat-badge.is-done{background:#1a8a4a;color:#fff}
 .ct-seat-badge.is-failed{background:#c0392b;color:#fff}
+/* Seat character marker: ◆ / ◈ / ◇ at the seat's top-left corner (the label is in the seat's aria-label). */
+.ct-seat-trait{position:absolute;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1;pointer-events:none;border:2px solid var(--bg2);background:var(--bg3);color:var(--fg)}
+.ct-seat-trait.is-bold{background:#e8603c;color:#fff}
+.ct-seat-trait.is-balanced{background:#e9b44c;color:#1b1b1b}
+.ct-seat-trait.is-cautious{background:#378cd6;color:#fff}
+@media (max-width:340px){.ct-seat-trait{width:17px;height:17px;font-size:9px}}
 .ct-seat.is-working .ct-avatar{box-shadow:0 0 0 3px rgba(233,180,76,.9)}
 .ct-seat.is-done .ct-avatar{box-shadow:0 0 0 3px #1a8a4a}
 .ct-seat.is-failed .ct-avatar{filter:grayscale(1) opacity(.6)}
@@ -3824,25 +3849,25 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=08e4b4a"></script>
-<script src="./commercial-config.js?v=08e4b4a"></script>
-<script src="./event-runtime.js?v=08e4b4a"></script>
-<script src="./external-link-runtime.js?v=08e4b4a"></script>
-<script src="./auth-client.js?v=08e4b4a"></script>
-<script src="./native-loader.js?v=08e4b4a"></script>
-<script src="./billing-web.js?v=08e4b4a"></script>
-<script src="./i18n-catalog.js?v=08e4b4a"></script>
-<script src="./lang-detect.js?v=08e4b4a"></script>
-<script src="./i18n-runtime.js?v=08e4b4a"></script>
-<script src="./consent-runtime.js?v=08e4b4a"></script>
-<script src="./analytics-telemetry.js?v=08e4b4a"></script>
-<script src="./win-match-core.js?v=08e4b4a"></script>
-<script src="./court-core.js?v=08e4b4a"></script>
-<script src="./smart-start.js?v=08e4b4a"></script>
-<script src="./app-runtime.js?v=08e4b4a"></script>
-<script src="./inline-runtime-2.js?v=08e4b4a"></script>
-<script src="./commercial-runtime.js?v=08e4b4a"></script>
-<script src="./inline-runtime-3.js?v=08e4b4a"></script>
+<script src="./version.js?v=1ddfd75"></script>
+<script src="./commercial-config.js?v=1ddfd75"></script>
+<script src="./event-runtime.js?v=1ddfd75"></script>
+<script src="./external-link-runtime.js?v=1ddfd75"></script>
+<script src="./auth-client.js?v=1ddfd75"></script>
+<script src="./native-loader.js?v=1ddfd75"></script>
+<script src="./billing-web.js?v=1ddfd75"></script>
+<script src="./i18n-catalog.js?v=1ddfd75"></script>
+<script src="./lang-detect.js?v=1ddfd75"></script>
+<script src="./i18n-runtime.js?v=1ddfd75"></script>
+<script src="./consent-runtime.js?v=1ddfd75"></script>
+<script src="./analytics-telemetry.js?v=1ddfd75"></script>
+<script src="./win-match-core.js?v=1ddfd75"></script>
+<script src="./court-core.js?v=1ddfd75"></script>
+<script src="./smart-start.js?v=1ddfd75"></script>
+<script src="./app-runtime.js?v=1ddfd75"></script>
+<script src="./inline-runtime-2.js?v=1ddfd75"></script>
+<script src="./commercial-runtime.js?v=1ddfd75"></script>
+<script src="./inline-runtime-3.js?v=1ddfd75"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3994,9 +4019,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=08e4b4a"></script>
-<script src="./notifications-runtime.js?v=08e4b4a"></script>
-<script src="./pwa-runtime.js?v=08e4b4a"></script>
+<script src="./notification-center.js?v=1ddfd75"></script>
+<script src="./notifications-runtime.js?v=1ddfd75"></script>
+<script src="./pwa-runtime.js?v=1ddfd75"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -4007,8 +4032,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=08e4b4a"></script>
-<script src="./inline-runtime-5.js?v=08e4b4a"></script>
-<script src="./inline-runtime-6.js?v=08e4b4a"></script>
+<script src="./inline-runtime-4.js?v=1ddfd75"></script>
+<script src="./inline-runtime-5.js?v=1ddfd75"></script>
+<script src="./inline-runtime-6.js?v=1ddfd75"></script>
 </body>
 </html>
