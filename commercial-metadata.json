@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-09-26",
+  "updatedAt": "2026-09-27",
   "freeRecentDrawsByGame": {
     "lotto": 15,
     "vikinglotto": 15,
@@ -373,7 +373,7 @@
       "freeDraws": 30
     },
     "powerball": {
-      "availableDraws": 1997,
+      "availableDraws": 1998,
       "freeDraws": 30
     },
     "megaMillions": {
