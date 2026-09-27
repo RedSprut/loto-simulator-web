@@ -29,6 +29,12 @@
  * numbers, money and dates follow the panel language. The switcher in the header applies at once —
  * the open section, sheet, popup, map and notification centre re-render from the data they already
  * hold — and the choice is remembered. The public app, its language and every number are untouched.
+ *
+ * 2026-09-27: the panel language FOLLOWS the app language (Русский / Norsk / English → the same panel
+ * language, one persisted source of truth: the app's `loto_lang`). The header switcher only appears
+ * when the app runs in one of the other 14 locales, as the fallback chooser. And a distinct
+ * «Google Analytics 4 — независимая аналитика» block sits UNDER the internal overview: GA4 read
+ * server-side as an independent control source, never replacing the internal numbers.
  */
 (function () {
   'use strict';
@@ -89,6 +95,7 @@
   var AUDIENCES = [['all', 'Все'], ['guest', 'Гостевые визиты'], ['registered', 'Авторизованные визиты']];
   var PLATFORMS = [['all', 'Все'], ['web', 'Веб'], ['ios', 'iOS'], ['android', 'Android']];
   var HOW = {
+    ga4: 'Данные Google Analytics 4 читаются напрямую из GA4 Data API сервисным аккаунтом после проверки владельца. Считает Google по своим правилам (cookie GA4, сессии по 30 минут, без моделирования); учитываются только посетители, согласившиеся на аналитику, — тег GA4 загружается только после согласия. Внутренняя аналитика выше остаётся основной; отсутствующие показатели не заменяются нулями.',
     verified: 'Люди с подтверждённой личностью: вошли в аккаунт. Один аккаунт = один человек, сколько бы устройств он ни использовал. Владелец исключён.',
     probable: 'Анонимные устройства с признаками живого человека, сгруппированные внутри одного домохозяйства по нижней границе: в группу попадают только устройства разных типов, которые никогда не работали одновременно. Это оценка, а не доказанная личность.',
     unknown: 'Анонимные устройства без признаков взаимодействия: один заход без действий. Они не называются людьми и считаются отдельно.',
@@ -147,6 +154,7 @@
     custom: { from: '', to: '' },
     filters: { platform: 'all', country: 'all', lottery: 'all', audience: 'all' },
     toggles: { owner: false, bots: false, unknown: true },
+    ga4Loading: false, ga4Error: null,
     compare: true,
     page: 0,
     peopleKind: 'all',
@@ -176,6 +184,7 @@
       var error = new Error((body && (body.error || body.detail)) || ('HTTP ' + response.status));
       error.status = response.status;
       error.code = body && body.code ? String(body.code) : '';
+      error.detail = body && body.detail ? String(body.detail).slice(0, 300) : '';
       throw error;
     }
     return body;
@@ -433,6 +442,8 @@
       // KPI precision tags, empty states, map legend / tooltip / country card
       '#ow-ov .ow-tag{display:inline-block;margin-left:auto;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:800;text-transform:none;letter-spacing:0;background:var(--ow-chip);color:var(--ow-sub);white-space:nowrap}',
       '#ow-ov .ow-tag-exact{color:var(--ow-up)}#ow-ov .ow-tag-estimate{color:#a8730b}',
+      // The GA4 block is visibly a different source: a dashed frame and its own tag on every card.
+      '#ow-ov .ow-ga4{border:2px dashed var(--ow-bd);margin-top:20px}#ow-ov .ow-ga4>.ow-block-h{font-size:15px}#ow-ov .ow-tag-ga4{background:#fbbc04;color:#3c2a00;margin-left:6px}#ow-ov .ow-ga4 .ow-block{margin-top:10px}',
       '#ow-ov .ow-kpi-none{font-size:15px;font-weight:700;color:var(--ow-sub);margin-top:10px}',
       '#ow-ov .ow-kpi-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px}',
       '#ow-ov .ow-kpi-h h2{font-size:15px;margin:0 8px 0 0}',
@@ -577,7 +588,9 @@
       var n = i18n() ? i18n().languageName(c) : { name: 'Русский', flag: '🇷🇺' };
       return '<option value="' + c + '" lang="' + (c === 'no' ? 'nb' : c) + '"' + (c === code ? ' selected' : '') + '>' + esc(n.flag + ' ' + n.name) + '</option>';
     }).join('');
-    ovEl.querySelector('#ow-lang').hidden = langs.length < 2;
+    // The switcher is the FALLBACK chooser only: when the app runs in one of the panel's three
+    // languages the panel follows it and the switcher is hidden (one source of truth: the app).
+    ovEl.querySelector('#ow-lang').hidden = langs.length < 2 || !!(i18n() && i18n().followsApp && i18n().followsApp());
     ovEl.querySelector('#ow-preset').innerHTML = options(PRESETS, state.preset);
     ovEl.querySelector('#ow-platform').innerHTML = options(PLATFORMS, state.filters.platform);
     ovEl.querySelector('#ow-audience').innerHTML = options(AUDIENCES, state.filters.audience);
@@ -662,10 +675,11 @@
     // Leaving the map tab frees its WebGL context, markers and listeners at once; the next visit builds
     // a fresh map into the freshly rendered box (an orphaned instance kept answering for a detached box).
     if (section !== 'map' && mapApi) { mapApi.destroy(); mapApi = null; }
-    if (section === 'overview') await loadMany(['overview', 'kpi'], extra);
+    if (section === 'overview') { await loadMany(['overview', 'kpi'], extra); state.ga4Loading = true; state.ga4Error = null; }
     else if (section === 'map') { await loadMany(['countries'], extra); state.data.map = state.data.countries; }
     else await load(section, extra);
     render();
+    if (section === 'overview') loadGa4();   // its own request, its own states — never on the overview's path
     if (section === 'live') startLive();
     if (section === 'map') {
       mountMap();
@@ -1172,7 +1186,115 @@
     '<div class="ow-block"><div class="ow-block-h">' + et('Свежесть данных') + '</div>' +
       '<div class="ow-bar"><span class="ow-bar-l">' + et('Последнее событие') + '</span><span>' + esc(timeText((data.freshness || {}).latest_event)) + '</span><span></span></div>' +
       '<div class="ow-bar"><span class="ow-bar-l">' + et('Последний разбор') + '</span><span>' + esc(timeText((data.freshness || {}).latest_resolution)) + '</span><span></span></div>' +
-    '</div>';
+    '</div>' +
+    renderGa4();
+  }
+
+  // ── Google Analytics 4 — the INDEPENDENT control source (2026-09-27) ──────────────────────
+  // Rendered UNDER the internal analytics of the overview and never mixed with it: the internal
+  // numbers above stay the primary record; this block shows what GA4 itself reports for the same
+  // period (read server-side through the GA4 Data API after the owner gate). Nothing is invented:
+  // a metric GA4 did not return prints «нет данных», an event without rows prints a dash, an
+  // unconfigured property explains what is missing, a failed request shows its error.
+  var GA4_EVENT_RU = {
+    session_start: 'Сессии (session_start)', generate_combination: 'Сгенерировали комбинацию', pro_feature: 'Открыли PRO-функцию',
+    paywall_view: 'Увидели экран PRO', begin_checkout: 'Начали оплату', purchase: 'Покупка подтверждена'
+  };
+  var GA4_FUNNEL = ['session_start', 'generate_combination', 'pro_feature', 'paywall_view', 'begin_checkout', 'purchase'];
+  var GA4_DEVICE_RU = { desktop: 'Компьютер', mobile: 'Телефон', tablet: 'Планшет', smarttv: 'Телевизор' };
+  var GA4_ERROR_RU = {
+    ga4_forbidden: 'у сервисного аккаунта нет доступа к свойству GA4', ga4_quota: 'исчерпана квота GA4 Data API',
+    ga4_auth_failed: 'не удалось получить токен сервисного аккаунта', ga4_bad_range: 'неверный период'
+  };
+  function ga4Metric(totals, name) { return totals && Object.prototype.hasOwnProperty.call(totals, name) ? num(totals[name]) : none(); }
+  function ga4Card(title, value, sub) {
+    return '<div class="ow-card"><div class="ow-card-h"><span>' + et(title) + '</span><span class="ow-tag ow-tag-ga4">GA4</span></div>' +
+      '<div class="ow-card-v">' + value + '</div>' + (sub ? '<div class="ow-card-s">' + sub + '</div>' : '') + '</div>';
+  }
+  function renderGa4() {
+    var g = state.data.ga4, err = state.ga4Error, tag = W.LotoGA4;
+    var tagLine = tag && tag.configured ? t('Тег GA4 на сайте настроен ({{0}}); загружается только после согласия на аналитику.', tag.measurementId)
+      : t('Тег GA4 на сайте не настроен (переменная деплоя LOTO_GA4_MEASUREMENT_ID пуста): сайт ничего не отправляет в Google.');
+    var body;
+    if (state.ga4Loading) body = '<div class="ow-empty">' + et('Загрузка GA4…') + '</div>';
+    else if (err) {
+      var reason = err.code && GA4_ERROR_RU[err.code] ? t(GA4_ERROR_RU[err.code]) : (err.status ? t('HTTP {{0}}', err.status) : t('неизвестно'));
+      body = '<div class="ow-error" role="alert">' + et('Ошибка запроса GA4: {{0}}', reason) + (err.detail ? ' <small>' + esc(err.detail) + '</small>' : '') + '</div>';
+    } else if (!g) body = '<div class="ow-empty">' + et('GA4 ещё не запрашивался') + '</div>';
+    else if (g.configured === false) {
+      body = '<div class="ow-empty"><b>' + et('GA4 не подключён.') + '</b> ' +
+        et('Чтобы включить: создайте свойство GA4, задайте переменную деплоя LOTO_GA4_MEASUREMENT_ID (идентификатор G-…), добавьте сервисный аккаунт как Viewer свойства и сохраните секреты GA4_PROPERTY_ID, GA4_SERVICE_ACCOUNT_EMAIL, GA4_SERVICE_ACCOUNT_PRIVATE_KEY.') +
+        (g.missing && g.missing.length ? '<div class="ow-card-s">' + et('Не заданы: {{0}}', g.missing.join(', ')) + '</div>' : '') + '</div>';
+    } else {
+      var tt = g.totals || {};
+      var engaged = tt.sessions ? pctText(tt.engagedSessions, tt.sessions) : '—';
+      var avgEngage = tt.sessions && tt.userEngagementDuration != null ? esc(dur((tt.userEngagementDuration / tt.sessions) * 1000)) : none();
+      var rt = g.realtime && g.realtime.activeUsers != null ? num(g.realtime.activeUsers) : none();
+      var cards = '<div class="ow-cards">' +
+        ga4Card('Активные пользователи', ga4Metric(tt, 'activeUsers'), et('за период, по данным GA4')) +
+        ga4Card('Новые пользователи', ga4Metric(tt, 'newUsers'), et('первый визит по cookie GA4')) +
+        ga4Card('Сессии', ga4Metric(tt, 'sessions'), et('таймаут 30 минут')) +
+        ga4Card('Вовлечённые сессии', ga4Metric(tt, 'engagedSessions'), et('{{0}} от всех', engaged)) +
+        ga4Card('Просмотры страниц', ga4Metric(tt, 'screenPageViews'), '') +
+        ga4Card('События', ga4Metric(tt, 'eventCount'), '') +
+        ga4Card('Покупки (GA4)', ga4Metric(tt, 'ecommercePurchases'), et('событие purchase; деньги считает журнал магазина')) +
+        ga4Card('Среднее время вовлечения', avgEngage, et('на сессию')) +
+        ga4Card('Сейчас на сайте (30 мин)', rt, g.realtime_error ? et('realtime недоступен: {{0}}', g.realtime_error) : et('отчёт реального времени GA4')) +
+      '</div>';
+      var byEvent = {};
+      (g.funnel || []).forEach(function (row) { byEvent[row.event] = row; });
+      var base = byEvent.session_start ? byEvent.session_start.users : 0;
+      var funnel = '<div class="ow-block"><div class="ow-block-h">' + et('Воронка GA4 (пользователи по событиям)') + '</div>' +
+        GA4_FUNNEL.map(function (name) {
+          var row = byEvent[name];
+          var users = row ? row.users : null;
+          return '<div class="ow-bar"><span class="ow-bar-l">' + et(GA4_EVENT_RU[name]) + '</span>' +
+            '<span class="ow-bar-t"><i style="width:' + (row && base ? Math.max(1, Math.round((users / base) * 100)) : 0) + '%"></i></span>' +
+            '<span class="ow-bar-v">' + (row ? num(users) + ' · ' + pctText(users, base) + ' · ' + et('{{0}} соб.', num(row.count)) : '<span class="ow-kpi-none">' + et('нет событий в GA4 за период') + '</span>') + '</span></div>';
+        }).join('') + '</div>';
+      var chart = lineChart((g.daily || []).map(function (d) { return { bucket: d.date, users: d.activeUsers, sessions: d.sessions }; }), ['users', 'sessions'], ['Активные пользователи', 'Сессии']);
+      var countries = (g.countries || []).length
+        ? '<div class="ow-block"><div class="ow-block-h">' + et('Страны по GA4') + '</div>' + (function () {
+            var max = g.countries.reduce(function (m, r) { return Math.max(m, r.activeUsers); }, 0);
+            return g.countries.map(function (r) {
+              return '<div class="ow-bar"><span class="ow-bar-l">' + esc((LIB.flagEmoji ? LIB.flagEmoji(r.country) + ' ' : '') + (countryName(r.country) || r.country)) + '</span>' +
+                '<span class="ow-bar-t"><i style="width:' + (max ? Math.max(2, Math.round((r.activeUsers / max) * 100)) : 0) + '%"></i></span>' +
+                '<span class="ow-bar-v">' + num(r.activeUsers) + '</span></div>';
+            }).join('');
+          })() + '</div>'
+        : '<div class="ow-empty">' + et('GA4 не вернул страны за период') + '</div>';
+      var devices = {};
+      (g.devices || []).forEach(function (r) { devices[r.device] = r.activeUsers; });
+      var deviceList = (g.devices || []).length ? barList(devices, GA4_DEVICE_RU, null, 'Устройства по GA4') : '<div class="ow-empty">' + et('GA4 не вернул устройства за период') + '</div>';
+      body = cards + funnel + chart + countries + deviceList +
+        '<div class="ow-card-s">' + et('Период GA4: {{0}} — {{1}} (дни по часовому поясу панели, {{2}}); стандартные отчёты GA4 отстают до 24–48 часов. Выручка в GA4 не измеряется: деньги считает журнал магазина (RevenueCat) в разделе «День».', g.range.from, g.range.to, g.range.tz) + '</div>';
+    }
+    return '<div class="ow-block ow-ga4" id="ow-b-ga4"><div class="ow-block-h">' + et('Google Analytics 4 — независимая аналитика') + how('ga4') + '<span class="ow-tag ow-tag-ga4">GA4</span></div>' +
+      '<div class="ow-card-s">' + et('Независимый контрольный источник. Внутренняя аналитика Lotto Simulator выше остаётся основной; GA4 не заменяет её и считает по своим правилам.') + ' ' + esc(tagLine) + '</div>' +
+      body + '</div>';
+  }
+  function paintGa4() {
+    if (!ovEl || state.section !== 'overview') return;
+    var el = ovEl.querySelector('#ow-b-ga4');
+    if (el) el.outerHTML = renderGa4();
+  }
+  var ga4Request = 0;
+  async function loadGa4() {
+    var range = currentRange(), id = ++ga4Request;
+    state.ga4Loading = true; state.ga4Error = null;
+    paintGa4();
+    try {
+      var report = await api({ ga4: { op: 'report', from: range.from, to: range.to, tz: range.tz } });
+      if (id !== ga4Request) return;
+      state.data.ga4 = report;
+    } catch (error) {
+      if (id !== ga4Request) return;
+      state.ga4Error = { code: (error && error.code) || '', status: error && error.status, detail: (error && error.detail) || '' };
+      if (!state.ga4Error.code && !state.ga4Error.detail && error && /Failed to fetch|NetworkError|load failed/i.test(error.message || '')) state.ga4Error.detail = t('Нет связи с сервером. Проверьте соединение.');
+      state.data.ga4 = null;
+    } finally {
+      if (id === ga4Request) { state.ga4Loading = false; paintGa4(); }
+    }
   }
 
   // ── LIVE: today's aggregates + the chronological feed (v4). The older `stream` shape is still

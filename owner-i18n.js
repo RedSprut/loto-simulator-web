@@ -6,10 +6,13 @@
  * the catalog is separate, because it is owner-only: it loads lazily with the panel, so neither its
  * size nor its keys ever reach the public startup payload or the public 17-locale catalog.
  *
- * The panel language is the owner's own choice, independent of the app language: the switcher in
- * the panel header sets it, it applies at once (every panel module re-renders from the data it
- * already holds on `loto:ownerlanguagechange`) and it is remembered in localStorage (`loto_owner_lang`).
- * Until the owner picks one, the panel stays in Russian — its language before the switcher existed.
+ * The panel language FOLLOWS the app language (2026-09-27): Русский, Norsk or English in the app is
+ * the same language in the panel, at once (`loto:languagechange` → `loto:ownerlanguagechange`, every
+ * panel module re-renders from the data it already holds) and on the next open — the one persisted
+ * source of truth is the app's own `loto_lang`. When the app runs in one of the other 14 locales the
+ * panel falls back to the owner's remembered panel choice (`loto_owner_lang`, set by the header
+ * switcher that only appears in that case) and, without one, to Russian — the panel's language
+ * before any switcher existed. No second persisted state competes with the app's language.
  *
  *   t(source, ...args)  a panel string: `source` is the Russian text, `{{0}}`… are filled with args.
  *   tx(text)            a Russian text composed by the SERVER (owner notification titles/bodies,
@@ -34,6 +37,50 @@
 
   // ── catalog: [ru source, en, no] ─────────────────────────────────────────────────────────────
   var ROWS = [
+    ["Google Analytics 4 — независимая аналитика", "Google Analytics 4 — Independent Analytics", "Google Analytics 4 — uavhengig analyse"],
+    ["Независимый контрольный источник. Внутренняя аналитика Lotto Simulator выше остаётся основной; GA4 не заменяет её и считает по своим правилам.", "An independent control source. The internal Lotto Simulator analytics above remain the primary record; GA4 does not replace them and counts by its own rules.", "En uavhengig kontrollkilde. Den interne Lotto Simulator-analysen ovenfor forblir hovedkilden; GA4 erstatter den ikke og teller etter sine egne regler."],
+    ["Тег GA4 на сайте настроен ({{0}}); загружается только после согласия на аналитику.", "The GA4 tag is configured on the site ({{0}}); it loads only after analytics consent.", "GA4-taggen er satt opp på nettstedet ({{0}}); den lastes bare etter samtykke til analyse."],
+    ["Тег GA4 на сайте не настроен (переменная деплоя LOTO_GA4_MEASUREMENT_ID пуста): сайт ничего не отправляет в Google.", "The GA4 tag is not configured on the site (deploy variable LOTO_GA4_MEASUREMENT_ID is empty): the site sends nothing to Google.", "GA4-taggen er ikke satt opp på nettstedet (deploy-variabelen LOTO_GA4_MEASUREMENT_ID er tom): nettstedet sender ingenting til Google."],
+    ["Загрузка GA4…", "Loading GA4…", "Laster GA4 …"],
+    ["Ошибка запроса GA4: {{0}}", "GA4 request failed: {{0}}", "GA4-forespørselen mislyktes: {{0}}"],
+    ["у сервисного аккаунта нет доступа к свойству GA4", "the service account has no access to the GA4 property", "tjenestekontoen har ikke tilgang til GA4-egenskapen"],
+    ["исчерпана квота GA4 Data API", "the GA4 Data API quota is exhausted", "GA4 Data API-kvoten er brukt opp"],
+    ["не удалось получить токен сервисного аккаунта", "the service account token could not be obtained", "kunne ikke hente token for tjenestekontoen"],
+    ["неверный период", "invalid period", "ugyldig periode"],
+    ["GA4 ещё не запрашивался", "GA4 has not been requested yet", "GA4 er ikke hentet ennå"],
+    ["GA4 не подключён.", "GA4 is not connected.", "GA4 er ikke koblet til."],
+    ["Чтобы включить: создайте свойство GA4, задайте переменную деплоя LOTO_GA4_MEASUREMENT_ID (идентификатор G-…), добавьте сервисный аккаунт как Viewer свойства и сохраните секреты GA4_PROPERTY_ID, GA4_SERVICE_ACCOUNT_EMAIL, GA4_SERVICE_ACCOUNT_PRIVATE_KEY.", "To enable it: create a GA4 property, set the deploy variable LOTO_GA4_MEASUREMENT_ID (the G-… id), add the service account as a Viewer of the property and store the secrets GA4_PROPERTY_ID, GA4_SERVICE_ACCOUNT_EMAIL, GA4_SERVICE_ACCOUNT_PRIVATE_KEY.", "Slik slår du det på: opprett en GA4-egenskap, sett deploy-variabelen LOTO_GA4_MEASUREMENT_ID (G-…-id-en), legg til tjenestekontoen som Viewer for egenskapen og lagre hemmelighetene GA4_PROPERTY_ID, GA4_SERVICE_ACCOUNT_EMAIL, GA4_SERVICE_ACCOUNT_PRIVATE_KEY."],
+    ["Не заданы: {{0}}", "Not set: {{0}}", "Ikke satt: {{0}}"],
+    ["за период, по данным GA4", "for the period, as GA4 reports it", "for perioden, slik GA4 rapporterer det"],
+    ["Активные пользователи", "Active users", "Aktive brukere"],
+    ["Новые пользователи", "New users", "Nye brukere"],
+    ["первый визит по cookie GA4", "first visit by GA4 cookie", "første besøk etter GA4-cookie"],
+    ["Просмотры страниц", "Page views", "Sidevisninger"],
+    ["Покупки (GA4)", "Purchases (GA4)", "Kjøp (GA4)"],
+    ["событие purchase; деньги считает журнал магазина", "the purchase event; money is counted by the store ledger", "purchase-hendelsen; penger telles av butikkloggen"],
+    ["Среднее время вовлечения", "Average engagement time", "Gjennomsnittlig engasjementstid"],
+    ["на сессию", "per session", "per økt"],
+    ["Сейчас на сайте (30 мин)", "On the site now (30 min)", "På nettstedet nå (30 min)"],
+    ["realtime недоступен: {{0}}", "realtime unavailable: {{0}}", "sanntid utilgjengelig: {{0}}"],
+    ["отчёт реального времени GA4", "GA4 realtime report", "GA4-sanntidsrapport"],
+    ["Воронка GA4 (пользователи по событиям)", "GA4 funnel (users by event)", "GA4-trakt (brukere per hendelse)"],
+    ["Сессии (session_start)", "Sessions (session_start)", "Økter (session_start)"],
+    ["Сгенерировали комбинацию", "Generated a combination", "Genererte en kombinasjon"],
+    ["Открыли PRO-функцию", "Opened a PRO feature", "Åpnet en PRO-funksjon"],
+    ["Увидели экран PRO", "Saw the PRO screen", "Så PRO-skjermen"],
+    ["Покупка подтверждена", "Purchase confirmed", "Kjøp bekreftet"],
+    ["{{0}} соб.", "{{0}} ev.", "{{0}} hend."],
+    ["нет событий в GA4 за период", "no events in GA4 for the period", "ingen hendelser i GA4 for perioden"],
+    ["Страны по GA4", "Countries by GA4", "Land ifølge GA4"],
+    ["GA4 не вернул страны за период", "GA4 returned no countries for the period", "GA4 returnerte ingen land for perioden"],
+    ["Устройства по GA4", "Devices by GA4", "Enheter ifølge GA4"],
+    ["GA4 не вернул устройства за период", "GA4 returned no devices for the period", "GA4 returnerte ingen enheter for perioden"],
+    ["Компьютер", "Desktop", "Datamaskin"],
+    ["Телефон", "Phone", "Telefon"],
+    ["Планшет", "Tablet", "Nettbrett"],
+    ["Телевизор", "TV", "TV"],
+    ["Период GA4: {{0}} — {{1}} (дни по часовому поясу панели, {{2}}); стандартные отчёты GA4 отстают до 24–48 часов. Выручка в GA4 не измеряется: деньги считает журнал магазина (RevenueCat) в разделе «День».", "GA4 period: {{0}} — {{1}} (days in the panel time zone, {{2}}); standard GA4 reports lag by up to 24–48 hours. Revenue is not measured in GA4: money is counted by the store ledger (RevenueCat) in the “Day” section.", "GA4-periode: {{0}} — {{1}} (dager i panelets tidssone, {{2}}); GA4s standardrapporter henger etter med opptil 24–48 timer. Inntekt måles ikke i GA4: penger telles av butikkloggen (RevenueCat) under «Dag»."],
+    ["Данные Google Analytics 4 читаются напрямую из GA4 Data API сервисным аккаунтом после проверки владельца. Считает Google по своим правилам (cookie GA4, сессии по 30 минут, без моделирования); учитываются только посетители, согласившиеся на аналитику, — тег GA4 загружается только после согласия. Внутренняя аналитика выше остаётся основной; отсутствующие показатели не заменяются нулями.", "Google Analytics 4 data is read directly from the GA4 Data API by a service account after the owner check. Google counts by its own rules (GA4 cookie, 30-minute sessions, no modelling); only visitors who consented to analytics are counted — the GA4 tag loads only after consent. The internal analytics above remain the primary record; missing metrics are never replaced with zeros.", "Google Analytics 4-data leses direkte fra GA4 Data API av en tjenestekonto etter eierkontrollen. Google teller etter sine egne regler (GA4-cookie, 30-minutters økter, ingen modellering); bare besøkende som har samtykket til analyse telles — GA4-taggen lastes bare etter samtykke. Den interne analysen ovenfor forblir hovedkilden; manglende tall erstattes aldri med nuller."],
     ["День","Day","Dag"],
     ["Обзор","Overview","Oversikt"],
     ["Люди","People","Personer"],
@@ -1008,10 +1055,19 @@
   var core = W.LotoI18n && typeof W.LotoI18n.createTranslator === 'function' ? W.LotoI18n.createTranslator(catalog) : null;
 
   var missing = new Set();
-  var lang = (function () {
-    try { var saved = String(W.localStorage.getItem(STORE_KEY) || ''); if (LANGS.indexOf(saved) >= 0) return saved; } catch (e) {}
-    return 'ru';
-  })();
+  // The app language as the app itself resolved it (LotoI18n), else the detector, else the stored
+  // choice — the same chain the app uses, so the panel can never disagree with it.
+  function appLanguage() {
+    try { var l = W.LotoI18n && W.LotoI18n.language; if (l) return String(l).toLowerCase(); } catch (e) {}
+    try { var d = W.LotoLang && W.LotoLang.detect && W.LotoLang.detect(); if (d) return String(d).toLowerCase(); } catch (e) {}
+    try { return String(W.localStorage.getItem('loto_lang') || '').trim().toLowerCase(); } catch (e) { return ''; }
+  }
+  function followsApp() { return LANGS.indexOf(appLanguage()) >= 0; }
+  function savedChoice() {
+    try { var saved = String(W.localStorage.getItem(STORE_KEY) || ''); return LANGS.indexOf(saved) >= 0 ? saved : ''; } catch (e) { return ''; }
+  }
+  function resolve() { var app = appLanguage(); return LANGS.indexOf(app) >= 0 ? app : (savedChoice() || 'ru'); }
+  var lang = resolve();
 
   function fill(text, args) {
     if (!args.length) return text;
@@ -1058,19 +1114,30 @@
     var own = NAMES[code] || [code, ''];
     return { name: (info && info.name) || own[0], flag: (info && info.flag) || own[1] };
   }
-  function setLang(code) {
-    if (LANGS.indexOf(code) < 0 || code === lang) return false;
+  function apply(code) {
+    if (code === lang) return false;
     lang = code;
-    try { W.localStorage.setItem(STORE_KEY, code); } catch (e) {}
+    regionNames = {};
     try { W.dispatchEvent(new CustomEvent(EVENT, { detail: { language: code } })); } catch (e) {}
     return true;
   }
+  // The fallback chooser: remembered for the locales the panel does not speak, applied only while
+  // the app is in one of them. While the app speaks ru / no / en the app is the single source.
+  function setLang(code) {
+    if (LANGS.indexOf(code) < 0) return false;
+    try { W.localStorage.setItem(STORE_KEY, code); } catch (e) {}
+    if (followsApp()) return false;
+    return apply(code);
+  }
+  try { W.addEventListener('loto:languagechange', function () { apply(resolve()); }); } catch (e) {}
 
   W.LotoOwnerI18n = {
     LANGS: LANGS.slice(),
     EVENT: EVENT,
     get lang() { return lang; },
     setLang: setLang,
+    followsApp: followsApp,
+    appLanguage: appLanguage,
     t: t,
     tx: tx,
     intl: intl,
