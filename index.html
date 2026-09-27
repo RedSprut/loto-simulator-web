@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="ff804aa" data-build-ts="2026-09-27T18:35:24.322Z">
+<html lang="en" data-build="759ee50" data-build-ts="2026-09-27T19:32:53.079Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=ff804aa"></script>
+<script src="./boot-runtime.js?v=759ee50"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,13 +33,13 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=ff804aa">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=759ee50">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=ff804aa">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=759ee50">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
 <link rel="icon" href="./favicon-64.png?v=20260901b" type="image/png" sizes="64x64">
@@ -124,7 +124,7 @@ html:not(.loto-booting) body{animation:lotoAppIn .32s ease both}
 /* ══ ТЕМА «ДЕНЬ В СТУДИИ» (светлая, по умолчанию) ══ */
 :root{
   --bg:#EFE8DC; --fg:#26121C; --bg2:#FFFCF5; --bg3:#F4EDE1;
-  --border:#E2D6C2; --sub:#96857C; --sub2:#6E5B54;
+  --border:#E2D6C2; --sub:#7A6A61; --sub2:#6E5B54;
   --card-shadow:0 2px 10px rgba(74,26,44,.07),0 1px 2px rgba(74,26,44,.05);
   --nav-bg:rgba(255,252,245,.88); --nav-border:#E2D6C2;
   --inp-bg:#F4EDE1; --inp-border:#DECFB8;
@@ -286,6 +286,10 @@ body[data-game="powerballau"]{--hdr-a:#5A2AC8;--hdr-b:#8A2AB8;--hdr-c:#B5169E;--
 .lt.oe{border-color:#f0a500;background:var(--cd-euro);box-shadow:0 4px 16px rgba(240,165,0,.22)}.lt.oe .lt-name{color:#f0a500}
 .lt.ow{border-color:#34c759;background:rgba(52,199,89,.12);box-shadow:0 4px 16px rgba(52,199,89,.2)}.lt.ow .lt-name{color:#34c759}
 .lt-flag{font-size:23px}.lt-name{font-size:11px;font-weight:800;margin-top:5px;color:var(--sub);letter-spacing:.4px;font-family:'Manrope',sans-serif;text-transform:uppercase}
+/* Light theme: the brand tints read fine as borders but not as 11px text on cream (Eurojackpot
+   amber was 1.9:1). The active tab name uses a darker shade of the same hue; dark theme untouched. */
+body:not(.dark) .lt.oe .lt-name{color:#8A5A00}body:not(.dark) .lt.ow .lt-name{color:#1F7A38}body:not(.dark) .lt.ov .lt-name{color:#2E4FD0}
+body:not(.dark) .rule-badge.current{color:#1F7A38}
 
 /* расписание */
 .sched-strip{display:flex;margin:10px 14px 0;border-radius:14px;overflow-x:auto;overflow-y:hidden;border:1px solid var(--strip-border);background:var(--strip-bg);scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-inline:contain;touch-action:pan-x;cursor:grab;user-select:none;box-shadow:var(--card-shadow)}
@@ -2324,7 +2328,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
   <button class="hdr-icon" data-loto-event-click="cycleLang()" id="lang-btn" title="Language" style="font-size:12px;font-weight:800;font-family:'Manrope',sans-serif">RU</button>
   <button class="hdr-icon" data-loto-event-click="toggleDark()" id="theme-btn" title="Тема">🌓</button>
   <button class="hdr-icon hdr-info" data-loto-event-click="openAbout()" id="about-btn" type="button" aria-haspopup="dialog" aria-expanded="false" title="О приложении" aria-label="О приложении"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="7.7" r="1.25" fill="currentColor"/><path d="M12 10.9v6.1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></button>
-  <button class="hdr-icon hdr-profile" data-loto-event-click="openAccount()" id="profile-btn" type="button" aria-haspopup="dialog" aria-expanded="false" title="Личный кабинет" aria-label="Личный кабинет" data-i18n-ignore>
+  <button class="hdr-icon hdr-profile" data-loto-event-click="openAccount()" id="profile-btn" type="button" aria-haspopup="dialog" aria-expanded="false" title="Личный кабинет" aria-label="Личный кабинет">
     <img class="hdr-avatar" id="hdr-avatar-img" alt="" hidden>
     <svg class="hdr-avatar-silhouette" id="hdr-avatar-silhouette" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><circle cx="12" cy="8.2" r="3.7" stroke="currentColor" stroke-width="1.7"/><path d="M5.5 19.2c.7-3.4 3.3-5.4 6.5-5.4s5.8 2 6.5 5.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
     <span class="hdr-profile-dot" id="hdr-profile-dot" hidden aria-hidden="true"></span>
@@ -2392,7 +2396,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <div class="gen-grid">
         <div>
           <div class="gen-label">Количество</div>
-          <select class="gen-select" id="gen-count" data-loto-event-change="onGenCountChange()">
+          <select class="gen-select" id="gen-count" aria-label="Количество" data-loto-event-change="onGenCountChange()">
             <option value="1">1 ряд</option><option value="2">2 ряда</option><option value="3">3 ряда</option><option value="4">4 ряда</option><option value="5" selected>5 рядов</option>
             <option value="6">6 рядов</option><option value="7">7 рядов</option><option value="8">8 рядов</option><option value="9">9 рядов</option><option value="10">10 рядов</option>
             <option value="15">15 рядов</option><option value="20">20 рядов</option><option value="30">30 рядов</option><option value="40">40 рядов</option><option value="50">50 рядов</option>
@@ -2400,7 +2404,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
         </div>
         <div>
           <div class="gen-label">Анализ</div>
-          <select class="gen-select" id="direct-algo" data-loto-event-change="showSelectedModelDescription(this.value)">
+          <select class="gen-select" id="direct-algo" aria-label="Анализ" data-loto-event-change="showSelectedModelDescription(this.value)">
             <option value="freq">Горячие числа</option>
             <option value="bal">Комбинированный</option>
             <option value="man">Сегментный охват</option>
@@ -2490,7 +2494,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <div class="card-t" style="margin-bottom:4px">Конструктор колёсных систем</div>
       <div style="font-size:13px;color:var(--sub2);line-height:1.5">Выберите пул чисел кликами, затем гарантию покрытия. Если полная гарантия не помещается в 50 рядов, будет показан честный процент покрытия.</div>
       <div class="wheel-tools">
-        <select class="gen-select" id="wheel-guarantee" data-loto-event-change="renderWheelBuilder()">
+        <select class="gen-select" id="wheel-guarantee" aria-label="Гарантия покрытия" data-loto-event-change="renderWheelBuilder()">
           <option value="2">Гарантия 2 из 2</option>
           <option value="3">Гарантия 3 из 3</option>
           <option value="4" selected>Гарантия 4 из 4</option>
@@ -2510,7 +2514,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <div class="card-t">🔍 Проверить реальный билет</div>
       <div style="font-size:12px;color:var(--sub2);margin-bottom:8px">Введи числа которые выпали в реальном тираже — система проверит твои ряды</div>
       <div class="draw-check-row">
-        <select class="gen-select" id="saved-draw-select"><option value="">Выбрать сохранённый тираж</option></select>
+        <select class="gen-select" id="saved-draw-select" aria-label="Выбрать сохранённый тираж"><option value="">Выбрать сохранённый тираж</option></select>
         <button class="btn-exp" data-loto-event-click="checkAgainstSavedDraw()" style="margin-top:0">Проверить против тиража из базы</button>
       </div>
       <div id="draw-check-out" class="draw-check-out"></div>
@@ -2564,7 +2568,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="ana-column ana-input-tools">
     <div class="card">
       <div class="card-t">Добавить реальный тираж</div>
-      <div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px">Дата тиража</div><input class="date-inp" type="date" id="inp-date"></div>
+      <div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px">Дата тиража</div><input class="date-inp" type="date" id="inp-date" aria-label="Дата тиража"></div>
       <div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px">Размер джекпота (млн в валюте игры) — необязательно</div><input class="num-inp" type="number" id="inp-jackpot" placeholder="Например: 85"></div>
       <div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px" id="lbl-m-inp">Главные числа</div><div style="display:flex;gap:6px;flex-wrap:wrap" id="inp-main"></div></div>
       <div id="inp-bwrap" style="display:none;margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px" id="lbl-b-inp">Бонусные</div><div style="display:flex;gap:6px;flex-wrap:wrap" id="inp-bonus"></div></div>
@@ -2752,12 +2756,12 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
 
 <!-- BOTTOM NAV -->
 <div class="bnav" role="navigation" aria-label="Primary">
-  <div class="bn on" id="bn-sim" data-route="sim" data-loto-event-click="bottomNavRoute('sim')"><div class="bn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.6"/><path d="M8 15.1 6.4 20.4M16 15.1 17.6 20.4M6.4 20.4h11.2"/><circle cx="9.9" cy="8.4" r="1.6" fill="currentColor" stroke="none"/><circle cx="14.3" cy="9.5" r="1.35" fill="currentColor" stroke="none"/><circle cx="11.5" cy="12.1" r="1.25" fill="currentColor" stroke="none"/></svg></div><div class="bn-lbl">Симулятор</div></div>
-  <div class="bn" id="bn-drum3d" data-route="drum3d" role="button" tabindex="0" aria-label="3D-розыгрыш" data-loto-event-click="bottomNavRoute('drum3d')">
+  <div class="bn on" id="bn-sim" data-route="sim" role="button" tabindex="0" aria-label="Симулятор" aria-current="page" data-loto-event-click="bottomNavRoute('sim')"><div class="bn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9.5" r="6.6"/><path d="M8 15.1 6.4 20.4M16 15.1 17.6 20.4M6.4 20.4h11.2"/><circle cx="9.9" cy="8.4" r="1.6" fill="currentColor" stroke="none"/><circle cx="14.3" cy="9.5" r="1.35" fill="currentColor" stroke="none"/><circle cx="11.5" cy="12.1" r="1.25" fill="currentColor" stroke="none"/></svg></div><div class="bn-lbl">Симулятор</div></div>
+  <div class="bn" id="bn-drum3d" data-route="drum3d" role="button" tabindex="0" aria-label="3D-розыгрыш" aria-current="false" data-loto-event-click="bottomNavRoute('drum3d')">
     <div class="bn-icon bn-icon-3d" aria-hidden="true">🎲</div>
     <div class="bn-lbl">3D-тираж</div>
   </div>
-  <div class="bn" id="bn-ana" data-route="ana" data-loto-event-click="bottomNavRoute('ana')"><div class="bn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="12" width="3.6" height="6.5" rx="1.2" fill="currentColor" stroke="none"/><rect x="10.2" y="8.5" width="3.6" height="10" rx="1.2" fill="currentColor" stroke="none"/><rect x="15.9" y="13.5" width="3.6" height="5" rx="1.2" fill="currentColor" stroke="none"/><path d="M4.5 8.2 9.4 5.2 14.3 7.8 19.6 3.8"/></svg></div><div class="bn-lbl">Аналитика</div></div>
+  <div class="bn" id="bn-ana" data-route="ana" role="button" tabindex="0" aria-label="Аналитика" aria-current="false" data-loto-event-click="bottomNavRoute('ana')"><div class="bn-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="12" width="3.6" height="6.5" rx="1.2" fill="currentColor" stroke="none"/><rect x="10.2" y="8.5" width="3.6" height="10" rx="1.2" fill="currentColor" stroke="none"/><rect x="15.9" y="13.5" width="3.6" height="5" rx="1.2" fill="currentColor" stroke="none"/><path d="M4.5 8.2 9.4 5.2 14.3 7.8 19.6 3.8"/></svg></div><div class="bn-lbl">Аналитика</div></div>
 </div>
 
 <!-- SMART GEN MODAL -->
@@ -2951,14 +2955,14 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="if-note" style="margin:0 0 12px;color:#C9B8E8">Чем точнее данные, тем глубже звёздный профиль: натальная Луна, число судьбы и солнечный градус. Всё считается на устройстве и никуда не отправляется.</div>
     <div style="display:grid;grid-template-columns:1fr 1.4fr 1.2fr;gap:8px">
       <input type="number" class="num-inp qab-inp" id="qab-d" min="1" max="31" placeholder="День">
-      <select class="num-inp qab-inp" id="qab-m">
+      <select class="num-inp qab-inp" id="qab-m" aria-label="Месяц">
         <option value="">Месяц</option>
         <option value="1">Январь</option><option value="2">Февраль</option><option value="3">Март</option>
         <option value="4">Апрель</option><option value="5">Май</option><option value="6">Июнь</option>
         <option value="7">Июль</option><option value="8">Август</option><option value="9">Сентябрь</option>
         <option value="10">Октябрь</option><option value="11">Ноябрь</option><option value="12">Декабрь</option>
       </select>
-      <select class="num-inp qab-inp" id="qab-y"><option value="">Год</option></select>
+      <select class="num-inp qab-inp" id="qab-y" aria-label="Год"><option value="">Год</option></select>
     </div>
     <div class="if-seclbl" style="color:#F2EAFF">Время рождения (если известно)</div>
     <input type="text" class="num-inp qab-inp" id="qab-t" placeholder="--:--" inputmode="numeric" maxlength="5" autocomplete="off" style="width:100%;text-align:center;letter-spacing:1px">
@@ -3242,8 +3246,8 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div id="period-presets"></div>
     <div class="if-seclbl">Или диапазон дат «от — до»</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <input type="date" class="num-inp" id="period-from" style="width:100%">
-      <input type="date" class="num-inp" id="period-to" style="width:100%">
+      <input type="date" class="num-inp" id="period-from" style="width:100%" aria-label="Период: от">
+      <input type="date" class="num-inp" id="period-to" style="width:100%" aria-label="Период: до">
     </div>
     <button class="btn-exp" style="margin-top:8px" data-loto-event-click="PERIOD_range()">Применить диапазон</button>
     <div class="if-seclbl">Или своё число тиражей</div>
@@ -3704,7 +3708,7 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
   <div class="cal-box">
     <div class="cal-head">
       <button type="button" class="cal-nav" id="cal-prev" data-loto-event-click="AccountUI.calNav(-1)" aria-label="Назад">‹</button>
-      <button type="button" class="cal-title" id="cal-title" data-loto-event-click="AccountUI.calToggleYears()" data-i18n-ignore></button>
+      <button type="button" class="cal-title" id="cal-title" data-loto-event-click="AccountUI.calToggleYears()" aria-label="Выбрать месяц и год" data-i18n-ignore></button>
       <button type="button" class="cal-nav" id="cal-next" data-loto-event-click="AccountUI.calNav(1)" aria-label="Вперёд">›</button>
     </div>
     <div class="cal-weekdays" id="cal-weekdays" data-i18n-ignore></div>
@@ -3849,26 +3853,26 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=ff804aa"></script>
-<script src="./commercial-config.js?v=ff804aa"></script>
-<script src="./event-runtime.js?v=ff804aa"></script>
-<script src="./external-link-runtime.js?v=ff804aa"></script>
-<script src="./auth-client.js?v=ff804aa"></script>
-<script src="./native-loader.js?v=ff804aa"></script>
-<script src="./billing-web.js?v=ff804aa"></script>
-<script src="./i18n-catalog.js?v=ff804aa"></script>
-<script src="./lang-detect.js?v=ff804aa"></script>
-<script src="./i18n-runtime.js?v=ff804aa"></script>
-<script src="./consent-runtime.js?v=ff804aa"></script>
-<script src="./analytics-telemetry.js?v=ff804aa"></script>
-<script src="./ga4-runtime.js?v=ff804aa"></script>
-<script src="./win-match-core.js?v=ff804aa"></script>
-<script src="./court-core.js?v=ff804aa"></script>
-<script src="./smart-start.js?v=ff804aa"></script>
-<script src="./app-runtime.js?v=ff804aa"></script>
-<script src="./inline-runtime-2.js?v=ff804aa"></script>
-<script src="./commercial-runtime.js?v=ff804aa"></script>
-<script src="./inline-runtime-3.js?v=ff804aa"></script>
+<script src="./version.js?v=759ee50"></script>
+<script src="./commercial-config.js?v=759ee50"></script>
+<script src="./event-runtime.js?v=759ee50"></script>
+<script src="./external-link-runtime.js?v=759ee50"></script>
+<script src="./auth-client.js?v=759ee50"></script>
+<script src="./native-loader.js?v=759ee50"></script>
+<script src="./billing-web.js?v=759ee50"></script>
+<script src="./i18n-catalog.js?v=759ee50"></script>
+<script src="./lang-detect.js?v=759ee50"></script>
+<script src="./i18n-runtime.js?v=759ee50"></script>
+<script src="./consent-runtime.js?v=759ee50"></script>
+<script src="./analytics-telemetry.js?v=759ee50"></script>
+<script src="./ga4-runtime.js?v=759ee50"></script>
+<script src="./win-match-core.js?v=759ee50"></script>
+<script src="./court-core.js?v=759ee50"></script>
+<script src="./smart-start.js?v=759ee50"></script>
+<script src="./app-runtime.js?v=759ee50"></script>
+<script src="./inline-runtime-2.js?v=759ee50"></script>
+<script src="./commercial-runtime.js?v=759ee50"></script>
+<script src="./inline-runtime-3.js?v=759ee50"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -4020,9 +4024,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=ff804aa"></script>
-<script src="./notifications-runtime.js?v=ff804aa"></script>
-<script src="./pwa-runtime.js?v=ff804aa"></script>
+<script src="./notification-center.js?v=759ee50"></script>
+<script src="./notifications-runtime.js?v=759ee50"></script>
+<script src="./pwa-runtime.js?v=759ee50"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -4033,8 +4037,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=ff804aa"></script>
-<script src="./inline-runtime-5.js?v=ff804aa"></script>
-<script src="./inline-runtime-6.js?v=ff804aa"></script>
+<script src="./inline-runtime-4.js?v=759ee50"></script>
+<script src="./inline-runtime-5.js?v=759ee50"></script>
+<script src="./inline-runtime-6.js?v=759ee50"></script>
 </body>
 </html>

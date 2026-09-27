@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the ff804aa placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 759ee50 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-vff804aa';
+const CACHE_VERSION='loto-shell-v759ee50';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -235,6 +235,19 @@ self.addEventListener('push',event=>{
     // Also hand the payload to any open window so the in-app center + bell badge update live.
     self.clients.matchAll({type:'window',includeUncontrolled:true}).then(cs=>cs.forEach(c=>c.postMessage({type:'LOTO_PUSH_RECEIVED',data:full})))
   ]));
+});
+
+// The browser rotated this device's push endpoint. Re-subscribe with the same server key and
+// tell every open tab, so notifications-runtime hands the NEW endpoint to the backend; the old
+// row is disabled by the sender the first time it answers 410.
+self.addEventListener('pushsubscriptionchange',event=>{
+  event.waitUntil((async()=>{
+    const old=event.oldSubscription||null;
+    const key=(event.newSubscription&&event.newSubscription.options&&event.newSubscription.options.applicationServerKey)||(old&&old.options&&old.options.applicationServerKey)||null;
+    try{if(!event.newSubscription)await self.registration.pushManager.subscribe(key?{userVisibleOnly:true,applicationServerKey:key}:{userVisibleOnly:true});}catch(_e){}
+    const all=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+    for(const client of all){try{client.postMessage({type:'LOTO_PUSH_RESUBSCRIBE'});}catch(_e){}}
+  })());
 });
 
 self.addEventListener('notificationclick',event=>{

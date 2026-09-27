@@ -46,6 +46,10 @@ function resolveControlledResultsEndpoint(fallback){
 }
 const RESULTS_JSON_URL=resolveControlledResultsEndpoint(IS_NATIVE_APP?`${NATIVE_DATA_BASE}results.json`:'./results.json');
 const RESULTS_ARCHIVE_URL='./results-archive.json';
+/* The 10 MB archive package is served only where it physically exists (repo checkout, native bundle
+   when included). The public web deploy never publishes it (deploy-pages.yml asserts so), yet every
+   cold visit fetched it and logged a 404. build-public-bundle.mjs stamps this to false. */
+const RESULTS_ARCHIVE_PUBLISHED=true;
 const PRIZES_JSON_URL=IS_NATIVE_APP?`${NATIVE_DATA_BASE}prizes.json`:'./prizes.json';
 const RESULTS_JSON_BUNDLED='./results.json';   // offline fallback for native
 const PRIZES_JSON_BUNDLED='./prizes.json';     // offline fallback for native
@@ -204,6 +208,7 @@ async function loadPublicPrizes(gameKey){
   return Array.isArray(source)?source.map(normalizePrizeResult).sort((a,b)=>b.date.localeCompare(a.date)):[];
 }
 async function loadArchivePackage(gameKey){
+  if(!RESULTS_ARCHIVE_PUBLISHED)return{draws:[],eras:[],updatedAt:''};
   const db=await fetchResultsJson(RESULTS_ARCHIVE_URL);
   const configKey=resolveConfigKey(gameKey),appKey=resolveGameKey(gameKey);
   const source=db.games?.[configKey]||db.games?.[appKey]||[];
@@ -1031,8 +1036,8 @@ function selPage(p){
   try{document.documentElement.classList.toggle('on-ana',p==='ana');}catch(e){}
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('show'));
   document.getElementById('pg-'+p).classList.add('show');
-  document.querySelectorAll('.bn').forEach(x=>x.classList.remove('on'));
-  document.getElementById('bn-'+p).classList.add('on');
+  document.querySelectorAll('.bn').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-current','false');});
+  const activeNav=document.getElementById('bn-'+p);activeNav.classList.add('on');activeNav.setAttribute('aria-current','page');
   const shell=document.getElementById('lot-nav-shell');
   if(shell)shell.hidden=p!=='sim';
   if(p==='ana'){
@@ -1042,6 +1047,13 @@ function selPage(p){
   }
   else{updateHdr();}
 }
+/* Keyboard: the bottom bar items are role=button divs, so Enter/Space must activate them. */
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  const item=e.target&&e.target.closest&&e.target.closest('.bnav .bn[data-route]');
+  if(!item)return;
+  e.preventDefault();bottomNavRoute(item.getAttribute('data-route'));
+});
 function bottomNavRoute(p){
   if(document.getElementById('account-ov')?.classList.contains('show'))closeAccount();
   if(p==='drum3d'){if(typeof openDrum3D==='function')openDrum3D();return;}
@@ -4587,6 +4599,18 @@ try{
   setTimeout(centerAllCrowns,600);
   window.centerAllCrowns=centerAllCrowns;
 }catch(_e){}
+/* The i18n runtime can change language without the picker (native bridge, a restored choice, a
+   programmatic setLanguage). The shell's own language variable and every date it formats through
+   appLocale() must follow, or a stale curLang renders dates in the previous language. selectLang()
+   sets curLang before it dispatches, so its own change is a no-op here. */
+window.addEventListener('loto:languagechange',e=>{
+  const code=e&&e.detail&&e.detail.language;
+  if(!code||!LOCALE_CATALOG[code]||code===curLang)return;
+  curLang=code;
+  try{const _nd=nextDraw(cur);const _s=document.getElementById('ndb-sub');if(_s)_s.textContent=_nd.dateStr+' · '+_nd.timeLabel;const _sg=document.getElementById('sg-date');if(_sg&&_sg.textContent!=='—')_sg.textContent=_nd.dateStr;}catch(_e){}
+  try{refreshLocalizedDates();}catch(_e){}
+  try{if(curPage==='ana')renderAna();else{renderLotteryNav();renderHero();renderSim();updateHdr();}}catch(_e){}
+});
 async function selectLang(code){
   if(!LOCALE_CATALOG[code])return;
   curLang=code;
@@ -6617,9 +6641,16 @@ function HORO_text(sign){
   lucky.sort((a,b)=>a-b);
   const flavor=HORO_FLAVOR[sign][Math.floor(rng()*HORO_FLAVOR[sign].length)];
   const en=pick(HORO_POOL.energy);
+  /* Every phrase is returned WHOLE, as it stands in the catalog. The old `flavor+' '+lowercased
+     sentence` glued two catalog sentences into one text node the translator could no longer
+     match, so a Polish or English horoscope came out half Russian («…is the engine: today
+     побеждает не скорость…»). HORO_open renders each part in its own node; the share text
+     translates each part with appText. */
   return{
-    moon:ph.emoji+' '+ph.name+' · Луна в знаке '+QA_ZODIAC[ms][1],
-    energy:flavor+' '+en.charAt(0).toLowerCase()+en.slice(1),
+    moonPhase:ph.emoji+' '+ph.name,
+    moonSign:'Луна в знаке '+QA_ZODIAC[ms][1],
+    energyFlavor:flavor,
+    energy:en,
     money:pick(HORO_POOL.money),heart:pick(HORO_POOL.heart),advice:pick(HORO_POOL.advice),
     lucky
   };
@@ -6633,8 +6664,8 @@ function HORO_open(sign){
   document.getElementById('horo-date').textContent=new Date().toLocaleDateString(appLocale(),{weekday:'long',day:'numeric',month:'long'});
   const t=HORO_text(HORO_sign);
   document.getElementById('horo-body').innerHTML=
-    '<div class="horo-sec"><div class="horo-sec-t">🌙 Небо сегодня</div><div class="horo-sec-b">'+t.moon+'</div></div>'+
-    '<div class="horo-sec"><div class="horo-sec-t">⚡ Энергия</div><div class="horo-sec-b">'+t.energy+'</div></div>'+
+    '<div class="horo-sec"><div class="horo-sec-t">🌙 Небо сегодня</div><div class="horo-sec-b"><span>'+t.moonPhase+'</span> · <span>'+t.moonSign+'</span></div></div>'+
+    '<div class="horo-sec"><div class="horo-sec-t">⚡ Энергия</div><div class="horo-sec-b"><span>'+t.energyFlavor+'</span> <span>'+t.energy+'</span></div></div>'+
     '<div class="horo-sec"><div class="horo-sec-t">💰 Финансы</div><div class="horo-sec-b">'+t.money+'</div></div>'+
     '<div class="horo-sec"><div class="horo-sec-t">💛 Отношения</div><div class="horo-sec-b">'+t.heart+'</div></div>'+
     '<div class="horo-sec"><div class="horo-sec-t">✨ Совет</div><div class="horo-sec-b">'+t.advice+'</div></div>'+
@@ -6644,9 +6675,9 @@ function HORO_open(sign){
 function HORO_close(){document.getElementById('horo-ov').classList.remove('show');}
 function HORO_share(){
   const t=HORO_text(HORO_sign);
-  shareText('Гороскоп · '+QA_ZODIAC[HORO_sign][1],
-    '📜 '+QA_ZODIAC[HORO_sign][0]+' '+QA_ZODIAC[HORO_sign][1]+' · '+new Date().toLocaleDateString(appLocale(),{day:'numeric',month:'long'})+'\n'+
-    t.moon+'\n\n⚡ '+t.energy+'\n💰 '+t.money+'\n💛 '+t.heart+'\n'+t.advice+'\n🍀 Числа удачи: '+t.lucky.join(' '));
+  shareText(appText('Гороскоп ·')+' '+appText(QA_ZODIAC[HORO_sign][1]),
+    '📜 '+QA_ZODIAC[HORO_sign][0]+' '+appText(QA_ZODIAC[HORO_sign][1])+' · '+new Date().toLocaleDateString(appLocale(),{day:'numeric',month:'long'})+'\n'+
+    appText(t.moonPhase)+' · '+appText(t.moonSign)+'\n\n⚡ '+appText(t.energyFlavor)+' '+appText(t.energy)+'\n💰 '+appText(t.money)+'\n💛 '+appText(t.heart)+'\n'+appText(t.advice)+'\n'+appText('🍀 Числа удачи:')+' '+t.lucky.join(' '));
 }
 
 
@@ -7529,10 +7560,22 @@ async function JC_continue(){
   function attach(){tops().forEach(observeModal);}
   /* remember the control that triggered a modal so focus can return to it */
   document.addEventListener('pointerdown',function(e){var t=e.target&&e.target.closest&&e.target.closest('button,a,[onclick],[role="button"]');if(t)lastTrigger=t;},true);
+  /* Safari/WebKit: Tab skips buttons by default, so the first/last-focusable wrap below never
+     fires and focus walks out of the dialog into the page behind it. Whatever the engine, focus
+     that lands OUTSIDE the active modal is pulled back to its edge in the direction of travel. */
+  var lastTabShift=false;
+  document.addEventListener('focusin',function(e){
+    if(!activeModal)return;
+    var el=document.getElementById(activeModal);if(!el||el.contains(e.target))return;
+    var items=focusable(el);
+    var target=items.length?(lastTabShift?items[items.length-1]:items[0]):el;
+    try{target.focus();}catch(_e){}
+  });
   document.addEventListener('keydown',function(e){
     if(!activeModal)return;
     var el=document.getElementById(activeModal);if(!el)return;
     if(e.key==='Tab'){
+      lastTabShift=!!e.shiftKey;
       var items=focusable(el);if(!items.length){e.preventDefault();el.focus();return;}
       var first=items[0],last=items[items.length-1];
       if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
