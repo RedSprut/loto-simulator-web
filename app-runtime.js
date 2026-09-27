@@ -1844,7 +1844,10 @@ function courtRevision(){
 function loadCourtApp(){
   if(window.LotoCourtApp)return Promise.resolve(window.LotoCourtApp);
   if(courtAppPromise)return courtAppPromise;
-  courtAppPromise=new Promise((resolve,reject)=>{
+  // The court's own copy is a lazy catalog part (i18n/court-<code>.json), fetched alongside the
+  // screen. A failed part never blocks the screen; it only leaves that copy untranslated.
+  const copy=Promise.resolve(window.LotoI18n&&window.LotoI18n.loadPart?window.LotoI18n.loadPart('court'):null).catch(()=>null);
+  courtAppPromise=Promise.all([copy,new Promise((resolve,reject)=>{
     const script=document.createElement('script');
     let timer=0;
     const fail=error=>{clearTimeout(timer);script.remove();courtAppPromise=null;reject(error);};
@@ -1854,7 +1857,7 @@ function loadCourtApp(){
     const revision=courtRevision();
     script.src='./court-ui.js'+(revision?'?v='+encodeURIComponent(revision):'');
     document.head.appendChild(script);
-  });
+  })]).then(([,app])=>app);
   return courtAppPromise;
 }
 async function withCourtApp(run){
@@ -1923,6 +1926,7 @@ if(location.hash.indexOf('#owner')===0)loadOwnerDashboard().catch(()=>{});
 setTimeout(()=>{probeOwnerDashboard();},1500);
 window.LotoCourtUI=Object.freeze({
   sourceLabel:courtSourceLabel,defenseBadge:courtDefenseBadge,attributionLines:courtAttributionLines,
+  personaAccuracy:id=>LotoPersonaLedger.stats(id),personaFacts:id=>LotoPersonaLedger.facts(id),
   rowCaption:courtRowCaption,changedNumbers:courtChangedNumbers,originalOf:courtOriginalOf,
   actorLabel:courtActorLabel,modelName:courtModelName,personaName:courtPersonaName,
   provLookup:rowProvLookup,reviewStatus:row=>{const C=courtCore();return C?C.reviewStatus(C.provenanceOf(row,courtRulesFor(cur))):null;},
@@ -5907,6 +5911,40 @@ function NOTIF_render(s){
    One summary opens a dedicated detail record (never the generic analytics Prizes tab). Pure
    logic (dedup, retention, draw association, guards) lives in win-match-core.js. Defensive: any
    failure here never breaks generation/the app. */
+/* Persona accuracy ledger (Judge · Defense Counsel · Jurors). The win/match scan hands over EVERY
+   row it settles against an official draw; court-core turns the advice the user actually APPLIED in
+   that row into facts with one key per persona, number, combination and draw, so a rescan, a reload
+   or the one-time backfill can never count a fact twice. Local and personal, like the history. */
+const LotoPersonaLedger=(function(){
+  const KEY='loto_persona_facts_v1',BACKFILL='loto_persona_facts_backfill_v1';
+  const core=()=>window.LotoCourtCore;
+  const load=()=>{try{const v=JSON.parse(localStorage.getItem(KEY)||'null');return v&&v.v===1&&Array.isArray(v.facts)?v:{v:1,facts:[]};}catch(_e){return{v:1,facts:[]};}};
+  const save=v=>{try{localStorage.setItem(KEY,JSON.stringify(v));}catch(_e){}};
+  function rule(l){const picked=drawBonusCount(l);return{extraFromMain:drawBonusFromMainPool(l),bonusPicked:picked>0,mainChance:l.mB?l.pM/l.mB:0,bonusChance:picked>0&&l.bB?drawnBonusCount(l)/l.bB:0};}
+  /* One combination can be recorded for the same draw more than once (before and after a swap):
+     the variant carrying the most history is the one that was actually kept. */
+  function latest(list){const by=new Map();for(const e of list||[]){const id=e&&e.prov&&e.prov.id;if(!id)continue;const cur=by.get(id);if(!cur||(e.prov.events||[]).length>=(cur.prov.events||[]).length)by.set(id,e);}return[...by.values()];}
+  function record(list,draw){try{
+    const C=core(),l=LOTS[draw.gameId];if(!C||!C.recommendationFacts||!l)return 0;
+    const facts=[];
+    for(const e of latest(list)){const prov=C.sanitizeProvenance(e.prov,{mainMax:l.mB});if(prov)facts.push(...C.recommendationFacts(prov,{main:e.main,bonus:e.bonus,played:!!e.played},draw,rule(l)));}
+    if(!facts.length)return 0;
+    const merged=C.mergeFacts(load(),facts);if(merged.added)save(merged.ledger);return merged.added;
+  }catch(_e){return 0;}}
+  /* One-time migration: rows the scan settled before this ledger existed. Idempotent like record(). */
+  function backfill(history,drawsByGame){try{
+    if(localStorage.getItem(BACKFILL))return;
+    const groups=new Map();
+    for(const e of history||[]){if(!e||!e.lastMatchedDrawDate||!e.prov)continue;const k=e.gameId+'|'+e.lastMatchedDrawDate;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(e);}
+    let complete=true;
+    for(const [k,list] of groups){const [gameId,date]=k.split('|');const draws=drawsByGame[gameId];if(!draws){complete=false;continue;}
+      const d=draws.find(x=>x&&x.date===date);if(d)record(list,{gameId,date,drawId:d.drawId!=null?d.drawId:null,main:d.main||[],bonus:d.bonus||[]});}
+    if(complete)localStorage.setItem(BACKFILL,'1');
+  }catch(_e){}}
+  const facts=id=>load().facts.filter(f=>f.personaId===id);
+  const stats=id=>{const C=core();return C&&C.accuracyStats?C.accuracyStats(load().facts,id):null;};
+  return{record,backfill,facts,stats};
+})();
 const LotoWinMatch=(function(){
   const CORE=window.LotoWinMatchCore;
   const ON=!!(CORE&&CORE.recordRows);
@@ -5978,11 +6016,14 @@ const LotoWinMatch=(function(){
            public-holiday Monday draws, Lotto Max's 2025-01-02) still reaches the rows that were
            already live for it. `nd` is sorted oldest-first above, so the earliest draw a row was
            live for claims it and the next scheduled draw cannot count it twice. */
-        const ms=CORE.scanDrawAgainstHistory(h,drawObj,l,checkPrize,sched(id)); changed=true;
+        const settled=[];
+        const ms=CORE.scanDrawAgainstHistory(h,drawObj,l,checkPrize,sched(id),e=>settled.push(e)); changed=true;
+        if(settled.length)LotoPersonaLedger.record(settled,drawObj);
         for(const m of ms){ const po=payoutFor(d,m); if(po&&po.amount!=null){m.payout=po.amount;m.payoutState='available';m.winners=po.winners;} fresh.push(m); }
       }
       if(draws[0]&&draws[0].date)localStorage.setItem(lk,draws[0].date);
     }
+    LotoPersonaLedger.backfill(h,drawsByGame);
     if(changed)saveHist(h);
     for(const m of fresh){ if(!store.find(x=>x.id===m.id))store.unshift(m); }
     resolvePending(store,drawsByGame); saveMatches(store);

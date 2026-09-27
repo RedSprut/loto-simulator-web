@@ -12,14 +12,22 @@
   const candidateKey=value=>wordTokens(value).reduce((best,token)=>token.length>best.length?token:best,'');
   const entries=new Map();
   const aliases=new Map();
-  const patterns=[];
-  const phrases=[];
   const loadedLocales=new Set();
   const loadingLocales=new Map();
   const translationCaches=new Map();
 
-  for(const [source,sourceLocale,translations] of catalog.entries){
+  const patternBuckets=new Map(),patternFallback=[];
+  const phraseBuckets=new Map();
+  const addBucket=(buckets,key,item)=>{
+    if(!buckets.has(key))buckets.set(key,[]);
+    buckets.get(key).push(item);
+  };
+  // One entry into the lookup: exact map, reverse aliases, and the template / phrase indexes. Used
+  // for the startup catalog and, later, for a lazily loaded catalog part (see loadPart). Candidates
+  // are ranked at lookup time, so the order entries arrive in does not matter.
+  function addEntry(source,sourceLocale,translations){
     const normalized=normalize(source);
+    if(entries.has(normalized))return entries.get(normalized);
     const entry={source:normalized,sourceLocale,translations};
     entries.set(normalized,entry);
     for(const translation of translations||[]){
@@ -34,30 +42,19 @@
         if(match){slots.push(Number(match[1]));return '(.+?)';}
         return escapeRegExp(piece);
       }).join('')+'$';
-      patterns.push({...entry,regex:new RegExp(regex,'u'),slots,weight:normalized.replace(/{{\d+}}/g,'').length});
+      const pattern={...entry,regex:new RegExp(regex,'u'),slots,weight:normalized.replace(/{{\d+}}/g,'').length};
+      const key=candidateKey(pattern.source.replace(/{{\d+}}/g,' '));
+      if(key)addBucket(patternBuckets,key,pattern);
+      else patternFallback.push(pattern);
     }else if(normalized.length>=2&&/[A-Za-zА-Яа-яЁё]/.test(normalized)){
       entry.beginsWithWord=/^[\p{L}\p{N}]/u.test(normalized);
       entry.endsWithWord=/[\p{L}\p{N}]$/u.test(normalized);
-      phrases.push(entry);
+      const key=candidateKey(entry.source);
+      if(key)addBucket(phraseBuckets,key,entry);
     }
+    return entry;
   }
-  patterns.sort((a,b)=>b.weight-a.weight);
-  phrases.sort((a,b)=>b.source.length-a.source.length);
-  const patternBuckets=new Map(),patternFallback=[];
-  const phraseBuckets=new Map();
-  const addBucket=(buckets,key,item)=>{
-    if(!buckets.has(key))buckets.set(key,[]);
-    buckets.get(key).push(item);
-  };
-  for(const pattern of patterns){
-    const key=candidateKey(pattern.source.replace(/{{\d+}}/g,' '));
-    if(key)addBucket(patternBuckets,key,pattern);
-    else patternFallback.push(pattern);
-  }
-  for(const phrase of phrases){
-    const key=candidateKey(phrase.source);
-    if(key)addBucket(phraseBuckets,key,phrase);
-  }
+  for(const [source,sourceLocale,translations] of catalog.entries)addEntry(source,sourceLocale,translations);
   if(!catalog.chunksBase)localeCodes.forEach(code=>loadedLocales.add(code));
 
   // Определение языка живёт в ОДНОМ месте — lang-detect.js (LotoLang): сохранённый выбор →
@@ -198,10 +195,10 @@
     }
   });
 
-  function persistLocale(code,values){
+  function persistLocale(code,values,part=''){
     const serviceWorker=globalThis.navigator?.serviceWorker;
     if(!serviceWorker||!Array.isArray(values))return;
-    const message={type:'CACHE_LOCALE',code,values};
+    const message=part?{type:'CACHE_LOCALE',code,part}:{type:'CACHE_LOCALE',code,values};
     if(serviceWorker.controller)serviceWorker.controller.postMessage(message);
     else serviceWorker.ready?.then(registration=>registration.active?.postMessage(message)).catch(()=>{});
   }
@@ -231,11 +228,51 @@
     return pending;
   }
 
+  // ── Catalog parts ──
+  // Copy that only a lazily loaded screen shows (the analytical court) is not in the startup
+  // catalog at all: the build moves it into i18n/<part>-<code>.json, `{sources, values}` for one
+  // locale. The screen asks for its part before it renders; once asked for, a part follows every
+  // later language switch, so the screen never shows another language's copy.
+  const parts=catalog.parts||{};
+  const requestedParts=new Set();
+  const loadedParts=new Set(),loadingParts=new Map();
+  function loadPartFor(part,code){
+    const base=parts[part];
+    const key=`${part}|${code}`;
+    if(!base||loadedParts.has(key))return Promise.resolve();
+    if(loadingParts.has(key))return loadingParts.get(key);
+    const pending=(async()=>{
+      const response=await fetch(`${base}${encodeURIComponent(code)}.json`,{cache:'no-cache'});
+      if(!response.ok)throw new Error(`locale_part_http_${response.status}`);
+      const data=await response.json();
+      if(!data||!Array.isArray(data.sources)||!Array.isArray(data.values)||data.sources.length!==data.values.length)throw new Error('invalid_locale_part');
+      const index=localeIndex.get(code);
+      data.sources.forEach((source,position)=>{
+        const entry=addEntry(source,'ru',new Array(localeCodes.length));
+        if(!entry.translations[index])entry.translations[index]=data.values[position]||source;
+        const alias=normalize(data.values[position]);
+        if(canRegisterAlias(alias,entry.source)&&!aliases.has(alias))aliases.set(alias,entry);
+      });
+      translationCaches.clear();
+      loadedParts.add(key);
+      persistLocale(code,data.values,part);
+    })().finally(()=>loadingParts.delete(key));
+    loadingParts.set(key,pending);
+    return pending;
+  }
+  function loadPart(part){
+    if(!parts[part])return Promise.resolve();
+    requestedParts.add(part);
+    return loadPartFor(part,language);
+  }
+  const loadRequestedParts=code=>Promise.all([...requestedParts].map(part=>loadPartFor(part,code).catch(error=>console.warn('Locale part failed',part,error))));
+
   async function setLanguage(code){
     const target=localeIndex.has(code)?code:'en';
     const request=++languageRequest;
     language=target;
     try{await loadLanguage(target);}catch(error){console.warn('Locale chunk failed',error);}
+    await loadRequestedParts(target);
     if(request!==languageRequest||language!==target)return false;
     document.documentElement.lang=target;
     document.documentElement.dir='ltr';
@@ -294,6 +331,7 @@
     get language(){return language;},
     ready,
     setLanguage,
+    loadPart,
     translate,
     localizeTree,
     localeInfo:code=>catalog.locales[code],

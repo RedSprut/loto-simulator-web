@@ -198,12 +198,15 @@
   // off-schedule official draw reach the rows that were live for it; without it the behaviour is
   // exactly the strict target-date match. Draws must be fed oldest-first, so the earliest draw a
   // row was live for claims it.
-  function scanDrawAgainstHistory(store, draw, gameRule, checkPrizeFn, schedule) {
+  // `onProcessed(entry)` (optional) sees EVERY row settled against this draw, prize or not —
+  // e.g. the persona-accuracy ledger, which must count misses as well as hits.
+  function scanDrawAgainstHistory(store, draw, gameRule, checkPrizeFn, schedule, onProcessed) {
     const matches = [];
     for (const e of (store || [])) {
       if (!eligibleForDraw(e, draw, schedule)) continue;
       const m = matchEntry(e, draw, gameRule, checkPrizeFn);
       e.lastMatchedDrawDate = draw.date; // processed regardless of prize → no repeat scans
+      if (typeof onProcessed === 'function') { try { onProcessed(e); } catch (_e) { /* never breaks the scan */ } }
       if (m) matches.push(m);
     }
     return matches;

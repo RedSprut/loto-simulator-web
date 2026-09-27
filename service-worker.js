@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the a8ffe11 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 477607f placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-va8ffe11';
+const CACHE_VERSION='loto-shell-v477607f';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -24,6 +24,7 @@ const OPTIONAL_PRECACHE=[
   './privacy.html','./terms.html','./subscription-terms.html','./legal.css','./legal-runtime.js',
   './jackpots.json','./prizes.json',
 ];
+const LOCALE_PARTS=new Set(['court']);
 const SUPPORTED_LOCALES=new Set(['ru','en','no','sv','da','fi','de','fr','es','it','pt','pl','nl','et','lv','lt','uk']);
 const NEVER_CACHE=/(?:results-archive|\/functions\/v1\/|\/auth\/v1\/|pro-(?:analysis|compute)|access-state|consume-feature|start-trial|billing-(?:status|reconcile)|checkout|management|payment-return|revenuecat|paddle|token|session)/i;
 
@@ -94,8 +95,11 @@ self.addEventListener('message',event=>{
   if(event.data?.type!=='CACHE_LOCALE')return;
   const code=String(event.data.code||'').toLowerCase();
   if(!SUPPORTED_LOCALES.has(code))return;
+  // A lazily loaded catalog part (i18n/court-<code>.json) is cached the same way once it was used.
+  const part=String(event.data.part||'');
+  if(part&&!LOCALE_PARTS.has(part))return;
   event.waitUntil(caches.open(SHELL_CACHE).then(cache=>
-    cache.add(new Request(`./i18n/${code}.json`))
+    cache.add(new Request(part?`./i18n/${part}-${code}.json`:`./i18n/${code}.json`))
   ).catch(()=>undefined));
 });
 
