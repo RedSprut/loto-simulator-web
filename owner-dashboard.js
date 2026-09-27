@@ -22,6 +22,13 @@
  * operator, which account, what it did (visit / login / purchase with plan and amount / simulation)
  * and — the number to watch — what refused it and why. It reads its own ledger
  * (public.agent_activity via owner_agent_activity); no other section's numbers change.
+ *
+ * 2026-09-26: Русский · English · Norsk. The panel is still AUTHORED in Russian: every literal here is
+ * a Russian source passed through t() (owner-i18n.js, the app's own i18n engine over an owner-only
+ * catalog), texts the server composes in Russian (notes, notification titles) go through tx(), and
+ * numbers, money and dates follow the panel language. The switcher in the header applies at once —
+ * the open section, sheet, popup, map and notification centre re-render from the data they already
+ * hold — and the choice is remembered. The public app, its language and every number are untouched.
  */
 (function () {
   'use strict';
@@ -33,6 +40,20 @@
   var APIKEY = String(CFG.supabasePublishableKey || '');
   var LIB = W.LotoOwnerLib || {};
   var THEME_KEY = 'ow_theme_v2';
+
+  // ── language ───────────────────────────────────────────────────────────────────────────────
+  // Tables below keep their Russian sources and are translated where they are printed, so a switch
+  // of the panel language only has to re-render. Without owner-i18n.js the panel stays Russian.
+  function i18n() { return W.LotoOwnerI18n || null; }
+  function t(source) {
+    var api = i18n();
+    if (api) return api.t.apply(null, arguments);
+    var args = Array.prototype.slice.call(arguments, 1);
+    return String(source).replace(/{{(\d+)}}/g, function (_, n) { return args[+n] == null ? '' : String(args[+n]); });
+  }
+  function tx(text) { var api = i18n(); return api ? api.tx(text) : String(text == null ? '' : text); }
+  function intl() { var api = i18n(); return api ? api.intl() : 'ru-RU'; }
+  function lang() { var api = i18n(); return api ? api.lang : 'ru'; }
 
   var SECTIONS = [
     { id: 'day', label: 'День' },
@@ -66,6 +87,7 @@
     ['visits_suspicious', 'Подозрительный трафик'], ['visits_bot', 'Боты']
   ];
   var AUDIENCES = [['all', 'Все'], ['guest', 'Гостевые визиты'], ['registered', 'Авторизованные визиты']];
+  var PLATFORMS = [['all', 'Все'], ['web', 'Веб'], ['ios', 'iOS'], ['android', 'Android']];
   var HOW = {
     verified: 'Люди с подтверждённой личностью: вошли в аккаунт. Один аккаунт = один человек, сколько бы устройств он ни использовал. Владелец исключён.',
     probable: 'Анонимные устройства с признаками живого человека, сгруппированные внутри одного домохозяйства по нижней границе: в группу попадают только устройства разных типов, которые никогда не работали одновременно. Это оценка, а не доказанная личность.',
@@ -138,6 +160,7 @@
     data: {},
     error: null
   };
+  var mapRemount = false;
   var ovEl = null, mapApi = null, livePoll = null, hourglassTimer = null, mapLoading = false;
 
   // ── api ────────────────────────────────────────────────────────────────────────────────────
@@ -183,8 +206,8 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
     });
   }
-  function num(value) { var n = +value || 0; return n.toLocaleString('ru-RU'); }
-  function money(value, currency) { return LIB.formatMoney ? LIB.formatMoney(value, currency) : (+value).toLocaleString('ru-RU') + ' ' + (currency || ''); }
+  function num(value) { var n = +value || 0; return n.toLocaleString(intl()); }
+  function money(value, currency) { return LIB.formatMoney ? LIB.formatMoney(value, currency) : (+value).toLocaleString(intl()) + ' ' + (currency || ''); }
   function moneyList(rows, key) { return LIB.moneyList ? LIB.moneyList(rows, key) : ''; }
   // Server money text «4.99 EUR + 99 NOK» → «4,99 € · 99,00 kr» (each currency on its own, never summed).
   function moneyTextRu(text) {
@@ -195,25 +218,25 @@
     }).join(' · ');
   }
   function usdEstimate(value) { return LIB.usdEstimate ? LIB.usdEstimate(value) : ''; }
-  var NONE = '<span class="ow-kpi-none">нет данных</span>';
-  function dur(ms) { return LIB.formatDuration ? LIB.formatDuration(ms) : Math.round((+ms || 0) / 1000) + ' с'; }
+  function none() { return '<span class="ow-kpi-none">' + esc(t('нет данных')) + '</span>'; }
+  function dur(ms) { return LIB.formatDuration ? LIB.formatDuration(ms) : t('{{0}} с', Math.round((+ms || 0) / 1000)); }
   function pctText(part, total) { return total ? Math.round((part / total) * 100) + '%' : '—'; }
   function timeText(value) {
     if (!value) return '—';
     try {
-      return new Date(value).toLocaleString('ru-RU', { timeZone: state.tz, day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      return new Date(value).toLocaleString(intl(), { timeZone: state.tz, day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
     } catch (e) { return String(value); }
   }
   function clockText(value) {
-    try { return new Date(value).toLocaleTimeString('ru-RU', { timeZone: state.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { return ''; }
+    try { return new Date(value).toLocaleTimeString(intl(), { timeZone: state.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { return ''; }
   }
-  function label(map, key) { return (map && map[key]) || key || '—'; }
+  function label(map, key) { return (map && map[key]) ? t(map[key]) : (key || '—'); }
   function place(row) {
     var parts = [];
     if (row.city) parts.push(row.city);
     if (row.region && row.region !== row.city) parts.push(row.region);
-    if (row.country) parts.push(LIB.countryNameRu ? LIB.countryNameRu(row.country) : row.country);
-    return parts.length ? parts.join(' · ') : 'Место не определено';
+    if (row.country) parts.push(countryName(row.country));
+    return parts.length ? parts.join(' · ') : t('Место не определено');
   }
   function confidenceChip(value, evidence) {
     var c = LIB.confidence ? LIB.confidence(value) : { value: value, label: '', tone: 'mid' };
@@ -221,11 +244,11 @@
     return '<span class="ow-conf ow-conf-' + c.tone + '" title="' + esc(c.label + (tip ? ': ' + tip : '')) + '">' + c.value + '</span>';
   }
   function how(key) {
-    return '<button class="ow-how" type="button" data-how="' + esc(key) + '" aria-label="Как считается">i</button>';
+    return '<button class="ow-how" type="button" data-how="' + esc(key) + '" aria-label="' + esc(t('Как считается')) + '">i</button>';
   }
   function card(title, value, sub, howKey, delta) {
     return '<div class="ow-card">' +
-      '<div class="ow-card-h"><span>' + esc(title) + '</span>' + (howKey ? how(howKey) : '') + '</div>' +
+      '<div class="ow-card-h"><span>' + esc(t(title)) + '</span>' + (howKey ? how(howKey) : '') + '</div>' +
       '<div class="ow-card-v">' + value + '</div>' +
       (delta ? '<div class="ow-card-d ' + delta.dir + '">' + delta.text + '</div>' : '') +
       (sub ? '<div class="ow-card-s">' + sub + '</div>' : '') + '</div>';
@@ -235,12 +258,12 @@
     var change = LIB.pctChange ? LIB.pctChange(current, previous) : null;
     if (!change) return null;
     var arrow = change.dir === 'up' ? '▲' : change.dir === 'down' ? '▼' : '■';
-    return { dir: change.dir, text: arrow + ' ' + Math.abs(Math.round(change.pct)) + '% к прошлому периоду (' + num(previous) + ')' };
+    return { dir: change.dir, text: arrow + ' ' + esc(t('{{0}}% к прошлому периоду ({{1}})', Math.abs(Math.round(change.pct)), num(previous))) };
   }
   function table(columns, rows, empty) {
-    if (!rows || !rows.length) return '<div class="ow-empty">' + esc(empty || 'Нет данных за период') + '</div>';
+    if (!rows || !rows.length) return '<div class="ow-empty">' + esc(t(empty || 'Нет данных за период')) + '</div>';
     return '<div class="ow-tw"><table class="ow-t"><thead><tr>' +
-      columns.map(function (c) { return '<th' + (c.numeric ? ' class="num"' : '') + '>' + esc(c.title) + '</th>'; }).join('') +
+      columns.map(function (c) { return '<th' + (c.numeric ? ' class="num"' : '') + '>' + esc(t(c.title)) + '</th>'; }).join('') +
       '</tr></thead><tbody>' +
       rows.map(function (row, index) {
         var cls = (row.__click ? 'ow-click ' : '') + (row.__class || '');
@@ -252,8 +275,8 @@
     var rows = Object.keys(entries || {}).map(function (key) { return { key: key, value: +entries[key] || 0 }; })
       .sort(function (a, b) { return b.value - a.value; });
     var max = rows.reduce(function (m, r) { return Math.max(m, r.value); }, 0);
-    if (!rows.length) return '<div class="ow-empty">Нет данных за период</div>';
-    return '<div class="ow-block"><div class="ow-block-h">' + esc(title || '') + (howKey ? how(howKey) : '') + '</div>' +
+    if (!rows.length) return '<div class="ow-empty">' + esc(t('Нет данных за период')) + '</div>';
+    return '<div class="ow-block"><div class="ow-block-h">' + esc(t(title || '')) + (howKey ? how(howKey) : '') + '</div>' +
       rows.map(function (row) {
         return '<div class="ow-bar"><span class="ow-bar-l">' + esc(label(labels, row.key)) + '</span>' +
           '<span class="ow-bar-t"><i style="width:' + (max ? Math.max(2, Math.round((row.value / max) * 100)) : 0) + '%"></i></span>' +
@@ -266,7 +289,7 @@
       : ['#1d4ed8', '#0891b2', '#7c3aed'];
   }
   function lineChart(series, keys, titles) {
-    if (!series || series.length < 2) return '<div class="ow-empty">Для графика нужно минимум две точки</div>';
+    if (!series || series.length < 2) return '<div class="ow-empty">' + esc(t('Для графика нужно минимум две точки')) + '</div>';
     var width = 720, height = 190, padLeft = 42, padBottom = 26, padTop = 12;
     var max = 0;
     series.forEach(function (point) { keys.forEach(function (key) { max = Math.max(max, +point[key] || 0); }); });
@@ -292,9 +315,9 @@
       return '<text x="' + x + '" y="' + (height - 8) + '" class="ow-axis" text-anchor="middle">' + esc(String(point.bucket).slice(5)) + '</text>';
     }).join('');
     var legend = keys.map(function (key, index) {
-      return '<span><i style="background:' + colors[index % colors.length] + '"></i>' + esc(titles[index]) + '</span>';
+      return '<span><i style="background:' + colors[index % colors.length] + '"></i>' + esc(t(titles[index])) + '</span>';
     }).join('');
-    return '<div class="ow-chart"><svg viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none" role="img" aria-label="График">' +
+    return '<div class="ow-chart"><svg viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none" role="img" aria-label="' + esc(t('График')) + '">' +
       ticks + paths + labels + '</svg><div class="ow-legend">' + legend + '</div></div>';
   }
 
@@ -320,6 +343,9 @@
       '#ow-ov .ow-btn{min-height:34px;padding:6px 12px;border-radius:10px;border:1px solid var(--ow-bd);background:var(--ow-card2);color:inherit;font:inherit;font-weight:700;cursor:pointer}',
       '#ow-ov .ow-btn[disabled]{opacity:.6;cursor:progress}',
       '#ow-ov .ow-btn-primary{background:var(--ow-accent);border-color:var(--ow-accent);color:#fff}',
+      // The panel language switcher: a native select styled as a header button (keyboard, screen
+      // readers and the phone picker come for free); native language names, never translated.
+      '#ow-ov select.ow-lang{min-height:34px;padding:6px 10px;border-radius:10px;border:1px solid var(--ow-bd);background:var(--ow-card2);color:inherit;font:inherit;font-weight:700;cursor:pointer;max-width:100%}',
       // The owner bell inside the panel header (the public header has no owner bell at all).
       '#ow-ov .ow-bell{position:relative;padding:6px 10px;line-height:1}',
       '#ow-ov .ow-bell .ow-bell-ico{font-size:16px}',
@@ -390,7 +416,12 @@
       '#ow-ov .ow-map{height:clamp(300px,60vh,720px);border-radius:16px;overflow:hidden;border:1px solid var(--ow-bd);margin-top:10px;background:var(--ow-card2)}',
       '@media (max-width:719px){#ow-ov .ow-map{height:220px;border-radius:12px}}',
       '#ow-ov .ow-map-note{color:var(--ow-sub);font-size:12px;margin-top:6px}',
-      '#ow-ov .ow-pop{position:fixed;inset:auto 12px 12px 12px;max-width:560px;margin:0 auto;background:var(--ow-card);border:1px solid var(--ow-bd);border-radius:14px;padding:12px;box-shadow:0 18px 50px rgba(0,0,0,.35);z-index:20}',
+      // The ⓘ «Как считается» note (and every other openPopup message) is ONE component: a fixed
+      // backdrop that flex-centres the card in the viewport — horizontally and vertically, whatever
+      // the section's scroll position — above the country / person sheets (z 30), with the safe-area
+      // insets kept free and a long note scrolling inside the card instead of leaving the screen.
+      '#ow-ov .ow-pop-back{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:12px;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:rgba(8,14,26,.35)}',
+      '#ow-ov .ow-pop{position:relative;box-sizing:border-box;width:100%;max-width:560px;max-height:100%;overflow:auto;overscroll-behavior:contain;margin:0;background:var(--ow-card);border:1px solid var(--ow-bd);border-radius:14px;padding:12px;box-shadow:0 18px 50px rgba(0,0,0,.35)}',
       '#ow-ov .ow-pop h3{margin:0 0 6px;font-size:14px}',
       '#ow-ov .ow-pop p{margin:0;color:var(--ow-sub);font-size:13px}',
       '#ow-ov .ow-sheet{position:fixed;inset:0;background:rgba(8,4,8,.55);display:flex;align-items:flex-end;justify-content:center;z-index:30}',
@@ -466,42 +497,43 @@
     ovEl.setAttribute('data-ow-theme', resolveTheme());
     ovEl.innerHTML =
       '<div class="ow-top">' +
-        '<button class="ow-btn" id="ow-back" type="button">‹ Назад</button>' +
-        '<span class="ow-title">Аналитика — реальная аудитория</span>' +
+        '<button class="ow-btn" id="ow-back" type="button" data-owt="‹ Назад"></button>' +
+        '<span class="ow-title" data-owt="Аналитика — реальная аудитория"></span>' +
         // The owner analytics bell lives HERE, inside the owner panel — never in the public header.
         // owner-notifications.js reveals it after the server owner probe and owns its badge.
-        '<button class="ow-btn ow-bell" id="owner-bell-btn" type="button" hidden aria-label="Уведомления владельца">' +
+        '<button class="ow-btn ow-bell" id="owner-bell-btn" type="button" hidden aria-label="' + esc(t('Уведомления владельца')) + '">' +
           '<span class="ow-bell-ico" aria-hidden="true">🔔</span>' +
           '<span class="ow-bell-badge" id="owner-bell-badge" hidden aria-hidden="true">0</span></button>' +
-        '<button class="ow-btn ow-filters-btn" id="ow-filters" type="button" aria-expanded="false">Фильтры</button>' +
-        '<button class="ow-btn" id="ow-theme" type="button">Тема</button>' +
-        '<button class="ow-btn" id="ow-export" type="button">Экспорт</button>' +
-        '<button class="ow-btn ow-btn-primary" id="ow-refresh" type="button">Обновить</button>' +
+        '<button class="ow-btn ow-filters-btn" id="ow-filters" type="button" aria-expanded="false" data-owt="Фильтры"></button>' +
+        '<select class="ow-lang" id="ow-lang" data-owt-aria="Язык панели"></select>' +
+        '<button class="ow-btn" id="ow-theme" type="button" data-owt="Тема"></button>' +
+        '<button class="ow-btn" id="ow-export" type="button" data-owt="Экспорт"></button>' +
+        '<button class="ow-btn ow-btn-primary" id="ow-refresh" type="button" data-owt="Обновить"></button>' +
       '</div>' +
       '<div class="ow-controls" id="ow-controls">' +
-        '<label>Период <select id="ow-preset"></select></label>' +
-        '<span id="ow-daybar" class="ow-daybar" role="group" aria-label="Календарь">' +
-          '<button class="ow-chip" type="button" data-day="0">Сегодня</button>' +
-          '<button class="ow-chip" type="button" data-day="-1">Вчера</button>' +
-          '<button class="ow-chip" type="button" data-day="-2">Позавчера</button>' +
-          '<button class="ow-btn ow-daynav" type="button" id="ow-day-prev" aria-label="Предыдущий день">‹</button>' +
-          '<input type="date" id="ow-day" aria-label="Дата" max="2099-12-31" min="2026-01-01">' +
-          '<button class="ow-btn ow-daynav" type="button" id="ow-day-next" aria-label="Следующий день">›</button>' +
+        '<label><span data-owt="Период"></span> <select id="ow-preset"></select></label>' +
+        '<span id="ow-daybar" class="ow-daybar" role="group" data-owt-aria="Календарь">' +
+          '<button class="ow-chip" type="button" data-day="0" data-owt="Сегодня"></button>' +
+          '<button class="ow-chip" type="button" data-day="-1" data-owt="Вчера"></button>' +
+          '<button class="ow-chip" type="button" data-day="-2" data-owt="Позавчера"></button>' +
+          '<button class="ow-btn ow-daynav" type="button" id="ow-day-prev" data-owt-aria="Предыдущий день">‹</button>' +
+          '<input type="date" id="ow-day" data-owt-aria="Дата" max="2099-12-31" min="2026-01-01">' +
+          '<button class="ow-btn ow-daynav" type="button" id="ow-day-next" data-owt-aria="Следующий день">›</button>' +
         '</span>' +
-        '<span id="ow-custom" hidden><input type="date" id="ow-from"> — <input type="date" id="ow-to"></span>' +
-        '<label>Часовой пояс <select id="ow-tz"></select></label>' +
-        '<label>Платформа <select id="ow-platform"><option value="all">Все</option><option value="web">Веб</option><option value="ios">iOS</option><option value="android">Android</option></select></label>' +
-        '<label>Лотерея <select id="ow-lottery"><option value="all">Все</option></select></label>' +
-        '<label>Аудитория <select id="ow-audience">' + AUDIENCES.map(function (a) { return '<option value="' + a[0] + '">' + esc(a[1]) + '</option>'; }).join('') + '</select></label>' +
-        '<label class="ow-toggle"><input type="checkbox" id="ow-compare" checked> Сравнить с прошлым периодом</label>' +
-        '<label class="ow-toggle"><input type="checkbox" id="ow-owner"> Включить владельца / тесты</label>' +
-        '<label class="ow-toggle"><input type="checkbox" id="ow-bots"> Включить ботов</label>' +
-        '<label class="ow-toggle"><input type="checkbox" id="ow-unknown" checked> Включить неизвестных</label>' +
+        '<span id="ow-custom" hidden><input type="date" id="ow-from" data-owt-aria="С"> — <input type="date" id="ow-to" data-owt-aria="По"></span>' +
+        '<label><span data-owt="Часовой пояс"></span> <select id="ow-tz"></select></label>' +
+        '<label><span data-owt="Платформа"></span> <select id="ow-platform"></select></label>' +
+        '<label><span data-owt="Лотерея"></span> <select id="ow-lottery"><option value="all"></option></select></label>' +
+        '<label><span data-owt="Аудитория"></span> <select id="ow-audience"></select></label>' +
+        '<label class="ow-toggle"><input type="checkbox" id="ow-compare" checked> <span data-owt="Сравнить с прошлым периодом"></span></label>' +
+        '<label class="ow-toggle"><input type="checkbox" id="ow-owner"> <span data-owt="Включить владельца / тесты"></span></label>' +
+        '<label class="ow-toggle"><input type="checkbox" id="ow-bots"> <span data-owt="Включить ботов"></span></label>' +
+        '<label class="ow-toggle"><input type="checkbox" id="ow-unknown" checked> <span data-owt="Включить неизвестных"></span></label>' +
         '<span class="ow-status" id="ow-status"></span>' +
       '</div>' +
       '<div class="ow-tabs" id="ow-tabs" role="tablist"></div>' +
       '<div class="ow-body" id="ow-content">' +
-        '<div class="ow-load" id="ow-load"><div class="ow-hg" id="ow-hg">⏳</div><div class="ow-stages" id="ow-stages">Загрузка…</div></div>' +
+        '<div class="ow-load" id="ow-load"><div class="ow-hg" id="ow-hg">⏳</div><div class="ow-stages" id="ow-stages"></div></div>' +
         '<div id="ow-section"></div>' +
       '</div>';
     D.body.appendChild(ovEl);
@@ -511,19 +543,13 @@
     // map and the owner notification centre. Without this the manager stripped .show behind our
     // back and the page stayed locked with the panel's timers running.
     ovEl.__lotoClose = function (reason) {
-      // Escape closes the notification centre first (it is nested inside this panel), the panel next.
-      try {
-        if (reason === 'escape' && W.LotoOwnerNotifications && W.LotoOwnerNotifications._state().open) {
-          W.LotoOwnerNotifications.close();
-          return;
-        }
-      } catch (e) {}
+      // Escape closes the innermost layer first (notification centre, ⓘ note, sheet), the panel last.
+      if (reason === 'escape' && closeInnermost()) return;
       close();
     };
     try { if (W.LotoModals && W.LotoModals.register) W.LotoModals.register(ovEl); } catch (e) {}
 
-    var presetSelect = ovEl.querySelector('#ow-preset');
-    presetSelect.innerHTML = PRESETS.map(function (p) { return '<option value="' + p[0] + '"' + (p[0] === state.preset ? ' selected' : '') + '>' + esc(p[1]) + '</option>'; }).join('');
+    relabel();
     syncControls();
     var zones = (LIB.ZONES || ['Europe/Oslo', 'UTC']).slice();
     try {
@@ -531,17 +557,42 @@
       if (local && zones.indexOf(local) < 0) zones.push(local);
     } catch (e) {}
     ovEl.querySelector('#ow-tz').innerHTML = zones.map(function (z) { return '<option value="' + esc(z) + '"' + (z === state.tz ? ' selected' : '') + '>' + esc(z) + '</option>'; }).join('');
-    ovEl.querySelector('#ow-tabs').innerHTML = SECTIONS.map(function (s) {
-      return '<button class="ow-tab" role="tab" data-section="' + s.id + '" aria-selected="' + (s.id === state.section) + '">' + esc(s.label) + '</button>';
-    }).join('');
     wire();
     return ovEl;
   }
 
+  // Every static text of the shell in the panel language: [data-owt] / [data-owt-aria] carry the
+  // Russian source, the selects and tabs are rebuilt with their current value kept.
+  function options(list, current) {
+    return list.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === current ? ' selected' : '') + '>' + esc(t(o[1])) + '</option>'; }).join('');
+  }
+  function relabel() {
+    if (!ovEl) return;
+    var code = lang();
+    ovEl.setAttribute('lang', code === 'no' ? 'nb' : code);
+    ovEl.querySelectorAll('[data-owt]').forEach(function (el) { el.textContent = t(el.getAttribute('data-owt')); });
+    ovEl.querySelectorAll('[data-owt-aria]').forEach(function (el) { el.setAttribute('aria-label', t(el.getAttribute('data-owt-aria'))); });
+    var langs = (i18n() && i18n().LANGS) || ['ru'];
+    ovEl.querySelector('#ow-lang').innerHTML = langs.map(function (c) {
+      var n = i18n() ? i18n().languageName(c) : { name: 'Русский', flag: '🇷🇺' };
+      return '<option value="' + c + '" lang="' + (c === 'no' ? 'nb' : c) + '"' + (c === code ? ' selected' : '') + '>' + esc(n.flag + ' ' + n.name) + '</option>';
+    }).join('');
+    ovEl.querySelector('#ow-lang').hidden = langs.length < 2;
+    ovEl.querySelector('#ow-preset').innerHTML = options(PRESETS, state.preset);
+    ovEl.querySelector('#ow-platform').innerHTML = options(PLATFORMS, state.filters.platform);
+    ovEl.querySelector('#ow-audience').innerHTML = options(AUDIENCES, state.filters.audience);
+    var lottery = ovEl.querySelector('#ow-lottery');
+    if (lottery && lottery.options[0]) lottery.options[0].textContent = t('Все');
+    ovEl.querySelector('#ow-tabs').innerHTML = SECTIONS.map(function (s) {
+      return '<button class="ow-tab" role="tab" data-section="' + s.id + '" aria-selected="' + (s.id === state.section) + '">' + esc(t(s.label)) + '</button>';
+    }).join('');
+  }
+
+  var stageView = null;
   function setHourglass(on, message) {
     var load = ovEl.querySelector('#ow-load');
     var stages = ovEl.querySelector('#ow-stages');
-    if (message) stages.textContent = message;
+    if (message) { stageView = typeof message === 'function' ? message : null; stages.textContent = stageView ? stageView() : message; }
     load.classList.toggle('show', !!on);
     if (on && !hourglassTimer) {
       var flip = false;
@@ -553,14 +604,20 @@
     }
     if (!on && hourglassTimer) { clearInterval(hourglassTimer); hourglassTimer = null; }
   }
-  function setStatus(text) { var el = ovEl.querySelector('#ow-status'); if (el) el.innerHTML = text; }
+  // The status line is kept as the function that builds it, so a language switch can rebuild it.
+  var statusView = null;
+  function setStatus(view) {
+    statusView = typeof view === 'function' ? view : null;
+    var el = ovEl.querySelector('#ow-status');
+    if (el) el.innerHTML = typeof view === 'function' ? view() : String(view || '');
+  }
 
   // ── data loading ───────────────────────────────────────────────────────────────────────────
   async function load(section, extra) {
     if (state.busy) return null;                        // never two requests for the same view
     state.busy = true;
     state.error = null;
-    setHourglass(true, 'Загрузка раздела…');
+    setHourglass(true, function () { return t('Загрузка раздела…'); });
     try {
       var response = await api({ section: section, params: params(extra) });
       state.data[section] = response;
@@ -580,7 +637,7 @@
     state.busy = true;
     state.error = null;
     state.kpiError = null;
-    setHourglass(true, 'Загрузка раздела…');
+    setHourglass(true, function () { return t('Загрузка раздела…'); });
     try {
       var settled = await Promise.allSettled(sections.map(function (name) { return api({ section: name, params: params(extra) }); }));
       settled.forEach(function (outcome, index) {
@@ -660,32 +717,38 @@
     state.refreshing = true;
     var button = ovEl.querySelector('#ow-refresh');
     button.disabled = true;
-    button.textContent = 'Обновление…';
-    setHourglass(true, 'Получение свежих событий…');
+    button.setAttribute('data-owt', 'Обновление…');
+    button.textContent = t('Обновление…');
+    setHourglass(true, function () { return t('Получение свежих событий…'); });
     try {
       var result = await api({ refresh: true });
       var run = (result && result.refresh && result.refresh.run) || {};
       var stages = run.stage_ms || {};
       var order = [['sessions', 'Сессии'], ['profiles', 'Профили'], ['devices', 'Устройства'], ['households', 'Домохозяйства'], ['people', 'Люди'], ['summaries', 'Сводки']];
       setHourglass(true, order.filter(function (s) { return stages[s[0]] != null; })
-        .map(function (s) { return s[1] + ' ✓ ' + stages[s[0]] + ' мс'; }).join(' · ') || 'Идентификация…');
+        .map(function (s) { return t('{{0}} ✓ {{1}} мс', t(s[1]), stages[s[0]]); }).join(' · ') || t('Идентификация…'));
       state.data = {};
       state.busy = false;
       if (mapApi) { mapApi.destroy(); mapApi = null; }
       await show(state.section);
-      var added = [];
-      if (result.refresh.new_events) added.push('+' + num(result.refresh.new_events) + ' событий');
-      if (result.refresh.new_sessions) added.push('+' + num(result.refresh.new_sessions) + ' сессий');
-      state.lastRefresh = new Date();
-      setStatus('Обновлено ' + clockText(state.lastRefresh) + (added.length ? ' · ' + added.join(' · ') : '') +
-        (run.events_scanned != null ? ' · обработано ' + num(run.events_scanned) : ''));
+      var events = result.refresh.new_events, sessions = result.refresh.new_sessions, scanned = run.events_scanned;
+      var at = new Date();
+      state.lastRefresh = at;
+      setStatus(function () {
+        var added = [];
+        if (events) added.push(t('+{{0}} событий', num(events)));
+        if (sessions) added.push(t('+{{0}} сессий', num(sessions)));
+        return esc(t('Обновлено {{0}}', clockText(at)) + (added.length ? ' · ' + added.join(' · ') : '') +
+          (scanned != null ? ' · ' + t('обработано {{0}}', num(scanned)) : ''));
+      });
     } catch (error) {
-      setStatus('<span style="color:var(--ow-down)">Не удалось обновить: ' + esc(error.message || 'ошибка') + '</span>');
+      setStatus(function () { return '<span style="color:var(--ow-down)">' + esc(t('Не удалось обновить: {{0}}', error.message || t('ошибка'))) + '</span>'; });
       renderError(error, refresh);
     } finally {
       setHourglass(false);
       button.disabled = false;
-      button.textContent = 'Обновить';
+      button.setAttribute('data-owt', 'Обновить');
+      button.textContent = t('Обновить');
       state.refreshing = false;
     }
   }
@@ -699,10 +762,10 @@
   };
   function errorText(error) {
     var code = error && error.code;
-    if (code && ERROR_TEXT[code]) return ERROR_TEXT[code] + ' Код: ' + code;
-    if (error && error.status === 403) return 'Нет доступа к панели владельца.';
-    if (error && /Failed to fetch|NetworkError|load failed/i.test(error.message || '')) return 'Нет связи с сервером. Проверьте соединение.';
-    return 'Ошибка: ' + ((error && error.message) || 'неизвестно');
+    if (code && ERROR_TEXT[code]) return t(ERROR_TEXT[code]) + ' ' + t('Код: {{0}}', code);
+    if (error && error.status === 403) return t('Нет доступа к панели владельца.');
+    if (error && /Failed to fetch|NetworkError|load failed/i.test(error.message || '')) return t('Нет связи с сервером. Проверьте соединение.');
+    return t('Ошибка: {{0}}', (error && error.message) ? tx(error.message) : t('неизвестно'));
   }
 
   function renderError(error, retry) {
@@ -713,7 +776,8 @@
     var button = D.createElement('button');
     button.className = 'ow-btn';
     button.type = 'button';
-    button.textContent = 'Повторить';
+    button.setAttribute('data-owt', 'Повторить');
+    button.textContent = t('Повторить');
     button.addEventListener('click', function () { box.remove(); (retry || reload)(); });
     box.appendChild(button);
     host.prepend(box);
@@ -738,23 +802,26 @@
   function worldMeta(iso) {
     try { return (mapApi && mapApi.world && mapApi.world.meta[iso]) || null; } catch (e) { return null; }
   }
+  // A country in the panel language: the Russian table / the map's Russian name for Russian, Intl
+  // region names (then the map's English name) for English and Norwegian.
   function countryName(iso) {
-    if (!iso || iso === 'ZZ') return 'Не определено';
-    var fromCatalog = LIB.countryNameRu ? LIB.countryNameRu(iso) : iso;
+    if (!iso || iso === 'ZZ') return t('Не определено');
+    var ru = lang() === 'ru';
+    var fromCatalog = ru ? (LIB.countryNameRu ? LIB.countryNameRu(iso) : iso) : (LIB.countryName ? LIB.countryName(iso) : iso);
     if (fromCatalog !== iso) return fromCatalog;
     var meta = worldMeta(iso);
-    return (meta && (meta.ru || meta.n)) || iso;
+    return (meta && ((ru && meta.ru) || meta.n)) || iso;
   }
   // «территория Норвегии» for a dependency drawn as its own feature (SJ → NO, GF → FR, TK → NZ).
   function parentNote(iso) {
     var meta = worldMeta(iso);
-    return meta && meta.parent ? 'территория: ' + countryName(meta.parent) : '';
+    return meta && meta.parent ? t('территория: {{0}}', countryName(meta.parent)) : '';
   }
   function continentOf(iso) {
     try { return (mapApi && mapApi.world && mapApi.world.meta[iso] && mapApi.world.meta[iso].c) || null; } catch (e) { return null; }
   }
   function metricLabel(metric) {
-    for (var i = 0; i < MAP_METRICS.length; i++) if (MAP_METRICS[i][0] === metric) return MAP_METRICS[i][1];
+    for (var i = 0; i < MAP_METRICS.length; i++) if (MAP_METRICS[i][0] === metric) return t(MAP_METRICS[i][1]);
     return metric;
   }
   // Compact tooltip: the selected metric first, then the three anchors — each figure exactly once.
@@ -765,7 +832,7 @@
     var parent = parentNote(iso);
     return '<b>' + esc((LIB.flagEmoji ? LIB.flagEmoji(iso) + ' ' : '') + countryName(iso)) + '</b>' + (parent ? '<br><i>' + esc(parent) + '</i>' : '') +
       lines.filter(function (l) { if (seen[l[0]]) return false; seen[l[0]] = true; return true; })
-        .map(function (l, i) { return '<br>' + esc(l[1]) + ': ' + (i === 0 ? '<b>' + num(row[l[0]]) + '</b>' : num(row[l[0]])); }).join('');
+        .map(function (l, i) { return '<br>' + esc(t(l[1])) + ': ' + (i === 0 ? '<b>' + num(row[l[0]]) + '</b>' : num(row[l[0]])); }).join('');
   }
   // Height from the real width (world aspect ≈ 1.9:1), capped by the viewport; re-applied on resize.
   function sizeMapBox(host) {
@@ -786,14 +853,15 @@
   });
   async function mountMap(force) {
     var host = ovEl.querySelector('#ow-mapbox');
-    if (!host || mapLoading) return;
+    if (mapLoading) { if (force) mapRemount = true; return; }
+    if (!host) return;
     sizeMapBox(host);
     var rows = countryRows();
     if (mapApi && !force && mapApi.map && mapApi.map.getContainer() === host) {
       mapApi.setData(rows, state.mapMetric); mapApi.setContinent(state.continent); mapApi.select(state.selectedCountry); mapApi.resize(); return;
     }
     mapLoading = true;
-    setHourglass(true, 'Загрузка карты…');
+    setHourglass(true, function () { return t('Загрузка карты…'); });
     try {
       if (mapApi) { mapApi.destroy(); mapApi = null; }
       // Versioned like every other runtime script: an unversioned dynamic import could be served from
@@ -807,6 +875,12 @@
         colorFor: function (value, max, theme) { return LIB.choroplethColor ? LIB.choroplethColor(value, max, theme) : (value > 0 ? '#5591db' : '#dde6ee'); },
         onHover: hoverHtml,
         nameOf: countryName,
+        label: t('Карта мира: страны, окрашенные по выбранному показателю'),
+        numberLocale: intl(),
+        locale: {
+          'NavigationControl.ZoomIn': t('Приблизить'), 'NavigationControl.ZoomOut': t('Отдалить'),
+          'AttributionControl.ToggleAttribution': t('Показать источники карты'), 'Map.Title': t('Карта'), 'Marker.Title': t('Метка на карте')
+        },
         onSelect: function (iso) { state.selectedCountry = iso; openCountry(iso); }
       });
       mapApi.setData(rows, state.mapMetric);
@@ -814,111 +888,151 @@
       if (state.selectedCountry) mapApi.select(state.selectedCountry);
     } catch (error) {
       var box = ovEl.querySelector('#ow-mapbox');
-      if (box) box.innerHTML = '<div class="ow-empty">Карта не загрузилась: ' + esc(error.message || 'ошибка') + '</div>';
+      if (box) box.innerHTML = '<div class="ow-empty">' + esc(t('Карта не загрузилась: {{0}}', error.message || t('ошибка'))) + '</div>';
     } finally {
       mapLoading = false;
       setHourglass(false);
+      if (mapRemount) { mapRemount = false; if (state.section === 'map') mountMap(true); }
     }
   }
 
   // The country card: everything the owner may know about one country, nothing about one person.
   // Raw IP addresses and e-mails do not exist in this data and are never shown.
   var countryLoading = false;
+  var NET_LABELS = { isp: 'Домашний провайдер', mobile: 'Мобильный оператор', hosting: 'Дата-центр', vpn: 'VPN', tor: 'Tor', education: 'Учебная сеть', business: 'Корпоративная', unknown: 'Не определено' };
   async function openCountry(iso) {
     if (!iso || countryLoading) return;
     countryLoading = true;
     state.selectedCountry = iso;
     if (mapApi) mapApi.select(iso);
-    setHourglass(true, 'Загрузка страны…');
+    setHourglass(true, function () { return t('Загрузка страны…'); });
     var response = null;
     try { response = await api({ section: 'country', params: params({ country: iso }) }); }
-    catch (error) { countryLoading = false; setHourglass(false); openPopup('Ошибка', esc(errorText(error))); return; }
+    catch (error) { countryLoading = false; setHourglass(false); openPopup('Ошибка', function () { return esc(errorText(error)); }); return; }
     countryLoading = false;
     setHourglass(false);
-    var data = response.data || {};
+    var sheet = openSheet(function () { return countrySheetHtml(iso, response.data || {}); }, function () { return countryName(iso); });
+    sheet.addEventListener('click', function (event) {
+      if (event.target === sheet || event.target.id === 'ow-sheet-close') { sheet.remove(); state.selectedCountry = null; if (mapApi) mapApi.select(null); }
+    });
+    try { sheet.querySelector('#ow-sheet-close').focus({ preventScroll: true }); } catch (e) {}
+  }
+  function countrySheetHtml(iso, data) {
     var sum = data.summary || {};
     var visits = data.visits_available !== false;
     var kv = function (value, opts) { var k = LIB.kpiText ? LIB.kpiText(value, opts) : { text: num(value), state: 'ok' }; return k.state === 'ok' ? k.text : '<span class="ow-kpi-none">' + esc(k.text) + '</span>'; };
     var v = function (key) { return visits ? kv(sum[key] == null ? 0 : sum[key]) : kv(null, { unavailable: true }); };
     var human = +sum.visits_human || 0, regNew = +sum.registered_new || 0;
     var conversion = visits && human >= 20 ? (Math.round((regNew / human) * 10000) / 100) + '%' : kv(null, { insufficient: true });
-    var netLabels = { isp: 'Домашний провайдер', mobile: 'Мобильный оператор', hosting: 'Дата-центр', vpn: 'VPN', tor: 'Tor', education: 'Учебная сеть', business: 'Корпоративная', unknown: 'Не определено' };
-    var old = ovEl.querySelector('#ow-sheet'); if (old) old.remove();
-    var sheet = D.createElement('div');
-    sheet.className = 'ow-sheet';
-    sheet.id = 'ow-sheet';
-    sheet.setAttribute('role', 'dialog');
-    sheet.setAttribute('aria-label', countryName(iso));
-    sheet.innerHTML = '<div class="ow-sheet-in">' +
+    return '<div class="ow-sheet-in">' +
       '<div class="ow-country-h"><span class="ow-flag">' + esc(LIB.flagEmoji ? LIB.flagEmoji(iso) : '') + '</span><span>' + esc(countryName(iso)) + '</span>' +
         '<code>' + esc(iso) + '</code>' + (continentOf(iso) ? '<span class="ow-tag">' + esc(label(LIB.CONTINENT_RU, continentOf(iso))) + '</span>' : '') +
         (parentNote(iso) ? '<span class="ow-tag">' + esc(parentNote(iso)) + '</span>' : '') +
         how('countryMap') + '</div>' +
       '<div class="ow-cards">' +
-        card('Обычные визиты', v('visits_human'), 'без обнаруженных признаков автоматизации', 'visitsHuman') +
-        card('Гостевые визиты', v('visits_guest'), 'визиты без входа в аккаунт', 'guests') +
-        card('Авторизованные визиты', v('visits_signed_in'), 'визиты с входом в аккаунт · это визиты, не люди', 'authorizedVisits') +
-        card('Зарегистрированные', kv(sum.registered), 'точно · новых за период: ' + num(sum.registered_new), 'registered') +
-        card('FREE', kv(sum.free), 'точно', 'levels') +
-        card('PRO', kv(sum.pro), 'активная подписка', 'levels') +
-        card('Lifetime', kv(sum.lifetime), 'бессрочный доступ', 'levels') +
-        card('Покупатели', kv(sum.buyers), 'покупок за период: ' + num(sum.purchases), 'buyers') +
-        card('Домохозяйства', kv(sum.households), 'оценка · с согласием', 'households') +
-        card('Посетители с согласием', kv(sum.visitors), num(sum.guests) + ' гостевых профилей', 'consented') +
-        card('Web', v('web'), 'обычные визиты') + card('iOS', v('ios'), 'обычные визиты') + card('Android', v('android'), 'обычные визиты') +
-        card('Согласились', kv(sum.consent_accepted), 'решений за период', 'consent') +
-        card('Отклонили', kv(sum.consent_declined), 'решений за период', 'consent') +
-        card('Боты', v('visits_bot'), 'объявленные краулеры', 'traffic') +
-        card('Подозрительный трафик', v('visits_suspicious'), 'VPN / Tor / дата-центры: ' + (visits ? num(sum.visits_proxy) : '—'), 'traffic') +
-        card('Конверсия в регистрацию', conversion, 'оценка · регистрации ÷ обычные визиты', 'conversion') +
+        card('Обычные визиты', v('visits_human'), esc(t('без обнаруженных признаков автоматизации')), 'visitsHuman') +
+        card('Гостевые визиты', v('visits_guest'), esc(t('визиты без входа в аккаунт')), 'guests') +
+        card('Авторизованные визиты', v('visits_signed_in'), esc(t('визиты с входом в аккаунт · это визиты, не люди')), 'authorizedVisits') +
+        card('Зарегистрированные', kv(sum.registered), esc(t('точно · новых за период: {{0}}', num(sum.registered_new))), 'registered') +
+        card('FREE', kv(sum.free), esc(t('точно')), 'levels') +
+        card('PRO', kv(sum.pro), esc(t('активная подписка')), 'levels') +
+        card('Lifetime', kv(sum.lifetime), esc(t('бессрочный доступ')), 'levels') +
+        card('Покупатели', kv(sum.buyers), esc(t('покупок за период: {{0}}', num(sum.purchases))), 'buyers') +
+        card('Домохозяйства', kv(sum.households), esc(t('оценка · с согласием')), 'households') +
+        card('Посетители с согласием', kv(sum.visitors), esc(t('{{0}} гостевых профилей', num(sum.guests))), 'consented') +
+        card('Web', v('web'), esc(t('обычные визиты'))) + card('iOS', v('ios'), esc(t('обычные визиты'))) + card('Android', v('android'), esc(t('обычные визиты'))) +
+        card('Согласились', kv(sum.consent_accepted), esc(t('решений за период')), 'consent') +
+        card('Отклонили', kv(sum.consent_declined), esc(t('решений за период')), 'consent') +
+        card('Боты', v('visits_bot'), esc(t('объявленные краулеры')), 'traffic') +
+        card('Подозрительный трафик', v('visits_suspicious'), esc(t('VPN / Tor / дата-центры: {{0}}', visits ? num(sum.visits_proxy) : '—')), 'traffic') +
+        card('Конверсия в регистрацию', conversion, esc(t('оценка · регистрации ÷ обычные визиты')), 'conversion') +
       '</div>' +
-      (visits ? lineChart(data.timeseries || [], ['human', 'suspicious', 'bot'], ['Обычные', 'Подозрительный', 'Боты']) : '<div class="ow-empty">Счётчики визитов ещё не накоплены</div>') +
+      (visits ? lineChart(data.timeseries || [], ['human', 'suspicious', 'bot'], ['Обычные', 'Подозрительный', 'Боты']) : '<div class="ow-empty">' + esc(t('Счётчики визитов ещё не накоплены')) + '</div>') +
       lineChart(data.visitors_timeseries || [], ['visitors', 'sessions'], ['Посетители с согласием', 'Сессии']) +
       barList(data.platforms, { web: 'Веб', ios: 'iOS', android: 'Android' }, null, 'Платформы (все визиты)') +
-      barList(data.network_types, netLabels, 'traffic', 'Тип сети') +
-      '<div class="ow-block"><div class="ow-block-h">Лотереи</div>' +
+      barList(data.network_types, NET_LABELS, 'traffic', 'Тип сети') +
+      '<div class="ow-block"><div class="ow-block-h">' + esc(t('Лотереи')) + '</div>' +
         table([{ title: 'Лотерея', key: 'lottery' }, { title: 'Сессий', key: 'sessions', numeric: true }], data.top_lotteries, 'Нет данных с согласием') + '</div>' +
-      '<div class="ow-block"><div class="ow-block-h">Функции</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + esc(t('Функции')) + '</div>' +
         table([{ title: 'Функция', key: 'feature', html: function (r) { return esc(label(LIB.EVENT_RU, r.feature)); } }, { title: 'Сессий', key: 'sessions', numeric: true }], data.top_features, 'Нет данных с согласием') + '</div>' +
       lineChart(data.consent_timeseries || [], ['accepted', 'declined'], ['Согласились', 'Отклонили']) +
-      '<button class="ow-btn ow-btn-primary" id="ow-sheet-close" type="button" style="margin-top:10px">Закрыть</button></div>';
-    ovEl.appendChild(sheet);
-    sheet.addEventListener('click', function (event) {
-      if (event.target === sheet || event.target.id === 'ow-sheet-close') { sheet.remove(); state.selectedCountry = null; if (mapApi) mapApi.select(null); }
-    });
-    try { sheet.querySelector('#ow-sheet-close').focus({ preventScroll: true }); } catch (e) {}
+      '<button class="ow-btn ow-btn-primary" id="ow-sheet-close" type="button" style="margin-top:10px">' + esc(t('Закрыть')) + '</button></div>';
   }
 
-  function openPopup(title, html) {
-    closePopup();
-    var pop = D.createElement('div');
-    pop.className = 'ow-pop';
-    pop.id = 'ow-pop';
-    pop.innerHTML = '<h3>' + esc(title) + '</h3><p>' + html + '</p>';
-    var close = D.createElement('button');
-    close.className = 'ow-btn';
-    close.type = 'button';
-    close.textContent = 'Закрыть';
-    close.style.marginTop = '8px';
-    close.addEventListener('click', closePopup);
-    pop.appendChild(close);
-    ovEl.appendChild(pop);
-  }
-  function closePopup() { var pop = ovEl.querySelector('#ow-pop'); if (pop) pop.remove(); }
-
-  // ── person sheet ───────────────────────────────────────────────────────────────────────────
-  async function openPerson(personId) {
-    setHourglass(true, 'Загрузка карточки…');
-    var response = null;
-    try { response = await api({ section: 'person', params: params({ person: personId }) }); }
-    catch (error) { setHourglass(false); openPopup('Ошибка', esc(error.message || 'не удалось загрузить')); return; }
-    setHourglass(false);
-    var data = response.data || {};
-    var person = data.person || {};
+  // Sheets and popups keep the function that renders them (`__render`), so a language switch
+  // re-renders what is on screen from the data it was opened with — no second request.
+  function openSheet(render, name) {
+    var old = ovEl.querySelector('#ow-sheet'); if (old) old.remove();
     var sheet = D.createElement('div');
     sheet.className = 'ow-sheet';
     sheet.id = 'ow-sheet';
-    sheet.innerHTML = '<div class="ow-sheet-in">' +
+    sheet.setAttribute('role', 'dialog');
+    sheet.__render = function () {
+      sheet.innerHTML = render();
+      if (name) sheet.setAttribute('aria-label', name());
+    };
+    sheet.__render();
+    ovEl.appendChild(sheet);
+    return sheet;
+  }
+
+  // The one popup of the panel (ⓘ notes, errors): centred in the viewport by .ow-pop-back.
+  function openPopup(title, body) {
+    closePopup();
+    var back = D.createElement('div');
+    back.className = 'ow-pop-back';
+    back.id = 'ow-pop-back';
+    var pop = D.createElement('div');
+    pop.className = 'ow-pop';
+    pop.id = 'ow-pop';
+    pop.setAttribute('role', 'dialog');
+    pop.setAttribute('aria-modal', 'true');
+    pop.setAttribute('aria-labelledby', 'ow-pop-title');
+    back.__render = function () {
+      pop.innerHTML = '<h3 id="ow-pop-title">' + esc(t(title)) + '</h3><p>' + (typeof body === 'function' ? body() : String(body || '')) + '</p>';
+      var close = D.createElement('button');
+      close.className = 'ow-btn';
+      close.type = 'button';
+      close.textContent = t('Закрыть');
+      close.style.marginTop = '8px';
+      close.addEventListener('click', closePopup);
+      pop.appendChild(close);
+    };
+    back.__render();
+    back.appendChild(pop);
+    // A tap on the dimmed backdrop (not on the card) closes the note, like Escape and «Закрыть».
+    back.addEventListener('click', function (event) { if (event.target === back) closePopup(); });
+    ovEl.appendChild(back);
+    try { pop.querySelector('.ow-btn').focus({ preventScroll: true }); } catch (e) {}
+  }
+  function closePopup() { var back = ovEl && ovEl.querySelector('#ow-pop-back'); if (back) back.remove(); }
+  // Innermost layer first: the owner notification centre, then an ⓘ note (above a sheet), then a
+  // sheet. Returns false when only the panel itself is left.
+  function closeInnermost() {
+    try {
+      if (W.LotoOwnerNotifications && W.LotoOwnerNotifications._state().open) { W.LotoOwnerNotifications.close(); return true; }
+    } catch (e) {}
+    if (ovEl.querySelector('#ow-pop-back')) { closePopup(); return true; }
+    var sheet = ovEl.querySelector('#ow-sheet');
+    if (sheet) { sheet.remove(); state.selectedCountry = null; if (mapApi) mapApi.select(null); return true; }
+    return false;
+  }
+
+  // ── person sheet ───────────────────────────────────────────────────────────────────────────
+  async function openPerson(personId) {
+    setHourglass(true, function () { return t('Загрузка карточки…'); });
+    var response = null;
+    try { response = await api({ section: 'person', params: params({ person: personId }) }); }
+    catch (error) { setHourglass(false); openPopup('Ошибка', function () { return esc(error.message ? tx(error.message) : t('не удалось загрузить')); }); return; }
+    setHourglass(false);
+    var sheet = openSheet(function () { return personSheetHtml(response.data || {}); }, function () { return t('Карточка человека'); });
+    sheet.addEventListener('click', function (event) {
+      if (event.target === sheet || event.target.id === 'ow-sheet-close') sheet.remove();
+    });
+  }
+  function personSheetHtml(data) {
+    var person = data.person || {};
+    return '<div class="ow-sheet-in">' +
       '<div class="ow-block-h">' + esc(label(LIB.KIND_RU, person.kind)) + ' · ' + esc(String(person.person_id || '').slice(0, 8)) +
         ' ' + confidenceChip(person.confidence, person.evidence) + '</div>' +
       '<div class="ow-cards">' +
@@ -929,7 +1043,7 @@
         card('Устройства', num(person.devices)) +
         card('Место', esc(place(person))) +
       '</div>' +
-      '<div class="ow-block"><div class="ow-block-h">Устройства</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + esc(t('Устройства')) + '</div>' +
         table([
           { title: 'ID', key: 'short' },
           { title: 'Тип', key: 'kind', html: function (r) { return esc(r.kind || '—'); } },
@@ -938,87 +1052,91 @@
           { title: 'Профилей', key: 'profiles', numeric: true },
           { title: 'Уверенность', key: 'confidence', html: function (r) { return confidenceChip(r.confidence, r.evidence); } }
         ], data.devices || [], 'Нет устройств') + '</div>' +
-      '<div class="ow-block"><div class="ow-block-h">Сессии</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + esc(t('Сессии')) + '</div>' +
         table([
           { title: 'Начало', key: 'started_at', html: function (r) { return esc(timeText(r.started_at)); } },
           { title: 'Длит.', key: 'duration_ms', html: function (r) { return esc(dur(r.duration_ms)); }, numeric: true },
-          { title: 'Активно', key: 'active_ms', html: function (r) { return esc(dur(r.active_ms)) + (r.active_source === 'estimated' ? ' <span class="ow-conf ow-conf-mid" title="Оценка по интервалам между действиями">оц.</span>' : ''); }, numeric: true },
+          { title: 'Активно', key: 'active_ms', html: function (r) { return esc(dur(r.active_ms)) + (r.active_source === 'estimated' ? ' <span class="ow-conf ow-conf-mid" title="' + esc(t('Оценка по интервалам между действиями')) + '">' + esc(t('оц.')) + '</span>' : ''); }, numeric: true },
           { title: 'События', key: 'events', numeric: true },
           { title: 'Вход', key: 'entry' },
           { title: 'Источник', key: 'channel', html: function (r) { return esc(label(LIB.CHANNEL_RU, r.channel)); } },
           { title: 'Место', key: 'city', html: function (r) { return esc(place(r)); } },
           { title: 'Устройство', key: 'device', html: function (r) { return esc([r.device, r.os, r.browser].filter(Boolean).join(' · ')); } }
         ], data.sessions || [], 'Нет сессий') + '</div>' +
-      '<div class="ow-block"><div class="ow-block-h">Путь</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + esc(t('Путь')) + '</div>' +
         ((data.journey || []).length
           ? (data.journey || []).map(function (step) {
             return '<div class="ow-jr"><b>' + esc(clockText(step.at).slice(0, 5)) + '</b><span>' +
               esc(label(LIB.EVENT_RU, step.event)) +
               (step.lottery ? ' · ' + esc(step.lottery) : '') +
-              (step.model ? ' · модель ' + esc(step.model) : '') +
-              (step.props && step.props.rows ? ' · ' + num(step.props.rows) + ' ряд.' : '') +
+              (step.model ? ' · ' + esc(t('модель {{0}}', step.model)) : '') +
+              (step.props && step.props.rows ? ' · ' + esc(t('{{0}} ряд.', num(step.props.rows))) : '') +
               '</span></div>';
           }).join('')
-          : '<div class="ow-empty">Нет событий</div>') +
+          : '<div class="ow-empty">' + esc(t('Нет событий')) + '</div>') +
       '</div>' +
-      '<button class="ow-btn ow-btn-primary" id="ow-sheet-close" type="button" style="margin-top:10px">Закрыть</button></div>';
-    ovEl.appendChild(sheet);
-    sheet.addEventListener('click', function (event) {
-      if (event.target === sheet || event.target.id === 'ow-sheet-close') sheet.remove();
-    });
+      '<button class="ow-btn ow-btn-primary" id="ow-sheet-close" type="button" style="margin-top:10px">' + esc(t('Закрыть')) + '</button></div>';
   }
 
   // ── sections ───────────────────────────────────────────────────────────────────────────────
+  // Titles passed to card / kcard / dayCard / block / table / barList / lineChart are Russian
+  // sources (the helpers translate them; data-kpi keeps the source as a stable hook). Sub-lines are
+  // HTML the caller builds, so the caller translates them: et() = esc(t()).
+  function et() { return esc(t.apply(null, arguments)); }
+  var PLATFORM_RU = { web: 'Веб', ios: 'iOS', android: 'Android' };
+  var CONSENT_STATE_RU = { accepted: 'Согласились', declined: 'Отклонили', undecided: 'Ещё не решили' };
   // KPI card: value text or an honest empty state, a precision tag and a «how» note.
   function kcard(title, value, sub, howKey, precision, opts) {
-    var k = opts && opts.text ? (value ? { text: String(value), state: 'ok' } : { text: 'нет данных', state: 'none' }) : (LIB.kpiText ? LIB.kpiText(value, opts) : { text: num(value), state: 'ok' });
+    var k = opts && opts.text ? (value ? { text: String(value), state: 'ok' } : { text: t('нет данных'), state: 'none' }) : (LIB.kpiText ? LIB.kpiText(value, opts) : { text: num(value), state: 'ok' });
     var text = k.state === 'ok' ? esc(k.text) + (opts && opts.suffix ? opts.suffix : '') : '<span class="ow-kpi-none">' + esc(k.text) + '</span>';
     var tag = precision ? '<span class="ow-tag ow-tag-' + esc(precision) + '">' + esc(label(LIB.PRECISION_RU, precision)) + '</span>' : '';
     return '<div class="ow-card ow-kpi" data-kpi="' + esc(title) + '">' +
-      '<div class="ow-card-h"><span>' + esc(title) + '</span>' + (howKey ? how(howKey) : '') + tag + '</div>' +
+      '<div class="ow-card-h"><span>' + et(title) + '</span>' + (howKey ? how(howKey) : '') + tag + '</div>' +
       '<div class="ow-card-v">' + text + '</div>' +
       (sub ? '<div class="ow-card-s">' + sub + '</div>' : '') + '</div>';
   }
   function renderKpi() {
     var response = state.data.kpi;
-    var head = '<div class="ow-kpi-h"><h2>Ключевые показатели</h2>' +
-      ['exact', 'filtered', 'consented', 'estimate'].map(function (p) { return '<span class="ow-tag ow-tag-' + p + '">' + esc(LIB.PRECISION_RU ? LIB.PRECISION_RU[p] : p) + '</span>'; }).join('') + '</div>';
+    var head = '<div class="ow-kpi-h"><h2>' + et('Ключевые показатели') + '</h2>' +
+      ['exact', 'filtered', 'consented', 'estimate'].map(function (p) { return '<span class="ow-tag ow-tag-' + p + '">' + esc(label(LIB.PRECISION_RU, p)) + '</span>'; }).join('') + '</div>';
     if (!response) {
       return '<div class="ow-block" id="ow-kpi">' + head +
-        '<div class="ow-err"><span>' + esc(state.kpiError ? errorText(state.kpiError) : 'Нет данных') + '</span>' +
-        '<button class="ow-btn" type="button" data-kpi-retry>Повторить</button></div></div>';
+        '<div class="ow-err"><span>' + esc(state.kpiError ? errorText(state.kpiError) : t('Нет данных')) + '</span>' +
+        '<button class="ow-btn" type="button" data-kpi-retry>' + et('Повторить') + '</button></div></div>';
     }
     var d = response.data || {};
-    var a = d.accounts || {}, t = d.traffic || {}, c = d.consented || {}, cs = d.consent || {}, cv = d.conversion || {};
+    var a = d.accounts || {}, tr = d.traffic || {}, c = d.consented || {}, cs = d.consent || {}, cv = d.conversion || {};
     var levels = a.levels || {}, rv = a.revenue || {};
     var grossKpi = moneyList(rv.gross_by_currency || []), netKpi = moneyList(rv.net_by_currency || [], 'amount'), refundKpi = moneyList(rv.refunds_by_currency || []);
-    var tv = function (key) { return t.available ? (t[key] == null ? 0 : t[key]) : null; };
-    var un = { unavailable: !t.available };
+    var tv = function (key) { return tr.available ? (tr[key] == null ? 0 : tr[key]) : null; };
+    var un = { unavailable: !tr.available };
     var pct = function (value) { return value == null ? null : value; };
+    var notSales = rv.promo_grants || rv.trial_starts || rv.sandbox_events
+      ? '<br>' + et('не продажи: промо {{0}} · пробных {{1}} · sandbox {{2}}', num(rv.promo_grants), num(rv.trial_starts), num(rv.sandbox_events)) : '';
     return '<div class="ow-block" id="ow-kpi">' + head + '<div class="ow-cards">' +
-      kcard('Обычные визиты', tv('human'), t.available ? num(t.visits) + ' всего · ' + pctText(t.human, t.visits) + ' без обнаруженных признаков автоматизации' : 'счётчики ещё не накоплены', 'visitsHuman', 'filtered', un) +
-      kcard('Гостевые визиты', tv('guest'), 'визиты без входа в аккаунт', 'guests', 'filtered', un) +
-      kcard('Авторизованные визиты', tv('signed_in'), 'визиты с входом в аккаунт · это визиты, не люди', 'authorizedVisits', 'filtered', un) +
-      kcard('Зарегистрированные аккаунты', a.registered_total, '+' + num(a.registered_new) + ' за период · владелец: ' + num(a.owners) + ' · анонимных сессий: ' + num(a.anonymous_accounts), 'registered', 'exact') +
-      kcard('Новые регистрации', a.registered_new, 'за выбранный период', 'registered', 'exact') +
-      kcard('FREE', levels.free, 'без активной подписки', 'levels', 'exact') +
-      kcard('PRO', levels.pro, 'истёкших: ' + num(levels.expired) + ' · пробных: ' + num(a.trials_active), 'levels', 'exact') +
-      kcard('Lifetime', levels.lifetime, 'бессрочный доступ', 'levels', 'exact') +
-      kcard('Покупатели', a.paying_customers, 'подписок активно: ' + num(a.active_subscriptions) + ' · тестовых аккаунтов: ' + num(a.test_accounts), 'buyers', 'exact') +
-      kcard('Покупки за период', a.purchase_events != null ? a.purchase_events : a.purchases, 'оплачено · продления: ' + (a.renewals == null ? 'нет данных' : num(a.renewals)) + ' · возвраты: ' + num(rv.refund_events) + (rv.promo_grants || rv.trial_starts || rv.sandbox_events ? '<br>не продажи: промо ' + num(rv.promo_grants) + ' · пробных ' + num(rv.trial_starts) + ' · sandbox ' + num(rv.sandbox_events) : ''), 'buyers', 'exact') +
-      kcard('Сумма покупок (gross)', grossKpi || null, (rv.gross_usd != null ? esc(usdEstimate(rv.gross_usd)) + ' · ' : '') + 'в валюте покупателя, до удержаний' + (refundKpi ? ' · возвраты: ' + esc(refundKpi) : ''), 'revenue', 'exact', { text: true }) +
-      kcard('Чистыми (net)', netKpi || null, +rv.net_unknown ? 'RevenueCat не сообщил удержания для ' + num(rv.net_unknown) + ' из ' + num((+rv.net_known || 0) + (+rv.net_unknown || 0)) : (rv.net_usd != null ? esc(usdEstimate(rv.net_usd)) : 'после удержаний магазина по данным RevenueCat'), 'netRevenue', 'exact', { text: true }) +
-      kcard('Конверсия в регистрацию', pct(cv.signup_rate_pct), 'регистрации ÷ обычные визиты · нужно ≥ ' + num(cv.min_visits) + ' визитов', 'conversion', 'estimate', { insufficient: true, suffix: '%' }) +
-      kcard('Конверсия в покупку', pct(cv.purchase_rate_pct), 'покупатели ÷ аккаунты · нужно ≥ ' + num(cv.min_registered) + ' аккаунтов', 'conversion', 'estimate', { insufficient: true, suffix: '%' }) +
-      kcard('Посетители с согласием', c.visitors, num(c.guest_profiles) + ' гостевых профилей · ' + num(c.registered_profiles) + ' с аккаунтом · ' + num(c.unknown_visitors) + ' без признаков', 'consented', 'consented') +
-      kcard('Домохозяйства', c.households, 'по домашним сетям согласившихся', 'households', 'estimate') +
-      kcard('Боты', tv('bot'), 'объявленные краулеры', 'traffic', 'filtered', un) +
-      kcard('Подозрительный трафик', tv('suspicious'), 'headless, дата-центры, VPN, Tor, всплески', 'traffic', 'filtered', un) +
-      kcard('Согласия', cs.accepted, 'отклонили: ' + num(cs.declined) + ' · стран известно: ' + num(cs.countries_known), 'consent', 'exact') +
+      kcard('Обычные визиты', tv('human'), tr.available ? et('{{0}} всего · {{1}} без обнаруженных признаков автоматизации', num(tr.visits), pctText(tr.human, tr.visits)) : et('счётчики ещё не накоплены'), 'visitsHuman', 'filtered', un) +
+      kcard('Гостевые визиты', tv('guest'), et('визиты без входа в аккаунт'), 'guests', 'filtered', un) +
+      kcard('Авторизованные визиты', tv('signed_in'), et('визиты с входом в аккаунт · это визиты, не люди'), 'authorizedVisits', 'filtered', un) +
+      kcard('Зарегистрированные аккаунты', a.registered_total, et('+{{0}} за период · владелец: {{1}} · анонимных сессий: {{2}}', num(a.registered_new), num(a.owners), num(a.anonymous_accounts)), 'registered', 'exact') +
+      kcard('Новые регистрации', a.registered_new, et('за выбранный период'), 'registered', 'exact') +
+      kcard('FREE', levels.free, et('без активной подписки'), 'levels', 'exact') +
+      kcard('PRO', levels.pro, et('истёкших: {{0}} · пробных: {{1}}', num(levels.expired), num(a.trials_active)), 'levels', 'exact') +
+      kcard('Lifetime', levels.lifetime, et('бессрочный доступ'), 'levels', 'exact') +
+      kcard('Покупатели', a.paying_customers, et('подписок активно: {{0}} · тестовых аккаунтов: {{1}}', num(a.active_subscriptions), num(a.test_accounts)), 'buyers', 'exact') +
+      kcard('Покупки за период', a.purchase_events != null ? a.purchase_events : a.purchases, et('оплачено · продления: {{0}} · возвраты: {{1}}', a.renewals == null ? t('нет данных') : num(a.renewals), num(rv.refund_events)) + notSales, 'buyers', 'exact') +
+      kcard('Сумма покупок (gross)', grossKpi || null, (rv.gross_usd != null ? esc(usdEstimate(rv.gross_usd)) + ' · ' : '') + et('в валюте покупателя, до удержаний') + (refundKpi ? ' · ' + et('возвраты: {{0}}', refundKpi) : ''), 'revenue', 'exact', { text: true }) +
+      kcard('Чистыми (net)', netKpi || null, +rv.net_unknown ? et('RevenueCat не сообщил удержания для {{0}} из {{1}}', num(rv.net_unknown), num((+rv.net_known || 0) + (+rv.net_unknown || 0))) : (rv.net_usd != null ? esc(usdEstimate(rv.net_usd)) : et('после удержаний магазина по данным RevenueCat')), 'netRevenue', 'exact', { text: true }) +
+      kcard('Конверсия в регистрацию', pct(cv.signup_rate_pct), et('регистрации ÷ обычные визиты · нужно ≥ {{0}} визитов', num(cv.min_visits)), 'conversion', 'estimate', { insufficient: true, suffix: '%' }) +
+      kcard('Конверсия в покупку', pct(cv.purchase_rate_pct), et('покупатели ÷ аккаунты · нужно ≥ {{0}} аккаунтов', num(cv.min_registered)), 'conversion', 'estimate', { insufficient: true, suffix: '%' }) +
+      kcard('Посетители с согласием', c.visitors, et('{{0}} гостевых профилей · {{1}} с аккаунтом · {{2}} без признаков', num(c.guest_profiles), num(c.registered_profiles), num(c.unknown_visitors)), 'consented', 'consented') +
+      kcard('Домохозяйства', c.households, et('по домашним сетям согласившихся'), 'households', 'estimate') +
+      kcard('Боты', tv('bot'), et('объявленные краулеры'), 'traffic', 'filtered', un) +
+      kcard('Подозрительный трафик', tv('suspicious'), et('headless, дата-центры, VPN, Tor, всплески'), 'traffic', 'filtered', un) +
+      kcard('Согласия', cs.accepted, et('отклонили: {{0}} · стран известно: {{1}}', num(cs.declined), num(cs.countries_known)), 'consent', 'exact') +
     '</div>' +
-    (t.available ? lineChart(t.timeseries || [], ['human', 'suspicious', 'bot'], ['Обычные', 'Подозрительный', 'Боты']) : '') +
-    (t.available ? barList(t.by_platform, { web: 'Веб', ios: 'iOS', android: 'Android' }, 'visitsHuman', 'Обычные визиты по платформам') : '') +
-    (t.available ? barList(t.by_consent, { accepted: 'Согласились', declined: 'Отклонили', undecided: 'Ещё не решили' }, 'consent', 'Обычные визиты по состоянию согласия') : '') +
+    (tr.available ? lineChart(tr.timeseries || [], ['human', 'suspicious', 'bot'], ['Обычные', 'Подозрительный', 'Боты']) : '') +
+    (tr.available ? barList(tr.by_platform, PLATFORM_RU, 'visitsHuman', 'Обычные визиты по платформам') : '') +
+    (tr.available ? barList(tr.by_consent, CONSENT_STATE_RU, 'consent', 'Обычные визиты по состоянию согласия') : '') +
     '</div>';
   }
 
@@ -1027,33 +1145,33 @@
     var engagement = data.engagement || {}, geography = data.geography || {}, live = data.live || {};
     var previous = data.previous || null;
     return renderKpi() + '<div class="ow-cards" style="margin-top:12px">' +
-      card('Оценка живой аудитории', num(people.estimated_min) + '–' + num(people.estimated_max), 'подтверждённые + вероятные … + каждое устройство отдельно', 'estimated') +
-      card('Подтверждённые люди', num(people.verified), 'вошли в аккаунт', 'verified', previous ? null : null) +
-      card('Вероятные люди', num(people.probable), 'анонимные, сгруппированы по нижней границе', 'probable') +
-      card('Неизвестные посетители', num(people.unknown_visitors), 'нет признаков взаимодействия', 'unknown') +
-      card('Новые', num(people.new), 'первый визит внутри периода', 'newPeople') +
-      card('Вернувшиеся', num(people.returning), 'были известны до периода', 'returningPeople') +
-      card('Приходили в разные дни', num(people.returned_another_day), 'активны в 2+ календарных дня', 'returnedAnotherDay') +
-      card('Дней активности в среднем', String(people.active_days_avg == null ? '—' : people.active_days_avg), 'на человека за период') +
-      card('Активны сейчас', num(live.active_now), 'события за 5 минут', 'live') +
-      card('Домохозяйства', num(structure.households), 'одна домашняя сеть', 'households') +
-      card('Устройства', num(structure.devices), num(structure.shared_devices) + ' общих (несколько аккаунтов)', 'devices') +
-      card('Профили браузера', num(structure.browser_profiles), 'установки и профили', 'profiles') +
-      card('Сессии', num(structure.sessions), 'таймаут 30 минут', 'sessions', previous ? deltaOf(structure.sessions, previous.sessions) : null) +
-      card('Повторные сессии', num(structure.repeat_sessions), 'сверх первой на человека', 'repeatSessions') +
-      card('События', num(structure.events), previous ? '' : '', null, previous ? deltaOf(structure.events, previous.events) : null) +
-      card('Активное время в среднем', dur(engagement.avg_active_ms), num(engagement.measured_sessions) + ' измерено / ' + num(engagement.estimated_sessions) + ' оценка', 'active') +
-      card('Вовлечённые сессии', num(engagement.engaged_sessions), pctText(engagement.engaged_sessions, structure.sessions) + ' от всех') +
-      card('Исключено: владелец и тесты', num(excluded.owner_test_profiles) + ' проф. / ' + num(excluded.owner_test_sessions) + ' сес.', 'не входят в аудиторию', 'excluded') +
-      card('Исключено: боты', num(excluded.bot_profiles) + ' проф. / ' + num(excluded.bot_sessions) + ' сес.', 'краулеры и автоматизация', 'excluded') +
-      card('Страны · регионы · города', num(geography.countries) + ' · ' + num(geography.regions) + ' · ' + num(geography.cities), num(geography.unknown_sessions) + ' сессий без гео', 'geo') +
+      card('Оценка живой аудитории', num(people.estimated_min) + '–' + num(people.estimated_max), et('подтверждённые + вероятные … + каждое устройство отдельно'), 'estimated') +
+      card('Подтверждённые люди', num(people.verified), et('вошли в аккаунт'), 'verified', previous ? null : null) +
+      card('Вероятные люди', num(people.probable), et('анонимные, сгруппированы по нижней границе'), 'probable') +
+      card('Неизвестные посетители', num(people.unknown_visitors), et('нет признаков взаимодействия'), 'unknown') +
+      card('Новые', num(people.new), et('первый визит внутри периода'), 'newPeople') +
+      card('Вернувшиеся', num(people.returning), et('были известны до периода'), 'returningPeople') +
+      card('Приходили в разные дни', num(people.returned_another_day), et('активны в 2+ календарных дня'), 'returnedAnotherDay') +
+      card('Дней активности в среднем', people.active_days_avg == null ? '—' : esc((+people.active_days_avg).toLocaleString(intl())), et('на человека за период')) +
+      card('Активны сейчас', num(live.active_now), et('события за 5 минут'), 'live') +
+      card('Домохозяйства', num(structure.households), et('одна домашняя сеть'), 'households') +
+      card('Устройства', num(structure.devices), et('{{0}} общих (несколько аккаунтов)', num(structure.shared_devices)), 'devices') +
+      card('Профили браузера', num(structure.browser_profiles), et('установки и профили'), 'profiles') +
+      card('Сессии', num(structure.sessions), et('таймаут 30 минут'), 'sessions', previous ? deltaOf(structure.sessions, previous.sessions) : null) +
+      card('Повторные сессии', num(structure.repeat_sessions), et('сверх первой на человека'), 'repeatSessions') +
+      card('События', num(structure.events), '', null, previous ? deltaOf(structure.events, previous.events) : null) +
+      card('Активное время в среднем', esc(dur(engagement.avg_active_ms)), et('{{0}} измерено / {{1}} оценка', num(engagement.measured_sessions), num(engagement.estimated_sessions)), 'active') +
+      card('Вовлечённые сессии', num(engagement.engaged_sessions), et('{{0}} от всех', pctText(engagement.engaged_sessions, structure.sessions))) +
+      card('Исключено: владелец и тесты', et('{{0}} проф. / {{1}} сес.', num(excluded.owner_test_profiles), num(excluded.owner_test_sessions)), et('не входят в аудиторию'), 'excluded') +
+      card('Исключено: боты', et('{{0}} проф. / {{1}} сес.', num(excluded.bot_profiles), num(excluded.bot_sessions)), et('краулеры и автоматизация'), 'excluded') +
+      card('Страны · регионы · города', num(geography.countries) + ' · ' + num(geography.regions) + ' · ' + num(geography.cities), et('{{0}} сессий без гео', num(geography.unknown_sessions)), 'geo') +
     '</div>' +
     lineChart(data.timeseries || [], ['people', 'sessions'], ['Люди', 'Сессии']) +
     barList(data.people_by_channel, LIB.CHANNEL_RU, 'channels', 'Люди по первому источнику') +
     barList(data.channels, LIB.CHANNEL_RU, 'channels', 'Сессии по последнему источнику') +
-    '<div class="ow-block"><div class="ow-block-h">Свежесть данных</div>' +
-      '<div class="ow-bar"><span class="ow-bar-l">Последнее событие</span><span>' + esc(timeText((data.freshness || {}).latest_event)) + '</span><span></span></div>' +
-      '<div class="ow-bar"><span class="ow-bar-l">Последний разбор</span><span>' + esc(timeText((data.freshness || {}).latest_resolution)) + '</span><span></span></div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Свежесть данных') + '</div>' +
+      '<div class="ow-bar"><span class="ow-bar-l">' + et('Последнее событие') + '</span><span>' + esc(timeText((data.freshness || {}).latest_event)) + '</span><span></span></div>' +
+      '<div class="ow-bar"><span class="ow-bar-l">' + et('Последний разбор') + '</span><span>' + esc(timeText((data.freshness || {}).latest_resolution)) + '</span><span></span></div>' +
     '</div>';
   }
 
@@ -1073,51 +1191,51 @@
   function feedWhat(row) {
     if (row.kind === 'commerce') {
       var amount = row.price != null && row.currency ? ' · ' + esc(money(row.price, row.currency)) : '';
-      var net = row.net != null && row.currency ? ' · чистыми ' + esc(money(row.net, row.currency)) : '';
+      var net = row.net != null && row.currency ? ' · ' + et('чистыми {{0}}', money(row.net, row.currency)) : '';
       var kind = row.row_kind && row.row_kind !== 'paid' ? ' <span class="ow-tag ow-tag-kind">' + esc(label(LIB.COMMERCE_KIND_RU, row.row_kind)) + '</span>' : '';
-      return esc(label(LIB.COMMERCE_RU, row.name)) + kind + (row.plan ? ' · ' + esc(row.plan) + ' мес.' : '') + amount + net + (row.reason ? ' · ' + esc(row.reason) : '');
+      return esc(label(LIB.COMMERCE_RU, row.name)) + kind + (row.plan ? ' · ' + et('{{0}} мес.', row.plan) : '') + amount + net + (row.reason ? ' · ' + esc(tx(row.reason)) : '');
     }
-    if (row.kind === 'account') return 'Новый аккаунт' + (row.platform ? ' · ' + esc(row.platform) : '');
+    if (row.kind === 'account') return et('Новый аккаунт') + (row.platform ? ' · ' + esc(label(PLATFORM_RU, row.platform)) : '');
     if (row.kind === 'visits') {
-      return 'Визиты за час: ' + num(row.count) + ' · ' + esc(label(LIB.TRAFFIC_RU, row.name)) +
-        (row.consent ? ' · ' + esc({ accepted: 'с согласием', declined: 'отклонили', undecided: 'без решения' }[row.consent] || row.consent) : '');
+      return et('Визиты за час: {{0}}', num(row.count)) + ' · ' + esc(label(LIB.TRAFFIC_RU, row.name)) +
+        (row.consent ? ' · ' + esc(label({ accepted: 'с согласием', declined: 'отклонили', undecided: 'без решения' }, row.consent)) : '');
     }
     var what = esc(label(LIB.EVENT_RU, row.name));
     if (row.lottery) what += ' · ' + esc(row.lottery);
-    if (row.model) what += ' · модель ' + esc(row.model);
-    if (row.rows) what += ' · ' + num(row.rows) + ' ряд.';
-    if (row.context && row.name === 'client_error') what += ' · ' + esc(row.context);
+    if (row.model) what += ' · ' + et('модель {{0}}', row.model);
+    if (row.rows) what += ' · ' + et('{{0}} ряд.', num(row.rows));
+    if (row.context && row.name === 'client_error') what += ' · ' + esc(tx(row.context));
     return what;
   }
   function renderLive(data) {
     var s = data.today_scalars || {};
     var rows = feedRows(data).map(function (row) { return Object.assign({}, row, { __click: false, __class: 'ow-feed-' + (row.kind || 'event') }); });
     var gross = moneyTextRu(s.revenue_text), net = moneyTextRu(s.net_text);
-    var notSales = [s.promo_grants ? 'промо ' + num(s.promo_grants) : '', s.trial_starts ? 'пробных ' + num(s.trial_starts) : '', s.sandbox_events ? 'sandbox ' + num(s.sandbox_events) : ''].filter(Boolean).join(' · ');
+    var notSales = [s.promo_grants ? t('промо {{0}}', num(s.promo_grants)) : '', s.trial_starts ? t('пробных {{0}}', num(s.trial_starts)) : '', s.sandbox_events ? t('sandbox {{0}}', num(s.sandbox_events)) : ''].filter(Boolean).join(' · ');
     var cards = '<div class="ow-cards">' +
-      card('Активны сейчас', '<span class="ow-live-dot" aria-hidden="true"></span>' + num(data.active_now), 'события за 5 минут · за 15 минут: ' + num(data.active_15m), 'live') +
-      card('Точные аккаунты сегодня', num(s.exact_accounts), 'один аккаунт = один пользователь', 'identity') +
-      card('Оценка уникальных гостей', num(s.estimated_unique_guests), 'с согласием: ' + num(s.guest_profiles_consented) + ' · дневных ключей: ' + num(s.guest_keys_daily), 'identity') +
-      card('Люди с согласием сегодня', num(s.people), 'новых: ' + num(s.new_people) + ' · вернувшихся: ' + num(s.returning_people), 'dayPeople') +
-      card('Визиты сегодня', data.visits_available === false ? '—' : num(s.visits_human), 'обычные · за последний час: ' + num(data.visits_last_hour), 'visitsHuman') +
-      card('Регистрации сегодня', num(s.registrations), 'точно', 'dayRegistrations') +
-      card('Страны сегодня', num(s.countries), 'по визитам и сессиям', 'dayLanguages') +
-      card('Покупки PRO сегодня', num(s.purchases), 'оплачено · продлений: ' + num(s.renewals) + ' · возвратов: ' + num(s.refunds) + ' · сбоев оплаты: ' + num(s.payment_failures) + (notSales ? '<br>не продажи: ' + esc(notSales) : ''), 'dayCommerce') +
-      card('Сумма покупок сегодня', gross ? esc(gross) : NONE, (s.gross_usd != null ? esc(usdEstimate(s.gross_usd)) + ' · ' : '') + 'в валюте покупателя, до удержаний', 'revenue') +
-      card('Чистыми сегодня', net ? esc(net) : NONE, s.net_unknown ? 'RevenueCat не сообщил удержания для ' + num(s.net_unknown) + ' из ' + num((+s.net_known || 0) + (+s.net_unknown || 0)) : (s.net_usd != null ? esc(usdEstimate(s.net_usd)) : 'после удержаний магазина по данным RevenueCat'), 'netRevenue') +
-      card('Owner-уведомления', num(data.unread_owner_notifications), 'непрочитанных', 'liveFeed') +
-      card('Обновление', 'каждые 15 с', 'пока открыт раздел · ' + esc(data.today || '')) +
+      card('Активны сейчас', '<span class="ow-live-dot" aria-hidden="true"></span>' + num(data.active_now), et('события за 5 минут · за 15 минут: {{0}}', num(data.active_15m)), 'live') +
+      card('Точные аккаунты сегодня', num(s.exact_accounts), et('один аккаунт = один пользователь'), 'identity') +
+      card('Оценка уникальных гостей', num(s.estimated_unique_guests), et('с согласием: {{0}} · дневных ключей: {{1}}', num(s.guest_profiles_consented), num(s.guest_keys_daily)), 'identity') +
+      card('Люди с согласием сегодня', num(s.people), et('новых: {{0}} · вернувшихся: {{1}}', num(s.new_people), num(s.returning_people)), 'dayPeople') +
+      card('Визиты сегодня', data.visits_available === false ? '—' : num(s.visits_human), et('обычные · за последний час: {{0}}', num(data.visits_last_hour)), 'visitsHuman') +
+      card('Регистрации сегодня', num(s.registrations), et('точно'), 'dayRegistrations') +
+      card('Страны сегодня', num(s.countries), et('по визитам и сессиям'), 'dayLanguages') +
+      card('Покупки PRO сегодня', num(s.purchases), et('оплачено · продлений: {{0}} · возвратов: {{1}} · сбоев оплаты: {{2}}', num(s.renewals), num(s.refunds), num(s.payment_failures)) + (notSales ? '<br>' + et('не продажи: {{0}}', notSales) : ''), 'dayCommerce') +
+      card('Сумма покупок сегодня', gross ? esc(gross) : none(), (s.gross_usd != null ? esc(usdEstimate(s.gross_usd)) + ' · ' : '') + et('в валюте покупателя, до удержаний'), 'revenue') +
+      card('Чистыми сегодня', net ? esc(net) : none(), s.net_unknown ? et('RevenueCat не сообщил удержания для {{0}} из {{1}}', num(s.net_unknown), num((+s.net_known || 0) + (+s.net_unknown || 0))) : (s.net_usd != null ? esc(usdEstimate(s.net_usd)) : et('после удержаний магазина по данным RevenueCat')), 'netRevenue') +
+      card('Owner-уведомления', num(data.unread_owner_notifications), et('непрочитанных'), 'liveFeed') +
+      card('Обновление', et('каждые 15 с'), et('пока открыт раздел') + ' · ' + esc(data.today || '')) +
     '</div>';
     var host = ovEl && ovEl.querySelector('#ow-section');
     var scroll = host ? host.scrollTop : 0;
     var html = cards +
-      '<div class="ow-block" id="ow-b-feed"><div class="ow-block-h">Живая активность сегодня' + how('liveFeed') + '<span class="ow-tag" style="margin-left:auto">' + num(rows.length) + ' записей</span></div>' +
+      '<div class="ow-block" id="ow-b-feed"><div class="ow-block-h">' + et('Живая активность сегодня') + how('liveFeed') + '<span class="ow-tag" style="margin-left:auto">' + et('{{0}} записей', num(rows.length)) + '</span></div>' +
       table([
         { title: 'Время', key: 'at', html: function (r) { return esc(clockText(r.at)); } },
         { title: 'Что', key: 'kind', html: function (r) { return '<span class="ow-tag">' + esc(label(LIB.FEED_KIND_RU, r.kind)) + '</span>'; } },
         { title: 'Событие', key: 'name', html: feedWhat },
         { title: 'Статус', key: 'status', html: function (r) { return statusChip(r.status); } },
-        { title: 'Платформа', key: 'platform', html: function (r) { return esc(label({ web: 'Веб', ios: 'iOS', android: 'Android' }, r.platform)); } },
+        { title: 'Платформа', key: 'platform', html: function (r) { return esc(label(PLATFORM_RU, r.platform)); } },
         { title: 'Язык', key: 'locale', html: function (r) { return esc(r.locale || '—'); } },
         { title: 'Страна', key: 'country', html: function (r) { return esc(r.country ? (LIB.flagEmoji ? LIB.flagEmoji(r.country) + ' ' : '') + countryName(r.country) : '—'); } },
         { title: 'Устройство', key: 'device', html: function (r) { return esc(r.device || (r.network ? label({ isp: 'провайдер', mobile: 'мобильная', hosting: 'дата-центр', vpn: 'VPN', tor: 'Tor' }, r.network) : '—')); } },
@@ -1132,7 +1250,7 @@
   function dayTitle(ymd) {
     try {
       var p = ymd.split('-');
-      return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).toLocaleDateString('ru-RU', { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' });
+      return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).toLocaleDateString(intl(), { timeZone: 'UTC', day: 'numeric', month: 'long', year: 'numeric' });
     } catch (e) { return ymd; }
   }
   function cmpLine(key, compare, opts) {
@@ -1147,12 +1265,12 @@
       var value = opts.money ? money(block.scalars[key], 'USD') : num(block.scalars[key]);
       var sign = d.abs > 0 ? '+' : '';
       var change = d.pct == null ? (d.abs === 0 ? '±0' : sign + num(d.abs)) : sign + num(d.abs) + ' · ' + sign + num(d.pct) + '%';
-      parts.push('<span>' + esc(title) + ' <b>' + esc(String(value)) + '</b> <span class="' + d.dir + '">' + esc(change) + '</span></span>');
+      parts.push('<span>' + et(title) + ' <b>' + esc(String(value)) + '</b> <span class="' + d.dir + '">' + esc(change) + '</span></span>');
     };
     one('вчера', compare.prev_day);
     one('нед. назад', compare.same_weekday);
     one('ср. 7 дн.', compare.avg7);
-    return parts.length ? '<div class="ow-cmp">' + (opts.label ? '<span class="ow-cmp-l">' + esc(opts.label) + ':</span>' : '') + parts.join('') + '</div>' : '';
+    return parts.length ? '<div class="ow-cmp">' + (opts.label ? '<span class="ow-cmp-l">' + et(opts.label) + ':</span>' : '') + parts.join('') + '</div>' : '';
   }
   // A day card: the value, its precision tag, the «how» note and the three comparisons.
   function dayCard(title, key, sub, howKey, precision, compare, opts) {
@@ -1161,17 +1279,21 @@
     var value = scalars[key];
     var text;
     if (opts.money) { var k = LIB.kpiText ? LIB.kpiText(value) : { text: num(value), state: 'ok' }; text = k.state === 'ok' ? esc(money(value, 'USD')) : '<span class="ow-kpi-none">' + esc(k.text) + '</span>'; }
-    else if (opts.unavailable) text = '<span class="ow-kpi-none">Нет данных</span>';
+    else if (opts.unavailable) text = '<span class="ow-kpi-none">' + et('Нет данных') + '</span>';
     else text = num(value);
     var tag = precision ? '<span class="ow-tag ow-tag-' + esc(precision) + '">' + esc(label(LIB.PRECISION_RU, precision)) + '</span>' : '';
     return '<div class="ow-card ow-kpi" data-kpi="' + esc(title) + '">' +
-      '<div class="ow-card-h"><span>' + esc(title) + '</span>' + (howKey ? how(howKey) : '') + tag + '</div>' +
+      '<div class="ow-card-h"><span>' + et(title) + '</span>' + (howKey ? how(howKey) : '') + tag + '</div>' +
       '<div class="ow-card-v">' + text + '</div>' +
       (sub ? '<div class="ow-card-s">' + sub + '</div>' : '') +
       (opts.unavailable ? '' : cmpLine(key, compare, opts)) + '</div>';
   }
   function block(id, title, howKey, inner, extraHead) {
-    return '<div class="ow-block" id="ow-b-' + id + '"><div class="ow-block-h">' + esc(title) + (howKey ? how(howKey) : '') + (extraHead || '') + '</div>' + inner + '</div>';
+    return '<div class="ow-block" id="ow-b-' + id + '"><div class="ow-block-h">' + et(title) + (howKey ? how(howKey) : '') + (extraHead || '') + '</div>' + inner + '</div>';
+  }
+  function moneyCard(kpi, title, howKey, tagClass, tagText, value, sub, cmp) {
+    return '<div class="ow-card ow-kpi" data-kpi="' + esc(kpi) + '"><div class="ow-card-h"><span>' + et(title) + '</span>' + how(howKey) + '<span class="ow-tag ' + tagClass + '">' + et(tagText) + '</span></div>' +
+      '<div class="ow-card-v">' + value + '</div><div class="ow-card-s">' + sub + '</div>' + (cmp || '') + '</div>';
   }
   function renderDay(data) {
     var s = data.scalars || {};
@@ -1179,82 +1301,81 @@
     var visits = data.visits_available !== false;
     var un = { unavailable: !visits };
     var v = data.visits || {}, platforms = data.platforms || {}, accounts = data.accounts || {}, commerce = data.commerce || {}, system = data.system || {}, excluded = data.excluded || {};
-    var netLabels = { isp: 'Домашний провайдер', mobile: 'Мобильный оператор', hosting: 'Дата-центр', vpn: 'VPN', tor: 'Tor', education: 'Учебная сеть', business: 'Корпоративная', unknown: 'Не определено' };
     var anchors = [['identity', 'Кто это был'], ['visits', 'Визиты'], ['people', 'Аудитория'], ['accounts', 'Аккаунты'], ['platforms', 'Платформы'], ['countries', 'Страны и языки'], ['lotteries', 'Лотереи'], ['features', 'Функции'], ['funnel', 'Воронка'], ['commerce', 'Платежи'], ['system', 'Сбои']];
     var head = '<div class="ow-dayhead"><h2>' + esc(dayTitle(data.day || state.day)) + '</h2>' +
-      '<span class="ow-card-s">' + esc(WEEKDAYS_RU[data.weekday] || '') + (data.is_today ? ' · сегодня (день ещё идёт)' : '') + ' · ' + esc(String(data.hours_in_day || 24)) + ' ч · ' + esc(state.tz) + '</span>' + how('dayBounds') + how('dayCompare') + '</div>' +
-      '<div class="ow-anchors">' + anchors.map(function (a) { return '<a href="#ow-b-' + a[0] + '" data-block="' + a[0] + '">' + esc(a[1]) + '</a>'; }).join('') + '</div>';
+      '<span class="ow-card-s">' + esc(WEEKDAYS_RU[data.weekday] ? t(WEEKDAYS_RU[data.weekday]) : '') + (data.is_today ? ' · ' + et('сегодня (день ещё идёт)') : '') + ' · ' + et('{{0}} ч', String(data.hours_in_day || 24)) + ' · ' + esc(state.tz) + '</span>' + how('dayBounds') + how('dayCompare') + '</div>' +
+      '<div class="ow-anchors">' + anchors.map(function (a) { return '<a href="#ow-b-' + a[0] + '" data-block="' + a[0] + '">' + et(a[1]) + '</a>'; }).join('') + '</div>';
 
     var visitsBlock = block('visits', 'Визиты (счётчики без идентификаторов)', 'visitsHuman',
       '<div class="ow-cards">' +
-        dayCard('Обычные визиты', 'visits_human', visits ? num(s.visits_total) + ' всего · ' + pctText(s.visits_human, s.visits_total) + ' без признаков автоматизации' : 'счётчики ещё не накоплены', 'visitsHuman', 'filtered', compare, un) +
-        dayCard('Гостевые визиты', 'visits_guest', 'визиты без входа в аккаунт', 'guests', 'filtered', compare, un) +
-        dayCard('Авторизованные визиты', 'visits_signed_in', 'визиты с входом · это визиты, не люди', 'authorizedVisits', 'filtered', compare, un) +
-        dayCard('Подозрительный трафик', 'visits_suspicious', 'headless, дата-центры, VPN, Tor, всплески', 'traffic', 'filtered', compare, un) +
-        dayCard('Боты', 'visits_bot', 'объявленные краулеры', 'traffic', 'filtered', compare, un) +
+        dayCard('Обычные визиты', 'visits_human', visits ? et('{{0}} всего · {{1}} без признаков автоматизации', num(s.visits_total), pctText(s.visits_human, s.visits_total)) : et('счётчики ещё не накоплены'), 'visitsHuman', 'filtered', compare, un) +
+        dayCard('Гостевые визиты', 'visits_guest', et('визиты без входа в аккаунт'), 'guests', 'filtered', compare, un) +
+        dayCard('Авторизованные визиты', 'visits_signed_in', et('визиты с входом · это визиты, не люди'), 'authorizedVisits', 'filtered', compare, un) +
+        dayCard('Подозрительный трафик', 'visits_suspicious', et('headless, дата-центры, VPN, Tor, всплески'), 'traffic', 'filtered', compare, un) +
+        dayCard('Боты', 'visits_bot', et('объявленные краулеры'), 'traffic', 'filtered', compare, un) +
       '</div>' +
       (visits ? lineChart(v.hourly || [], ['human', 'suspicious', 'bot'], ['Обычные', 'Подозрительный', 'Боты']) : '') +
-      (visits ? barList(v.by_platform, { web: 'Веб', ios: 'iOS', android: 'Android' }, null, 'Обычные визиты по платформам') : '') +
-      (visits ? barList(v.by_consent, { accepted: 'Согласились', declined: 'Отклонили', undecided: 'Ещё не решили' }, 'consent', 'Обычные визиты по состоянию согласия') : '') +
-      (visits ? barList(v.by_network, netLabels, 'traffic', 'Все визиты по типу сети') : ''));
+      (visits ? barList(v.by_platform, PLATFORM_RU, null, 'Обычные визиты по платформам') : '') +
+      (visits ? barList(v.by_consent, CONSENT_STATE_RU, 'consent', 'Обычные визиты по состоянию согласия') : '') +
+      (visits ? barList(v.by_network, NET_LABELS, 'traffic', 'Все визиты по типу сети') : ''));
 
     var identityBlock = block('identity', 'Кто это был: аккаунты · гости · визиты · сессии · устройства · домохозяйства', 'identity',
       '<div class="ow-cards">' +
-        dayCard('Точные активные аккаунты', 'exact_accounts', 'один аккаунт = один пользователь · владелец отдельно · авторизованных визитов: ' + num(s.visits_signed_in), 'identity', 'exact', compare) +
-        dayCard('Оценка уникальных гостей', 'estimated_unique_guests', 'профилей с согласием: ' + num(s.guest_profiles_consented) + ' · дневных ключей: ' + num(s.guest_keys_daily) + (s.guest_keys_linked ? ' · связано с аккаунтом и исключено: ' + num(s.guest_keys_linked) : ''), 'identity', 'estimate', compare) +
-        dayCard('Визиты', 'visits_human', 'обычные · загрузки страницы, не люди', 'visitsHuman', 'filtered', compare, un) +
-        dayCard('Сессии', 'sessions', 'с согласием · таймаут 30 минут', 'sessions', 'consented', compare) +
-        dayCard('Устройства', 'devices', 'с согласием · ' + num(s.profiles) + ' профилей/установок', 'devices', 'consented', compare) +
-        dayCard('Домохозяйства (оценка)', 'households', 'по домашним сетям согласившихся', 'households', 'estimate', compare) +
+        dayCard('Точные активные аккаунты', 'exact_accounts', et('один аккаунт = один пользователь · владелец отдельно · авторизованных визитов: {{0}}', num(s.visits_signed_in)), 'identity', 'exact', compare) +
+        dayCard('Оценка уникальных гостей', 'estimated_unique_guests', et('профилей с согласием: {{0}} · дневных ключей: {{1}}', num(s.guest_profiles_consented), num(s.guest_keys_daily)) + (s.guest_keys_linked ? ' · ' + et('связано с аккаунтом и исключено: {{0}}', num(s.guest_keys_linked)) : ''), 'identity', 'estimate', compare) +
+        dayCard('Визиты', 'visits_human', et('обычные · загрузки страницы, не люди'), 'visitsHuman', 'filtered', compare, un) +
+        dayCard('Сессии', 'sessions', et('с согласием · таймаут 30 минут'), 'sessions', 'consented', compare) +
+        dayCard('Устройства', 'devices', et('с согласием · {{0}} профилей/установок', num(s.profiles)), 'devices', 'consented', compare) +
+        dayCard('Домохозяйства (оценка)', 'households', et('по домашним сетям согласившихся'), 'households', 'estimate', compare) +
       '</div>' +
-      (data.identity && data.identity.guest_keys_by_platform ? barList(data.identity.guest_keys_by_platform, { web: 'Веб', ios: 'iOS', android: 'Android' }, 'identity', 'Дневные ключи гостей по платформам') : '') +
-      '<div class="ow-card-s" style="margin-top:6px">' + esc((data.identity && data.identity.note) || '') + '</div>');
+      (data.identity && data.identity.guest_keys_by_platform ? barList(data.identity.guest_keys_by_platform, PLATFORM_RU, 'identity', 'Дневные ключи гостей по платформам') : '') +
+      '<div class="ow-card-s" style="margin-top:6px">' + esc(tx((data.identity && data.identity.note) || '')) + '</div>');
 
     var peopleBlock = block('people', 'Аудитория с согласием', 'dayPeople',
       '<div class="ow-cards">' +
-        dayCard('Уникальные пользователи', 'people', 'с признаками человека: ' + num(s.people_human), 'dayPeople', 'consented', compare) +
-        dayCard('Новые', 'new_people', 'первый визит в истории — в этот день', 'newPeople', 'consented', compare) +
-        dayCard('Вернувшиеся', 'returning_people', 'были известны до этого дня', 'returningPeople', 'consented', compare) +
-        dayCard('Аккаунты активны', 'accounts_active', 'вошли в аккаунт в этот день (без владельца)', 'dayEntities', 'exact', compare) +
-        dayCard('Устройства', 'devices', num(s.profiles) + ' профилей/установок', 'dayEntities', 'consented', compare) +
-        dayCard('Сессии', 'sessions', num(s.engaged_sessions) + ' вовлечённых · ' + num(s.events) + ' событий', 'sessions', 'consented', compare) +
-        dayCard('Домохозяйства (оценка)', 'households', 'по домашним сетям', 'households', 'estimate', compare) +
-        dayCard('Гости', 'guests', 'устройства без входа в аккаунт', 'dayStatuses', 'consented', compare) +
+        dayCard('Уникальные пользователи', 'people', et('с признаками человека: {{0}}', num(s.people_human)), 'dayPeople', 'consented', compare) +
+        dayCard('Новые', 'new_people', et('первый визит в истории — в этот день'), 'newPeople', 'consented', compare) +
+        dayCard('Вернувшиеся', 'returning_people', et('были известны до этого дня'), 'returningPeople', 'consented', compare) +
+        dayCard('Аккаунты активны', 'accounts_active', et('вошли в аккаунт в этот день (без владельца)'), 'dayEntities', 'exact', compare) +
+        dayCard('Устройства', 'devices', et('{{0}} профилей/установок', num(s.profiles)), 'dayEntities', 'consented', compare) +
+        dayCard('Сессии', 'sessions', et('{{0}} вовлечённых · {{1}} событий', num(s.engaged_sessions), num(s.events)), 'sessions', 'consented', compare) +
+        dayCard('Домохозяйства (оценка)', 'households', et('по домашним сетям'), 'households', 'estimate', compare) +
+        dayCard('Гости', 'guests', et('устройства без входа в аккаунт'), 'dayStatuses', 'consented', compare) +
       '</div>' +
       lineChart(data.sessions_hourly || [], ['sessions', 'people'], ['Сессии', 'Люди']));
 
     var levels = accounts.levels_active || {};
     var accountsBlock = block('accounts', 'Аккаунты и статусы', 'dayStatuses',
       '<div class="ow-cards">' +
-        dayCard('Регистрации', 'registrations', 'аккаунтов всего сейчас: ' + num(accounts.registered_total_now), 'dayRegistrations', 'exact', compare) +
-        dayCard('FREE активны', 'free_active', 'вошли в этот день', 'dayStatuses', 'exact', compare) +
-        dayCard('PRO активны', 'pro_active', 'активная платная подписка', 'dayStatuses', 'exact', compare) +
-        dayCard('PRO Lifetime активны', 'lifetime_active', 'бессрочный доступ (не владелец)', 'dayStatuses', 'exact', compare) +
-        dayCard('PRO истёк / отменён', 'expired_active', 'заходили с истёкшей подпиской', 'dayStatuses', 'exact', compare) +
-        card('Владелец / тест (отдельно)', num(excluded.owner_sessions) + ' сес. · ' + num(excluded.owner_profiles) + ' проф.', 'аккаунтов владельца активно: ' + num(excluded.owner_accounts_active) + ' · регистраций владельца: ' + num(s.registrations_owner) + ' · не входят в цифры выше', 'excluded') +
-        card('Исключено: боты', num(excluded.bot_sessions) + ' сес.', 'краулеры и автоматизация', 'excluded') +
+        dayCard('Регистрации', 'registrations', et('аккаунтов всего сейчас: {{0}}', num(accounts.registered_total_now)), 'dayRegistrations', 'exact', compare) +
+        dayCard('FREE активны', 'free_active', et('вошли в этот день'), 'dayStatuses', 'exact', compare) +
+        dayCard('PRO активны', 'pro_active', et('активная платная подписка'), 'dayStatuses', 'exact', compare) +
+        dayCard('PRO Lifetime активны', 'lifetime_active', et('бессрочный доступ (не владелец)'), 'dayStatuses', 'exact', compare) +
+        dayCard('PRO истёк / отменён', 'expired_active', et('заходили с истёкшей подпиской'), 'dayStatuses', 'exact', compare) +
+        card('Владелец / тест (отдельно)', et('{{0}} сес. · {{1}} проф.', num(excluded.owner_sessions), num(excluded.owner_profiles)), et('аккаунтов владельца активно: {{0}} · регистраций владельца: {{1}} · не входят в цифры выше', num(excluded.owner_accounts_active), num(s.registrations_owner)), 'excluded') +
+        card('Исключено: боты', et('{{0}} сес.', num(excluded.bot_sessions)), et('краулеры и автоматизация'), 'excluded') +
       '</div>' +
       (Object.keys(levels).length ? barList(levels, LIB.STATUS_RU, 'dayStatuses', 'Активные аккаунты по статусу') : ''));
 
     var platformsBlock = block('platforms', 'Платформы и устройства', 'devices',
       '<div class="ow-cards">' +
-        dayCard('Web', 'web', 'сессий', 'devices', 'consented', compare) +
-        dayCard('iOS', 'ios', 'сессий', 'devices', 'consented', compare) +
-        dayCard('Android', 'android', 'сессий', 'devices', 'consented', compare) +
-        dayCard('Телефоны', 'mobile', 'устройств', 'devices', 'consented', compare) +
-        dayCard('Компьютеры', 'desktop', 'устройств', 'devices', 'consented', compare) +
-        dayCard('Планшеты', 'tablet', 'устройств', 'devices', 'consented', compare) +
+        dayCard('Web', 'web', et('сессий'), 'devices', 'consented', compare) +
+        dayCard('iOS', 'ios', et('сессий'), 'devices', 'consented', compare) +
+        dayCard('Android', 'android', et('сессий'), 'devices', 'consented', compare) +
+        dayCard('Телефоны', 'mobile', et('устройств'), 'devices', 'consented', compare) +
+        dayCard('Компьютеры', 'desktop', et('устройств'), 'devices', 'consented', compare) +
+        dayCard('Планшеты', 'tablet', et('устройств'), 'devices', 'consented', compare) +
       '</div>' +
       barList(platforms.os, null, null, 'Операционные системы (устройства)'));
 
     var countriesBlock = block('countries', 'Страны и языки интерфейса', 'dayLanguages',
       '<div class="ow-cards">' +
-        dayCard('Страны', 'countries', 'по визитам и сессиям, без ботов', 'countryMap', 'filtered', compare) +
-        card('Языки интерфейса', num((data.languages || []).length), 'разных locale за день', 'dayLanguages') +
+        dayCard('Страны', 'countries', et('по визитам и сессиям, без ботов'), 'countryMap', 'filtered', compare) +
+        card('Языки интерфейса', num((data.languages || []).length), et('разных locale за день'), 'dayLanguages') +
       '</div>' +
-      '<div class="ow-block-h" style="margin-top:8px">Страны</div>' +
+      '<div class="ow-block-h" style="margin-top:8px">' + et('Страны') + '</div>' +
       table([
-        { title: 'Страна', key: 'country', html: function (r) { return esc((LIB.flagEmoji ? LIB.flagEmoji(r.country) + ' ' : '') + countryName(r.country)) + (r.is_new ? ' <span class="ow-tag ow-tag-exact">новая</span>' : ''); } },
+        { title: 'Страна', key: 'country', html: function (r) { return esc((LIB.flagEmoji ? LIB.flagEmoji(r.country) + ' ' : '') + countryName(r.country)) + (r.is_new ? ' <span class="ow-tag ow-tag-exact">' + et('новая') + '</span>' : ''); } },
         { title: 'Обычные визиты', key: 'visits_human', html: function (r) { return visits ? num(r.visits_human) : '—'; }, numeric: true },
         { title: 'Подозр.', key: 'visits_suspicious', html: function (r) { return visits ? num(r.visits_suspicious) : '—'; }, numeric: true },
         { title: 'Боты', key: 'visits_bot', html: function (r) { return visits ? num(r.visits_bot) : '—'; }, numeric: true },
@@ -1262,7 +1383,7 @@
         { title: 'Сессий', key: 'sessions', numeric: true },
         { title: 'Аккаунтов', key: 'accounts', numeric: true }
       ], data.countries, 'В этот день визитов не было') +
-      '<div class="ow-block-h" style="margin-top:12px">Языки интерфейса</div>' +
+      '<div class="ow-block-h" style="margin-top:12px">' + et('Языки интерфейса') + '</div>' +
       table([
         { title: 'Язык', key: 'locale' }, { title: 'Людей', key: 'people', numeric: true }, { title: 'Сессий', key: 'sessions', numeric: true }
       ], data.languages, 'Нет данных с согласием'));
@@ -1278,7 +1399,7 @@
         { title: 'Функция', key: 'feature', html: function (r) { return esc(label(LIB.EVENT_RU, r.feature)); } },
         { title: 'Событий', key: 'events', numeric: true }, { title: 'Уникальных пользователей', key: 'users', numeric: true }
       ], data.features, 'Событий с согласием не было') +
-      barList(data.pages, { sim: 'Симулятор', ana: 'Статистика', privacy: 'Политика', terms: 'Условия' }, null, 'Разделы (просмотры)'));
+      barList(data.pages, PAGE_RU, null, 'Разделы (просмотры)'));
 
     var steps = data.funnel || [];
     var first = steps.length ? (+steps[0].value || 0) : 0;
@@ -1286,11 +1407,11 @@
     var funnelBlock = block('funnel', 'Регистрации и конверсия в PRO', 'conversion',
       steps.map(function (step) {
         var value = +step.value || 0;
-        return '<div class="ow-bar"><span class="ow-bar-l">' + esc(stepTitles[step.step] || step.step) + ' <span class="ow-tag ow-tag-' + esc(step.precision) + '">' + esc(label(LIB.PRECISION_RU, step.precision)) + '</span></span>' +
+        return '<div class="ow-bar"><span class="ow-bar-l">' + esc(label(stepTitles, step.step)) + ' <span class="ow-tag ow-tag-' + esc(step.precision) + '">' + esc(label(LIB.PRECISION_RU, step.precision)) + '</span></span>' +
           '<span class="ow-bar-t"><i style="width:' + (first ? Math.max(1, Math.round((value / first) * 100)) : 0) + '%"></i></span>' +
           '<span class="ow-bar-v">' + num(value) + ' · ' + pctText(value, first) + '</span></div>';
       }).join('') +
-      '<div class="ow-card-s" style="margin-top:6px">Ступени с разной точностью не складываются в одну воронку буквально: визиты — счётчики, люди — только с согласием, регистрации и покупки — точные записи.</div>');
+      '<div class="ow-card-s" style="margin-top:6px">' + et('Ступени с разной точностью не складываются в одну воронку буквально: визиты — счётчики, люди — только с согласием, регистрации и покупки — точные записи.') + '</div>');
 
     // Money: gross by currency (what was paid), RevenueCat's USD estimate apart, net only where the
     // store's deductions are known. Nothing is summed across currencies, nothing is invented.
@@ -1301,76 +1422,82 @@
     var notSalesRows = [['Промо-доступ', s.promo_grants], ['Пробные периоды', s.trial_starts], ['Без оплаты', s.zero_price_events], ['Sandbox / Test Store', s.sandbox_events]].filter(function (r) { return +r[1] > 0; });
     var commerceBlock = block('commerce', 'Платежи и подписки', 'dayCommerce',
       '<div class="ow-cards">' +
-        dayCard('Покупки PRO', 'purchases', 'оплачено · подтверждено магазином', 'dayCommerce', 'exact', compare) +
-        dayCard('Продления', 'renewals', 'оплачено · подтверждено магазином', 'dayCommerce', 'exact', compare) +
-        dayCard('Отмены', 'cancellations', 'истекло: ' + num(s.expirations), 'dayCommerce', 'exact', compare) +
-        dayCard('Возвраты', 'refunds', refundText ? 'на сумму ' + esc(refundText) + (commerce.refund_usd != null ? ' · ' + esc(usdEstimate(commerce.refund_usd)) : '') : (+s.refunds ? 'сумма неизвестна' : 'возвратов не было'), 'revenue', 'exact', compare) +
-        dayCard('Сбои оплаты', 'payment_failures', 'магазин + клиент', 'dayCommerce', 'exact', compare) +
-        dayCard('Checkout начат', 'checkout_started', 'клиент открыл оплату · по телеметрии: ' + num((commerce.telemetry || {}).purchase_start), 'dayCommerce', 'exact', compare) +
-        dayCard('Checkout не удался', 'checkout_failed', 'отменено пользователем: ' + num(s.checkout_cancelled), 'dayCommerce', 'exact', compare) +
-        card('Не продажи (отдельно)', notSalesRows.length ? notSalesRows.map(function (r) { return esc(r[0]) + ': ' + num(r[1]); }).join('<br>') : '0', 'промо, пробные, без оплаты, sandbox — в покупки и суммы не входят', 'notSales') +
+        dayCard('Покупки PRO', 'purchases', et('оплачено · подтверждено магазином'), 'dayCommerce', 'exact', compare) +
+        dayCard('Продления', 'renewals', et('оплачено · подтверждено магазином'), 'dayCommerce', 'exact', compare) +
+        dayCard('Отмены', 'cancellations', et('истекло: {{0}}', num(s.expirations)), 'dayCommerce', 'exact', compare) +
+        dayCard('Возвраты', 'refunds', refundText ? et('на сумму {{0}}', refundText) + (commerce.refund_usd != null ? ' · ' + esc(usdEstimate(commerce.refund_usd)) : '') : (+s.refunds ? et('сумма неизвестна') : et('возвратов не было')), 'revenue', 'exact', compare) +
+        dayCard('Сбои оплаты', 'payment_failures', et('магазин + клиент'), 'dayCommerce', 'exact', compare) +
+        dayCard('Checkout начат', 'checkout_started', et('клиент открыл оплату · по телеметрии: {{0}}', num((commerce.telemetry || {}).purchase_start)), 'dayCommerce', 'exact', compare) +
+        dayCard('Checkout не удался', 'checkout_failed', et('отменено пользователем: {{0}}', num(s.checkout_cancelled)), 'dayCommerce', 'exact', compare) +
+        card('Не продажи (отдельно)', notSalesRows.length ? notSalesRows.map(function (r) { return et(r[0]) + ': ' + num(r[1]); }).join('<br>') : '0', et('промо, пробные, без оплаты, sandbox — в покупки и суммы не входят'), 'notSales') +
       '</div>' +
       '<div class="ow-cards ow-money" style="margin-top:10px">' +
-        '<div class="ow-card ow-kpi" data-kpi="Сумма покупок (gross)"><div class="ow-card-h"><span>Сумма покупок (gross)</span>' + how('revenue') + '<span class="ow-tag ow-tag-exact">точно</span></div>' +
-          '<div class="ow-card-v">' + (grossText ? esc(grossText) : NONE) + '</div>' +
-          '<div class="ow-card-s">в валюте покупателя, до удержаний · ' + num(s.revenue_known) + ' с суммой · ' + num(s.revenue_unknown) + ' без суммы' + (s.gross_usd != null ? '<br>' + esc(usdEstimate(s.gross_usd)) : '') + '</div>' +
-          cmpLine('revenue_usd', compare, { money: true, label: '≈ USD' }) + '</div>' +
-        '<div class="ow-card ow-kpi" data-kpi="Удержания магазина"><div class="ow-card-h"><span>Удержания магазина</span>' + how('netRevenue') + '<span class="ow-tag ow-tag-estimate">оценка RevenueCat</span></div>' +
-          '<div class="ow-card-v">' + (dedText ? esc(dedText) : NONE) + '</div>' +
-          '<div class="ow-card-s">' + (netTotal ? 'налог + комиссия магазина · известно для ' + num(s.net_known) + ' из ' + num(netTotal) : 'налог + комиссия магазина по данным RevenueCat') + (s.deductions_usd != null ? '<br>' + esc(usdEstimate(s.deductions_usd)) : '') + '</div></div>' +
-        '<div class="ow-card ow-kpi" data-kpi="Чистыми (net)"><div class="ow-card-h"><span>Чистыми (net)</span>' + how('netRevenue') + '<span class="ow-tag ow-tag-exact">по данным RevenueCat</span></div>' +
-          '<div class="ow-card-v">' + (netText ? esc(netText) : NONE) + '</div>' +
-          '<div class="ow-card-s">' + (+s.net_unknown ? 'RevenueCat не сообщил удержания для ' + num(s.net_unknown) + ' из ' + num(netTotal) + ' — чистая сумма по ним неизвестна' : 'сумма покупок минус удержания магазина') + (s.net_usd != null ? '<br>' + esc(usdEstimate(s.net_usd)) : '') + '</div>' +
-          cmpLine('net_usd', compare, { money: true, label: '≈ USD' }) + '</div>' +
+        moneyCard('Сумма покупок (gross)', 'Сумма покупок (gross)', 'revenue', 'ow-tag-exact', 'точно', grossText ? esc(grossText) : none(),
+          et('в валюте покупателя, до удержаний · {{0}} с суммой · {{1}} без суммы', num(s.revenue_known), num(s.revenue_unknown)) + (s.gross_usd != null ? '<br>' + esc(usdEstimate(s.gross_usd)) : ''),
+          cmpLine('revenue_usd', compare, { money: true, label: '≈ USD' })) +
+        moneyCard('Удержания магазина', 'Удержания магазина', 'netRevenue', 'ow-tag-estimate', 'оценка RevenueCat', dedText ? esc(dedText) : none(),
+          (netTotal ? et('налог + комиссия магазина · известно для {{0}} из {{1}}', num(s.net_known), num(netTotal)) : et('налог + комиссия магазина по данным RevenueCat')) + (s.deductions_usd != null ? '<br>' + esc(usdEstimate(s.deductions_usd)) : '')) +
+        moneyCard('Чистыми (net)', 'Чистыми (net)', 'netRevenue', 'ow-tag-exact', 'по данным RevenueCat', netText ? esc(netText) : none(),
+          (+s.net_unknown ? et('RevenueCat не сообщил удержания для {{0}} из {{1}} — чистая сумма по ним неизвестна', num(s.net_unknown), num(netTotal)) : et('сумма покупки минус удержания магазина')) + (s.net_usd != null ? '<br>' + esc(usdEstimate(s.net_usd)) : ''),
+          cmpLine('net_usd', compare, { money: true, label: '≈ USD' })) +
       '</div>' +
       barList(commerce.by_plan, { 1: '1 месяц', 3: '3 месяца', 6: '6 месяцев', 12: '12 месяцев', unknown: 'Тариф не определён' }, 'dayCommerce', 'Тариф (оплаченные покупки и продления)') +
       barList(commerce.by_store, { apple: 'App Store', google: 'Google Play', paddle: 'Paddle (веб)', stripe: 'Stripe (RevenueCat Web Billing)', revenuecat: 'RevenueCat', promotional: 'Промо-доступ', test_store: 'Test Store', web: 'Веб', ios: 'iOS', android: 'Android', unknown: 'Не определено' }, 'dayCommerce', 'Магазин (оплаченные покупки и продления)') +
-      '<div class="ow-block-h" style="margin-top:12px">События магазина</div>' +
+      '<div class="ow-block-h" style="margin-top:12px">' + et('События магазина') + '</div>' +
       table([
         { title: 'Время', key: 'at', html: function (r) { return esc(clockText(r.at)); } },
-        { title: 'Событие', key: 'name', html: function (r) { return esc(label(LIB.COMMERCE_RU, r.name)) + (r.error ? '<br><span class="ow-card-s">' + esc(r.error) + '</span>' : ''); } },
+        { title: 'Событие', key: 'name', html: function (r) { return esc(label(LIB.COMMERCE_RU, r.name)) + (r.error ? '<br><span class="ow-card-s">' + esc(tx(r.error)) + '</span>' : ''); } },
         { title: 'Вид', key: 'kind', html: function (r) { var k = r.kind || 'paid'; return '<span class="ow-tag' + (k === 'paid' ? ' ow-tag-exact' : ' ow-tag-kind') + '">' + esc(label(LIB.COMMERCE_KIND_RU, k)) + '</span>'; } },
-        { title: 'Тариф', key: 'plan', html: function (r) { return r.plan ? esc(r.plan) + ' мес.' : '—'; } },
+        { title: 'Тариф', key: 'plan', html: function (r) { return r.plan ? et('{{0}} мес.', r.plan) : '—'; } },
         { title: 'Магазин', key: 'store', html: function (r) { return esc(r.store || '—'); } },
-        { title: 'Сумма (gross)', key: 'price', html: function (r) { return r.price != null && r.currency ? esc(money(r.price, r.currency)) : '<span class="ow-card-s">без суммы</span>'; }, numeric: true },
-        { title: 'Удержания', key: 'net', html: function (r) { var d = LIB.deductionText ? LIB.deductionText(r) : ''; return d ? esc(d) : '<span class="ow-card-s">нет данных</span>'; }, numeric: true },
-        { title: 'Чистыми (net)', key: 'net', html: function (r) { return r.net != null && r.currency ? esc(money(r.net, r.currency)) : '<span class="ow-card-s">нет данных</span>'; }, numeric: true },
+        { title: 'Сумма (gross)', key: 'price', html: function (r) { return r.price != null && r.currency ? esc(money(r.price, r.currency)) : '<span class="ow-card-s">' + et('без суммы') + '</span>'; }, numeric: true },
+        { title: 'Удержания', key: 'net', html: function (r) { var d = LIB.deductionText ? LIB.deductionText(r) : ''; return d ? esc(d) : '<span class="ow-card-s">' + et('нет данных') + '</span>'; }, numeric: true },
+        { title: 'Чистыми (net)', key: 'net', html: function (r) { return r.net != null && r.currency ? esc(money(r.net, r.currency)) : '<span class="ow-card-s">' + et('нет данных') + '</span>'; }, numeric: true },
         { title: '≈ USD (RC)', key: 'price_usd', html: function (r) { return r.price_usd != null ? esc(money(r.price_usd, 'USD')) : '—'; }, numeric: true },
         { title: 'Статус', key: 'status', html: function (r) { return statusChip(r.status); } },
         { title: 'Страна', key: 'country', html: function (r) { return esc(r.country ? countryName(r.country) : '—'); } },
-        { title: 'Причина', key: 'reason', html: function (r) { return esc(r.reason || '—'); } }
+        { title: 'Причина', key: 'reason', html: function (r) { return esc(r.reason ? tx(r.reason) : '—'); } }
       ], commerce.events, 'Событий магазина в этот день не было') +
-      '<div class="ow-card-s" style="margin-top:6px">' + esc(commerce.note || '') + (commerce.net_source ? '<br>' + esc(commerce.net_source) : '') + (commerce.usd_source ? '<br>USD: ' + esc(commerce.usd_source) : '') + '</div>');
+      '<div class="ow-card-s" style="margin-top:6px">' + esc(tx(commerce.note || '')) + (commerce.net_source ? '<br>' + esc(tx(commerce.net_source)) : '') + (commerce.usd_source ? '<br>USD: ' + esc(tx(commerce.usd_source)) : '') + '</div>');
 
     var ingest = {};
     (system.ingest || []).forEach(function (row) { ingest[row.outcome + ': ' + (row.reason || '—')] = row.events; });
     var systemBlock = block('system', 'Сбои и системные события', 'daySystem',
       '<div class="ow-cards">' +
-        dayCard('Отклонено приёмом', 'ingest_rejected', 'событий rejected + invalid', 'quality', 'exact', compare) +
-        dayCard('Ошибки разбора', 'resolve_errors', 'запусков analytics_resolve со статусом error', 'quality', 'exact', compare) +
-        dayCard('Push не доставлен', 'push_failed', 'отправлено: ' + num((system.push || {}).sent), 'daySystem', 'exact', compare) +
-        card('Ошибки в приложении', num(system.client_errors), 'client_error у пользователей', 'daySystem') +
+        dayCard('Отклонено приёмом', 'ingest_rejected', et('событий rejected + invalid'), 'quality', 'exact', compare) +
+        dayCard('Ошибки разбора', 'resolve_errors', et('запусков analytics_resolve со статусом error'), 'quality', 'exact', compare) +
+        dayCard('Push не доставлен', 'push_failed', et('отправлено: {{0}}', num((system.push || {}).sent)), 'daySystem', 'exact', compare) +
+        card('Ошибки в приложении', num(system.client_errors), et('client_error у пользователей'), 'daySystem') +
       '</div>' +
       barList(ingest, null, 'quality', 'Приём событий') +
-      '<div class="ow-block-h" style="margin-top:12px">Ошибки разбора</div>' +
+      '<div class="ow-block-h" style="margin-top:12px">' + et('Ошибки разбора') + '</div>' +
       table([
         { title: 'Когда', key: 'at', html: function (r) { return esc(clockText(r.at)); } }, { title: 'Причина', key: 'trigger' }, { title: 'Ошибка', key: 'error' }
       ], system.resolution_errors, 'Ошибок разбора не было') +
-      '<div class="ow-block-h" style="margin-top:12px">Системные уведомления владельца</div>' +
+      '<div class="ow-block-h" style="margin-top:12px">' + et('Системные уведомления владельца') + '</div>' +
       table([
-        { title: 'Когда', key: 'at', html: function (r) { return esc(clockText(r.at)); } }, { title: 'Заголовок', key: 'title' }, { title: 'Детали', key: 'body' }
+        { title: 'Когда', key: 'at', html: function (r) { return esc(clockText(r.at)); } },
+        { title: 'Заголовок', key: 'title', html: function (r) { return esc(tx(r.title)); } },
+        { title: 'Детали', key: 'body', html: function (r) { return esc(tx(r.body)); } }
       ], system.notifications, 'Системных уведомлений не было'));
 
     return head + identityBlock + visitsBlock + peopleBlock + accountsBlock + platformsBlock + countriesBlock + lotteriesBlock + featuresBlock + funnelBlock + commerceBlock + systemBlock;
   }
 
+  var PAGE_RU = { sim: 'Симулятор', ana: 'Статистика', privacy: 'Политика', terms: 'Условия' };
+  function kvLines(map, limit, labels) {
+    var keys = Object.keys(map || {});
+    if (limit) keys = keys.slice(0, limit);
+    return keys.map(function (k) { return esc(labels ? label(labels, k) : k) + ': ' + num(map[k]); }).join('<br>') || '—';
+  }
+
   function renderPeople(data) {
     var rows = (data.rows || []).map(function (row) { return Object.assign({}, row, { __click: true }); });
-    return '<div class="ow-block"><div class="ow-block-h">Люди: ' + num(data.total) + how('estimated') +
-      '<select id="ow-kind" style="margin-left:auto">' +
+    return '<div class="ow-block"><div class="ow-block-h">' + et('Люди: {{0}}', num(data.total)) + how('estimated') +
+      '<select id="ow-kind" style="margin-left:auto" aria-label="' + et('Категория') + '">' +
         ['all', 'verified', 'probable', 'unknown'].map(function (kind) {
           return '<option value="' + kind + '"' + (kind === state.peopleKind ? ' selected' : '') + '>' +
-            esc(kind === 'all' ? 'Все категории' : label(LIB.KIND_RU, kind)) + '</option>';
+            esc(kind === 'all' ? t('Все категории') : label(LIB.KIND_RU, kind)) + '</option>';
         }).join('') + '</select></div>' +
       table([
         { title: 'ID', key: 'short' },
@@ -1382,7 +1509,7 @@
         { title: 'Активно', key: 'active_ms', html: function (r) { return esc(dur(r.active_ms)); }, numeric: true },
         { title: 'Источник', key: 'channel', html: function (r) { return esc(label(LIB.CHANNEL_RU, r.channel)); } },
         { title: 'Место', key: 'city', html: function (r) { return esc(place(r)); } },
-        { title: 'Первый визит', key: 'first_seen', html: function (r) { return esc(timeText(r.first_seen)) + (r.is_new ? ' · новый' : ''); } },
+        { title: 'Первый визит', key: 'first_seen', html: function (r) { return esc(timeText(r.first_seen)) + (r.is_new ? ' · ' + et('новый') : ''); } },
         { title: 'Последний', key: 'last_seen', html: function (r) { return esc(timeText(r.last_seen)); } },
         { title: 'Дом', key: 'household' }
       ], rows, 'Нет людей за период') +
@@ -1393,13 +1520,13 @@
     var size = 50;
     if (!total || total <= size) return '';
     var pages = Math.ceil(total / size);
-    return '<div class="ow-bar" style="margin-top:8px"><span class="ow-bar-l">Страница ' + (state.page + 1) + ' из ' + pages + '</span>' +
-      '<span><button class="ow-btn" type="button" data-page="prev"' + (state.page ? '' : ' disabled') + '>Назад</button> ' +
-      '<button class="ow-btn" type="button" data-page="next"' + (state.page + 1 < pages ? '' : ' disabled') + '>Вперёд</button></span><span></span></div>';
+    return '<div class="ow-bar" style="margin-top:8px"><span class="ow-bar-l">' + et('Страница {{0}} из {{1}}', state.page + 1, pages) + '</span>' +
+      '<span><button class="ow-btn" type="button" data-page="prev"' + (state.page ? '' : ' disabled') + '>' + et('Назад') + '</button> ' +
+      '<button class="ow-btn" type="button" data-page="next"' + (state.page + 1 < pages ? '' : ' disabled') + '>' + et('Вперёд') + '</button></span><span></span></div>';
   }
 
   function renderHouseholds(data) {
-    return '<div class="ow-block"><div class="ow-block-h">Домохозяйства: ' + num(data.total) + how('households') + '</div>' +
+    return '<div class="ow-block"><div class="ow-block-h">' + et('Домохозяйства: {{0}}', num(data.total)) + how('households') + '</div>' +
       table([
         { title: 'ID', key: 'short' },
         { title: 'Людей (оценка)', key: 'people_min', html: function (r) { return num(r.people_min) + '–' + num(r.people_max); }, numeric: true },
@@ -1410,20 +1537,20 @@
         { title: 'Сессий', key: 'sessions', numeric: true },
         { title: 'Уверенность', key: 'confidence', html: function (r) { return confidenceChip(r.confidence, r.evidence); } },
         { title: 'Место', key: 'city', html: function (r) { return esc(place(r)); } },
-        { title: 'Владелец', key: 'owner_household', html: function (r) { return r.owner_household ? 'да' : '—'; } },
+        { title: 'Владелец', key: 'owner_household', html: function (r) { return r.owner_household ? et('да') : '—'; } },
         { title: 'Последний визит', key: 'last_seen', html: function (r) { return esc(timeText(r.last_seen)); } }
       ], data.rows, 'Домохозяйства не определены: нужны повторные визиты из домашней сети') + '</div>';
   }
 
   function renderDevices(data) {
     return '<div class="ow-cards">' +
-      card('Типы', Object.keys(data.by_kind || {}).map(function (k) { return esc(k) + ': ' + num(data.by_kind[k]); }).join('<br>') || '—', '', 'devices') +
-      card('ОС', Object.keys(data.by_os || {}).slice(0, 6).map(function (k) { return esc(k) + ': ' + num(data.by_os[k]); }).join('<br>') || '—') +
-      card('Браузеры', Object.keys(data.by_browser || {}).slice(0, 6).map(function (k) { return esc(k) + ': ' + num(data.by_browser[k]); }).join('<br>') || '—') +
-      card('Платформы', Object.keys(data.by_platform || {}).map(function (k) { return esc(k) + ': ' + num(data.by_platform[k]); }).join('<br>') || '—') +
-      card('Экраны', Object.keys(data.by_screen || {}).map(function (k) { return esc(k) + ': ' + num(data.by_screen[k]); }).join('<br>') || '—') +
+      card('Типы', kvLines(data.by_kind), '', 'devices') +
+      card('ОС', kvLines(data.by_os, 6)) +
+      card('Браузеры', kvLines(data.by_browser, 6)) +
+      card('Платформы', kvLines(data.by_platform)) +
+      card('Экраны', kvLines(data.by_screen)) +
     '</div>' +
-    '<div class="ow-block"><div class="ow-block-h">Устройства' + how('devices') + '</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Устройства') + how('devices') + '</div>' +
       table([
         { title: 'ID', key: 'short' },
         { title: 'Тип', key: 'kind' },
@@ -1433,7 +1560,7 @@
         { title: 'Сессий', key: 'sessions', numeric: true },
         { title: 'Активно', key: 'active_ms', html: function (r) { return esc(dur(r.active_ms)); }, numeric: true },
         { title: 'Класс', key: 'class', html: function (r) { return esc(label(LIB.CLASS_RU, r.class)); } },
-        { title: 'Общее', key: 'shared', html: function (r) { return r.shared ? 'да (несколько аккаунтов)' : '—'; } },
+        { title: 'Общее', key: 'shared', html: function (r) { return r.shared ? et('да (несколько аккаунтов)') : '—'; } },
         { title: 'Уверенность', key: 'confidence', html: function (r) { return confidenceChip(r.confidence, r.evidence); } },
         { title: 'Дом', key: 'household' }
       ], data.rows, 'Нет устройств за период') + '</div>';
@@ -1441,15 +1568,15 @@
 
   function renderSessions(data) {
     return '<div class="ow-cards">' +
-      card('Сессии', num(data.total), 'таймаут 30 минут', 'sessions') +
-      card('События на сессию', String(data.distribution && data.distribution.events_per_session || 0)) +
+      card('Сессии', num(data.total), et('таймаут 30 минут'), 'sessions') +
+      card('События на сессию', esc(String(data.distribution && data.distribution.events_per_session || 0))) +
     '</div>' +
     barList((data.distribution || {}).duration_buckets, null, 'sessions', 'Длительность сессий') +
-    '<div class="ow-block"><div class="ow-block-h">Сессии</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Сессии') + '</div>' +
       table([
         { title: 'Начало', key: 'started_at', html: function (r) { return esc(timeText(r.started_at)); } },
         { title: 'Длит.', key: 'duration_ms', html: function (r) { return esc(dur(r.duration_ms)); }, numeric: true },
-        { title: 'Активно', key: 'active_ms', html: function (r) { return esc(dur(r.active_ms)) + (r.active_source === 'estimated' ? ' оц.' : ''); }, numeric: true },
+        { title: 'Активно', key: 'active_ms', html: function (r) { return esc(dur(r.active_ms)) + (r.active_source === 'estimated' ? ' ' + et('оц.') : ''); }, numeric: true },
         { title: 'События', key: 'events', numeric: true },
         { title: 'Действия', key: 'interactions', numeric: true },
         { title: 'Вход', key: 'entry' },
@@ -1467,48 +1594,49 @@
     var coverage = data.coverage || {};
     return '<div class="ow-cards">' +
       card('Сессии с источником', num(coverage.sessions_with_source), '', 'channels') +
-      card('Источник неизвестен', num(coverage.sessions_unknown_source), esc(coverage.note || '')) +
+      card('Источник неизвестен', num(coverage.sessions_unknown_source), esc(tx(coverage.note || ''))) +
     '</div>' +
     barList(data.first_touch, LIB.CHANNEL_RU, 'channels', 'Первый источник (люди)') +
     barList(data.last_touch, LIB.CHANNEL_RU, 'channels', 'Последний источник (сессии)') +
     barList(data.search_engines, null, null, 'Поисковые системы') +
     barList(data.social, null, null, 'Соцсети') +
     barList(data.ai_assistants, null, null, 'ИИ-ассистенты') +
-    '<div class="ow-block"><div class="ow-block-h">Сайты-источники</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Сайты-источники') + '</div>' +
       table([{ title: 'Домен', key: 'domain' }, { title: 'Сессий', key: 'sessions', numeric: true }, { title: 'Людей', key: 'people', numeric: true }],
         data.referrers, 'Переходов по ссылкам не было') + '</div>' +
-    '<div class="ow-block"><div class="ow-block-h">Кампании (UTM)</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Кампании (UTM)') + '</div>' +
       table([
         { title: 'Источник', key: 'source' }, { title: 'Канал', key: 'medium' }, { title: 'Кампания', key: 'campaign' },
         { title: 'Содержание', key: 'content' }, { title: 'Ключ', key: 'term' },
         { title: 'Сессий', key: 'sessions', numeric: true }, { title: 'Людей', key: 'people', numeric: true }
       ], data.campaigns, 'Меток кампаний не было') + '</div>' +
-    '<div class="ow-block"><div class="ow-block-h">Страницы входа</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Страницы входа') + '</div>' +
       table([{ title: 'Страница', key: 'page' }, { title: 'Сессий', key: 'sessions', numeric: true }], data.landing_pages, 'Нет данных') + '</div>';
   }
 
   function renderGeography(data) {
-    return '<div class="ow-block"><div class="ow-block-h">Страны' + how('geo') + '</div>' +
+    var country = function (r) { return esc(countryName(r.country)); };
+    return '<div class="ow-block"><div class="ow-block-h">' + et('Страны') + how('geo') + '</div>' +
       table([
-        { title: 'Страна', key: 'country', html: function (r) { return esc(LIB.countryNameRu ? LIB.countryNameRu(r.country) : r.country); } },
+        { title: 'Страна', key: 'country', html: country },
         { title: 'Людей', key: 'people', numeric: true }, { title: 'Домохозяйств', key: 'households', numeric: true },
         { title: 'Устройств', key: 'devices', numeric: true }, { title: 'Сессий', key: 'sessions', numeric: true },
         { title: 'Новых', key: 'new_people', numeric: true }
       ], data.countries, 'Нет данных') + '</div>' +
-    '<div class="ow-block"><div class="ow-block-h">Регионы</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Регионы') + '</div>' +
       table([
-        { title: 'Страна', key: 'country', html: function (r) { return esc(LIB.countryNameRu ? LIB.countryNameRu(r.country) : r.country); } },
+        { title: 'Страна', key: 'country', html: country },
         { title: 'Регион', key: 'region' }, { title: 'Людей', key: 'people', numeric: true },
         { title: 'Домохозяйств', key: 'households', numeric: true }, { title: 'Сессий', key: 'sessions', numeric: true }
       ], data.regions, 'Регион не определён: нужен city-уровень GeoIP') + '</div>' +
-    '<div class="ow-block"><div class="ow-block-h">Города</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Города') + '</div>' +
       table([
         { title: 'Город', key: 'city' }, { title: 'Регион', key: 'region' },
-        { title: 'Страна', key: 'country', html: function (r) { return esc(LIB.countryNameRu ? LIB.countryNameRu(r.country) : r.country); } },
+        { title: 'Страна', key: 'country', html: country },
         { title: 'Людей', key: 'people', numeric: true }, { title: 'Сессий', key: 'sessions', numeric: true }
       ], data.cities, 'Город не определён') + '</div>' +
     barList(data.resolution, { city: 'До города', region: 'До региона', country: 'До страны', none: 'Не определено' }, 'geo', 'Точность определения') +
-    barList(data.network_types, { isp: 'Домашний провайдер', mobile: 'Мобильный оператор', hosting: 'Дата-центр', vpn: 'VPN', tor: 'Tor', education: 'Учебная сеть', business: 'Корпоративная', unknown: 'Не определено' }, null, 'Тип сети');
+    barList(data.network_types, NET_LABELS, null, 'Тип сети');
   }
 
   function renderMap(data) {
@@ -1517,23 +1645,23 @@
     var visits = data.visits_available !== false;
     var theme = ovEl.getAttribute('data-ow-theme');
     var scale = (theme === 'dark' ? LIB.BLUE_DARK : LIB.BLUE_LIGHT) || [];
-    var legend = '<div class="ow-legend-scale"><span>Нет данных</span><i style="background:' + esc(scale[0] || '#dde6ee') + '"></i><span>меньше</span>' +
-      scale.slice(1).map(function (c) { return '<i style="background:' + esc(c) + '"></i>'; }).join('') + '<span>больше · ' + esc(metricLabel(state.mapMetric)) + '</span></div>';
+    var legend = '<div class="ow-legend-scale"><span>' + et('Нет данных') + '</span><i style="background:' + esc(scale[0] || '#dde6ee') + '"></i><span>' + et('меньше') + '</span>' +
+      scale.slice(1).map(function (c) { return '<i style="background:' + esc(c) + '"></i>'; }).join('') + '<span>' + et('больше · {{0}}', metricLabel(state.mapMetric)) + '</span></div>';
     var cell = function (key) { return function (r) { return visits ? num(r[key]) : '—'; }; };
-    return '<div class="ow-block"><div class="ow-block-h">Карта' + how('countryMap') +
-      '<select id="ow-mapmetric" aria-label="Показатель карты" style="margin-left:auto">' + MAP_METRICS.map(function (m) {
-        return '<option value="' + m[0] + '"' + (m[0] === state.mapMetric ? ' selected' : '') + '>' + esc(m[1]) + '</option>';
+    return '<div class="ow-block"><div class="ow-block-h">' + et('Карта') + how('countryMap') +
+      '<select id="ow-mapmetric" aria-label="' + et('Показатель карты') + '" style="margin-left:auto">' + MAP_METRICS.map(function (m) {
+        return '<option value="' + m[0] + '"' + (m[0] === state.mapMetric ? ' selected' : '') + '>' + et(m[1]) + '</option>';
       }).join('') + '</select>' +
-      '<select id="ow-continent" aria-label="Континент">' + [['all', 'Весь мир']].concat((LIB.CONTINENT_ORDER || []).map(function (c) { return [c, LIB.CONTINENT_RU[c]]; })).map(function (c) {
-        return '<option value="' + c[0] + '"' + (c[0] === state.continent ? ' selected' : '') + '>' + esc(c[1]) + '</option>';
+      '<select id="ow-continent" aria-label="' + et('Континент') + '">' + [['all', 'Весь мир']].concat((LIB.CONTINENT_ORDER || []).map(function (c) { return [c, LIB.CONTINENT_RU[c]]; })).map(function (c) {
+        return '<option value="' + c[0] + '"' + (c[0] === state.continent ? ' selected' : '') + '>' + et(c[1]) + '</option>';
       }).join('') + '</select>' +
-      '<button class="ow-btn" id="ow-fit" type="button">Показать всё</button></div>' +
+      '<button class="ow-btn" id="ow-fit" type="button">' + et('Показать всё') + '</button></div>' +
       '<div class="ow-map" id="ow-mapbox"></div>' + legend +
-      '<div class="ow-map-note">Наведите на страну — подсветится вся её территория; нажмите — откроется карточка. ' +
-        (visits ? 'Обычные визиты: ' + num(totals.visits_human) + ' · подозрительных: ' + num(totals.visits_suspicious) + ' · ботов: ' + num(totals.visits_bot) + ' · стран: ' + num(totals.countries)
-          : 'Счётчики визитов ещё не накоплены — карта показывает данные, собранные с согласием') +
-        ' · аккаунтов со страной: ' + num(totals.registered) + ' · покупателей: ' + num(totals.buyers) + '<br>' + esc(data.note || '') + '</div></div>' +
-      '<div class="ow-block"><div class="ow-block-h">Страны</div>' +
+      '<div class="ow-map-note">' + et('Наведите на страну — подсветится вся её территория; нажмите — откроется карточка.') + ' ' +
+        (visits ? et('Обычные визиты: {{0}} · подозрительных: {{1}} · ботов: {{2}} · стран: {{3}}', num(totals.visits_human), num(totals.visits_suspicious), num(totals.visits_bot), num(totals.countries))
+          : et('Счётчики визитов ещё не накоплены — карта показывает данные, собранные с согласием')) +
+        ' · ' + et('аккаунтов со страной: {{0}} · покупателей: {{1}}', num(totals.registered), num(totals.buyers)) + '<br>' + esc(tx(data.note || '')) + '</div></div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Страны') + '</div>' +
       table([
         { title: 'Страна', key: 'country', html: function (r) { return esc((LIB.flagEmoji ? LIB.flagEmoji(r.country) + ' ' : '') + countryName(r.country)) + ' <span class="ow-card-s" style="display:inline">' + esc(r.country) + '</span>'; } },
         { title: 'Обычные визиты', key: 'visits_human', html: cell('visits_human'), numeric: true },
@@ -1551,7 +1679,7 @@
   }
 
   function renderGames(data) {
-    return '<div class="ow-block"><div class="ow-block-h">Лотереи</div>' +
+    return '<div class="ow-block"><div class="ow-block-h">' + et('Лотереи') + '</div>' +
       table([
         { title: 'Лотерея', key: 'lottery' }, { title: 'Людей', key: 'people', numeric: true },
         { title: 'Сессий', key: 'sessions', numeric: true }, { title: 'Открытий', key: 'opens', numeric: true },
@@ -1565,13 +1693,13 @@
   }
 
   function renderFeatures(data) {
-    return '<div class="ow-block"><div class="ow-block-h">Функции</div>' +
+    return '<div class="ow-block"><div class="ow-block-h">' + et('Функции') + '</div>' +
       table([
         { title: 'Функция', key: 'feature', html: function (r) { return esc(label(LIB.EVENT_RU, r.feature)); } },
         { title: 'Событий', key: 'events', numeric: true }, { title: 'Людей', key: 'people', numeric: true },
         { title: 'Сессий', key: 'sessions', numeric: true }
       ], data.rows, 'Нет событий') + '</div>' +
-      barList(data.pages, { sim: 'Симулятор', ana: 'Статистика', privacy: 'Политика', terms: 'Условия' }, null, 'Разделы');
+      barList(data.pages, PAGE_RU, null, 'Разделы');
   }
 
   function renderFunnels(data) {
@@ -1581,14 +1709,14 @@
     // The funnel counts PEOPLE with analytics consent; the store's own sales live in «День» → Платежи.
     var notes = { checkout: 'Люди с согласием, открывшие экран оплаты (клиент). Оплаченные покупки — точные записи магазина: «День» → Платежи.',
       purchase: 'Люди с согласием, у которых клиент сообщил об оплате. Число оплаченных покупок — из журнала магазина: «День» → Платежи и «Обзор» → Покупки за период.' };
-    return '<div class="ow-block"><div class="ow-block-h">Воронка по людям' + how('funnels') + '</div>' +
+    return '<div class="ow-block"><div class="ow-block-h">' + et('Воронка по людям') + how('funnels') + '</div>' +
       steps.map(function (step) {
         var value = step.people || 0;
-        if (notes[step.step]) step = Object.assign({}, step, { note: notes[step.step] });
-        return '<div class="ow-bar"><span class="ow-bar-l">' + esc(titles[step.step] || step.step) + '</span>' +
+        var note = notes[step.step] ? t(notes[step.step]) : (step.note ? tx(step.note) : '');
+        return '<div class="ow-bar"><span class="ow-bar-l">' + esc(label(titles, step.step)) + '</span>' +
           '<span class="ow-bar-t"><i style="width:' + (first ? Math.max(1, Math.round((value / first) * 100)) : 0) + '%"></i></span>' +
           '<span class="ow-bar-v">' + num(value) + ' · ' + pctText(value, first) + '</span></div>' +
-          (step.note ? '<div class="ow-card-s">' + esc(step.note) + '</div>' : '');
+          (note ? '<div class="ow-card-s">' + esc(note) + '</div>' : '');
       }).join('') + '</div>';
   }
 
@@ -1599,7 +1727,7 @@
       card('Вернувшиеся', num(summary.returning)) +
       card('Были в 2+ дня', num(summary.multi_day)) +
     '</div>' +
-    '<div class="ow-block"><div class="ow-block-h">Когорты' + how('retention') + '</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Когорты') + how('retention') + '</div>' +
       table([
         { title: 'Когорта', key: 'cohort' }, { title: 'Людей', key: 'people', numeric: true },
         { title: 'D1', key: 'd1', html: function (r) { return num(r.d1) + ' · ' + pctText(r.d1, r.people); }, numeric: true },
@@ -1614,18 +1742,18 @@
       evidence[LIB.evidenceRu ? LIB.evidenceRu(key) : key] = data.evidence[key];
     });
     return '<div class="ow-cards">' +
-      card('Владелец и тесты', num((data.owner_test || {}).profiles) + ' проф.', num((data.owner_test || {}).sessions) + ' сессий', 'excluded') +
-      card('Классы трафика', Object.keys(data.classes || {}).map(function (k) { return esc(label(LIB.CLASS_RU, k)) + ': ' + num(data.classes[k]); }).join('<br>') || '—', '', 'excluded') +
+      card('Владелец и тесты', et('{{0}} проф.', num((data.owner_test || {}).profiles)), et('{{0}} сессий', num((data.owner_test || {}).sessions)), 'excluded') +
+      card('Классы трафика', kvLines(data.classes, 0, LIB.CLASS_RU), '', 'excluded') +
     '</div>' +
     barList(evidence, null, 'excluded', 'Признаки, по которым принято решение') +
-    '<div class="ow-block"><div class="ow-block-h">Профили с признаками автоматизации</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Профили с признаками автоматизации') + '</div>' +
       table([
         { title: 'ID', key: 'short' }, { title: 'Класс', key: 'class', html: function (r) { return esc(label(LIB.CLASS_RU, r.class)); } },
         { title: 'Оценка', key: 'bot_score', numeric: true },
         { title: 'Признаки', key: 'evidence', html: function (r) { return esc((r.evidence || []).map(function (e) { return LIB.evidenceRu ? LIB.evidenceRu(e) : e; }).join(' · ')); } },
         { title: 'Сессий', key: 'sessions', numeric: true }, { title: 'События', key: 'events', numeric: true },
         { title: 'Действия', key: 'interactions', numeric: true },
-        { title: 'Страна', key: 'country', html: function (r) { return esc(r.country ? (LIB.countryNameRu ? LIB.countryNameRu(r.country) : r.country) : '—'); } },
+        { title: 'Страна', key: 'country', html: function (r) { return esc(r.country ? countryName(r.country) : '—'); } },
         { title: 'Браузер', key: 'browser' }, { title: 'Первый', key: 'first_seen', html: function (r) { return esc(timeText(r.first_seen)); } }
       ], data.rows, 'Ботов и тестов за период не найдено') + '</div>';
   }
@@ -1635,19 +1763,19 @@
     var ingest = {};
     (data.ingest || []).forEach(function (row) { ingest[row.outcome + ': ' + (row.reason || '—')] = row.events; });
     return '<div class="ow-cards">' +
-      card('События за период', num(events.total), num(events.v2) + ' новый формат / ' + num(events.v1_legacy) + ' старый', 'quality') +
-      card('Без гео', num(events.missing_geo), pctText(events.missing_geo, events.total) + ' от всех', 'geo') +
-      card('С городом', num(events.city_level), pctText(events.city_level, events.total) + ' от всех') +
-      card('Начало сессии без источника', num(events.missing_acquisition), 'остаётся «неизвестно»', 'channels') +
-      card('С признаком устройства', num(events.with_device_signal), 'только с отдельным согласием') +
-      card('Согласия', num(consent.accepted) + ' да / ' + num(consent.declined) + ' нет', num(consent.device_recognition) + ' с распознаванием устройства') +
-      card('Задержка разбора', Math.round((freshness.watermark_lag_seconds || 0) / 60) + ' мин', 'разбор идёт каждые 5 минут') +
+      card('События за период', num(events.total), et('{{0}} новый формат / {{1}} старый', num(events.v2), num(events.v1_legacy)), 'quality') +
+      card('Без гео', num(events.missing_geo), et('{{0}} от всех', pctText(events.missing_geo, events.total)), 'geo') +
+      card('С городом', num(events.city_level), et('{{0}} от всех', pctText(events.city_level, events.total))) +
+      card('Начало сессии без источника', num(events.missing_acquisition), et('остаётся «неизвестно»'), 'channels') +
+      card('С признаком устройства', num(events.with_device_signal), et('только с отдельным согласием')) +
+      card('Согласия', et('{{0}} да / {{1}} нет', num(consent.accepted), num(consent.declined)), et('{{0}} с распознаванием устройства', num(consent.device_recognition))) +
+      card('Задержка разбора', et('{{0}} мин', num(Math.round((freshness.watermark_lag_seconds || 0) / 60))), et('разбор идёт каждые 5 минут')) +
       card('Последнее событие', esc(timeText(freshness.latest_event))) +
     '</div>' +
     barList(ingest, null, 'quality', 'Приём событий') +
     barList(data.identity_confidence, null, null, 'Распределение уверенности идентификации') +
     barList(freshness.geo_source_mix, null, null, 'Источник геоданных') +
-    '<div class="ow-block"><div class="ow-block-h">Запуски разбора</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Запуски разбора') + '</div>' +
       table([
         { title: 'Когда', key: 'at', html: function (r) { return esc(timeText(r.at)); } },
         { title: 'Статус', key: 'status' }, { title: 'Причина', key: 'trigger' },
@@ -1661,16 +1789,16 @@
     var decisions = data.decisions || {}, coverage = data.analytics_coverage || {}, device = data.device_recognition || {};
     var acceptRate = data.accept_rate == null ? '—' : data.accept_rate + '%';
     return '<div class="ow-cards">' +
-      card('Решений о согласии', num(decisions.total), 'за выбранный период', 'consent') +
-      card('Согласились на аналитику', num(decisions.accepted), 'доля среди решений: ' + esc(acceptRate)) +
-      card('Только необходимое', num(decisions.only_necessary), 'отказ от необязательной статистики') +
-      card('Включили «Повторные посещения»', num(decisions.device_recognition), num(device.profiles_with_signal) + ' профилей с признаком') +
-      card('Данные с согласием', num(coverage.events_consented), num(coverage.events_legacy) + ' событий собрано до внедрения согласия') +
-      card('Профили с согласием', num(coverage.consented_profiles), num(coverage.legacy_profiles) + ' старых профилей') +
-      card('Охват от всех посетителей', 'нельзя измерить', 'см. пояснение ниже', 'consent') +
+      card('Решений о согласии', num(decisions.total), et('за выбранный период'), 'consent') +
+      card('Согласились на аналитику', num(decisions.accepted), et('доля среди решений: {{0}}', acceptRate)) +
+      card('Только необходимое', num(decisions.only_necessary), et('отказ от необязательной статистики')) +
+      card('Включили «Повторные посещения»', num(decisions.device_recognition), et('{{0}} профилей с признаком', num(device.profiles_with_signal))) +
+      card('Данные с согласием', num(coverage.events_consented), et('{{0}} событий собрано до внедрения согласия', num(coverage.events_legacy))) +
+      card('Профили с согласием', num(coverage.consented_profiles), et('{{0}} старых профилей', num(coverage.legacy_profiles))) +
+      card('Охват от всех посетителей', et('нельзя измерить'), et('см. пояснение ниже'), 'consent') +
     '</div>' +
-    '<div class="ow-block"><div class="ow-block-h">Почему нет процента охвата</div>' +
-      '<div class="ow-card-s">' + esc(coverage.note || '') + '</div></div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Почему нет процента охвата') + '</div>' +
+      '<div class="ow-card-s">' + esc(tx(coverage.note || '')) + '</div></div>' +
     barList(data.by_source, { banner: 'Баннер', settings: 'Настройки', privacy_page: 'Страница политики' }, null, 'Где принято решение') +
     barList(data.by_platform, { web: 'Веб', ios: 'iOS', android: 'Android', unknown: 'Не указано' }, null, 'Платформа') +
     barList(data.by_policy, null, null, 'Версия политики') +
@@ -1704,16 +1832,16 @@
     attributed_by_recent_agent_session: 'Связано с недавней сессией агента'
   };
   function agentEvidenceRu(key) {
-    if (AGENT_EVIDENCE_RU[key]) return AGENT_EVIDENCE_RU[key];
-    if (key.indexOf('agent_operator:') === 0) return 'Оператор: ' + key.slice(15);
-    if (key.indexOf('declared_bot:') === 0) return 'Объявленный бот: ' + key.slice(13);
+    if (AGENT_EVIDENCE_RU[key]) return t(AGENT_EVIDENCE_RU[key]);
+    if (key.indexOf('agent_operator:') === 0) return t('Оператор: {{0}}', key.slice(15));
+    if (key.indexOf('declared_bot:') === 0) return t('Объявленный бот: {{0}}', key.slice(13));
     return LIB.evidenceRu ? LIB.evidenceRu(key) : key;
   }
   // Agent ledger amounts (a plain number + currency code; the store ledger's own money() is above).
   function agentMoney(value, currency) {
     var n = +value || 0;
     if (!n) return '—';
-    return n.toLocaleString('ru-RU', { maximumFractionDigits: 2 }) + (currency ? ' ' + esc(currency) : '');
+    return n.toLocaleString(intl(), { maximumFractionDigits: 2 }) + (currency ? ' ' + esc(currency) : '');
   }
   function renderAgents(data) {
     var s = data.summary || {};
@@ -1721,30 +1849,31 @@
     Object.keys(data.evidence || {}).forEach(function (key) { evidence[agentEvidenceRu(key)] = data.evidence[key]; });
     var reasons = {};
     Object.keys(data.blocked_reasons || {}).forEach(function (key) { reasons[key] = data.blocked_reasons[key]; });
+    var proven = function (r) { return r.verified ? t('доказана') : t('не доказана'); };
     return '<div class="ow-cards">' +
-      card('Запросы автоматизации', num(s.requests), num(s.accounts) + ' аккаунт(ов) · ' + num(s.operators) + ' оператор(ов)') +
-      card('Проверенные агенты', num(s.verified_requests), 'подпись Web Bot Auth проверена сервером') +
-      card('Непроверенная автоматизация', num(s.unverified_requests), 'заявлено, но не доказано') +
-      card('Краулеры и боты', num(s.bot_requests), 'объявленные индексаторы и скрипты') +
-      card('Визиты и входы', num(s.visits) + ' / ' + num(s.logins), 'визит · вход или регистрация') +
-      card('Симуляции', num(s.simulations), 'запуски моделей и разборов') +
-      card('Покупки агентами', num(s.purchases), 'подтверждено магазином: ' + agentMoney(s.revenue)) +
-      card('Отказы агентам', num(s.blocked), 'см. причины ниже') +
+      card('Запросы автоматизации', num(s.requests), et('{{0}} аккаунт(ов) · {{1}} оператор(ов)', num(s.accounts), num(s.operators))) +
+      card('Проверенные агенты', num(s.verified_requests), et('подпись Web Bot Auth проверена сервером')) +
+      card('Непроверенная автоматизация', num(s.unverified_requests), et('заявлено, но не доказано')) +
+      card('Краулеры и боты', num(s.bot_requests), et('объявленные индексаторы и скрипты')) +
+      card('Визиты и входы', num(s.visits) + ' / ' + num(s.logins), et('визит · вход или регистрация')) +
+      card('Симуляции', num(s.simulations), et('запуски моделей и разборов')) +
+      card('Покупки агентами', num(s.purchases), et('подтверждено магазином: {{0}}', agentMoney(s.revenue))) +
+      card('Отказы агентам', num(s.blocked), et('см. причины ниже')) +
     '</div>' +
     (Object.keys(reasons).length
       ? barList(reasons, null, null, 'Чем именно остановлен агент (причина отказа)')
-      : '<div class="ow-block"><div class="ow-block-h">Чем именно остановлен агент</div>' +
-        '<div class="ow-empty">За период ни один агент не получил отказ</div></div>') +
+      : '<div class="ow-block"><div class="ow-block-h">' + et('Чем именно остановлен агент') + '</div>' +
+        '<div class="ow-empty">' + et('За период ни один агент не получил отказ') + '</div></div>') +
     barList(data.by_class, AGENT_CLASS_RU, null, 'Классы автоматизации') +
     barList(data.by_kind, AGENT_KIND_RU, null, 'Что делали агенты') +
     barList(evidence, null, null, 'На каком основании определён класс') +
-    '<div class="ow-block"><div class="ow-block-h">Операторы</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Операторы') + '</div>' +
       table([
         { title: 'Оператор', key: 'operator' },
         { title: 'Личность', key: 'verified', html: function (r) {
-          return r.verified ? '<span class="ow-conf ow-conf-high" title="Подпись проверена сервером">доказана</span>' +
-            (r.trusted ? ' · в списке доверия' : '')
-            : '<span class="ow-conf ow-conf-low" title="Только заявление клиента">не доказана</span>';
+          return r.verified ? '<span class="ow-conf ow-conf-high" title="' + et('Подпись проверена сервером') + '">' + esc(proven(r)) + '</span>' +
+            (r.trusted ? ' · ' + et('в списке доверия') : '')
+            : '<span class="ow-conf ow-conf-low" title="' + et('Только заявление клиента') + '">' + esc(proven(r)) + '</span>';
         } },
         { title: 'Класс', key: 'class', html: function (r) { return esc(label(AGENT_CLASS_RU, r.class)); } },
         { title: 'Запросы', key: 'requests', numeric: true },
@@ -1755,20 +1884,20 @@
         { title: 'Отказы', key: 'blocked', numeric: true },
         { title: 'Последний', key: 'last_seen', html: function (r) { return esc(timeText(r.last_seen)); } }
       ], data.operators, 'Автоматизация за период не обращалась') + '</div>' +
-    barList(data.by_platform, { web: 'Веб', ios: 'iOS', android: 'Android' }, null, 'Платформа') +
-    '<div class="ow-block"><div class="ow-block-h">Действия</div>' +
+    barList(data.by_platform, PLATFORM_RU, null, 'Платформа') +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Действия') + '</div>' +
       table([
         { title: 'Время', key: 'last_seen', html: function (r) { return esc(timeText(r.last_seen)); } },
         { title: 'Действие', key: 'kind', html: function (r) { return esc(label(AGENT_KIND_RU, r.kind)); } },
         { title: 'Класс', key: 'class', html: function (r) { return esc(label(AGENT_CLASS_RU, r.class)); } },
         { title: 'Оператор', key: 'operator' },
-        { title: 'Личность', key: 'verified', html: function (r) { return r.verified ? 'доказана' : 'не доказана'; } },
-        { title: 'Аккаунт', key: 'account', html: function (r) { return esc(r.account || 'без входа'); } },
-        { title: 'Деталь', key: 'detail', html: function (r) { return esc(r.detail || '—'); } },
+        { title: 'Личность', key: 'verified', html: function (r) { return esc(proven(r)); } },
+        { title: 'Аккаунт', key: 'account', html: function (r) { return esc(r.account || t('без входа')); } },
+        { title: 'Деталь', key: 'detail', html: function (r) { return esc(r.detail ? tx(r.detail) : '—'); } },
         { title: 'Запросы', key: 'requests', numeric: true },
         { title: 'Сумма', key: 'amount', numeric: true, html: function (r) { return agentMoney(r.amount, r.currency); } },
         { title: 'Источник', key: 'source', html: function (r) {
-          return esc({ client: 'клиент', server: 'сервер', store: 'магазин' }[r.source] || r.source);
+          return esc(label({ client: 'клиент', server: 'сервер', store: 'магазин' }, r.source));
         } },
         { title: 'Основание', key: 'evidence', html: function (r) {
           return esc((r.evidence || []).map(agentEvidenceRu).join(' · '));
@@ -1789,17 +1918,22 @@
     var host = ovEl.querySelector('#ow-section');
     var response = state.data[state.section];
     if (state.error) { host.innerHTML = ''; renderError(state.error, reload); return; }
-    if (!response) { host.innerHTML = '<div class="ow-empty">Нет данных</div>'; return; }
+    if (!response) { host.innerHTML = '<div class="ow-empty">' + et('Нет данных') + '</div>'; return; }
     var renderer = RENDERERS[state.section];
-    host.innerHTML = renderer ? renderer(response.data || {}) : '<div class="ow-empty">Раздел недоступен</div>';
+    host.innerHTML = renderer ? renderer(response.data || {}) : '<div class="ow-empty">' + et('Раздел недоступен') + '</div>';
     var range = response.range || {};
+    var took = response.ms;
+    var ms = function () { return took != null ? ' · ' + t('{{0}} мс', took) : ''; };
     if (!state.lastRefresh && state.preset === 'day') {
-      setStatus('День ' + esc(state.day) + ' · ' + esc(range.tz || state.tz) + (state.filters.country !== 'all' ? ' · страна ' + esc(state.filters.country) : '') +
-        (response.ms != null ? ' · ' + response.ms + ' мс' : ''));
+      var day = state.day, tz = range.tz || state.tz, country = state.filters.country;
+      setStatus(function () {
+        return et('День {{0}}', day) + ' · ' + esc(tz) + (country !== 'all' ? ' · ' + et('страна {{0}}', country) : '') + esc(ms());
+      });
     } else if (!state.lastRefresh) {
-      setStatus('Период ' + esc(String(range.from || '').slice(0, 16).replace('T', ' ')) + ' — ' +
-        esc(String(range.to || '').slice(0, 16).replace('T', ' ')) + ' · ' + esc(range.tz || '') +
-        (response.ms != null ? ' · ' + response.ms + ' мс' : ''));
+      setStatus(function () {
+        return et('Период {{0}} — {{1}}', String(range.from || '').slice(0, 16).replace('T', ' '), String(range.to || '').slice(0, 16).replace('T', ' ')) +
+          ' · ' + esc(range.tz || '') + esc(ms());
+      });
     }
   }
 
@@ -1832,6 +1966,15 @@
   // ── wiring ─────────────────────────────────────────────────────────────────────────────────
   function wire() {
     ovEl.querySelector('#ow-back').addEventListener('click', close);
+    ovEl.querySelector('#ow-lang').addEventListener('change', function (event) { if (i18n()) i18n().setLang(event.target.value); });
+    // ⓘ buttons live in the sections AND in the country / person sheets (appended to the panel, not
+    // to #ow-content), so the one «Как считается» handler listens on the whole panel.
+    ovEl.addEventListener('click', function (event) {
+      var howButton = event.target.closest('[data-how]');
+      if (!howButton || !ovEl.contains(howButton)) return;
+      var key = howButton.getAttribute('data-how');
+      openPopup('Как считается', function () { return esc(t(HOW[key] || '')); });
+    });
     ovEl.querySelector('#ow-refresh').addEventListener('click', refresh);
     ovEl.querySelector('#ow-export').addEventListener('click', exportCurrent);
     ovEl.querySelector('#ow-filters').addEventListener('click', function () {
@@ -1889,8 +2032,7 @@
     ovEl.querySelector('#ow-content').addEventListener('click', function (event) {
       var anchor = event.target.closest('.ow-anchors a[data-block]');
       if (anchor) { event.preventDefault(); state.block = anchor.getAttribute('data-block'); focusBlock(); return; }
-      var howButton = event.target.closest('[data-how]');
-      if (howButton) { openPopup('Как считается', esc(HOW[howButton.getAttribute('data-how')] || '')); return; }
+      if (event.target.closest('[data-how]')) return;
       var pageButton = event.target.closest('[data-page]');
       if (pageButton) {
         state.page = Math.max(0, state.page + (pageButton.getAttribute('data-page') === 'next' ? 1 : -1));
@@ -1922,20 +2064,17 @@
         state.mapMetric = event.target.value;
         if (mapApi) mapApi.setMetric(state.mapMetric);
         var legend = ovEl.querySelector('.ow-legend-scale span:last-child');
-        if (legend) legend.textContent = 'больше · ' + metricLabel(state.mapMetric);
+        if (legend) legend.textContent = t('больше · {{0}}', metricLabel(state.mapMetric));
       }
       if (event.target.id === 'ow-continent') { state.continent = event.target.value; if (mapApi) mapApi.setContinent(state.continent); }
     });
     ovEl.querySelector('#ow-content').addEventListener('click', function (event) {
       if (event.target.id === 'ow-fit' && mapApi) { state.continent = 'all'; var sel = ovEl.querySelector('#ow-continent'); if (sel) sel.value = 'all'; mapApi.setContinent('all'); }
     });
+    // Without the shell's modal manager (it handles Escape first and calls __lotoClose above).
     D.addEventListener('keydown', function (event) {
-      if (!ovEl || !ovEl.classList.contains('show')) return;
-      if (event.key === 'Escape') {
-        if (ovEl.querySelector('#ow-sheet')) { ovEl.querySelector('#ow-sheet').remove(); state.selectedCountry = null; if (mapApi) mapApi.select(null); }
-        else if (ovEl.querySelector('#ow-pop')) closePopup();
-        else close();
-      }
+      if (!ovEl || !ovEl.classList.contains('show') || event.key !== 'Escape' || event.defaultPrevented) return;
+      if (!closeInnermost()) close();
     });
   }
 
@@ -1944,7 +2083,7 @@
       var select = ovEl.querySelector('#ow-lottery');
       var keys = Object.values(W.LOTO_APP_LOTTERY_KEYS || {});
       if (!keys.length || select.options.length > 1) return;
-      select.innerHTML = '<option value="all">Все</option>' + keys.sort().map(function (key) {
+      select.innerHTML = '<option value="all">' + esc(t('Все')) + '</option>' + keys.sort().map(function (key) {
         return '<option value="' + esc(key) + '">' + esc(key) + '</option>';
       }).join('');
     } catch (e) {}
@@ -1952,22 +2091,51 @@
 
   // ── open / close ───────────────────────────────────────────────────────────────────────────
   var fromAccount = false;
+  // The panel's ru/en/no catalog (owner-i18n.js) is fetched with the panel, never at startup; if it
+  // cannot load, the panel simply stays Russian.
+  var i18nPromise = null;
+  function loadI18n() {
+    if (W.LotoOwnerI18n) return Promise.resolve();
+    if (!i18nPromise) {
+      i18nPromise = (typeof W.LotoLoadRuntimeScript === 'function' ? W.LotoLoadRuntimeScript('owner-i18n.js') : Promise.reject(new Error('no_loader')))
+        .catch(function () { i18nPromise = null; });
+    }
+    return i18nPromise;
+  }
+  function renderDenied() {
+    ovEl.querySelector('#ow-section').innerHTML = '<div class="ow-deny"><h2>' + et('Доступ только для владельца') + '</h2>' +
+      '<p>' + et('Эта панель доступна только аккаунту владельца проекта.') + '</p></div>';
+  }
   async function open(viaAccount) {
     fromAccount = !!viaAccount;
+    await loadI18n();
     build();
     fillLotteries();
     syncControls();
     ovEl.classList.add('show');
     D.documentElement.style.overflow = 'hidden';
     var owner = await isOwner();
-    if (!owner) {
-      ovEl.querySelector('#ow-section').innerHTML = '<div class="ow-deny"><h2>Доступ только для владельца</h2>' +
-        '<p>Эта панель доступна только аккаунту владельца проекта.</p></div>';
-      return;
-    }
+    state.denied = !owner;
+    if (!owner) { renderDenied(); return; }
     startOwnerNotifications();
     await show(state.section);
   }
+  // A switch of the panel language re-renders everything on screen from the data already held:
+  // shell, section, status line, an open sheet or ⓘ note and the map. No request is repeated.
+  function onLanguageChange() {
+    if (!ovEl) return;
+    relabel();
+    if (state.denied) renderDenied();
+    else if (!state.busy && (state.data[state.section] || state.error)) {
+      render();
+      if (state.section === 'map') mountMap(true);
+    }
+    if (statusView) setStatus(statusView);
+    if (stageView) { var stages = ovEl.querySelector('#ow-stages'); if (stages) stages.textContent = stageView(); }
+    var sheet = ovEl.querySelector('#ow-sheet'); if (sheet && sheet.__render) sheet.__render();
+    var note = ovEl.querySelector('#ow-pop-back'); if (note && note.__render) note.__render();
+  }
+  W.addEventListener('loto:ownerlanguagechange', onLanguageChange);
   // The Owner Notification Center is part of THIS panel, not of the public page: it is fetched on
   // the first open and started/stopped with the panel, so no owner query, listener or timer can
   // run while the panel is closed.

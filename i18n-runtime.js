@@ -18,6 +18,10 @@
 
   const patternBuckets=new Map(),patternFallback=[];
   const phraseBuckets=new Map();
+  // The lookup index of the app catalog. A scoped catalog (LotoI18n.createTranslator — the Owner
+  // Panel's ru/en/no rows, loaded with the panel) gets its own index of the same shape and is
+  // matched by the same addEntry / translateCore.
+  const appIndex={localeIndex,entries,aliases,patternBuckets,patternFallback,phraseBuckets,translationCaches};
   const addBucket=(buckets,key,item)=>{
     if(!buckets.has(key))buckets.set(key,[]);
     buckets.get(key).push(item);
@@ -25,14 +29,14 @@
   // One entry into the lookup: exact map, reverse aliases, and the template / phrase indexes. Used
   // for the startup catalog and, later, for a lazily loaded catalog part (see loadPart). Candidates
   // are ranked at lookup time, so the order entries arrive in does not matter.
-  function addEntry(source,sourceLocale,translations){
+  function addEntry(source,sourceLocale,translations,idx=appIndex){
     const normalized=normalize(source);
-    if(entries.has(normalized))return entries.get(normalized);
+    if(idx.entries.has(normalized))return idx.entries.get(normalized);
     const entry={source:normalized,sourceLocale,translations};
-    entries.set(normalized,entry);
+    idx.entries.set(normalized,entry);
     for(const translation of translations||[]){
       const alias=normalize(translation);
-      if(canRegisterAlias(alias,normalized)&&!aliases.has(alias))aliases.set(alias,entry);
+      if(canRegisterAlias(alias,normalized)&&!idx.aliases.has(alias))idx.aliases.set(alias,entry);
     }
     if(/{{\d+}}/.test(normalized)){
       const slots=[];
@@ -44,13 +48,13 @@
       }).join('')+'$';
       const pattern={...entry,regex:new RegExp(regex,'u'),slots,weight:normalized.replace(/{{\d+}}/g,'').length};
       const key=candidateKey(pattern.source.replace(/{{\d+}}/g,' '));
-      if(key)addBucket(patternBuckets,key,pattern);
-      else patternFallback.push(pattern);
+      if(key)addBucket(idx.patternBuckets,key,pattern);
+      else idx.patternFallback.push(pattern);
     }else if(normalized.length>=2&&/[A-Za-zА-Яа-яЁё]/.test(normalized)){
       entry.beginsWithWord=/^[\p{L}\p{N}]/u.test(normalized);
       entry.endsWithWord=/[\p{L}\p{N}]$/u.test(normalized);
       const key=candidateKey(entry.source);
-      if(key)addBucket(phraseBuckets,key,entry);
+      if(key)addBucket(idx.phraseBuckets,key,entry);
     }
     return entry;
   }
@@ -82,15 +86,15 @@
   const attributeState=new WeakMap();
   const translatedAttrs=['placeholder','title','aria-label','aria-description'];
 
-  function valueFor(entry,code=language){
-    const index=localeIndex.get(code);
+  function valueFor(entry,code=language,idx=appIndex){
+    const index=idx.localeIndex.get(code);
     return index===undefined?entry.source:(entry.translations[index]||entry.source);
   }
 
-  function fillTemplate(value,captures,slots,code=language){
+  function fillTemplate(value,captures,slots,code=language,idx=appIndex){
     return value.replace(/{{(\d+)}}/g,(_,slot)=>{
       const position=slots.indexOf(Number(slot));
-      return position>=0?translateCore(captures[position],code):'';
+      return position>=0?translateCore(captures[position],code,idx):'';
     });
   }
 
@@ -102,9 +106,9 @@
     return[...found];
   }
 
-  function cachedTranslation(code,core,compute){
-    let cache=translationCaches.get(code);
-    if(!cache){cache=new Map();translationCaches.set(code,cache);}
+  function cachedTranslation(code,core,compute,idx=appIndex){
+    let cache=idx.translationCaches.get(code);
+    if(!cache){cache=new Map();idx.translationCaches.set(code,cache);}
     if(cache.has(core))return cache.get(core);
     const value=compute();
     if(cache.size>=4000)cache.clear();
@@ -120,29 +124,29 @@
     return entry.phraseRegex;
   }
 
-  function translateCore(core,code=language){
+  function translateCore(core,code=language,idx=appIndex){
     if(!core||code==='ru'&&/[А-Яа-яЁё]/.test(core))return core;
     return cachedTranslation(code,core,()=>{
-      const exact=entries.get(core)||aliases.get(core);
-      if(exact)return valueFor(exact,code);
-      const patternCandidates=candidateList(core,patternBuckets,patternFallback).sort((a,b)=>b.weight-a.weight);
+      const exact=idx.entries.get(core)||idx.aliases.get(core);
+      if(exact)return valueFor(exact,code,idx);
+      const patternCandidates=candidateList(core,idx.patternBuckets,idx.patternFallback).sort((a,b)=>b.weight-a.weight);
       for(const pattern of patternCandidates){
         const match=core.match(pattern.regex);
-        if(match)return fillTemplate(valueFor(pattern,code),match.slice(1),pattern.slots,code);
+        if(match)return fillTemplate(valueFor(pattern,code,idx),match.slice(1),pattern.slots,code,idx);
       }
       let output=core;
-      const phraseCandidates=candidateList(core,phraseBuckets).sort((a,b)=>b.source.length-a.source.length);
-      for(const phrase of phraseCandidates)output=output.replace(phraseRegex(phrase),valueFor(phrase,code));
+      const phraseCandidates=candidateList(core,idx.phraseBuckets).sort((a,b)=>b.source.length-a.source.length);
+      for(const phrase of phraseCandidates)output=output.replace(phraseRegex(phrase),valueFor(phrase,code,idx));
       return output;
-    });
+    },idx);
   }
 
-  function translate(value,code=language){
+  function translate(value,code=language,idx=appIndex){
     const raw=String(value??'');
     const leading=raw.match(/^\s*/)?.[0]||'';
     const trailing=raw.match(/\s*$/)?.[0]||'';
     const core=normalize(raw);
-    return leading+translateCore(core,code)+trailing;
+    return leading+translateCore(core,code,idx)+trailing;
   }
 
   function skipTextNode(node){
@@ -325,9 +329,21 @@
     return CURRENCY_SYMBOL[cur]?`${CURRENCY_SYMBOL[cur]}${num} ${unit}`:`${num} ${unit}${cur?' '+cur:''}`;
   }
 
+  // A translator over a separate catalog of the same format ({locales, entries}) — for copy that
+  // must not live in the startup catalog and follows its own language (the Owner Panel).
+  function createTranslator(scoped){
+    const codes=Object.keys(scoped.locales);
+    const idx={localeIndex:new Map(codes.map((code,index)=>[code,index])),entries:new Map(),aliases:new Map(),
+      patternBuckets:new Map(),patternFallback:[],phraseBuckets:new Map(),translationCaches:new Map()};
+    for(const [source,sourceLocale,translations] of scoped.entries)addEntry(source,sourceLocale,translations,idx);
+    return(value,code)=>translate(value,code,idx);
+  }
+
   window.LotoI18n={
     catalog,
+    createTranslator,
     formatJackpot,
+    intlLocale,
     get language(){return language;},
     ready,
     setLanguage,

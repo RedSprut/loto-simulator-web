@@ -11,6 +11,18 @@
 })(this, function () {
   var TZ = 'Europe/Oslo';
 
+  // Owner Panel language (owner-i18n.js, browser only): every label this library prints is a Russian
+  // source passed through tr(), every number / amount is formatted in intl(). In Node, or in a page
+  // without owner-i18n.js, both fall back to the Russian source and ru-RU — what the tests pin.
+  function ownerI18n() { return (typeof window !== 'undefined' && window.LotoOwnerI18n) || null; }
+  function tr(source) {
+    var i18n = ownerI18n();
+    if (i18n) return i18n.t.apply(null, arguments);
+    var args = Array.prototype.slice.call(arguments, 1);
+    return String(source).replace(/{{(\d+)}}/g, function (_, n) { return args[+n] == null ? '' : String(args[+n]); });
+  }
+  function intl() { var i18n = ownerI18n(); return i18n ? i18n.intl() : 'ru-RU'; }
+
   // Oslo wall-clock offset (minutes east of UTC) at a given UTC instant.
   function osloOffsetMinutes(utcMs) {
     var dtf = new Intl.DateTimeFormat('en-US', {
@@ -176,6 +188,13 @@
     var code = String(iso).toUpperCase();
     return COUNTRY_RU[code] || code;
   }
+  // A country in the panel language: the Russian table for Russian, Intl region names otherwise.
+  function countryName(iso) {
+    var i18n = ownerI18n();
+    if (!i18n || i18n.lang === 'ru') return countryNameRu(iso);
+    if (!iso || String(iso).toUpperCase() === 'ZZ') return tr('Не определено');
+    return i18n.countryName(iso) || String(iso).toUpperCase();
+  }
   function countryList() {
     return Object.keys(COUNTRY_RU).sort(function (a, b) { return COUNTRY_RU[a].localeCompare(COUNTRY_RU[b], 'ru'); })
       .map(function (c) { return { code: c, name: COUNTRY_RU[c] }; });
@@ -268,12 +287,12 @@
 
   function formatDuration(ms) {
     var seconds = Math.max(0, Math.round((+ms || 0) / 1000));
-    if (seconds < 60) return seconds + ' с';
+    if (seconds < 60) return tr('{{0}} с', seconds);
     var minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return minutes + ' мин ' + (seconds % 60 ? (seconds % 60) + ' с' : '');
+    if (minutes < 60) return tr('{{0}} мин', minutes) + ' ' + (seconds % 60 ? tr('{{0}} с', seconds % 60) : '');
     var hours = Math.floor(minutes / 60);
-    if (hours < 24) return hours + ' ч ' + (minutes % 60 ? (minutes % 60) + ' мин' : '');
-    return Math.floor(hours / 24) + ' д ' + (hours % 24 ? (hours % 24) + ' ч' : '');
+    if (hours < 24) return tr('{{0}} ч', hours) + ' ' + (minutes % 60 ? tr('{{0}} мин', minutes % 60) : '');
+    return tr('{{0}} д', Math.floor(hours / 24)) + ' ' + (hours % 24 ? tr('{{0}} ч', hours % 24) : '');
   }
 
   function csv(columns, rows) {
@@ -298,9 +317,9 @@
   function confidence(value) {
     var n = Math.max(0, Math.min(100, Math.round(+value || 0)));
     for (var i = 0; i < CONFIDENCE_STEPS.length; i++) {
-      if (n >= CONFIDENCE_STEPS[i].min) return { value: n, label: CONFIDENCE_STEPS[i].label, tone: CONFIDENCE_STEPS[i].tone };
+      if (n >= CONFIDENCE_STEPS[i].min) return { value: n, label: tr(CONFIDENCE_STEPS[i].label), tone: CONFIDENCE_STEPS[i].tone };
     }
-    return { value: n, label: 'Низкая уверенность', tone: 'low' };
+    return { value: n, label: tr('Низкая уверенность'), tone: 'low' };
   }
 
   var KIND_RU = { verified: 'Подтверждённый человек', probable: 'Вероятный человек', unknown: 'Неизвестный посетитель' };
@@ -357,9 +376,9 @@
   };
   function evidenceRu(key) {
     if (!key) return '';
-    if (EVIDENCE_RU[key]) return EVIDENCE_RU[key];
+    if (EVIDENCE_RU[key]) return tr(EVIDENCE_RU[key]);
     var bot = /^declared_bot:(.+)$/.exec(String(key));
-    if (bot) return 'Объявленный робот: ' + bot[1];
+    if (bot) return tr('Объявленный робот: {{0}}', bot[1]);
     return String(key);
   }
 
@@ -397,11 +416,11 @@
   // the sample is too small); a real 0 stays «0»; an unanswered backend never becomes a 0.
   function kpiText(value, opts) {
     opts = opts || {};
-    if (opts.unavailable) return { text: 'Нет данных', state: 'none' };
-    if (value == null) return opts.insufficient ? { text: 'Недостаточно данных', state: 'insufficient' } : { text: 'Нет данных', state: 'none' };
+    if (opts.unavailable) return { text: tr('Нет данных'), state: 'none' };
+    if (value == null) return opts.insufficient ? { text: tr('Недостаточно данных'), state: 'insufficient' } : { text: tr('Нет данных'), state: 'none' };
     var n = +value;
-    if (!isFinite(n)) return { text: 'Нет данных', state: 'none' };
-    return { text: n.toLocaleString('ru-RU'), state: 'ok' };
+    if (!isFinite(n)) return { text: tr('Нет данных'), state: 'none' };
+    return { text: n.toLocaleString(intl()), state: 'ok' };
   }
 
   // ── Owner Panel calendar + Owner Notification Center (2026-09-20) ────────────────────────────
@@ -482,8 +501,8 @@
   function formatMoney(amount, currency) {
     var n = +amount;
     if (!isFinite(n)) return '—';
-    try { return n.toLocaleString('ru-RU', { style: 'currency', currency: currency || 'USD', maximumFractionDigits: 2 }); }
-    catch (e) { return n.toLocaleString('ru-RU') + ' ' + (currency || ''); }
+    try { return n.toLocaleString(intl(), { style: 'currency', currency: currency || 'USD', maximumFractionDigits: 2 }); }
+    catch (e) { return n.toLocaleString(intl()) + ' ' + (currency || ''); }
   }
   // Money by currency, never summed across currencies: [{currency, amount}] → «4,99 € · 99,00 kr».
   // Rows without an amount are skipped (unknown is unknown, not zero).
@@ -497,27 +516,27 @@
   function usdEstimate(value) {
     var n = +value;
     if (value == null || !isFinite(n)) return '';
-    return '≈ ' + formatMoney(n, 'USD') + ' по курсу RevenueCat';
+    return tr('≈ {{0}} по курсу RevenueCat', formatMoney(n, 'USD'));
   }
   // Net of one ledger row: exact when the server computed it, «нет данных» otherwise — never 0 by default.
   function netText(row) {
-    if (!row) return 'нет данных';
+    if (!row) return tr('нет данных');
     if (row.net != null && row.currency && isFinite(+row.net)) return formatMoney(row.net, row.currency);
-    return 'нет данных';
+    return tr('нет данных');
   }
   function deductionText(row) {
     if (!row || row.price == null || row.net == null || !row.currency) return '';
     var d = +row.price - +row.net;
     if (!isFinite(d)) return '';
     var shares = [];
-    if (row.commission_pct != null && isFinite(+row.commission_pct)) shares.push('комиссия ' + Math.round(+row.commission_pct * 1000) / 10 + '%');
-    if (row.tax_pct != null && isFinite(+row.tax_pct)) shares.push('налог ' + Math.round(+row.tax_pct * 1000) / 10 + '%');
+    if (row.commission_pct != null && isFinite(+row.commission_pct)) shares.push(tr('комиссия {{0}}%', Math.round(+row.commission_pct * 1000) / 10));
+    if (row.tax_pct != null && isFinite(+row.tax_pct)) shares.push(tr('налог {{0}}%', Math.round(+row.tax_pct * 1000) / 10));
     return formatMoney(d, row.currency) + (shares.length ? ' (' + shares.join(' + ') + ')' : '');
   }
 
   return {
     osloRange: osloRange, forecast: forecast, pctChange: pctChange,
-    COUNTRY_RU: COUNTRY_RU, countryNameRu: countryNameRu, countryList: countryList,
+    COUNTRY_RU: COUNTRY_RU, countryNameRu: countryNameRu, countryName: countryName, countryList: countryList,
     range: range, ZONES: ZONES, formatDuration: formatDuration, csv: csv, confidence: confidence,
     KIND_RU: KIND_RU, CLASS_RU: CLASS_RU, CHANNEL_RU: CHANNEL_RU, EVENT_RU: EVENT_RU,
     EVIDENCE_RU: EVIDENCE_RU, evidenceRu: evidenceRu,

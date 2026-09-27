@@ -237,7 +237,10 @@ function styleFor(theme, features) {
   };
 }
 
-export async function createMap({ container, theme = 'light', colorFor, onHover, onSelect, continentOf, nameOf: nameOfOpt, labels = true }) {
+// `label`, `numberLocale` and `locale` (MapLibre's own control strings) come from the panel, in the
+// panel language; without them the map keeps its Russian defaults.
+export async function createMap({ container, theme = 'light', colorFor, onHover, onSelect, continentOf, nameOf: nameOfOpt, labels = true,
+  label = 'Карта мира: страны, окрашенные по выбранному показателю', numberLocale = 'ru-RU', locale = null }) {
   ensureCss();
   const [maplibre, world] = await Promise.all([loadMaplibre(), loadWorld()]);
   const gl = maplibre.default || maplibre;
@@ -257,11 +260,12 @@ export async function createMap({ container, theme = 'light', colorFor, onHover,
     dragRotate: false,
     pitchWithRotate: false,
     touchPitch: false,
+    ...(locale ? { locale } : {}),
   });
   map.addControl(new gl.NavigationControl({ showCompass: false }), 'top-right');
   try { map.touchZoomRotate.disableRotation(); } catch (_e) {}
   container.setAttribute('role', 'img');
-  container.setAttribute('aria-label', 'Карта мира: страны, окрашенные по выбранному показателю');
+  container.setAttribute('aria-label', label);
 
   const continent = (iso) => (typeof continentOf === 'function' ? continentOf(iso) : ((world.meta[iso] || {}).c || null));
   let state = { rows: [], metric: 'visits_human', theme, continent: 'all', selected: null, hovered: null };
@@ -291,7 +295,7 @@ export async function createMap({ container, theme = 'light', colorFor, onHover,
       const feature = world.features.find((f) => f.properties.iso === row.country);
       if (!feature) continue;
       keep.add(row.country);
-      const text = nameOf(row.country, feature.properties.name) + ' · ' + (+row[state.metric] || 0).toLocaleString('ru-RU');
+      const text = nameOf(row.country, feature.properties.name) + ' · ' + (+row[state.metric] || 0).toLocaleString(numberLocale);
       let marker = markers.get(row.country);
       if (!marker) {
         const el = document.createElement('button');
