@@ -1079,22 +1079,10 @@ function formatPrice(l){
   if(!l.price)return '—';
   return `${l.price} ${l.currency||'NOK'}`;
 }
-function updateLotteryNavArrows(){
-  const el=document.getElementById('lot-tabs'),prev=document.getElementById('lot-scroll-prev'),next=document.getElementById('lot-scroll-next');
-  if(!el||!prev||!next)return;
-  const max=Math.max(0,el.scrollWidth-el.clientWidth);
-  prev.disabled=max<2||el.scrollLeft<=2;
-  next.disabled=max<2||el.scrollLeft>=max-2;
-}
 function centerNavItem(scroller,item){
   if(!scroller||!item||scroller.scrollWidth<=scroller.clientWidth+2)return;
   const left=item.offsetLeft-(scroller.clientWidth-item.offsetWidth)/2;
   scroller.scrollTo({left:Math.max(0,left),behavior:'smooth'});
-}
-function scrollLotteryNav(dir){
-  const el=document.getElementById('lot-tabs');if(!el)return;
-  el.scrollBy({left:dir*Math.max(150,el.clientWidth*.72),behavior:'smooth'});
-  setTimeout(updateLotteryNavArrows,320);
 }
 function enableHorizontalScroller(el,manualTouch=false){
   if(!el||el.dataset.dragReady==='1')return;
@@ -1172,7 +1160,6 @@ function renderLotteryNav(){
   requestAnimationFrame(()=>{
     centerNavItem(tabs,document.getElementById('lt-'+cur));
     centerNavItem(strip,document.getElementById('ss-'+cur));
-    updateLotteryNavArrows();
   });
 }
 function updateOfficialControls(){
@@ -6179,9 +6166,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   const lotTabs=document.getElementById('lot-tabs');
   enableHorizontalScroller(lotTabs,true);
   enableHorizontalScroller(document.getElementById('sched-strip'));
-  if(lotTabs)lotTabs.addEventListener('scroll',updateLotteryNavArrows,{passive:true});
-  window.addEventListener('resize',updateLotteryNavArrows,{passive:true});
-  setTimeout(updateLotteryNavArrows,80);
   setTimeout(()=>{PERIOD_refreshLabel().catch(()=>{});NOTIF_boot();},500);
   setTimeout(autoCheckFavorites,4500);
   /* ══ OVERLAY PAGE SCROLLBAR ══════════════════════════════════════════════════════════════
