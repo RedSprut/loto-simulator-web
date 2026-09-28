@@ -5360,12 +5360,13 @@ function shareRows(){
   const l=L();fillAll();
   const good=rows.filter(r=>r.m.length===l.pM);
   if(!good.length){showFeedback('Пусто','Сначала заполни хотя бы один ряд.','✋',2400);return;}
-  shareText('Мои ряды · '+l.name,'Мои ряды · '+l.name+'\n'+rowsAsText(good,l));
+  const title=appText('Мои ряды')+' · '+l.name;
+  shareText(title,title+'\n'+rowsAsText(good,l));
 }
 function shareMatrix(){
   const st=CONS_state;
   if(!st||!st.matrix){showFeedback('Матрица пуста','Сначала сформируй выборку.','✋',2400);return;}
-  shareText('Матрица консенсуса · '+st.ctx.lotteryName,'Итоговая матрица консенсуса · '+st.ctx.lotteryName+'\n'+rowsAsText(st.matrix,st.l));
+  shareText(appText('Матрица консенсуса')+' · '+st.ctx.lotteryName,appText('Итоговая матрица консенсуса')+' · '+st.ctx.lotteryName+'\n'+rowsAsText(st.matrix,st.l));
 }
 
 /* ═══════════════ ПОБЕДНАЯ КОМБИНАЦИЯ + БИЛЕТ ═══════════════ */
@@ -5416,8 +5417,8 @@ async function WC_fav(){
 function WC_share(){
   if(!WC_draw)return;
   const l=L();
-  shareText('Результат симуляции · '+(l.short||l.name),
-    '🎯 Результат симуляции '+(l.short||l.name)+' · тираж '+WC_draw.date+'\n'+
+  shareText(appText('Результат симуляции')+' · '+(l.short||l.name),
+    '🎯 '+appText('Результат симуляции')+' '+(l.short||l.name)+' · '+appText('тираж')+' '+formatHistoryDate(WC_draw.date)+'\n'+
     (WC_draw.main||[]).join(' ')+((WC_draw.bonus&&WC_draw.bonus.length)?' | '+WC_draw.bonus.join(' '):''));
 }
 function TK_open(){
@@ -5687,7 +5688,7 @@ function SUP_share(){
   const st=SUP_state,recommend=!!(st&&st.mode==='recommend'&&supRecRows.length);
   const list=recommend?supRecRows:(st&&st.verdict);
   if(!list||!list.length)return;
-  const title=recommend?'Рекомендации Верховного судьи':'Вердикт Верховного судьи';
+  const title=appText(recommend?'Рекомендации Верховного судьи':'Вердикт Верховного судьи');
   shareText(title+' · '+L().name,'⚖️ '+title+' · '+L().name+'\n'+rowsAsText(list,L()));
 }
 
@@ -6520,10 +6521,10 @@ async function QA_use(){
 function QA_share(){
   const st=QA_state;if(!st||!st.rows)return;
   const{ph,ms,zs}=st.rows.meta;
-  shareText('Квантово-астральный ряд · '+L().name,
-    '🔮 Мой квантово-астральный ряд · '+L().name+'\n'+
+  shareText(appText('Квантово-астральный ряд')+' · '+L().name,
+    '🔮 '+appText('Мой квантово-астральный ряд')+' · '+L().name+'\n'+
     rowsAsText(st.rows,L())+'\n'+
-    QA_ZODIAC[zs][0]+' '+QA_ZODIAC[zs][1]+' · '+ph.emoji+' '+ph.name+' · Луна в '+QA_ZODIAC[ms][1]);
+    QA_ZODIAC[zs][0]+' '+appText(QA_ZODIAC[zs][1])+' · '+ph.emoji+' '+appText(ph.name)+' · '+appText('Луна в знаке')+' '+appText(QA_ZODIAC[ms][1]));
 }
 
 
@@ -6706,9 +6707,12 @@ function HORO_open(sign){
 function HORO_close(){document.getElementById('horo-ov').classList.remove('show');}
 function HORO_share(){
   const t=HORO_text(HORO_sign);
+  /* moonPhase / moonSign are composites («🌕 Полнолуние», «Луна в знаке Овен»): share their parts
+     as exact catalog keys, not as one string the translator can only match piecewise. */
+  const now=new Date(),ph=QA_moonPhase(now),ms=QA_moonSign(now);
   shareText(appText('Гороскоп ·')+' '+appText(QA_ZODIAC[HORO_sign][1]),
     '📜 '+QA_ZODIAC[HORO_sign][0]+' '+appText(QA_ZODIAC[HORO_sign][1])+' · '+new Date().toLocaleDateString(appLocale(),{day:'numeric',month:'long'})+'\n'+
-    appText(t.moonPhase)+' · '+appText(t.moonSign)+'\n\n⚡ '+appText(t.energyFlavor)+' '+appText(t.energy)+'\n💰 '+appText(t.money)+'\n💛 '+appText(t.heart)+'\n'+appText(t.advice)+'\n'+appText('🍀 Числа удачи:')+' '+t.lucky.join(' '));
+    ph.emoji+' '+appText(ph.name)+' · '+appText('Луна в знаке')+' '+appText(QA_ZODIAC[ms][1])+'\n\n⚡ '+appText(t.energyFlavor)+' '+appText(t.energy)+'\n💰 '+appText(t.money)+'\n💛 '+appText(t.heart)+'\n'+appText(t.advice)+'\n'+appText('🍀 Числа удачи:')+' '+t.lucky.join(' '));
 }
 
 
@@ -6944,11 +6948,11 @@ async function ADV_useVerdict(){
 function ADV_share(){
   const st=ADV_state;if(!st||!st.rows)return;
   const dd=QA_nextDrawDate();
-  shareText('Исследовательский набор · '+L().name,'💬 Набор «'+(ADV_NAMES[st.algo]||st.algo)+'» для даты '+dd.toLocaleDateString(appLocale(),{day:'numeric',month:'short'})+' · '+L().name+'\n'+rowsAsText(st.rows,L())+'\nЭто исследование истории, а не прогноз.');
+  shareText(appText('Исследовательский набор')+' · '+L().name,'💬 '+historyText('Набор «{{0}}» для даты {{1}}',appText(ADV_NAMES[st.algo]||st.algo),dd.toLocaleDateString(appLocale(),{day:'numeric',month:'short'}))+' · '+L().name+'\n'+rowsAsText(st.rows,L())+'\n'+appText('Это исследование истории, а не прогноз.'));
 }
 function ADV_shareVerdict(){
   const st=ADV_state;if(!st||!st.verdict)return;
-  shareText('Вердикт судьи · '+L().name,'⚖️ Вердикт судьи на тираж '+QA_nextDrawDate().toLocaleDateString(appLocale(),{day:'numeric',month:'short'})+' · '+L().name+'\n'+rowsAsText(st.verdict,L()));
+  shareText(appText('Вердикт судьи')+' · '+L().name,'⚖️ '+historyText('Вердикт судьи на тираж {{0}}',QA_nextDrawDate().toLocaleDateString(appLocale(),{day:'numeric',month:'short'}))+' · '+L().name+'\n'+rowsAsText(st.verdict,L()));
 }
 
 
@@ -7119,7 +7123,7 @@ async function SUPC_dbUse(){
 }
 function SUPC_dbShare(){
   if(!window.SUPC_dbRows)return;
-  shareText('Совет судьи · '+L().name,'⚖️📊 Совет судьи по лидерам базы · '+L().name+' · тираж '+QA_nextDrawDate().toLocaleDateString(appLocale(),{day:'numeric',month:'short'})+'\n'+rowsAsText(window.SUPC_dbRows,L()));
+  shareText(appText('Совет судьи')+' · '+L().name,'⚖️📊 '+appText('Совет судьи по лидерам базы')+' · '+L().name+' · '+appText('тираж')+' '+QA_nextDrawDate().toLocaleDateString(appLocale(),{day:'numeric',month:'short'})+'\n'+rowsAsText(window.SUPC_dbRows,L()));
 }
 /* ═══ Поиск по истории + фильтр по эпохе правил ═══
    Один проход по уже отрисованным строкам, без перезагрузки и без запроса к архиву: строка
@@ -7394,7 +7398,8 @@ function PDX_copy(btn){
 }
 function PDX_share(){
   const st=PDX_state;if(!st||!st.rows)return;
-  shareText(lotteryName(cur)+' · парадоксы',lotteryName(cur)+' · парадоксы\n'+rowsAsText(st.rows.map(r=>({m:r.m,b:r.b})),L()));
+  const title=lotteryName(cur)+' · '+appText('парадоксы');
+  shareText(title,title+'\n'+rowsAsText(st.rows.map(r=>({m:r.m,b:r.b})),L()));
 }
 function PDX_judge(){
   const st=PDX_state;if(!st||!st.rows)return;
