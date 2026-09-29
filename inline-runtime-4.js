@@ -157,6 +157,7 @@
     // so a PRO user's 100s of saves are never truncated.
     try { await saveFavs(drumIsPro() ? favs : favs.slice(0, 10)); } catch (e) {}
     try { await renderFavs(); } catch (e) {}
+    appUsage('combination_saved', 'drum', { rows: 1 });
     postToDrum({ type: 'APP_SAVE_RESULT', status: 'saved' }); pushDrumFavorites();
     try { drumApplyToTopRows(combo); } catch (e) {} // #3: also add to the top working rows
   }
@@ -167,6 +168,7 @@
     favs.unshift(drumComboToFav(combo));
     try { await saveFavs(drumIsPro() ? favs : favs.slice(0, 10)); } catch (e) {}
     try { await renderFavs(); } catch (e) {}
+    appUsage('combination_saved', 'drum_replace', { rows: 1 });
     postToDrum({ type: 'APP_SAVE_RESULT', status: 'saved' }); pushDrumFavorites();
     try { drumApplyToTopRows(combo); } catch (e) {} // #3: also add to the top working rows
   }

@@ -2906,6 +2906,7 @@ function runLifeSim(){
   const ticket=rows.filter(r=>r.m.length===l.pM&&(l.pBo===0||r.b.length===l.pBo)).map(r=>({m:[...r.m],b:[...r.b]}));
   if(!ticket.length){if(out)out.textContent='Нет заполненных рядов для симуляции.';return;}
   lifeRunning=true;
+  appUsage('simulation_run','life',{rows:ticket.length});
   const runToken=++lifeRunToken;
   const drawsPerWeek=Math.max(1,new Set(l.drawDays||[]).size);
   const drawsPerYear=52*drawsPerWeek,total=50*drawsPerYear,batch=50;
@@ -3056,6 +3057,7 @@ async function checkAgainstSavedDraw(){
   if(!d){if(out)out.textContent='Тираж не найден в базе.';await renderSavedDrawOptions();return;}
   fillAll();
   showBanner(d.main||[],d.bonus||[]);
+  appUsage('ticket_check','saved_draw');
   document.getElementById('win-banner').scrollIntoView({behavior:'smooth'});
   if(out)out.textContent=`Проверено против тиража ${date}: совпадения подсвечены в баннере, как в купоне Norsk Tipping.`;
   showFeedback('Проверено',`Тираж ${date}: совпадения подсвечены вверху, как в купоне Norsk Tipping.`,'🔍',2200);
@@ -3064,6 +3066,9 @@ async function checkAgainstSavedDraw(){
 // ═══════════════════════════════════════════════
 //  FAVORITES
 // ═══════════════════════════════════════════════
+// Owner analytics (analytics-telemetry.js decides consent): a product action reported from the
+// place that KNOWS it happened — a save that really wrote, a check that really ran. Codes only.
+function appUsage(type,context,extra){try{if(window.LotoTelemetry)window.LotoTelemetry.track(type,{props:Object.assign({context:context},extra||{})});}catch(_e){}}
 async function saveFav(){
   const l=L();
   fillAll();
@@ -3072,6 +3077,7 @@ async function saveFav(){
   rows.forEach(r=>ensureManualProvenance(r,l));
   favs.unshift({name,rows:normalizeGeneratedRows(rows,l).map(r=>r.prov?{m:[...r.m],b:[...r.b],prov:r.prov}:{m:[...r.m],b:[...r.b]}),lot:cur});
   await saveFavs(favs.slice(0,10));
+  appUsage('combination_saved','ticket',{rows:rows.length});
   // Mark these rows as SAVED (not played) in the personal win/match history, preserving origin.
   try{if(window.LotoWinMatch&&LotoWinMatch.ready)normalizeGeneratedRows(rows,l).forEach(r=>LotoWinMatch.markSavedPlayed(cur,r.m,r.b,false));}catch(_e){}
   await renderFavs();
@@ -3123,6 +3129,7 @@ async function useFav(i){
     return true;
   });
   if(!loaded)return;
+  appUsage('favorite_use','favorites');
   // The loading overlay is gone before navigation. Move first, then open the
   // confirmation so the modal manager records/restores the NEW (rows) position.
   goToRows({immediate:true});
@@ -5462,6 +5469,7 @@ async function WC_fav(){
   const l=L(),favs=await loadFav();
   favs.unshift({name:'🎯 Тираж '+WC_draw.date+' · '+(l.short||l.name),rows:[{m:[...(WC_draw.main||[])],b:[...(WC_draw.bonus||[])]}],lot:cur});
   await saveFavs(favs.slice(0,10));
+  appUsage('combination_saved','official',{rows:1});
   await renderFavs();
   showCopyToast('⭐ Комбинация сохранена в Избранное');
 }

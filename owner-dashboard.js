@@ -64,6 +64,7 @@
   var SECTIONS = [
     { id: 'day', label: 'День' },
     { id: 'journey', label: 'Путь гостя' },
+    { id: 'usage', label: 'Лотереи и функции' },
     { id: 'overview', label: 'Обзор' },
     { id: 'live', label: 'Live' },
     { id: 'people', label: 'Люди' },
@@ -148,7 +149,13 @@
     journeyGuests: 'Новый гость — установка, чья самая первая сессия с согласием началась в периоде без входа в аккаунт. Вернувшийся гость — установка, известная до периода, снова пришедшая без аккаунта. Один браузер = один гость; разные браузеры одного человека без входа в аккаунт — разные гости, потому что связать их надёжно нельзя.',
     journeyActive: 'Активный гость — гость с хотя бы одним значимым действием: генерация рядов, симуляция тиража, 3D-тираж до конца, проверка билета, анализ периода, календарный анализ, суд (присяжные, защита, судья), сохранение или отправка комбинаций, запуск PRO-модели. Интерес к PRO (попытка PRO-функции, экран PRO, начало оплаты) — отдельный сигнал. Просмотр разделов, открытие экранов, язык, тема, прокрутка — не действия. Карточка «Активный гость» одна на гостя в день и обновляется, а не дублируется.',
     journeyUsers: 'Новый пользователь — только реальная первая регистрация аккаунта (не анонимный, не владелец). Гостевая история привязывается к аккаунту, только если вход в этот аккаунт произошёл на той же установке; адрес, сеть и похожие устройства людей не объединяют. После регистрации действия этой установки без входа считаются действиями аккаунта. FREE — аккаунт без действующего PRO; PRO — действующий платный или бессрочный доступ; новые PRO — первая оплата в периоде.',
-    journeyCohort: 'Берутся новые гости выбранного периода, и для каждого смотрится, что с ним стало до сегодняшнего дня: стал ли активным, зарегистрировался ли (через вход на той же установке), стал ли PRO. Проценты — от числа новых гостей периода.'
+    journeyCohort: 'Берутся новые гости выбранного периода, и для каждого смотрится, что с ним стало до сегодняшнего дня: стал ли активным, зарегистрировался ли (через вход на той же установке), стал ли PRO. Проценты — от числа новых гостей периода.',
+    usage: 'Какие лотереи и функции реально используют. Источник — события с согласием на аналитику (без согласия действий не видно). Человек — аккаунт, если на установке был вход в аккаунт, иначе установка (браузер или приложение). Люди, установки, сессии и действия — четыре разных числа: один активный человек с сотней генераций остаётся одним человеком, поэтому популярность сортируется по людям. Обновление страницы, открытие приложения, навигация, язык и тема — не использование функции; одинаковое событие, повторённое в пределах секунды, считается одним.',
+    usageUnits: 'Действие — значимое использование: генерация рядов, симуляция, 3D-тираж до конца, проверка билета, анализ, календарь, суд (присяжные, защитник, судья), сохранение или отправка комбинаций, PRO-модель, интерес к PRO. Открытие — только посмотрел (открыл генератор, 3D-барабан, суд, статистику, результаты, выбрал лотерею). Лотерея записывается только у действий, которые относятся к лотерее; язык, тема, вход, оплата — глобальные и без лотереи.',
+    usageStatus: 'Статус в момент действия: гость — до входа в аккаунт на этой установке; PRO — приложение в этот момент имело PRO-доступ; иначе FREE. Один человек может за период побывать гостем, FREE и PRO — тогда он есть в каждой строке, а в итогах один раз.',
+    usageMatrix: 'Клетка — сколько людей (или сессий, или действий — переключатель) сделали это в этой лотерее или стране. Нажатие на клетку, строку или столбец включает фильтр.',
+    usageTransitions: 'Люди, которые в выбранном срезе были гостями, и что с ними стало к сегодняшнему дню: зарегистрировали аккаунт (вход на той же установке), делали что-то уже в аккаунте, получили PRO (действующий доступ или оплата). Адрес, сеть и похожие устройства людей не объединяют.',
+    usagePeople: 'Люди выбираются фильтрами, а путь показывает всё, что человек делал за период: страна → лотерея → функции в ней (по первому использованию) → другие лотереи, интерес к PRO, регистрация, PRO. Функция, которую только открыли, помечена «открыл». Показано до 100 последних активных людей.'
   };
 
   var state = {
@@ -158,7 +165,8 @@
     block: null,
     tz: 'Europe/Oslo',
     custom: { from: '', to: '' },
-    filters: { platform: 'all', country: 'all', lottery: 'all', audience: 'all' },
+    filters: { platform: 'all', country: 'all', lottery: 'all', audience: 'all', feature: 'all', status: 'all' },
+    usageMetric: 'people',
     toggles: { owner: false, bots: false, unknown: true },
     ga4Loading: false, ga4Error: null,
     compare: true,
@@ -208,7 +216,7 @@
     var payload = {
       from: range.from, to: range.to, tz: range.tz, bucket: range.bucket,
       platform: state.filters.platform, country: state.filters.country, lottery: state.filters.lottery,
-      audience: state.filters.audience,
+      audience: state.filters.audience, feature: state.filters.feature, status: state.filters.status,
       include_owner: state.toggles.owner, include_bots: state.toggles.bots, include_unknown: state.toggles.unknown
     };
     if (state.compare && range.prev_from) { payload.prev_from = range.prev_from; payload.prev_to = range.prev_to; }
@@ -496,7 +504,25 @@
       '#ow-ov .ow-feed-visits td{color:var(--ow-sub)}',
       '#ow-ov .ow-live-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--ow-up);margin-right:6px;animation:ow-pulse 1.6s ease-in-out infinite}',
       '@keyframes ow-pulse{0%,100%{opacity:1}50%{opacity:.35}}',
-      '@media(prefers-reduced-motion:reduce){#ow-ov .ow-live-dot{animation:none}}'
+      '@media(prefers-reduced-motion:reduce){#ow-ov .ow-live-dot{animation:none}}',
+      // «Лотереи и функции»: section filters, heat matrices, journey chips (wrap on phones)
+      '#ow-ov .ow-u-bar{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:var(--ow-card);border:1px solid var(--ow-bd);border-radius:14px;padding:10px 12px}',
+      '#ow-ov .ow-u-f{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ow-sub);min-width:0}',
+      '#ow-ov .ow-u-f select{max-width:190px;min-height:32px}',
+      '#ow-ov .ow-u-metric{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}',
+      '#ow-ov .ow-u-metric .ow-chip{min-height:28px;padding:2px 9px;font-size:12px}',
+      '#ow-ov .ow-u-link{border:0;background:none;padding:0;color:inherit;font:inherit;font-weight:700;cursor:pointer;text-align:left;text-decoration:underline dotted var(--ow-bd);text-underline-offset:3px}',
+      '#ow-ov table.ow-u-m th:first-child{position:sticky;left:0;z-index:1;background:var(--ow-card);text-transform:none;letter-spacing:0;font-size:12px;color:var(--ow-tx)}',
+      '#ow-ov .ow-u-cell{min-width:38px;border:0;border-radius:7px;padding:4px 7px;font:inherit;font-weight:800;color:var(--ow-tx);cursor:pointer;background:rgba(79,143,247,var(--a,.1))}',
+      '#ow-ov .ow-u-zero{color:var(--ow-bd)}',
+      '#ow-ov .ow-path{display:flex;flex-wrap:wrap;gap:4px;align-items:center;white-space:normal;min-width:240px;max-width:560px}',
+      '#ow-ov .ow-path-s{padding:1px 7px;border-radius:999px;background:var(--ow-chip);font-size:12px;font-weight:600;white-space:nowrap}',
+      '#ow-ov .ow-path-lottery{background:var(--ow-accent);color:#fff;font-weight:800}',
+      '#ow-ov .ow-path-country{background:none;padding-left:0;font-weight:800}',
+      '#ow-ov .ow-path-status{background:rgba(90,209,154,.2);color:var(--ow-up);font-weight:800}',
+      '#ow-ov .ow-path-seen{opacity:.6;font-weight:500}',
+      '#ow-ov .ow-path-a{color:var(--ow-sub);font-size:11px}',
+      '@media(max-width:640px){#ow-ov .ow-u-f{flex:1 1 100%;justify-content:space-between}#ow-ov .ow-u-f select{flex:1;max-width:none}#ow-ov .ow-path{min-width:200px}}'
     ].join('\n');
     var style = D.createElement('style');
     style.id = 'ow-style';
@@ -2116,8 +2142,167 @@
   }
   function renderJourney(data) { return journeyBody(data, false); }
 
+  // ── lotteries × functions (migration 061, section `usage`) ─────────────────────────────────
+  // Units on every table: people (account or installation), sessions and actions are separate
+  // numbers; popularity is ordered by people. Rows, headers and cells are drill-down filters.
+  var USAGE_METRICS = [['people', 'Люди'], ['sessions', 'Сессии'], ['actions', 'Действия']];
+  // Codes the client sends as a use's detail (models stay their own ids: markov, consensus, qastro…).
+  var DETAIL_RU = {
+    free_counsel: 'Бесплатный защитник', defense: 'Защитник', jury_review: 'Присяжные: проверка', jury_generate: 'Присяжные: ряды',
+    model_review: 'Разбор моделями', judge: 'Верховный судья', court_judge: 'Судья суда', world_analysis: 'Мировой анализ',
+    trial: 'пробный запуск', free: 'FREE', full: 'полный',
+    rows: 'ряды', matrix: 'матрица', copy: 'копия', official: 'официальный тираж', advice: 'совет', ticket: 'билет',
+    drum: '3D-барабан', drum_replace: '3D-барабан (замена)', saved_draw: 'сохранённый тираж', life: '50 лет', favorites: 'избранное'
+  };
+  function lotName(id) { return LIB.lotteryName ? LIB.lotteryName(id) : (id || '—'); }
+  function featName(id) { return LIB.usageLabel ? LIB.usageLabel(id) : (id || '—'); }
+  function detailName(code) { return DETAIL_RU[code] ? t(DETAIL_RU[code]) : code; }
+  function flagName(iso) { return (LIB.flagEmoji ? LIB.flagEmoji(iso) + ' ' : '') + countryName(iso); }
+  function gfp(r) { return num(r.guests) + ' / ' + num(r.free) + ' / ' + num(r.pro); }
+  function usageSelect(id, label, current, list) {
+    return '<label class="ow-u-f"><span>' + et(label) + '</span> <select id="' + id + '">' +
+      list.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === current ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') +
+      '</select></label>';
+  }
+  function usageFilters(data) {
+    var f = state.filters;
+    var countries = (data.countries || []).map(function (r) { return r.country; });
+    if (f.country !== 'all' && countries.indexOf(f.country) < 0) countries.unshift(f.country);
+    var lotteries = (LIB.LOTTERY_ORDER || data.lotteries_catalog || []);
+    var features = (LIB.USAGE_ORDER || data.features_catalog || []);
+    return '<div class="ow-u-bar">' +
+      usageSelect('ow-u-lottery', 'Лотерея', f.lottery, [['all', t('Все')]].concat(lotteries.map(function (id) { return [id, lotName(id)]; }))) +
+      usageSelect('ow-u-feature', 'Функция', f.feature, [['all', t('Все')]].concat(features.map(function (id) { return [id, featName(id)]; }))) +
+      usageSelect('ow-u-country', 'Страна', f.country, [['all', t('Все')]].concat(countries.map(function (iso) { return [iso, flagName(iso)]; }))) +
+      usageSelect('ow-u-status', 'Статус', f.status, [['all', t('Все')], ['guest', label(LIB.STATUS_RU, 'guest')], ['free', 'FREE'], ['pro', 'PRO']]) +
+      (f.lottery !== 'all' || f.feature !== 'all' || f.country !== 'all' || f.status !== 'all'
+        ? '<button class="ow-btn" type="button" id="ow-u-reset">' + et('Сбросить фильтры') + '</button>' : '') +
+    '</div>';
+  }
+  // A matrix of people / sessions / actions: rows × columns, shaded by value; every row, column and
+  // cell carries the filters it stands for.
+  function usageMatrix(title, howKey, cells, rowKey, colKey, rowName, colName, rowAttr, colAttr) {
+    var metric = state.usageMetric;
+    var rows = [], cols = [], val = {}, colTot = {}, max = 0;
+    (cells || []).forEach(function (c) {
+      var r = c[rowKey], k = c[colKey], v = +c[metric] || 0;
+      if (rows.indexOf(r) < 0) rows.push(r);
+      if (cols.indexOf(k) < 0) cols.push(k);
+      val[r + '|' + k] = v;
+      colTot[k] = (colTot[k] || 0) + (+c.people || 0);
+      max = Math.max(max, v);
+    });
+    if (!rows.length) return '<div class="ow-block"><div class="ow-block-h">' + et(title) + how(howKey) + '</div><div class="ow-empty">' + et('Нет данных за период') + '</div></div>';
+    var sum = function (r) { return cols.reduce(function (s, k) { return s + (val[r + '|' + k] || 0); }, 0); };
+    rows.sort(function (a, b) { return sum(b) - sum(a); });
+    cols.sort(function (a, b) { return (colTot[b] || 0) - (colTot[a] || 0); });
+    return '<div class="ow-block"><div class="ow-block-h">' + et(title) + how(howKey) +
+      '<span class="ow-u-metric" role="group" aria-label="' + et('Показатель') + '">' + USAGE_METRICS.map(function (m) {
+        return '<button class="ow-chip" type="button" data-u-metric="' + m[0] + '" aria-pressed="' + (m[0] === metric) + '">' + et(m[1]) + '</button>';
+      }).join('') + '</span></div>' +
+      '<div class="ow-tw"><table class="ow-t ow-u-m"><thead><tr><th></th>' +
+      cols.map(function (k) { return '<th class="num"><button type="button" class="ow-u-link" ' + colAttr + '="' + esc(k) + '">' + esc(colName(k)) + '</button></th>'; }).join('') +
+      '</tr></thead><tbody>' + rows.map(function (r) {
+        return '<tr><th><button type="button" class="ow-u-link" ' + rowAttr + '="' + esc(r) + '">' + esc(rowName(r)) + '</button></th>' +
+          cols.map(function (k) {
+            var v = val[r + '|' + k] || 0;
+            var a = max ? (0.08 + 0.62 * (v / max)).toFixed(2) : 0;
+            return '<td class="num">' + (v ? '<button type="button" class="ow-u-cell" ' + rowAttr + '="' + esc(r) + '" ' + colAttr + '="' + esc(k) + '" style="--a:' + a + '">' + num(v) + '</button>' : '<span class="ow-u-zero">·</span>') + '</td>';
+          }).join('') + '</tr>';
+      }).join('') + '</tbody></table></div></div>';
+  }
+  function journeyChips(person) {
+    var steps = LIB.journeySteps ? LIB.journeySteps(person, countryName) : [];
+    return '<div class="ow-path">' + steps.map(function (s, i) {
+      return (i ? '<span class="ow-path-a" aria-hidden="true">→</span>' : '') +
+        '<span class="ow-path-s ow-path-' + esc(s.type) + (s.seen ? ' ow-path-seen' : '') + '">' + esc(s.text) + '</span>';
+    }).join('') + '</div>';
+  }
+  function detailText(details) {
+    var keys = Object.keys(details || {});
+    if (!keys.length) return '';
+    return keys.slice(0, 6).map(function (k) { var d = details[k]; return detailName(k) + ' ×' + num(d && typeof d === 'object' ? d.actions : d); }).join(' · ');
+  }
+  function renderUsage(data) {
+    var s = data.totals || {};
+    var tr = data.transitions || {};
+    var guests = +tr.guests || 0;
+    var step = function (title, value) {
+      var width = guests ? Math.max(2, Math.round(((+value || 0) / guests) * 100)) : 0;
+      return '<div class="ow-bar"><span class="ow-bar-l">' + et(title) + '</span><span class="ow-bar-t"><i style="width:' + width + '%"></i></span>' +
+        '<span class="ow-bar-v">' + num(value) + (guests ? ' · ' + esc(pctText(+value || 0, guests)) : '') + '</span></div>';
+    };
+    return usageFilters(data) +
+      '<div class="ow-cards">' +
+        card('Люди', num(s.people), et('с действием: {{0}} · установок: {{1}}', num(s.active_people), num(s.installs)), 'usage') +
+        card('Сессии', num(s.sessions), et('лотерей: {{0}} · стран: {{1}}', num(s.lotteries), num(s.countries)), 'usage') +
+        card('Действия', num(s.actions), et('открытий: {{0}}', num(s.views)), 'usageUnits') +
+        card('Гости / FREE / PRO', gfp(s), et('люди по статусу в момент действия'), 'usageStatus') +
+        card('Время в лотереях', +s.engaged_ms >= 1000 ? esc(dur(s.engaged_ms)) : '—', et('активное время на экране лотереи'), 'usageUnits') +
+      '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Лотереи') + how('usage') + '</div>' +
+        table([
+          { title: 'Лотерея', key: 'lottery', html: function (r) { return '<button type="button" class="ow-u-link" data-u-lottery="' + esc(r.lottery) + '">' + esc(lotName(r.lottery)) + '</button>'; } },
+          { title: 'Люди', key: 'people', numeric: true, html: function (r) { return '<b>' + num(r.people) + '</b>'; } },
+          { title: 'С действием', key: 'active_people', numeric: true },
+          { title: 'Сессии', key: 'sessions', numeric: true },
+          { title: 'Действия', key: 'actions', numeric: true },
+          { title: 'Открытия', key: 'views', numeric: true },
+          { title: 'Гости / FREE / PRO', key: 'guests', numeric: true, html: gfp },
+          { title: 'Стран', key: 'countries', numeric: true },
+          { title: 'Время', key: 'engaged_ms', numeric: true, html: function (r) { return +r.engaged_ms >= 1000 ? esc(dur(r.engaged_ms)) : '—'; } },
+          { title: 'Главная функция', key: 'top_feature', html: function (r) { return r.top_feature ? esc(featName(r.top_feature)) : '—'; } }
+        ], data.lotteries, 'Нет действий в лотереях за период') + '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Функции') + how('usageUnits') + '</div>' +
+        table([
+          { title: 'Функция', key: 'feature', html: function (r) { return '<button type="button" class="ow-u-link" data-u-feature="' + esc(r.feature) + '">' + esc(featName(r.feature)) + '</button>'; } },
+          { title: 'Люди', key: 'people', numeric: true, html: function (r) { return '<b>' + num(r.people) + '</b>'; } },
+          { title: 'С действием', key: 'active_people', numeric: true },
+          { title: 'Сессии', key: 'sessions', numeric: true },
+          { title: 'Действия', key: 'actions', numeric: true },
+          { title: 'Открытия', key: 'views', numeric: true },
+          { title: 'Гости / FREE / PRO', key: 'guests', numeric: true, html: gfp },
+          { title: 'Лотерей', key: 'lotteries', numeric: true },
+          { title: 'Модели и режимы', key: 'details', html: function (r) { return '<span class="ow-card-s">' + esc(detailText(r.details)) + '</span>'; } }
+        ], data.features, 'Функциями за период не пользовались') + '</div>' +
+      usageMatrix('Функция × лотерея', 'usageMatrix', data.feature_lottery, 'feature', 'lottery', featName, lotName, 'data-u-feature', 'data-u-lottery') +
+      usageMatrix('Страна × лотерея', 'usageMatrix', data.country_lottery, 'country', 'lottery', flagName, lotName, 'data-u-country', 'data-u-lottery') +
+      usageMatrix('Страна × функция', 'usageMatrix', data.country_feature, 'country', 'feature', flagName, featName, 'data-u-country', 'data-u-feature') +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Гость, FREE, PRO') + how('usageStatus') + '</div>' +
+        table([
+          { title: 'Статус', key: 'status', html: function (r) { return '<button type="button" class="ow-u-link" data-u-status="' + esc(r.status) + '">' + statusChip(r.status) + '</button>'; } },
+          { title: 'Люди', key: 'people', numeric: true, html: function (r) { return '<b>' + num(r.people) + '</b>'; } },
+          { title: 'Установки', key: 'installs', numeric: true },
+          { title: 'Сессии', key: 'sessions', numeric: true },
+          { title: 'Действия', key: 'actions', numeric: true },
+          { title: 'Открытия', key: 'views', numeric: true }
+        ], data.statuses, 'Нет данных за период') + '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Переходы: гость → регистрация → аккаунт → PRO') + how('usageTransitions') + '</div>' +
+        (guests
+          ? step('Были гостями', guests) + step('Зарегистрировались (FREE)', tr.registered) + step('Действовали в аккаунте', tr.active_accounts) + step('Стали PRO', tr.pro)
+          : '<div class="ow-empty">' + et('Гостей в этом срезе нет') + '</div>') +
+        (+tr.accounts_without_guest ? '<div class="ow-card-s">' + et('Сразу с аккаунтом, без гостевой истории: {{0}}', num(tr.accounts_without_guest)) + '</div>' : '') + '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Люди и их путь: {{0}}', num(data.people_total)) + how('usagePeople') + '</div>' +
+        table([
+          { title: 'Человек', key: 'who', html: function (r) {
+            return esc(flagName(r.country)) + (r.region ? '<div class="ow-card-s">' + esc(r.region) + '</div>' : '') +
+              '<div class="ow-card-s">' + esc([label(PLATFORM_RU, r.platform), r.device, r.locale].filter(Boolean).join(' · ')) + ' · #' + esc(r.who) + '</div>';
+          } },
+          { title: 'Путь', key: 'lotteries', html: journeyChips },
+          { title: 'Сейчас', key: 'status_now', html: function (r) {
+            return journeyStatus(r.status_now) + ((r.statuses || []).length > 1 ? '<div class="ow-card-s">' + esc((r.statuses || []).map(function (k) { return label(LIB.STATUS_RU, k); }).join(' → ')) + '</div>' : '');
+          } },
+          { title: 'Действия', key: 'actions', numeric: true },
+          { title: 'Сессии', key: 'sessions', numeric: true },
+          { title: 'Активно', key: 'engaged_ms', numeric: true, html: function (r) { return +r.engaged_ms >= 1000 ? esc(dur(r.engaged_ms)) : '—'; } },
+          { title: 'Источник', key: 'channel', html: function (r) { return esc(r.channel ? label(LIB.CHANNEL_RU, r.channel) : '—'); } },
+          { title: 'Последняя активность', key: 'last_at', html: function (r) { return esc(timeText(r.last_at)); } }
+        ], data.people, 'Никого за период') + '</div>' +
+      '<div class="ow-card-s" style="margin-top:6px">' + esc(tx(data.note || '')) + '</div>';
+  }
+
   var RENDERERS = {
-    day: renderDay, journey: renderJourney, overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
+    day: renderDay, journey: renderJourney, usage: renderUsage, overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
     devices: renderDevices, sessions: renderSessions, acquisition: renderAcquisition, geography: renderGeography,
     map: renderMap, games: renderGames, features: renderFeatures, funnels: renderFunnels,
     retention: renderRetention, bots: renderBots, agents: renderAgents, consent: renderConsent, quality: renderQuality
@@ -2275,7 +2460,23 @@
         var legend = ovEl.querySelector('.ow-legend-scale span:last-child');
         if (legend) legend.textContent = t('больше · {{0}}', metricLabel(state.mapMetric));
       }
+      // «Лотереи и функции»: its own filters (the lottery and the country are the panel's shared ones)
+      var usageFilter = { 'ow-u-lottery': 'lottery', 'ow-u-feature': 'feature', 'ow-u-country': 'country', 'ow-u-status': 'status' }[event.target.id];
+      if (usageFilter) { setUsageFilters(usageFilter, event.target.value); return; }
       if (event.target.id === 'ow-continent') { state.continent = event.target.value; if (mapApi) mapApi.setContinent(state.continent); }
+    });
+    ovEl.querySelector('#ow-content').addEventListener('click', function (event) {
+      if (state.section !== 'usage') return;
+      var metric = event.target.closest('[data-u-metric]');
+      if (metric) { state.usageMetric = metric.getAttribute('data-u-metric'); render(); return; }
+      if (event.target.closest('#ow-u-reset')) { setUsageFilters({ lottery: 'all', feature: 'all', country: 'all', status: 'all' }); return; }
+      var drill = event.target.closest('[data-u-lottery], [data-u-feature], [data-u-country], [data-u-status]');
+      if (!drill) return;
+      var next = {};
+      [['lottery', 'data-u-lottery'], ['feature', 'data-u-feature'], ['country', 'data-u-country'], ['status', 'data-u-status']].forEach(function (pair) {
+        if (drill.hasAttribute(pair[1])) next[pair[0]] = drill.getAttribute(pair[1]);
+      });
+      setUsageFilters(next);
     });
     ovEl.querySelector('#ow-content').addEventListener('click', function (event) {
       if (event.target.id === 'ow-fit' && mapApi) { state.continent = 'all'; var sel = ovEl.querySelector('#ow-continent'); if (sel) sel.value = 'all'; mapApi.setContinent('all'); }
@@ -2287,13 +2488,28 @@
     });
   }
 
+  // One place changes the usage filters: the lottery and the country are shared with the rest of the
+  // panel (the header select and the map), so every cached section is dropped, like the header does.
+  function setUsageFilters(key, value) {
+    var next = typeof key === 'object' ? key : {};
+    if (typeof key === 'string') next[key] = value;
+    Object.keys(next).forEach(function (k) { state.filters[k] = next[k] || 'all'; });
+    var header = ovEl.querySelector('#ow-lottery');
+    if (header) header.value = state.filters.lottery;
+    if (next.country !== undefined) state.selectedCountry = state.filters.country === 'all' ? null : state.filters.country;
+    state.data = {};
+    reload();
+  }
+
   function fillLotteries() {
     try {
       var select = ovEl.querySelector('#ow-lottery');
       var keys = Object.values(W.LOTO_APP_LOTTERY_KEYS || {});
       if (!keys.length || select.options.length > 1) return;
-      select.innerHTML = '<option value="all">' + esc(t('Все')) + '</option>' + keys.sort().map(function (key) {
-        return '<option value="' + esc(key) + '">' + esc(key) + '</option>';
+      var order = LIB.LOTTERY_ORDER || [];
+      keys.sort(function (a, b) { return (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99); });
+      select.innerHTML = '<option value="all">' + esc(t('Все')) + '</option>' + keys.map(function (key) {
+        return '<option value="' + esc(key) + '"' + (key === state.filters.lottery ? ' selected' : '') + '>' + esc(LIB.lotteryName ? LIB.lotteryName(key) : key) + '</option>';
       }).join('');
     } catch (e) {}
   }

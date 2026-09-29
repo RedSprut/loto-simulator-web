@@ -347,7 +347,8 @@
     purchase_failed: 'Оплата не прошла', purchase_cancelled: 'Отменил оплату',
     client_error: 'Ошибка в приложении',
     simulation_run: 'Симуляция тиража', draw3d_complete: '3D-тираж завершён', court_action: 'Бесплатный защитник',
-    calendar_run: 'Календарный анализ', pro_feature_use: 'Запустил PRO-функцию', pro_feature_attempt: 'Попытка PRO-функции'
+    calendar_run: 'Календарный анализ', pro_feature_use: 'Запустил PRO-функцию', pro_feature_attempt: 'Попытка PRO-функции',
+    feature_open: 'Открыл функцию', favorite_use: 'Взял из избранного'
   };
   // Meaningful product actions — the SAME kinds as public.owner_activity_kind() (migration 059), in
   // display order; PRO-interest is a separate signal and always last.
@@ -362,6 +363,54 @@
     return ACTIVITY_ORDER.filter(function (k) { var n = map[k] && typeof map[k] === 'object' ? map[k].actions : map[k]; return +n > 0; })
       .map(function (k) { var n = map[k] && typeof map[k] === 'object' ? map[k].actions : map[k]; return tr(ACTIVITY_RU[k]) + ' ×' + (+n); })
       .join(' · ');
+  }
+  // ── Lotteries × functions (migration 061, section `usage`) ────────────────────────────────
+  // The nine canonical game ids — the SAME list as public.owner_canonical_lottery() and the ingest's
+  // LOTTERY_IDS. Brand names are not translated.
+  var LOTTERY_ORDER = ['lotto', 'eurojackpot', 'vikinglotto', 'euroMillions', 'powerball', 'megaMillions', 'superEnalotto', 'lottoMax', 'powerballAustralia'];
+  var LOTTERY_NAMES = {
+    lotto: 'Norsk Lotto', eurojackpot: 'Eurojackpot', vikinglotto: 'Vikinglotto', euroMillions: 'EuroMillions',
+    powerball: 'Powerball', megaMillions: 'Mega Millions', superEnalotto: 'SuperEnalotto', lottoMax: 'Lotto Max',
+    powerballAustralia: 'Powerball Australia'
+  };
+  function lotteryName(id) { return LOTTERY_NAMES[id] || (id ? String(id) : '—'); }
+  // Functions of the usage report: the meaningful kinds of owner_activity_kind() plus the two
+  // look-only kinds of owner_usage_view_kind() («Выбор лотереи», «Результаты»).
+  var USAGE_ORDER = ACTIVITY_ORDER.filter(function (k) { return k !== 'pro_interest'; }).concat(['results', 'leaders', 'lottery', 'pro_interest']);
+  var USAGE_RU = {};
+  Object.keys(ACTIVITY_RU).forEach(function (k) { USAGE_RU[k] = ACTIVITY_RU[k]; });
+  USAGE_RU.lottery = 'Выбор лотереи';
+  USAGE_RU.results = 'Результаты';
+  USAGE_RU.leaders = 'Рейтинг прогнозов';
+  function usageLabel(kind) { return USAGE_RU[kind] ? tr(USAGE_RU[kind]) : String(kind || '—'); }
+  // One person of the usage report → the steps of their journey, in time order:
+  //   Латвия → Powerball → Генерация ×3 → 3D-тираж ×1 → Суд ×1 → Интерес к PRO ×1 → Регистрация → PRO
+  // A lottery opens a segment followed by the functions used IN it (by first use); functions without a
+  // lottery (PRO interest, …), the registration and the first PRO are placed by their own first time.
+  // A function only opened, never used, is kept but marked `seen` (the panel prints it muted).
+  // `country` is a function iso → name (the panel passes its translated one).
+  function journeySteps(person, country) {
+    var p = person || {};
+    var steps = [];
+    if (p.country) steps.push({ type: 'country', text: (flagEmoji(p.country) ? flagEmoji(p.country) + ' ' : '') + (country ? country(p.country) : p.country) });
+    var feature = function (f) {
+      var used = +f.actions > 0;
+      return { type: 'feature', feature: f.feature, seen: !used, text: usageLabel(f.feature) + (used ? ' ×' + (+f.actions) : ' · ' + tr('открыл')) };
+    };
+    var blocks = [];
+    (p.lotteries || []).forEach(function (l) {
+      var inner = (l.features || []).filter(function (f) { return f.feature !== 'lottery'; });
+      blocks.push({ at: l.first_at, items: [{ type: 'lottery', lottery: l.lottery, text: lotteryName(l.lottery) }].concat(inner.map(feature)) });
+    });
+    (p.global || []).forEach(function (f) { blocks.push({ at: f.first_at, items: [feature(f)] }); });
+    if (p.signup_at) blocks.push({ at: p.signup_at, items: [{ type: 'status', status: 'signup', text: tr('Регистрация') }] });
+    if (p.pro_at) blocks.push({ at: p.pro_at, items: [{ type: 'status', status: 'pro', text: 'PRO' }] });
+    blocks.sort(function (a, b) { return String(a.at || '').localeCompare(String(b.at || '')); });
+    blocks.forEach(function (b) { steps.push.apply(steps, b.items); });
+    return steps;
+  }
+  function journeyText(person, country) {
+    return journeySteps(person, country).map(function (s) { return s.text; }).join(' → ');
   }
   var EVIDENCE_RU = {
     verified_account: 'Вошёл в аккаунт — личность подтверждена',
@@ -556,6 +605,8 @@
     range: range, ZONES: ZONES, formatDuration: formatDuration, csv: csv, confidence: confidence,
     KIND_RU: KIND_RU, CLASS_RU: CLASS_RU, CHANNEL_RU: CHANNEL_RU, EVENT_RU: EVENT_RU,
     ACTIVITY_ORDER: ACTIVITY_ORDER, ACTIVITY_RU: ACTIVITY_RU, activityText: activityText,
+    LOTTERY_ORDER: LOTTERY_ORDER, LOTTERY_NAMES: LOTTERY_NAMES, lotteryName: lotteryName,
+    USAGE_ORDER: USAGE_ORDER, USAGE_RU: USAGE_RU, usageLabel: usageLabel, journeySteps: journeySteps, journeyText: journeyText,
     EVIDENCE_RU: EVIDENCE_RU, evidenceRu: evidenceRu,
     PRECISION_RU: PRECISION_RU, TRAFFIC_RU: TRAFFIC_RU, CONTINENT_RU: CONTINENT_RU, CONTINENT_ORDER: CONTINENT_ORDER,
     BLUE_LIGHT: BLUE_LIGHT, BLUE_DARK: BLUE_DARK, choroplethColor: choroplethColor, flagEmoji: flagEmoji, kpiText: kpiText,
