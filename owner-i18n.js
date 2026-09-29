@@ -1105,6 +1105,7 @@
     ["активное время {{0}}", "active time {{0}}", "aktiv tid {{0}}"],
     ["Уведомлений пока нет. Каждый визит, новый или активный гость, новый пользователь, покупка или сбой появится здесь и придёт push-уведомлением по вашим настройкам.", "No notifications yet. Every visit, new or active guest, new user, purchase or failure will appear here and arrive as a push notification according to your settings.", "Ingen varsler ennå. Hvert besøk, ny eller aktiv gjest, ny bruker, kjøp eller feil vises her og kommer som push-varsel etter innstillingene dine."],
     ["Вернулся гость", "Guest returned", "Gjest kom tilbake"],
+    ["Повторный визит", "Return visit", "Gjenbesøk"],
     ["Активный гость (впервые)", "Active guest (first time)", "Aktiv gjest (første gang)"],
     ["не вошёл в аккаунт", "not signed in", "ikke logget inn"],
     ["Действия: {{0}}", "Actions: {{0}}", "Handlinger: {{0}}"],

@@ -485,7 +485,7 @@
     return '#owner' + (query.length ? '?' + query.join('&') : '');
   }
   var CATEGORY_RU = {
-    visit: 'Визит', new_guest: 'Новый гость', returning_user: 'Возврат', active_guest: 'Активный гость', registration: 'Новый пользователь',
+    visit: 'Визит', new_guest: 'Новый гость', returning_user: 'Повторный визит', active_guest: 'Активный гость', registration: 'Новый пользователь',
     new_country: 'Новая страна', purchase: 'Покупка PRO', renewal: 'Продление PRO', cancellation: 'Отмена подписки',
     refund: 'Возврат', payment_failure: 'Сбой оплаты', system: 'Системное событие', daily_summary: 'Итоги дня'
   };
