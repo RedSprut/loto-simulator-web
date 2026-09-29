@@ -337,7 +337,7 @@
     user_engagement: 'Активность', app_background: 'Ушёл в фон', app_foreground: 'Вернулся',
     lottery_open: 'Открыл лотерею', generator_open: 'Открыл генератор', generator_run: 'Сгенерировал ряды',
     model_selected: 'Выбрал модель', combination_saved: 'Сохранил комбинацию', rows_shared: 'Поделился рядами',
-    analytics_open: 'Открыл статистику', period_analysis: 'Анализ периода', draw3d_start: '3D-тираж',
+    analytics_open: 'Открыл статистику', period_analysis: 'Анализ периода', draw3d_start: 'Открыл 3D-тираж',
     ticket_check: 'Проверил билет', result_view: 'Смотрел результаты', history_open: 'История тиражей',
     court_open: 'Верховный судья', about_open: 'О приложении', source_info_open: 'Источники данных',
     subscription_info_open: 'О подписке', notification_center_open: 'Центр уведомлений',
@@ -345,8 +345,24 @@
     signup: 'Регистрация', login: 'Вход', logout: 'Выход', paywall_view: 'Экран PRO',
     purchase_start: 'Начал оплату', purchase_success: 'Оплатил', restore_success: 'Восстановил покупку',
     purchase_failed: 'Оплата не прошла', purchase_cancelled: 'Отменил оплату',
-    client_error: 'Ошибка в приложении'
+    client_error: 'Ошибка в приложении',
+    simulation_run: 'Симуляция тиража', draw3d_complete: '3D-тираж завершён', court_action: 'Бесплатный защитник',
+    calendar_run: 'Календарный анализ', pro_feature_use: 'Запустил PRO-функцию', pro_feature_attempt: 'Попытка PRO-функции'
   };
+  // Meaningful product actions — the SAME kinds as public.owner_activity_kind() (migration 059), in
+  // display order; PRO-interest is a separate signal and always last.
+  var ACTIVITY_ORDER = ['generation', 'simulation', 'draw3d', 'ticket_check', 'analysis', 'calendar', 'court', 'combinations', 'pro_models', 'pro_interest'];
+  var ACTIVITY_RU = {
+    generation: 'Генерация', simulation: 'Симуляция', draw3d: '3D-тираж', ticket_check: 'Проверка билета', analysis: 'Анализ',
+    calendar: 'Календарь', court: 'Суд', combinations: 'Комбинации', pro_models: 'PRO-модели', pro_interest: 'Интерес к PRO'
+  };
+  // {generation: 2, court: 1} → «Генерация ×2 · Суд ×1» in the panel language; unknown kinds are skipped.
+  function activityText(byKind) {
+    var map = byKind && typeof byKind === 'object' ? byKind : {};
+    return ACTIVITY_ORDER.filter(function (k) { var n = map[k] && typeof map[k] === 'object' ? map[k].actions : map[k]; return +n > 0; })
+      .map(function (k) { var n = map[k] && typeof map[k] === 'object' ? map[k].actions : map[k]; return tr(ACTIVITY_RU[k]) + ' ×' + (+n); })
+      .join(' · ');
+  }
   var EVIDENCE_RU = {
     verified_account: 'Вошёл в аккаунт — личность подтверждена',
     anonymous_human_device: 'Анонимное устройство с признаками живого человека',
@@ -469,18 +485,18 @@
     return '#owner' + (query.length ? '?' + query.join('&') : '');
   }
   var CATEGORY_RU = {
-    visit: 'Визит', new_user: 'Новый пользователь', returning_user: 'Вернувшийся пользователь', registration: 'Регистрация',
+    visit: 'Визит', new_guest: 'Новый гость', returning_user: 'Возврат', active_guest: 'Активный гость', registration: 'Новый пользователь',
     new_country: 'Новая страна', purchase: 'Покупка PRO', renewal: 'Продление PRO', cancellation: 'Отмена подписки',
     refund: 'Возврат', payment_failure: 'Сбой оплаты', system: 'Системное событие', daily_summary: 'Итоги дня'
   };
   var CATEGORY_ICON = {
-    visit: '👣', new_user: '✨', returning_user: '🔁', registration: '🪪', new_country: '🌍', purchase: '💎', renewal: '♻️',
+    visit: '👣', new_guest: '✨', returning_user: '🔁', active_guest: '🎯', registration: '🪪', new_country: '🌍', purchase: '💎', renewal: '♻️',
     cancellation: '⛔', refund: '↩️', payment_failure: '⚠️', system: '🛠️', daily_summary: '📊'
   };
   var SEVERITY_RU = { info: 'Информация', important: 'Важное', critical: 'Критично' };
   var MODE_RU = {
-    all: ['Все события', 'Push о каждом событии: визиты, пользователи, регистрации, покупки, сбои, итоги дня.'],
-    important: ['Только важное', 'Push о регистрациях, новых странах, покупках, продлениях, отменах, возвратах, сбоях и итогах дня. Визиты и пользователи — только в центре.'],
+    all: ['Все события', 'Push о каждом событии: визиты, новые и активные гости, новые пользователи, покупки, сбои, итоги дня.'],
+    important: ['Только важное', 'Push о новых пользователях, новых странах, покупках, продлениях, отменах, возвратах, сбоях и итогах дня. Визиты и гости — только в центре.'],
     digest: ['Дайджест', 'Push только «Итоги дня» и критичные сбои. Всё остальное копится в центре уведомлений.'],
     custom: ['Свой набор', 'Для каждой категории отдельно: показывать в центре и/или присылать push.']
   };
@@ -539,6 +555,7 @@
     COUNTRY_RU: COUNTRY_RU, countryNameRu: countryNameRu, countryName: countryName, countryList: countryList,
     range: range, ZONES: ZONES, formatDuration: formatDuration, csv: csv, confidence: confidence,
     KIND_RU: KIND_RU, CLASS_RU: CLASS_RU, CHANNEL_RU: CHANNEL_RU, EVENT_RU: EVENT_RU,
+    ACTIVITY_ORDER: ACTIVITY_ORDER, ACTIVITY_RU: ACTIVITY_RU, activityText: activityText,
     EVIDENCE_RU: EVIDENCE_RU, evidenceRu: evidenceRu,
     PRECISION_RU: PRECISION_RU, TRAFFIC_RU: TRAFFIC_RU, CONTINENT_RU: CONTINENT_RU, CONTINENT_ORDER: CONTINENT_ORDER,
     BLUE_LIGHT: BLUE_LIGHT, BLUE_DARK: BLUE_DARK, choroplethColor: choroplethColor, flagEmoji: flagEmoji, kpiText: kpiText,

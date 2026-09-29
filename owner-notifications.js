@@ -102,6 +102,21 @@
     return body;
   }
 
+  // The guest-journey facts a presence card carries (migration 059): first visit, last action and the
+  // client-MEASURED engaged time. Only what the server sent is shown — a missing value stays missing.
+  function journeyLine(row) {
+    var d = row.data || {};
+    var g = row.category === 'registration' ? (d.guest || null) : d;
+    if (!g || (row.category !== 'active_guest' && row.category !== 'registration' && row.category !== 'new_guest')) return '';
+    var parts = [];
+    var first = row.category === 'registration' ? g.firstSeenAt : (d.firstVisitAt || null);
+    if (first) parts.push(t(row.category === 'registration' ? 'гость с {{0}}' : 'первый визит {{0}}', when(first)));
+    if (g.lastActionAt) parts.push(t('последнее действие {{0}}', when(g.lastActionAt)));
+    if (+g.sessions > 1) parts.push(t('сессий: {{0}}', num(g.sessions)));
+    if (+g.engagedMs >= 60000 && LIB.formatDuration) parts.push(t('активное время {{0}}', LIB.formatDuration(+g.engagedMs).trim()));
+    return parts.join(' · ');
+  }
+
   // ── styles ─────────────────────────────────────────────────────────────────────────────────
   function ensureStyles() {
     if (D.getElementById('own-style')) return;
@@ -134,6 +149,7 @@
       '#own-center .own-card h4{margin:0 0 2px;font-size:14px}',
       '#own-center .own-card p{margin:0;color:#3f6690;font-size:13px}',
       '#ow-ov[data-ow-theme="dark"] #own-center .own-card p{color:#8fb0d6}',
+      '#own-center .own-card p.own-journey{font-size:12px;margin-top:2px}',
       '#own-center .own-card .own-meta{color:#3f6690;font-size:11px;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap}',
       '#ow-ov[data-ow-theme="dark"] #own-center .own-card .own-meta{color:#8fb0d6}',
       '#own-center .own-sev{display:inline-block;padding:0 6px;border-radius:999px;font-size:10px;font-weight:800;background:#e3effc}',
@@ -376,7 +392,7 @@
     var body = panel.querySelector('#own-body');
     var html = '';
     if (state.error) html += '<div class="own-err">' + esc(state.error.status === 403 ? t('Нет доступа: центр доступен только владельцу.') : t('Не удалось загрузить уведомления: {{0}}', state.error.message || t('ошибка'))) + '</div>';
-    if (!state.rows.length && !state.busy && !state.error) html += '<div class="own-empty">' + esc(t('Уведомлений пока нет. Каждый визит, новый пользователь, регистрация, покупка или сбой появится здесь и придёт push-уведомлением по вашим настройкам.')) + '</div>';
+    if (!state.rows.length && !state.busy && !state.error) html += '<div class="own-empty">' + esc(t('Уведомлений пока нет. Каждый визит, новый или активный гость, новый пользователь, покупка или сбой появится здесь и придёт push-уведомлением по вашим настройкам.')) + '</div>';
     html += state.rows.map(function (row) {
       var data = row.data || {};
       var meta = [when(row.occurred_at || row.created_at), catLabel(row.category)];
@@ -384,6 +400,7 @@
       return '<button class="own-card' + (row.read ? '' : ' unread') + '" type="button" data-id="' + esc(row.id) + '" title="' + esc(t('Открыть панель владельца: {{0}}', row.deep_link || '')) + '">' +
         '<span class="own-ico" aria-hidden="true">' + esc(catIcon(row.category)) + '</span>' +
         '<span class="own-main"><h4>' + esc(row.title ? tx(row.title) : catLabel(row.category)) + '</h4><p>' + esc(prettyBody(row)) + '</p>' +
+          (journeyLine(row) ? '<p class="own-journey">' + esc(journeyLine(row)) + '</p>' : '') +
           '<span class="own-meta">' + meta.map(esc).join(' · ') + ' <span class="own-sev own-sev-' + esc(row.severity) + '">' + esc(sevLabel(row.severity)) + '</span>' + (row.day ? ' · ' + esc(row.day) : '') + '</span></span>' +
         '<span class="own-mark" role="button" tabindex="0" data-id="' + esc(row.id) + '" aria-label="' + esc(row.read ? t('Отметить непрочитанным') : t('Отметить прочитанным')) + '">' + (row.read ? '↺' : '✓') + '</span></button>';
     }).join('');

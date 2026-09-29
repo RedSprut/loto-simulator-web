@@ -63,6 +63,7 @@
 
   var SECTIONS = [
     { id: 'day', label: 'День' },
+    { id: 'journey', label: 'Путь гостя' },
     { id: 'overview', label: 'Обзор' },
     { id: 'live', label: 'Live' },
     { id: 'people', label: 'Люди' },
@@ -142,7 +143,12 @@
     dayFeatures: 'Функции — все события приложения за день: сколько раз произошло и сколько уникальных пользователей (аккаунт, человек или устройство) их совершили. Периодические отчёты об активности не показываются.',
     daySystem: 'Сбои за день: отклонённые и невалидные события приёма, ошибки разбора аналитики, недоставленные push, ошибки в приложении у пользователей и системные уведомления владельца.',
     identity: 'Шесть разных величин, которые не складываются друг в друга. Точные аккаунты — один auth-аккаунт = один пользователь, сколько бы визитов, сессий и устройств у него ни было (владелец отдельно). Оценка уникальных гостей — гостевые профили с согласием (одна стабильная анонимная идентичность) плюс дневные ключи гостей без согласия: HMAC суток, сети, браузера, ОС, устройства, платформы и языка; 50 загрузок одного такого гостя за день — 1 гость и 50 визитов, на следующий день — новый ключ. IP не хранится, ключ не считается доказанным человеком и не является аккаунтом; ключи, за которыми в тот же день был вход в аккаунт, исключены. Визиты, сессии, устройства и домохозяйства — отдельные метрики.',
-    liveFeed: 'Лента — реальные события сегодня (по часовому поясу отчёта): действия пользователей с согласием, платежи магазина, новые аккаунты и обезличенные счётчики визитов по часам. Показаны только страна, платформа, язык, лотерея/функция, статус и 8-значный псевдоним; e-mail, IP и идентификаторы устройств не существуют в этих данных. Владелец и боты скрыты, пока не включены переключатели.'
+    liveFeed: 'Лента — реальные события сегодня (по часовому поясу отчёта): действия пользователей с согласием, платежи магазина, новые аккаунты и обезличенные счётчики визитов по часам. Показаны только страна, платформа, язык, лотерея/функция, статус и 8-значный псевдоним; e-mail, IP и идентификаторы устройств не существуют в этих данных. Владелец и боты скрыты, пока не включены переключатели.',
+    journey: 'Путь одного человека по продукту: новый гость (первый визит без аккаунта) → активный гость (сделал что-то значимое) → новый пользователь (реальная первая регистрация) → PRO (действующий PRO-доступ). Гость — это установка (браузер или приложение) с согласием на аналитику: без согласия действий не видно, такой гость есть только в визитах. Обновление страницы, повторное открытие, новая сессия, смена языка или темы и навигация никого не делают новым и не считаются действием.',
+    journeyGuests: 'Новый гость — установка, чья самая первая сессия с согласием началась в периоде без входа в аккаунт. Вернувшийся гость — установка, известная до периода, снова пришедшая без аккаунта. Один браузер = один гость; разные браузеры одного человека без входа в аккаунт — разные гости, потому что связать их надёжно нельзя.',
+    journeyActive: 'Активный гость — гость с хотя бы одним значимым действием: генерация рядов, симуляция тиража, 3D-тираж до конца, проверка билета, анализ периода, календарный анализ, суд (присяжные, защита, судья), сохранение или отправка комбинаций, запуск PRO-модели. Интерес к PRO (попытка PRO-функции, экран PRO, начало оплаты) — отдельный сигнал. Просмотр разделов, открытие экранов, язык, тема, прокрутка — не действия. Карточка «Активный гость» одна на гостя в день и обновляется, а не дублируется.',
+    journeyUsers: 'Новый пользователь — только реальная первая регистрация аккаунта (не анонимный, не владелец). Гостевая история привязывается к аккаунту, только если вход в этот аккаунт произошёл на той же установке; адрес, сеть и похожие устройства людей не объединяют. После регистрации действия этой установки без входа считаются действиями аккаунта. FREE — аккаунт без действующего PRO; PRO — действующий платный или бессрочный доступ; новые PRO — первая оплата в периоде.',
+    journeyCohort: 'Берутся новые гости выбранного периода, и для каждого смотрится, что с ним стало до сегодняшнего дня: стал ли активным, зарегистрировался ли (через вход на той же установке), стал ли PRO. Проценты — от числа новых гостей периода.'
   };
 
   var state = {
@@ -652,12 +658,15 @@
     state.kpiError = null;
     setHourglass(true, function () { return t('Загрузка раздела…'); });
     try {
+      var section0 = sections[0];
+      state.journeyError = null;
       var settled = await Promise.allSettled(sections.map(function (name) { return api({ section: name, params: params(extra) }); }));
       settled.forEach(function (outcome, index) {
         var name = sections[index];
         if (outcome.status === 'fulfilled') { state.data[name] = outcome.value; return; }
         state.data[name] = null;
         if (name === 'kpi') state.kpiError = outcome.reason;
+        else if (name === 'journey' && section0 !== 'journey') state.journeyError = outcome.reason;   // the day report stands on its own
         else state.error = outcome.reason;
       });
       return settled;
@@ -677,6 +686,8 @@
     if (section !== 'map' && mapApi) { mapApi.destroy(); mapApi = null; }
     if (section === 'overview') { await loadMany(['overview', 'kpi'], extra); state.ga4Loading = true; state.ga4Error = null; }
     else if (section === 'map') { await loadMany(['countries'], extra); state.data.map = state.data.countries; }
+    // The day report shows the guest journey of the same day as its own block, from its own request.
+    else if (section === 'day') await loadMany(['day', 'journey'], extra);
     else await load(section, extra);
     render();
     if (section === 'overview') loadGa4();   // its own request, its own states — never on the overview's path
@@ -1423,7 +1434,7 @@
     var visits = data.visits_available !== false;
     var un = { unavailable: !visits };
     var v = data.visits || {}, platforms = data.platforms || {}, accounts = data.accounts || {}, commerce = data.commerce || {}, system = data.system || {}, excluded = data.excluded || {};
-    var anchors = [['identity', 'Кто это был'], ['visits', 'Визиты'], ['people', 'Аудитория'], ['accounts', 'Аккаунты'], ['platforms', 'Платформы'], ['countries', 'Страны и языки'], ['lotteries', 'Лотереи'], ['features', 'Функции'], ['funnel', 'Воронка'], ['commerce', 'Платежи'], ['system', 'Сбои']];
+    var anchors = [['identity', 'Кто это был'], ['journey', 'Путь гостя'], ['visits', 'Визиты'], ['people', 'Аудитория'], ['accounts', 'Аккаунты'], ['platforms', 'Платформы'], ['countries', 'Страны и языки'], ['lotteries', 'Лотереи'], ['features', 'Функции'], ['funnel', 'Воронка'], ['commerce', 'Платежи'], ['system', 'Сбои']];
     var head = '<div class="ow-dayhead"><h2>' + esc(dayTitle(data.day || state.day)) + '</h2>' +
       '<span class="ow-card-s">' + esc(WEEKDAYS_RU[data.weekday] ? t(WEEKDAYS_RU[data.weekday]) : '') + (data.is_today ? ' · ' + et('сегодня (день ещё идёт)') : '') + ' · ' + et('{{0}} ч', String(data.hours_in_day || 24)) + ' · ' + esc(state.tz) + '</span>' + how('dayBounds') + how('dayCompare') + '</div>' +
       '<div class="ow-anchors">' + anchors.map(function (a) { return '<a href="#ow-b-' + a[0] + '" data-block="' + a[0] + '">' + et(a[1]) + '</a>'; }).join('') + '</div>';
@@ -1603,7 +1614,11 @@
         { title: 'Детали', key: 'body', html: function (r) { return esc(tx(r.body)); } }
       ], system.notifications, 'Системных уведомлений не было'));
 
-    return head + identityBlock + visitsBlock + peopleBlock + accountsBlock + platformsBlock + countriesBlock + lotteriesBlock + featuresBlock + funnelBlock + commerceBlock + systemBlock;
+    var journeyResponse = state.data.journey;
+    var journeyBlock = block('journey', 'Путь гостя: новый гость → активный гость → новый пользователь → PRO', 'journey',
+      journeyResponse && journeyResponse.data ? journeyBody(journeyResponse.data, true)
+        : '<div class="ow-empty">' + et(state.journeyError ? 'Путь гостя не загрузился: {{0}}' : 'Нет данных', (state.journeyError && state.journeyError.message) || '') + '</div>');
+    return head + identityBlock + journeyBlock + visitsBlock + peopleBlock + accountsBlock + platformsBlock + countriesBlock + lotteriesBlock + featuresBlock + funnelBlock + commerceBlock + systemBlock;
   }
 
   var PAGE_RU = { sim: 'Симулятор', ana: 'Статистика', privacy: 'Политика', terms: 'Условия' };
@@ -2029,8 +2044,80 @@
       ['Проверенные', 'Непроверенные', 'Боты', 'Отказы']);
   }
 
+  // ── the guest journey (migration 059): Новый гость → Активный гость → Новый пользователь → PRO ──
+  // Units are printed on every card: guests are INSTALLATIONS on the consented path, users are
+  // ACCOUNTS, visits are page loads. The day report embeds the same body (compact) as a block.
+  function journeyStatus(key) {
+    return key === 'guest' ? statusChip('guest') : statusChip(key || 'free');
+  }
+  function journeyBody(data, compact) {
+    var s = data.scalars || {};
+    var cur = { __current: s };
+    var kinds = s.guest_actions_by_kind || {};
+    var cohort = +s.cohort_new_guests || 0;
+    var step = function (title, value, sub) {
+      var width = cohort ? Math.max(2, Math.round(((+value || 0) / cohort) * 100)) : 0;
+      return '<div class="ow-bar"><span class="ow-bar-l">' + et(title) + '</span>' +
+        '<span class="ow-bar-t"><i style="width:' + width + '%"></i></span>' +
+        '<span class="ow-bar-v">' + num(value) + (cohort ? ' · ' + esc(pctText(+value || 0, cohort)) : '') + '</span></div>' +
+        (sub ? '<div class="ow-card-s" style="margin:-2px 0 6px">' + sub + '</div>' : '');
+    };
+    var html = '<div class="ow-cards">' +
+      dayCard('Новые гости', 'new_guests', et('первый визит с согласием на аналитику · установки, не визиты'), 'journeyGuests', 'consented', cur) +
+      dayCard('Вернувшиеся гости', 'returning_guests', et('были до периода, пришли снова без аккаунта'), 'journeyGuests', 'consented', cur) +
+      dayCard('Активные гости', 'active_guests', et('с продуктовым действием: {{0}} · впервые: {{1}}', num(s.active_guests_product), num(s.first_time_active_guests)), 'journeyActive', 'consented', cur) +
+      dayCard('Интерес к PRO (гости)', 'pro_interest_guests', et('попытка PRO-функции, экран PRO, начало оплаты'), 'journeyActive', 'consented', cur) +
+      dayCard('Новые пользователи', 'registrations', et('до регистрации были гостями: {{0}} · активными гостями: {{1}}', num(s.registrations_from_guest), num(s.registrations_from_active_guest)), 'journeyUsers', 'exact', cur) +
+      dayCard('Новые PRO', 'new_pro', et('первая оплата за период · были гостями: {{0}}', num(s.new_pro_from_guest)), 'journeyUsers', 'exact', cur) +
+      dayCard('FREE сейчас', 'free_now', et('аккаунтов всего: {{0}} · активны за период: {{1}}', num(s.accounts_total_now), num(s.active_free_accounts)), 'journeyUsers', 'exact', cur) +
+      dayCard('PRO сейчас', 'pro_now', et('действующий PRO-доступ · активны за период: {{0}}', num(s.active_pro_accounts)), 'journeyUsers', 'exact', cur) +
+      (compact ? '' : dayCard('Визиты', 'visits_human', et('загрузки страницы — это не люди'), 'visitsHuman', 'filtered', cur)) +
+    '</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Когорта новых гостей периода: что с ними стало к сегодняшнему дню') + how('journeyCohort') + '</div>' +
+      (cohort
+        ? step('Новые гости', cohort) + step('Стали активными', s.cohort_active) + step('Зарегистрировались (FREE)', s.cohort_registered) + step('Стали PRO', s.cohort_pro)
+        : '<div class="ow-empty">' + et('Новых гостей с согласием за период нет') + '</div>') + '</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Действия гостей') + how('journeyActive') + '</div>' +
+      table([
+        { title: 'Действие', key: 'kind', html: function (r) { return esc(label(LIB.ACTIVITY_RU, r.kind)); } },
+        { title: 'Действий', key: 'actions', numeric: true },
+        { title: 'Гостей', key: 'guests', numeric: true }
+      ], (LIB.ACTIVITY_ORDER || Object.keys(kinds)).filter(function (k) { return kinds[k]; })
+          .map(function (k) { return { kind: k, actions: kinds[k].actions, guests: kinds[k].guests }; }), 'Гости за период ничего не делали') + '</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Активные гости') + how('journeyActive') + '</div>' +
+      table([
+        { title: 'Гость', key: 'who', html: function (r) {
+          return esc((LIB.flagEmoji ? LIB.flagEmoji(r.country) + ' ' : '') + countryName(r.country)) + '<div class="ow-card-s">' +
+            esc([label(PLATFORM_RU, r.platform), r.locale, r.device].filter(Boolean).join(' · ')) + ' · #' + esc(r.who) + '</div>';
+        } },
+        { title: 'Первый визит', key: 'first_seen_at', html: function (r) { return esc(timeText(r.first_seen_at)); } },
+        { title: 'Действия', key: 'actions', html: function (r) {
+          return '<b>' + num(r.actions) + '</b><div class="ow-card-s">' + esc(LIB.activityText ? LIB.activityText(r.by_kind) : '') + '</div>';
+        } },
+        { title: 'Последнее действие', key: 'last_action_at', html: function (r) { return esc(timeText(r.last_action_at)); } },
+        { title: 'Активное время', key: 'engaged_ms', html: function (r) { return +r.engaged_ms >= 60000 ? esc(dur(r.engaged_ms)) : '—'; } },
+        { title: 'Сейчас', key: 'status_now', html: function (r) { return journeyStatus(r.status_now); } }
+      ], (data.active_guests || []).slice(0, compact ? 12 : 60), 'Активных гостей за период нет') + '</div>' +
+    '<div class="ow-block"><div class="ow-block-h">' + et('Переходы: новые пользователи и новые PRO') + how('journeyUsers') + '</div>' +
+      table([
+        { title: 'Аккаунт', key: 'who', html: function (r) { return '#' + esc(r.who); } },
+        { title: 'Был гостем', key: 'guest', html: function (r) {
+          var g = r.guest;
+          if (!g) return '<span class="ow-card-s">' + et('нет связанной гостевой истории') + '</span>';
+          return esc(t('с {{0}}', timeText(g.firstSeenAt))) + '<div class="ow-card-s">' +
+            esc(+g.actions ? t('действий: {{0}}', num(g.actions)) + (LIB.activityText ? ' · ' + LIB.activityText(g.byKind) : '') : t('без действий')) + '</div>';
+        } },
+        { title: 'Регистрация', key: 'registered_at', html: function (r) { return esc(timeText(r.registered_at)); } },
+        { title: 'PRO с', key: 'pro_since', html: function (r) { return r.pro_since ? esc(timeText(r.pro_since)) : '—'; } },
+        { title: 'Сейчас', key: 'status_now', html: function (r) { return journeyStatus(r.status_now); } }
+      ], data.transitions || [], 'За период не было новых пользователей и новых PRO') + '</div>' +
+    '<div class="ow-card-s" style="margin-top:6px">' + esc(tx(data.note || '')) + '</div>';
+    return html;
+  }
+  function renderJourney(data) { return journeyBody(data, false); }
+
   var RENDERERS = {
-    day: renderDay, overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
+    day: renderDay, journey: renderJourney, overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
     devices: renderDevices, sessions: renderSessions, acquisition: renderAcquisition, geography: renderGeography,
     map: renderMap, games: renderGames, features: renderFeatures, funnels: renderFunnels,
     retention: renderRetention, bots: renderBots, agents: renderAgents, consent: renderConsent, quality: renderQuality

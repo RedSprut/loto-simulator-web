@@ -190,7 +190,10 @@ async function main() {
     onDraw: (value, poolId, results) => {
       hud?.setResults(results); hud?.setPhase(draw.state, value); saveUnfinished();
     },
-    onDone: () => { setTimeout(() => hud?.sortResults(true), 350); }, // pause, then sort ascending
+    onDone: () => {
+      setTimeout(() => hud?.sortResults(true), 350); // pause, then sort ascending
+      postToHost('DRUM_DRAW_COMPLETE'); // the host counts a finished 3D draw (not merely opening the drum)
+    },
   });
   draw._debug = debug; // RESULT_REVEAL diagnostics in the headless harness
 
