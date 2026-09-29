@@ -1865,6 +1865,36 @@ async function withCourtApp(run){
   catch(_error){showFeedback('Анализ недоступен','Не удалось загрузить экран анализа. Проверьте подключение и попробуйте ещё раз.','⚠️',0);return null;}
   return run(app);
 }
+// Prediction leaderboard / history (leaders-ui.js) is lazy like the court: loaded on the first tap
+// of «Рейтинг прогнозов» or of a persona's ledger section. It reuses the court's i18n part.
+let leadersAppPromise=null;
+function loadLeadersApp(){
+  if(window.LotoLeadersApp)return Promise.resolve(window.LotoLeadersApp);
+  if(leadersAppPromise)return leadersAppPromise;
+  const copy=Promise.resolve(window.LotoI18n&&window.LotoI18n.loadPart?window.LotoI18n.loadPart('court'):null).catch(()=>null);
+  leadersAppPromise=Promise.all([copy,loadRuntimeScript('leaders-ui.js')]).then(()=>{
+    if(!window.LotoLeadersApp)throw new Error('leaders_ui_missing');
+    return window.LotoLeadersApp;
+  }).catch(error=>{leadersAppPromise=null;throw error;});
+  return leadersAppPromise;
+}
+window.LotoLeadersUI=Object.freeze({
+  load:loadLeadersApp,
+  open:async target=>{
+    let app;
+    try{app=await loadLeadersApp();}
+    catch(_error){showFeedback('Рейтинг недоступен','Не удалось загрузить экран рейтинга. Проверьте подключение и попробуйте ещё раз.','⚠️',0);return null;}
+    return app.open(target||{});
+  },
+});
+document.addEventListener('click',event=>{
+  const button=event.target&&event.target.closest&&event.target.closest('[data-leaders-open]');
+  if(!button)return;
+  event.preventDefault();
+  const spec=String(button.getAttribute('data-leaders-open')||'board');
+  const [kind,id]=spec.split(':');
+  window.LotoLeadersUI.open(kind&&id?{kind,id}:{});
+});
 // Owner dashboard (owner-analytics-lib.js + owner-dashboard.js, ≈48 KB) is not a startup script:
 // it loads only for a signed-in account that passes the server owner probe, or when #owner is
 // opened directly. owner-dashboard.js re-verifies ownership itself; every data call is checked
@@ -2213,8 +2243,37 @@ function setGeneratedRows(gen,status,unique=false,origin,source){
   // Record the produced user-visible playable rows for the personal win/match system (origin +
   // target draw). Defensive: never let history capture break generation.
   try{if(window.LotoWinMatch&&LotoWinMatch.ready)LotoWinMatch.record(cur,rows,origin||{source:'generator'});}catch(_e){}
+  // Rows a CLIENT-side mechanism formed are predictions too: fixed in the server ledger before the
+  // draw, for a signed-in account. Server-computed rows (PRO models, wheel, Judge, jury) are
+  // written by the server itself and are deliberately not reported here, so nothing counts twice.
+  try{LotoPredictionClient.record(cur,rows,origin,source);}catch(_e){}
   return revealResult(document.getElementById('rows-c'),'start');
 }
+const LotoPredictionClient=(function(){
+  const FREE_MODELS=new Set(['freq','bal','man']);
+  function classify(origin,source){
+    const o=origin||{},src=source||provSourceFromOrigin(origin)||{};
+    const st=src.sourceType||'',modelId=String(src.modelId||o.modelId||'');
+    if(o.source==='judge_db')return{kind:'generator',id:'judge_db',op:'judge_db'};
+    if(st==='SIMULATED_3D_DRAW'||o.source==='drum3d')return{kind:'generator',id:'drum3d',op:'drum3d'};
+    if(o.source==='smartgen')return{kind:'generator',id:'smartgen',op:'smart_generator'};
+    if(st==='RANDOM_MODEL'||(st==='MATHEMATICAL_MODEL'&&modelId==='rnd'))return{kind:'model',id:'rnd',op:'client_generate'};
+    if(st==='MATHEMATICAL_MODEL'&&FREE_MODELS.has(modelId))return{kind:'model',id:modelId,op:'client_generate'};
+    if(st==='HOME_GENERATOR')return{kind:'generator',id:FREE_MODELS.has(modelId)||modelId==='rnd'?modelId:'quick',op:'quick_pick'};
+    return null;
+  }
+  function record(game,list,origin,source){
+    const api=window.LotoCommercial;
+    if(!api||typeof api.recordPredictions!=='function')return null;
+    const what=classify(origin,source);if(!what)return null;
+    const l=LOTS[game];if(!l)return null;
+    const clean=(list||[]).filter(r=>r&&Array.isArray(r.m)&&r.m.length===l.pM).map(r=>({main:[...r.m],bonus:[...(r.b||[])]}));
+    if(!clean.length)return null;
+    const gameId=typeof resolveConfigKey==='function'?(resolveConfigKey(game)||game):game;
+    return api.recordPredictions(gameId,what.kind,what.id,what.op,clean,null);
+  }
+  return{record,classify};
+})();
 function showGenStatus(msg){
   const el=document.getElementById('world-analysis-out');
   if(!el)return;
@@ -7101,7 +7160,7 @@ async function SUPC_dbUse(){
   if(!window.SUPC_dbRows)return;
   await withTransferBusy(async()=>{
     SUPC_close();closeSG();
-    setGeneratedRows(window.SUPC_dbRows,'Совет судьи по лидерам базы перенесён в билет. 📊🍀',true,undefined,{sourceType:'JUDGE'});
+    setGeneratedRows(window.SUPC_dbRows,'Совет судьи по лидерам базы перенесён в билет. 📊🍀',true,{source:'judge_db'},{sourceType:'JUDGE'});
   });
   goToRows({immediate:true});
 }
