@@ -243,7 +243,7 @@
   function drumBulkApply(lotteryId, combos, labels) {
     labels = labels || {};
     var appLot = DRUM_TO_APP[lotteryId] || lotteryId;
-    try { if (appLot && appLot !== currentAppId()) selLot(appLot); smartStartRecord(appLot); } catch (e) {}
+    try { var prevLot = currentAppId(); if (appLot && appLot !== prevLot) selLot(appLot); smartStartRecord(appLot, prevLot); } catch (e) {}
     closeDrum3D();                                          // back to the Simulator main screen
     try { clearGroupAnalysisState(); } catch (e) {}
     var applied = 0, already = 0, capped = false;
@@ -318,7 +318,7 @@
       if (d.type === 'DRUM_GAME_CHANGED') {
         var nextApp = DRUM_TO_APP[d.game];
         if (nextApp && nextApp !== currentAppId()) {
-          try { selLot(nextApp); smartStartRecord(nextApp); } catch (err) {}
+          try { var prevApp = currentAppId(); selLot(nextApp); smartStartRecord(nextApp, prevApp); } catch (err) {}
           try { document.querySelectorAll('.bn').forEach(function (x) { x.classList.remove('on'); }); navItem.classList.add('on'); } catch (err2) {}
         }
         try { pushDrumFavorites(); } catch (err3) {} // new game's favorites → drum snapshot

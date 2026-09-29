@@ -1195,22 +1195,24 @@ function clearAnalysisUI(){
 function initLottery(gameKey){
   const id=resolveGameKey(gameKey);
   if(!id)throw new Error(`Unknown lottery: ${gameKey}`);
+  const prev=cur;
   syncRulesFromConfig(id);
   clearAnalysisUI();
   selLot(id);
-  smartStartRecord(id);
+  smartStartRecord(id,prev);
   return{gameKey:id,config:getLotteryConfig(id),rules:LOTS[id]};
 }
 /* ═══ SMART START: the lottery the app opens on (rules + weights live in smart-start.js) ═══
-   Behaviour = only lotteries the USER picks (tabs, schedule strip, the drum's own switcher). The
-   start-up choice, notification opens and deep links go through selLot() and are never recorded,
-   otherwise the app would teach itself its own guesses. localStorage, so guests and signed-in
-   users alike keep it across launches; sign-out does not touch it. */
+   Behaviour = only lotteries the USER switches to (tabs, schedule strip, the drum's own switcher).
+   Re-tapping the lottery already open is not a choice, and the start-up pick, notification opens and
+   deep links go through selLot() and are never recorded — otherwise the app would teach itself its
+   own guesses. localStorage, so guests and signed-in users alike keep it across launches; sign-out
+   does not touch it. */
 const SMART_START_SESSION=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-function smartStartRecord(id){
+function smartStartRecord(id,prev){
   try{
     const S=window.LotoSmartStart;
-    if(S&&LOTS[id])S.save(localStorage,S.recordPick(S.load(localStorage),id,Date.now(),SMART_START_SESSION));
+    if(S&&LOTS[id]&&id!==prev)S.save(localStorage,S.recordPick(S.load(localStorage),id,Date.now(),SMART_START_SESSION));
   }catch(e){}
 }
 /* An explicitly requested game: ?game=<id> (or ?lottery=), a web-push cold start (?n_dest=…&n_lot=…),
@@ -1238,7 +1240,10 @@ function smartStartGame(){
     if(!S)return explicit||'euro';
     let timeZone='';try{timeZone=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}
     let picks=null;try{picks=S.load(localStorage);}catch(e){}
-    const pick=S.resolve({ids:Object.keys(LOTS),explicit,history:picks,timeZone,now:Date.now(),
+    // The lotteries the user chose to follow (notification settings, synced for signed-in users):
+    // [] = all and ['__none__'] = none carry no preference; only a real subset narrows the choice.
+    let interests=[];try{const p=JSON.parse(localStorage.getItem('loto_notif_prefs_v1')||'null');if(p&&Array.isArray(p.selected_lotteries))interests=p.selected_lotteries.map(String);}catch(e){}
+    const pick=S.resolve({ids:Object.keys(LOTS),explicit,history:picks,interests,timeZone,now:Date.now(),
       deadlineAfter:(id,at)=>nextDraw(id,new Date(at)).date.getTime()});
     window.__lotoSmartStart=pick;   // read-only diagnostics: {game, reason, region}
     return pick.game;
