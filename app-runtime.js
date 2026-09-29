@@ -5402,16 +5402,17 @@ function appShareUrl(){
   return local?canonical:location.href.split(/[?#]/)[0];
 }
 // Системное меню «Поделиться»: native (Capacitor Share, iOS/Android) → Web Share API.
-// true — меню показано (или пользователь сам его закрыл), false — меню недоступно, нужен fallback.
+// 'shared' / 'cancelled' — меню показано (пользователь поделился или сам закрыл), false — меню
+// недоступно, нужен fallback.
 async function openShareSheet(payload){
   const nativeShare=window.LotoNativeShare;
   if(nativeShare&&typeof nativeShare.share==='function'){
-    try{await nativeShare.share(payload);return true;}
-    catch(e){if(/cancel/i.test(String(e&&(e.message||e))))return true;}
+    try{await nativeShare.share(payload);return 'shared';}
+    catch(e){if(/cancel/i.test(String(e&&(e.message||e))))return 'cancelled';}
   }
   if(navigator.share&&(!navigator.canShare||navigator.canShare(payload))){
-    try{await navigator.share(payload);return true;}
-    catch(e){if(e&&e.name==='AbortError')return true;}
+    try{await navigator.share(payload);return 'shared';}
+    catch(e){if(e&&e.name==='AbortError')return 'cancelled';}
   }
   return false;
 }
@@ -5452,24 +5453,29 @@ function openAppShareUrl(href){
   if(href.startsWith('mailto:')){location.href=href;return;}
   if(window.LotoLinks)window.LotoLinks.open(href);else window.open(href,'_blank','noopener');
 }
-function appShareManualCopy(value){
+function appShareManualCopy(value,target){
   showFeedback(appText('Не скопировано'),appText('Скопируй вручную:')+'\n\n'+value,'📤',0);
+  appShareDone(target,'manual');
 }
+// Итог настоящего нажатия (канал + что вышло) — в first-party аналитику; телеметрия сама проверяет,
+// что это был жест человека на этой кнопке, и ничего не шлёт без согласия.
+function appShareDone(target,result){try{window.LotoTelemetry?.shareDone?.(target,result);}catch(_e){}}
 let appShareBusy=false;
 async function shareAppTo(target,btn){
   const p=appSharePayload();
   const link=APP_SHARE_LINKS[target];
   // Синхронно, внутри жеста: иначе Safari/Firefox блокируют новое окно.
-  if(link){openAppShareUrl(link(p));return;}
+  if(link){openAppShareUrl(link(p));appShareDone(target,'opened');return;}
   if(target==='copy'){
-    try{await writeClipboardText(p.url);}catch(e){appShareManualCopy(p.url);return;}
-    showCopyToast(appText('🔗 Ссылка скопирована'));
+    try{await writeClipboardText(p.url);}catch(e){appShareManualCopy(p.url,target);return;}
+    showCopyToast(appText('🔗 Ссылка скопирована'));appShareDone(target,'copied');
     if(btn){btn.classList.add('is-done');clearTimeout(btn._shareTimer);btn._shareTimer=setTimeout(()=>btn.classList.remove('is-done'),1600);}
     return;
   }
   const dest=APP_SHARE_COPY_OPEN[target];
   if(dest){
-    try{await writeClipboardText(p.full);}catch(e){appShareManualCopy(p.full);return;}
+    try{await writeClipboardText(p.full);}catch(e){appShareManualCopy(p.full,target);return;}
+    appShareDone(target,'copied');
     showFeedback(appText('Текст и ссылка скопированы'),appText('Вставьте их в сообщение или публикацию.'),'📋',0,
       {primaryText:dest.label,primaryAction:()=>openAppShareUrl(dest.url),secondaryText:'Закрыть',secondaryAction:()=>{}});
     return;
@@ -5478,9 +5484,11 @@ async function shareAppTo(target,btn){
   if(appShareBusy)return;
   appShareBusy=true;
   try{
-    if(await openShareSheet({title:p.title,text:p.text,url:p.url}))return;
-    try{await writeClipboardText(p.full);}catch(e){appShareManualCopy(p.full);return;}
+    const sheet=await openShareSheet({title:p.title,text:p.text,url:p.url});
+    if(sheet){appShareDone(target,sheet);return;}
+    try{await writeClipboardText(p.full);}catch(e){appShareManualCopy(p.full,target);return;}
     showCopyToast('📋 '+appText('Текст и ссылка скопированы')+'. '+appText('Вставьте их в сообщение или публикацию.'));
+    appShareDone(target,'copied');
   }finally{appShareBusy=false;}
 }
 function shareApp(){return shareAppTo('system');}

@@ -348,14 +348,14 @@
     client_error: 'Ошибка в приложении',
     simulation_run: 'Симуляция тиража', draw3d_complete: '3D-тираж завершён', court_action: 'Бесплатный защитник',
     calendar_run: 'Календарный анализ', pro_feature_use: 'Запустил PRO-функцию', pro_feature_attempt: 'Попытка PRO-функции',
-    feature_open: 'Открыл функцию', favorite_use: 'Взял из избранного'
+    feature_open: 'Открыл функцию', favorite_use: 'Взял из избранного', app_share: 'Поделился приложением'
   };
   // Meaningful product actions — the SAME kinds as public.owner_activity_kind() (migration 059), in
   // display order; PRO-interest is a separate signal and always last.
-  var ACTIVITY_ORDER = ['generation', 'simulation', 'draw3d', 'ticket_check', 'analysis', 'calendar', 'court', 'combinations', 'pro_models', 'pro_interest'];
+  var ACTIVITY_ORDER = ['generation', 'simulation', 'draw3d', 'ticket_check', 'analysis', 'calendar', 'court', 'combinations', 'share', 'pro_models', 'pro_interest'];
   var ACTIVITY_RU = {
     generation: 'Генерация', simulation: 'Симуляция', draw3d: '3D-тираж', ticket_check: 'Проверка билета', analysis: 'Анализ',
-    calendar: 'Календарь', court: 'Суд', combinations: 'Комбинации', pro_models: 'PRO-модели', pro_interest: 'Интерес к PRO'
+    calendar: 'Календарь', court: 'Суд', combinations: 'Комбинации', share: 'Поделиться', pro_models: 'PRO-модели', pro_interest: 'Интерес к PRO'
   };
   // {generation: 2, court: 1} → «Генерация ×2 · Суд ×1» in the panel language; unknown kinds are skipped.
   function activityText(byKind) {
