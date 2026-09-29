@@ -158,6 +158,10 @@
       '#own-center .own-mark{position:absolute;top:10px;right:10px;width:28px;height:28px;flex:none;box-sizing:border-box;padding:0;border-radius:50%;border:1px solid #bcd7f2;background:transparent;color:inherit;cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;user-select:none}',
       '#own-center .own-empty{color:#3f6690;text-align:center;padding:24px 10px}',
       '#own-center .own-err{background:rgba(242,120,154,.14);border:1px solid #c62a5a;border-radius:12px;padding:10px;margin:8px 0}',
+      '#own-center .own-mail{display:grid;gap:8px;margin-top:10px;overflow-wrap:anywhere}',
+      '#own-center .own-mail-h{font-weight:800;font-size:15px}',
+      '#own-center .own-mail-note{font-size:12px;opacity:.8}',
+      '#own-center a.own-btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;justify-self:start}',
       '#own-center .own-sec{background:#fff;border:1px solid #bcd7f2;border-radius:14px;padding:12px;margin-bottom:10px}',
       '#ow-ov[data-ow-theme="dark"] #own-center .own-sec{background:#12223a;border-color:#22405f}',
       '#own-center .own-sec h3{margin:0 0 8px;font-size:14px}',
@@ -345,8 +349,15 @@
       if (mark) { event.stopPropagation(); var id = mark.getAttribute('data-id'); var row = state.rows.filter(function (r) { return r.id === id; })[0]; markRead([id], !(row && row.read)); return; }
       var more = t.closest('#own-more');
       if (more) { loadList(true); return; }
+      if (t.closest('#own-mail-back')) { state.view = 'list'; state.mail = null; render(); return; }
       var card = t.closest('.own-card[data-id]');
-      if (card) { var cid = card.getAttribute('data-id'); var crow = state.rows.filter(function (r) { return r.id === cid; })[0]; if (crow && !crow.read) markRead([cid], true); openLink(crow && crow.deep_link); return; }
+      if (card) {
+        var cid = card.getAttribute('data-id'); var crow = state.rows.filter(function (r) { return r.id === cid; })[0];
+        if (crow && !crow.read) markRead([cid], true);
+        // A support letter opens its own view (safe metadata + the Gmail link), never the analytics panel.
+        if (crow && crow.category === 'support_mail' && crow.data && crow.data.mailId) { openMail(crow.data.mailId); return; }
+        openLink(crow && crow.deep_link); return;
+      }
       var test = t.closest('#own-test');
       if (test) { testPush(); return; }
       if (t.closest('#own-test-issue')) { issueOwnerTestCode(); return; }
@@ -488,6 +499,34 @@
       '<div class="own-note">' + esc(t('Настройки, прочитанное и счётчик синхронизируются между всеми устройствами, где вы вошли как владелец. Push не содержит e-mail, IP, идентификаторов устройств и аккаунтов.')) + '</div></div>';
     body.innerHTML = html;
   }
+  // ── support mail (2026-10-14): one letter's safe metadata, read through the owner-only RPC ────
+  async function openMail(id) {
+    state.view = 'mail'; state.mail = { loading: true }; render();
+    try {
+      var r = await api({ support_mail: { op: 'get', id: id } });
+      state.mail = r && r.mail ? r.mail : { missing: true };
+    } catch (e) { state.mail = { error: e }; }
+    render();
+  }
+  function renderMail() {
+    var body = panel.querySelector('#own-body');
+    var m = state.mail || {};
+    var html = '<button type="button" class="own-btn" id="own-mail-back">' + esc(t('‹ Назад')) + '</button>';
+    if (m.loading) html += '<div class="own-empty">' + esc(t('Загрузка…')) + '</div>';
+    else if (m.error) html += '<div class="own-err">' + esc(t('Не удалось загрузить письмо: {{0}}', m.error.message || t('ошибка'))) + '</div>';
+    else if (m.missing) html += '<div class="own-empty">' + esc(t('Письмо не найдено')) + '</div>';
+    else {
+      var when = m.received_at ? new Date(m.received_at).toLocaleString(W.LotoOwnerI18n ? W.LotoOwnerI18n.intl() : 'ru-RU') : '—';
+      html += '<div class="own-mail">' +
+        '<div class="own-mail-h">✉️ ' + esc(m.subject || t('без темы')) + '</div>' +
+        '<div class="own-mail-row"><b>' + esc(t('От')) + ':</b> <span data-i18n-ignore>' + esc([m.from_name, m.from_address ? '<' + m.from_address + '>' : ''].filter(Boolean).join(' ') || '—') + '</span></div>' +
+        '<div class="own-mail-row"><b>' + esc(t('Получено')) + ':</b> ' + esc(when) + '</div>' +
+        '<div class="own-mail-note">' + esc(t('Текст письма здесь не хранится — оно открывается в почтовом ящике поддержки.')) + '</div>' +
+        '<a class="own-btn own-btn-primary" id="own-mail-open" href="' + esc(m.gmail_url || '#') + '" target="_blank" rel="noopener noreferrer">' + esc(t('Открыть в Gmail')) + '</a>' +
+      '</div>';
+    }
+    body.innerHTML = html;
+  }
   function render() {
     if (!panel || !state.open) return;
     relabel();
@@ -496,7 +535,7 @@
     viewBtn.textContent = state.view === 'list' ? t('Настройки') : t('Уведомления');
     viewBtn.setAttribute('aria-pressed', String(state.view === 'settings'));
     panel.querySelector('#own-readall').hidden = state.view !== 'list';
-    if (state.view === 'list') renderList(); else renderSettings();
+    if (state.view === 'list') renderList(); else if (state.view === 'mail') renderMail(); else renderSettings();
   }
   function open() {
     build();

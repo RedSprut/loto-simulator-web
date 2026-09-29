@@ -90,6 +90,10 @@
   ];
   // Choropleth metrics: every one is a column of the `countries` report rows.
   var MAP_METRICS = [
+    // 2026-10-14: human geography first — visits whose browser shows a person (a consent decision or a
+    // sign-in) and consented people by class; «не определено» and automation stay separate metrics.
+    ['visits_people', 'Визиты людей'], ['people_confirmed', 'Люди ✓'], ['people_likely', 'Вероятно люди'],
+    ['visits_unknown', 'Визиты: не определено'],
     ['visits_human', 'Обычные визиты'], ['visitors', 'Посетители с согласием'], ['registered', 'Зарегистрированные'],
     ['buyers', 'Покупатели'], ['households', 'Домохозяйства (оценка)'], ['consent_accepted', 'Согласились на аналитику'],
     ['visits_suspicious', 'Подозрительный трафик'], ['visits_bot', 'Боты']
@@ -155,6 +159,7 @@
     usageStatus: 'Статус в момент действия: гость — до входа в аккаунт на этой установке; PRO — приложение в этот момент имело PRO-доступ; иначе FREE. Один человек может за период побывать гостем, FREE и PRO — тогда он есть в каждой строке, а в итогах один раз.',
     usageMatrix: 'Клетка — сколько людей (или сессий, или действий — переключатель) сделали это в этой лотерее или стране. Нажатие на клетку, строку или столбец включает фильтр.',
     usageTransitions: 'Люди, которые в выбранном срезе были гостями, и что с ними стало к сегодняшнему дню: зарегистрировали аккаунт (вход на той же установке), делали что-то уже в аккаунте, получили PRO (действующий доступ или оплата). Адрес, сеть и похожие устройства людей не объединяют.',
+    human: 'Кто за трафиком — по доказательствам, которые видит сервер, без новых данных о людях. «Человек ✓» — вошёл в аккаунт или сделал в приложении то, что делается только нажатием (выбрал лотерею, сгенерировал, открыл функцию, сохранил…). «Вероятно человек» — согласился на аналитику (это нажатие), но больше ничего не сделал; для визитов — браузер, где уже принято решение по согласию. «Не определено» — загрузка страницы без решения по согласию и без входа: так же выглядит и человек, закрывший вкладку, и сервис, открывший ссылку; такие визиты считаются, но не входят ни в людей, ни в страны, ни в уведомления. «Автоматический трафик» — боты, мониторинг, headless-браузеры, агенты, дата-центры, VPN, Tor; хранится для диагностики («Включить ботов»). Люди и визиты не складываются: загрузка страницы человеком с согласием — тоже визит.',
     usagePeople: 'Люди выбираются фильтрами, а путь показывает всё, что человек делал за период: страна → лотерея → функции в ней (по первому использованию) → другие лотереи, интерес к PRO, регистрация, PRO. Функция, которую только открыли, помечена «открыл». Показано до 100 последних активных людей.'
   };
 
@@ -172,7 +177,7 @@
     compare: true,
     page: 0,
     peopleKind: 'all',
-    mapMetric: 'visits_human',
+    mapMetric: 'visits_people',
     continent: 'all',
     selectedCountry: null,
     kpiError: null,
@@ -499,6 +504,10 @@
       '#ow-ov .ow-status-pro,#ow-ov .ow-status-lifetime{background:rgba(90,209,154,.2);color:var(--ow-up)}',
       '#ow-ov .ow-status-owner{background:rgba(242,193,78,.25);color:#a8730b}',
       '#ow-ov .ow-status-expired{background:rgba(242,120,154,.18);color:var(--ow-down)}',
+      '#ow-ov .ow-human{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap;background:var(--ow-chip);color:var(--ow-sub)}',
+      '#ow-ov .ow-human-confirmed{background:rgba(90,209,154,.22);color:var(--ow-up)}',
+      '#ow-ov .ow-human-likely{background:rgba(79,143,247,.16);color:var(--ow-accent)}',
+      '#ow-ov .ow-human-automated{background:rgba(242,120,154,.16);color:var(--ow-down)}',
       '#ow-ov .ow-feed-commerce td{background:rgba(90,209,154,.08)}',
       '#ow-ov .ow-feed-account td{background:rgba(79,143,247,.09)}',
       '#ow-ov .ow-feed-visits td{color:var(--ow-sub)}',
@@ -878,7 +887,7 @@
   // Compact tooltip: the selected metric first, then the three anchors — each figure exactly once.
   function hoverHtml(iso, metric) {
     var row = countryRows().filter(function (r) { return r.country === iso; })[0] || {};
-    var lines = [[metric, metricLabel(metric)], ['visits_human', 'Обычные визиты'], ['registered', 'Аккаунты'], ['buyers', 'Покупатели']];
+    var lines = [[metric, metricLabel(metric)], ['visits_people', 'Визиты людей'], ['visits_unknown', 'Визиты: не определено'], ['registered', 'Аккаунты'], ['buyers', 'Покупатели']];
     var seen = {};
     var parent = parentNote(iso);
     return '<b>' + esc((LIB.flagEmoji ? LIB.flagEmoji(iso) + ' ' : '') + countryName(iso)) + '</b>' + (parent ? '<br><i>' + esc(parent) + '</i>' : '') +
@@ -968,6 +977,12 @@
     });
     try { sheet.querySelector('#ow-sheet-close').focus({ preventScroll: true }); } catch (e) {}
   }
+  // The class of a country from the choropleth batch (062): a country seen only through undetermined
+  // visits is «Не определено», never human geography.
+  function countryHuman(iso) {
+    var row = countryRows().filter(function (r) { return r.country === iso; })[0];
+    return row && row.human ? row.human : null;
+  }
   function countrySheetHtml(iso, data) {
     var sum = data.summary || {};
     var visits = data.visits_available !== false;
@@ -976,7 +991,7 @@
     var human = +sum.visits_human || 0, regNew = +sum.registered_new || 0;
     var conversion = visits && human >= 20 ? (Math.round((regNew / human) * 10000) / 100) + '%' : kv(null, { insufficient: true });
     return '<div class="ow-sheet-in">' +
-      '<div class="ow-country-h"><span class="ow-flag">' + esc(LIB.flagEmoji ? LIB.flagEmoji(iso) : '') + '</span><span>' + esc(countryName(iso)) + '</span>' +
+      '<div class="ow-country-h"><span class="ow-flag">' + esc(LIB.flagEmoji ? LIB.flagEmoji(iso) : '') + '</span><span>' + esc(countryName(iso)) + '</span>' + ' ' + humanChip(countryHuman(iso)) +
         '<code>' + esc(iso) + '</code>' + (continentOf(iso) ? '<span class="ow-tag">' + esc(label(LIB.CONTINENT_RU, continentOf(iso))) + '</span>' : '') +
         (parentNote(iso) ? '<span class="ow-tag">' + esc(parentNote(iso)) + '</span>' : '') +
         how('countryMap') + '</div>' +
@@ -1164,7 +1179,7 @@
     var pct = function (value) { return value == null ? null : value; };
     var notSales = rv.promo_grants || rv.trial_starts || rv.sandbox_events
       ? '<br>' + et('не продажи: промо {{0}} · пробных {{1}} · sandbox {{2}}', num(rv.promo_grants), num(rv.trial_starts), num(rv.sandbox_events)) : '';
-    return '<div class="ow-block" id="ow-kpi">' + head + '<div class="ow-cards">' +
+    return '<div class="ow-block" id="ow-kpi">' + head + (d.human ? '<div class="ow-cards">' + humanCards(d.human.scalars || d.human) + '</div>' : '') + '<div class="ow-cards">' +
       kcard('Обычные визиты', tv('human'), tr.available ? et('{{0}} всего · {{1}} без обнаруженных признаков автоматизации', num(tr.visits), pctText(tr.human, tr.visits)) : et('счётчики ещё не накоплены'), 'visitsHuman', 'filtered', un) +
       kcard('Гостевые визиты', tv('guest'), et('визиты без входа в аккаунт'), 'guests', 'filtered', un) +
       kcard('Авторизованные визиты', tv('signed_in'), et('визиты с входом в аккаунт · это визиты, не люди'), 'authorizedVisits', 'filtered', un) +
@@ -1336,6 +1351,21 @@
 
   // ── LIVE: today's aggregates + the chronological feed (v4). The older `stream` shape is still
   // rendered when a backend answers with it, so nothing breaks during a rollout.
+  // Человек ✓ / Вероятно человек / Не определено / Автоматический трафик — the server's class (062).
+  function humanChip(cls) {
+    if (!cls) return '<span class="ow-card-s">—</span>';
+    return '<span class="ow-human ow-human-' + esc(cls) + '">' + esc(label(LIB.HUMAN_RU, cls)) + '</span>';
+  }
+  // The four classes as cards (day, LIVE, KPI). People and visits are never added together: a consented
+  // person's page load is also a counter visit.
+  function humanCards(h) {
+    h = h || {};
+    return card('Человек ✓', num(h.human_confirmed), et('вошёл в аккаунт или действовал в приложении · новых: {{0}}', num(h.new_human_confirmed)), 'human') +
+      card('Вероятно человек', num(h.human_likely), et('согласие на аналитику без действий · новых: {{0}}', num(h.new_human_likely)), 'human') +
+      card('Визиты людей', num(h.visits_people), et('решение по согласию или вход в аккаунт · это визиты, не люди'), 'human') +
+      card('Не определено', num(h.visits_unknown), et('визиты без решения по согласию и без входа — ни в людей, ни в страны не входят'), 'human') +
+      card('Автоматический трафик', num(h.visits_automated), et('боты, мониторинг, headless, дата-центры, VPN, Tor'), 'human');
+  }
   function statusChip(status) {
     var key = String(status || 'guest');
     return '<span class="ow-status-chip ow-status-' + esc(key) + '">' + esc(label(LIB.STATUS_RU, key)) + '</span>';
@@ -1383,6 +1413,7 @@
       card('Сумма покупок сегодня', gross ? esc(gross) : none(), (s.gross_usd != null ? esc(usdEstimate(s.gross_usd)) + ' · ' : '') + et('в валюте покупателя, до удержаний'), 'revenue') +
       card('Чистыми сегодня', net ? esc(net) : none(), s.net_unknown ? et('RevenueCat не сообщил удержания для {{0}} из {{1}}', num(s.net_unknown), num((+s.net_known || 0) + (+s.net_unknown || 0))) : (s.net_usd != null ? esc(usdEstimate(s.net_usd)) : et('после удержаний магазина по данным RevenueCat')), 'netRevenue') +
       card('Owner-уведомления', num(data.unread_owner_notifications), et('непрочитанных'), 'liveFeed') +
+      humanCards(s) +
       card('Обновление', et('каждые 15 с'), et('пока открыт раздел') + ' · ' + esc(data.today || '')) +
     '</div>';
     var host = ovEl && ovEl.querySelector('#ow-section');
@@ -1397,7 +1428,11 @@
         { title: 'Платформа', key: 'platform', html: function (r) { return esc(label(PLATFORM_RU, r.platform)); } },
         { title: 'Язык', key: 'locale', html: function (r) { return esc(r.locale || '—'); } },
         { title: 'Страна', key: 'country', html: function (r) { return esc(r.country ? (LIB.flagEmoji ? LIB.flagEmoji(r.country) + ' ' : '') + countryName(r.country) : '—'); } },
-        { title: 'Устройство', key: 'device', html: function (r) { return esc(r.device || (r.network ? label({ isp: 'провайдер', mobile: 'мобильная', hosting: 'дата-центр', vpn: 'VPN', tor: 'Tor' }, r.network) : '—')); } },
+        { title: 'Кто это', key: 'human', html: function (r) { return r.kind === 'commerce' ? '<span class="ow-card-s">—</span>' : humanChip(r.human); } },
+        // An hourly counter row has NO device: it says «агрегировано». Its network kind (isp = провайдер)
+        // is a network, shown in its own column — never as a device type.
+        { title: 'Устройство', key: 'device', html: function (r) { return r.aggregate || r.kind === 'visits' ? '<span class="ow-card-s">' + et('агрегировано') + '</span>' : esc(r.device || '—'); } },
+        { title: 'Сеть', key: 'network', html: function (r) { return esc(r.network ? label({ isp: 'провайдер', mobile: 'мобильная', hosting: 'дата-центр', vpn: 'VPN', tor: 'Tor', business: 'бизнес', education: 'учебная' }, r.network) : '—'); } },
         { title: 'Кто', key: 'who', html: function (r) { return '<code>' + esc(r.who || '—') + '</code>'; } }
       ], rows, 'Сегодня событий ещё не было') + '</div>';
     if (host) setTimeout(function () { try { host.scrollTop = scroll; } catch (e) {} }, 0);
@@ -1479,7 +1514,7 @@
       (visits ? barList(v.by_network, NET_LABELS, 'traffic', 'Все визиты по типу сети') : ''));
 
     var identityBlock = block('identity', 'Кто это был: аккаунты · гости · визиты · сессии · устройства · домохозяйства', 'identity',
-      '<div class="ow-cards">' +
+      '<div class="ow-cards">' + humanCards(s) + '</div><div class="ow-cards">' +
         dayCard('Точные активные аккаунты', 'exact_accounts', et('один аккаунт = один пользователь · владелец отдельно · авторизованных визитов: {{0}}', num(s.visits_signed_in)), 'identity', 'exact', compare) +
         dayCard('Оценка уникальных гостей', 'estimated_unique_guests', et('профилей с согласием: {{0}} · дневных ключей: {{1}}', num(s.guest_profiles_consented), num(s.guest_keys_daily)) + (s.guest_keys_linked ? ' · ' + et('связано с аккаунтом и исключено: {{0}}', num(s.guest_keys_linked)) : ''), 'identity', 'estimate', compare) +
         dayCard('Визиты', 'visits_human', et('обычные · загрузки страницы, не люди'), 'visitsHuman', 'filtered', compare, un) +
@@ -2238,6 +2273,7 @@
         card('Сессии', num(s.sessions), et('лотерей: {{0}} · стран: {{1}}', num(s.lotteries), num(s.countries)), 'usage') +
         card('Действия', num(s.actions), et('открытий: {{0}}', num(s.views)), 'usageUnits') +
         card('Гости / FREE / PRO', gfp(s), et('люди по статусу в момент действия'), 'usageStatus') +
+        card('Человек ✓ / вероятно', num(s.human_confirmed) + ' / ' + num(s.human_likely), et('по доказательствам сервера'), 'human') +
         card('Время в лотереях', +s.engaged_ms >= 1000 ? esc(dur(s.engaged_ms)) : '—', et('активное время на экране лотереи'), 'usageUnits') +
       '</div>' +
       '<div class="ow-block"><div class="ow-block-h">' + et('Лотереи') + how('usage') + '</div>' +
@@ -2290,7 +2326,7 @@
           } },
           { title: 'Путь', key: 'lotteries', html: journeyChips },
           { title: 'Сейчас', key: 'status_now', html: function (r) {
-            return journeyStatus(r.status_now) + ((r.statuses || []).length > 1 ? '<div class="ow-card-s">' + esc((r.statuses || []).map(function (k) { return label(LIB.STATUS_RU, k); }).join(' → ')) + '</div>' : '');
+            return humanChip(r.human) + ' ' + journeyStatus(r.status_now) + ((r.statuses || []).length > 1 ? '<div class="ow-card-s">' + esc((r.statuses || []).map(function (k) { return label(LIB.STATUS_RU, k); }).join(' → ')) + '</div>' : '');
           } },
           { title: 'Действия', key: 'actions', numeric: true },
           { title: 'Сессии', key: 'sessions', numeric: true },

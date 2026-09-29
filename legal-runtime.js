@@ -23,7 +23,16 @@
       select.value=event.detail?.language||i18n.language;
     });
   }
+  // «Поддержка» + the address itself (language-neutral, never a catalog key): one contact everywhere.
   const support=document.getElementById('legal-support');
-  const supportUrl=String(config.supportUrl||'').trim();
-  if(support&&supportUrl){support.href=supportUrl;support.hidden=false;}
+  const supportEmail=String(config.supportEmail||'').trim();
+  const supportUrl=String(config.supportUrl||'').trim()||(supportEmail?`mailto:${supportEmail}`:'');
+  if(support&&supportUrl){
+    support.href=supportUrl;support.hidden=false;
+    if(supportEmail&&!support.querySelector('.support-addr')){
+      const addr=document.createElement('span');
+      addr.className='support-addr';addr.setAttribute('data-i18n-ignore','');addr.textContent=` · ${supportEmail}`;
+      support.append(addr);
+    }
+  }
 })();

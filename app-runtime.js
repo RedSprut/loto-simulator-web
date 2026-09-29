@@ -3068,6 +3068,24 @@ async function checkAgainstSavedDraw(){
 // ═══════════════════════════════════════════════
 // Owner analytics (analytics-telemetry.js decides consent): a product action reported from the
 // place that KNOWS it happened — a save that really wrote, a check that really ran. Codes only.
+// The ONE support contact (commercial-config supportEmail → supportUrl = mailto:): the paywall shows
+// «Поддержка · address», About shows the address. A plain same-window mailto: link — no target — is
+// what iOS (UIApplication.open), Android (ACTION_VIEW intent) and browsers all hand to the mail app.
+function applySupportContact(){
+  try{
+    const c=window.LOTO_COMMERCIAL_CONFIG||{};
+    const email=String(c.supportEmail||'').trim();
+    const href=String(c.supportUrl||'').trim()||(email?`mailto:${email}`:'');
+    if(!href)return;
+    document.querySelectorAll('[data-support-link]').forEach(a=>{
+      a.href=href;a.hidden=false;a.removeAttribute('target');
+      if(a.getAttribute('data-support-link')==='address')a.textContent=email;
+      else if(email&&!a.querySelector('.support-addr')){const s=document.createElement('span');s.className='support-addr';s.setAttribute('data-i18n-ignore','');s.textContent=` · ${email}`;a.append(s);}
+    });
+    ['about-support-h','about-support'].forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=false;});
+  }catch(_e){}
+}
+applySupportContact();
 function appUsage(type,context,extra){try{if(window.LotoTelemetry)window.LotoTelemetry.track(type,{props:Object.assign({context:context},extra||{})});}catch(_e){}}
 async function saveFav(){
   const l=L();

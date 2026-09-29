@@ -536,11 +536,12 @@
   var CATEGORY_RU = {
     visit: 'Визит', new_guest: 'Новый гость', returning_user: 'Повторный визит', active_guest: 'Активный гость', registration: 'Новый пользователь',
     new_country: 'Новая страна', purchase: 'Покупка PRO', renewal: 'Продление PRO', cancellation: 'Отмена подписки',
-    refund: 'Возврат', payment_failure: 'Сбой оплаты', system: 'Системное событие', daily_summary: 'Итоги дня'
+    refund: 'Возврат', payment_failure: 'Сбой оплаты', system: 'Системное событие', daily_summary: 'Итоги дня',
+    support_mail: 'Новое письмо'
   };
   var CATEGORY_ICON = {
     visit: '👣', new_guest: '✨', returning_user: '🔁', active_guest: '🎯', registration: '🪪', new_country: '🌍', purchase: '💎', renewal: '♻️',
-    cancellation: '⛔', refund: '↩️', payment_failure: '⚠️', system: '🛠️', daily_summary: '📊'
+    cancellation: '⛔', refund: '↩️', payment_failure: '⚠️', system: '🛠️', daily_summary: '📊', support_mail: '✉️'
   };
   var SEVERITY_RU = { info: 'Информация', important: 'Важное', critical: 'Критично' };
   var MODE_RU = {
@@ -550,6 +551,10 @@
     custom: ['Свой набор', 'Для каждой категории отдельно: показывать в центре и/или присылать push.']
   };
   var STATUS_RU = { guest: 'Гость', free: 'FREE', pro: 'PRO', lifetime: 'PRO Lifetime', expired: 'PRO истёк', owner: 'Владелец', signed_in: 'С аккаунтом' };
+  // The ONE server classification of a person (migration 062, owner_human_class): what each class means
+  // is in the panel's «Как считается» (HOW.human). Order = most certain first.
+  var HUMAN_ORDER = ['confirmed', 'likely', 'unknown', 'automated'];
+  var HUMAN_RU = { confirmed: 'Человек ✓', likely: 'Вероятно человек', unknown: 'Не определено', automated: 'Автоматический трафик' };
   var FEED_KIND_RU = { event: 'Событие', commerce: 'Платёж', account: 'Аккаунт', visits: 'Визиты' };
   var COMMERCE_RU = {
     checkout_open: 'Открыл оплату', checkout_failed: 'Оплата не удалась', checkout_cancelled: 'Оплата отменена',
@@ -612,7 +617,7 @@
     BLUE_LIGHT: BLUE_LIGHT, BLUE_DARK: BLUE_DARK, choroplethColor: choroplethColor, flagEmoji: flagEmoji, kpiText: kpiText,
     dayRange: dayRange, todayYMD: todayYMD, shiftDay: shiftDay, delta: delta, parseOwnerLink: parseOwnerLink, buildOwnerLink: buildOwnerLink,
     CATEGORY_RU: CATEGORY_RU, CATEGORY_ICON: CATEGORY_ICON, SEVERITY_RU: SEVERITY_RU, MODE_RU: MODE_RU, STATUS_RU: STATUS_RU,
-    FEED_KIND_RU: FEED_KIND_RU, COMMERCE_RU: COMMERCE_RU, COMMERCE_KIND_RU: COMMERCE_KIND_RU, formatMoney: formatMoney,
+    FEED_KIND_RU: FEED_KIND_RU, HUMAN_ORDER: HUMAN_ORDER, HUMAN_RU: HUMAN_RU, COMMERCE_RU: COMMERCE_RU, COMMERCE_KIND_RU: COMMERCE_KIND_RU, formatMoney: formatMoney,
     moneyList: moneyList, usdEstimate: usdEstimate, netText: netText, deductionText: deductionText,
     _zoneOffsetMinutes: zoneOffsetMinutes, _zoneCivilToUTC: zoneCivilToUTC, _zoneYMD: zoneYMD,
     _osloCivilToUTC: osloCivilToUTC, _osloYMD: osloYMD, _osloOffsetMinutes: osloOffsetMinutes

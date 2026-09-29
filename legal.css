@@ -21,6 +21,8 @@ a{color:#8a2b23;text-underline-offset:3px}
 .legal-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
 .legal-action{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;border:1px solid #8a2b23;border-radius:6px;background:#8a2b23;color:#fff;text-decoration:none;font-weight:850}
 .legal-action.secondary{background:#fff;color:#8a2b23}
+/* «Поддержка · address»: the address may break anywhere on a narrow phone rather than push the page wider */
+.legal-action{max-width:100%;flex-wrap:wrap;text-align:center}.legal-action .support-addr{min-width:0;overflow-wrap:anywhere}
 [hidden]{display:none!important}
 /* ── Без вспышки исходного (русского) текста ────────────────────────────────────────────────
    Класс i18n-pending стоит в разметке и снимается i18n-runtime сразу после локализации. Пока он

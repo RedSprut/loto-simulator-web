@@ -7,7 +7,15 @@
     node.href=String(value);
     node.hidden=false;
   };
-  setLink('safe-support',config.supportUrl);
+  // One support contact everywhere: supportUrl, else mailto: supportEmail — with the address shown.
+  const supportEmail=String(config.supportEmail||'').trim();
+  setLink('safe-support',String(config.supportUrl||'').trim()||(supportEmail?`mailto:${supportEmail}`:''));
+  const safeSupport=document.getElementById('safe-support');
+  if(safeSupport&&!safeSupport.hidden&&supportEmail&&!safeSupport.querySelector('.support-addr')){
+    const addr=document.createElement('span');
+    addr.className='support-addr';addr.setAttribute('data-i18n-ignore','');addr.textContent=` · ${supportEmail}`;
+    safeSupport.append(addr);
+  }
   setLink('safe-app-store',config.appStoreUrl);
   setLink('safe-play-store',config.googlePlayUrl);
 
