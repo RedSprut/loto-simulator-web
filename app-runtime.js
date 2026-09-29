@@ -1871,13 +1871,13 @@ async function withCourtApp(run){
   return run(app);
 }
 // Prediction leaderboard / history (leaders-ui.js) is lazy like the court: loaded on the first tap
-// of «Рейтинг прогнозов» or of a persona's ledger section. It reuses the court's i18n part.
+// of «Рейтинг прогнозов» or of a persona's ledger section. It reuses the court's i18n part + identity.
 let leadersAppPromise=null;
 function loadLeadersApp(){
   if(window.LotoLeadersApp)return Promise.resolve(window.LotoLeadersApp);
   if(leadersAppPromise)return leadersAppPromise;
   const copy=Promise.resolve(window.LotoI18n&&window.LotoI18n.loadPart?window.LotoI18n.loadPart('court'):null).catch(()=>null);
-  leadersAppPromise=Promise.all([copy,loadRuntimeScript('leaders-ui.js')]).then(()=>{
+  leadersAppPromise=Promise.all([copy,loadCourtApp().catch(()=>null),loadRuntimeScript('leaders-ui.js')]).then(()=>{
     if(!window.LotoLeadersApp)throw new Error('leaders_ui_missing');
     return window.LotoLeadersApp;
   }).catch(error=>{leadersAppPromise=null;throw error;});
