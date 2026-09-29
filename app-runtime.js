@@ -4907,7 +4907,7 @@ function showFeedback(title,msg,icon='✅',autoMs=2200,options){
   const primary=document.getElementById('fb-primary');
   const secondary=document.getElementById('fb-secondary');
   if(actions)actions.classList.remove('has-secondary');
-  if(primary){primary.textContent=appText(options?.primaryText||'OK');primary.onclick=()=>closeFeedback();}
+  if(primary){primary.textContent=appText(options?.primaryText||'OK');primary.onclick=()=>{closeFeedback();if(typeof options?.primaryAction==='function')options.primaryAction();};}
   if(secondary){
     if(options?.secondaryText&&typeof options.secondaryAction==='function'){
       secondary.hidden=false;
@@ -5421,17 +5421,73 @@ async function shareText(title,text){
   try{await navigator.clipboard.writeText(payload.text);showCopyToast('📋 Скопировано — вставь в любой мессенджер');}
   catch(e){showFeedback('Поделиться','Скопируй вручную:\n\n'+payload.text,'📤',9000);}
 }
-// «Поделиться Lotto Simulator» — само приложение: название, короткое описание на языке
-// интерфейса и канонический адрес. Без системного меню копируется только ссылка.
-async function shareApp(){
-  const tr=value=>window.LotoI18n?.translate?.(value)||value;
+// «Поделиться Lotto Simulator» — ОДНА логика для блока на главной (#home-share) и для About.
+// Приглашение — на языке интерфейса, адрес — всегда канонический сайт без параметров: ни
+// сессия, ни capacitor://localhost получателю не уходят.
+const APP_SHARE_INVITE='Попробуй Lotto Simulator — симулятор лотерей со статистикой тиражей, генератором чисел и 3D-барабаном. Не продаёт билеты и не гарантирует выигрыш.';
+function appSharePayload(){
   const url=document.querySelector('link[rel="canonical"]')?.href||'https://lottosimulator.app/';
-  const payload={title:'Lotto Simulator',text:tr('Симулятор лотерей со статистикой тиражей, генератором чисел и 3D-барабаном. Не продаёт билеты и не гарантирует выигрыш.'),url};
-  if(await openShareSheet(payload))return;
-  try{await navigator.clipboard.writeText(url);showCopyToast('🔗 Ссылка скопирована');}
-  catch(e){showFeedback('Поделиться','Скопируй вручную:\n\n'+url,'📤',9000);}
+  const text=appText(APP_SHARE_INVITE);
+  return {title:'Lotto Simulator',text,url,full:text+'\n'+url};
 }
+// Официальные URL-механизмы публикации (только адрес/текст в параметрах, без ключей и трекинга).
+const APP_SHARE_LINKS={
+  facebook:p=>'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(p.url),
+  x:p=>'https://x.com/intent/tweet?text='+encodeURIComponent(p.text)+'&url='+encodeURIComponent(p.url),
+  reddit:p=>'https://www.reddit.com/submit?url='+encodeURIComponent(p.url)+'&title='+encodeURIComponent(p.text),
+  telegram:p=>'https://t.me/share/url?url='+encodeURIComponent(p.url)+'&text='+encodeURIComponent(p.text),
+  whatsapp:p=>'https://wa.me/?text='+encodeURIComponent(p.full),
+  linkedin:p=>'https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(p.url),
+  email:p=>'mailto:?subject='+encodeURIComponent(p.title)+'&body='+encodeURIComponent(p.full),
+};
+// Instagram и TikTok не принимают веб-ссылку в редактор: текст+ссылка копируются, окно говорит об
+// этом, а его кнопка (новый жест пользователя — без блокировки всплывающих окон) открывает сервис:
+// на iOS/Android universal/app link отдаёт его приложению, иначе открывается сайт.
+const APP_SHARE_COPY_OPEN={
+  instagram:{url:'https://www.instagram.com/',label:'Открыть Instagram'},
+  tiktok:{url:'https://www.tiktok.com/',label:'Открыть TikTok'},
+};
+function openAppShareUrl(href){
+  // mailto: система отдаёт почтовому клиенту и в браузере, и в Capacitor (iOS/Android).
+  if(href.startsWith('mailto:')){location.href=href;return;}
+  if(window.LotoLinks)window.LotoLinks.open(href);else window.open(href,'_blank','noopener');
+}
+function appShareManualCopy(value){
+  showFeedback(appText('Не скопировано'),appText('Скопируй вручную:')+'\n\n'+value,'📤',0);
+}
+let appShareBusy=false;
+async function shareAppTo(target,btn){
+  const p=appSharePayload();
+  const link=APP_SHARE_LINKS[target];
+  // Синхронно, внутри жеста: иначе Safari/Firefox блокируют новое окно.
+  if(link){openAppShareUrl(link(p));return;}
+  if(target==='copy'){
+    try{await writeClipboardText(p.url);}catch(e){appShareManualCopy(p.url);return;}
+    showCopyToast(appText('🔗 Ссылка скопирована'));
+    if(btn){btn.classList.add('is-done');clearTimeout(btn._shareTimer);btn._shareTimer=setTimeout(()=>btn.classList.remove('is-done'),1600);}
+    return;
+  }
+  const dest=APP_SHARE_COPY_OPEN[target];
+  if(dest){
+    try{await writeClipboardText(p.full);}catch(e){appShareManualCopy(p.full);return;}
+    showFeedback(appText('Текст и ссылка скопированы'),appText('Вставьте их в сообщение или публикацию.'),'📋',0,
+      {primaryText:dest.label,primaryAction:()=>openAppShareUrl(dest.url),secondaryText:'Закрыть',secondaryAction:()=>{}});
+    return;
+  }
+  // Системное меню со всеми установленными приложениями; без него — текст+ссылка в буфер.
+  if(appShareBusy)return;
+  appShareBusy=true;
+  try{
+    if(await openShareSheet({title:p.title,text:p.text,url:p.url}))return;
+    try{await writeClipboardText(p.full);}catch(e){appShareManualCopy(p.full);return;}
+    showCopyToast('📋 '+appText('Текст и ссылка скопированы')+'. '+appText('Вставьте их в сообщение или публикацию.'));
+  }finally{appShareBusy=false;}
+}
+function shareApp(){return shareAppTo('system');}
 window.shareApp=shareApp;
+window.shareAppTo=shareAppTo;
+// Символ «Поделиться»: на iOS/iPadOS/macOS — системный (квадрат со стрелкой), на остальных — три узла.
+try{if(/iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent||''))document.documentElement.setAttribute('data-share-glyph','apple');}catch(e){}
 function shareRows(){
   const l=L();fillAll();
   const good=rows.filter(r=>r.m.length===l.pM);
