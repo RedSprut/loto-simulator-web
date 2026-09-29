@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="176a59e" data-build-ts="2026-09-29T18:39:14.971Z">
+<html lang="en" data-build="3c51f1d" data-build-ts="2026-09-29T19:43:20.319Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=176a59e"></script>
+<script src="./boot-runtime.js?v=3c51f1d"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,14 +33,14 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=176a59e">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=3c51f1d">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=176a59e">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=3c51f1d">
 <meta name="twitter:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
@@ -2543,6 +2543,27 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="acc-stores-title">Установить приложение</div>
     <div class="acc-stores-btns" id="home-stores-btns"></div>
   </section>
+  <!-- Web-only: the static, per-language SEO pages (scripts/build-seo-pages.mjs). Native apps never
+       show it — those pages are not in the app bundle. Hrefs follow the active language at runtime. -->
+  <nav class="app-guides" id="home-guides" aria-labelledby="home-guides-title" hidden>
+    <h2 class="acc-stores-title app-guides-title" id="home-guides-title">Лотереи</h2>
+    <div class="app-guides-tools">
+      <a class="app-guides-tool" href="/lottery-statistics/" data-seo-path="lottery-statistics/">Статистика лотерей</a>
+      <a class="app-guides-tool" href="/lottery-number-generator/" data-seo-path="lottery-number-generator/">Генератор чисел</a>
+      <a class="app-guides-tool" href="/lottery-results/" data-seo-path="lottery-results/">Последние результаты</a>
+    </div>
+    <div class="app-guides-games">
+      <a class="app-guides-link" href="/lottery/norsk-lotto/" data-seo-path="lottery/norsk-lotto/" data-i18n-ignore>Norsk Lotto</a>
+      <a class="app-guides-link" href="/lottery/vikinglotto/" data-seo-path="lottery/vikinglotto/" data-i18n-ignore>Vikinglotto</a>
+      <a class="app-guides-link" href="/lottery/eurojackpot/" data-seo-path="lottery/eurojackpot/" data-i18n-ignore>Eurojackpot</a>
+      <a class="app-guides-link" href="/lottery/powerball/" data-seo-path="lottery/powerball/" data-i18n-ignore>Powerball</a>
+      <a class="app-guides-link" href="/lottery/mega-millions/" data-seo-path="lottery/mega-millions/" data-i18n-ignore>Mega Millions</a>
+      <a class="app-guides-link" href="/lottery/euromillions/" data-seo-path="lottery/euromillions/" data-i18n-ignore>EuroMillions</a>
+      <a class="app-guides-link" href="/lottery/superenalotto/" data-seo-path="lottery/superenalotto/" data-i18n-ignore>SuperEnalotto</a>
+      <a class="app-guides-link" href="/lottery/lotto-max/" data-seo-path="lottery/lotto-max/" data-i18n-ignore>Lotto Max</a>
+      <a class="app-guides-link" href="/lottery/powerball-australia/" data-seo-path="lottery/powerball-australia/" data-i18n-ignore>Powerball Australia</a>
+    </div>
+  </nav>
   <section class="app-share" id="home-share" aria-labelledby="home-share-title">
     <h2 class="acc-stores-title app-share-title" id="home-share-title">Поделиться Lotto Simulator</h2>
     <div class="app-share-body">
@@ -2829,7 +2850,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
 <!-- CUSTOM CONFIRM (native confirm() can be blocked in sandboxed artifact iframes) -->
 <div class="lang-ov" id="lang-ov" data-loto-event-click="if(event.target===this)closeLangPicker()">
   <div class="lang-box">
-    <div class="lang-title">🌐 Language · Язык · Språk</div>
+    <div class="lang-title">🌐 Язык</div>
     <div class="lang-grid" id="lang-grid"></div>
     <button class="btn-close2" data-loto-event-click="closeLangPicker()">✕</button>
   </div>
@@ -3562,6 +3583,16 @@ body.account-open .bnav{z-index:570}
 .app-share-body{display:flex;flex-direction:column;align-items:center;gap:14px}
 .app-share-main{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:min(100%,300px);min-height:48px;margin:0;padding:0 22px;border:none;border-radius:999px;background:linear-gradient(160deg,var(--gold2),var(--gold));color:#2A1608;font:800 15px/1.2 'Manrope',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 6px 18px rgba(184,134,11,.28)}
 .app-share-main svg{width:20px;height:20px;flex:0 0 auto}
+/* «Лотереи» (web only): links to the static per-language SEO pages, above the share card (which stays last). */
+.app-guides{width:min(calc(100% - 28px),1120px);margin:14px auto 10px;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--bg2);box-shadow:var(--card-shadow);text-align:center}
+.app-guides[hidden]{display:none}
+.app-guides .app-guides-title{margin:0 0 12px;font-family:inherit;font-size:15px;font-weight:800;color:var(--fg);line-height:1.3}
+.app-guides-tools,.app-guides-games{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.app-guides-games{margin-top:10px}
+.app-guides a{display:inline-flex;align-items:center;min-height:36px;padding:0 14px;border:1px solid var(--border);border-radius:999px;background:var(--bg3);color:var(--fg);font-size:13px;font-weight:700;text-decoration:none;overflow-wrap:anywhere}
+.app-guides a.app-guides-tool{font-weight:800}
+.app-guides a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (hover:hover) and (pointer:fine){.app-guides a:hover{border-color:var(--gold)}}
 .app-share-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px 8px;width:100%;max-width:340px;justify-items:center}
 .app-share-btn{--sb:var(--gold);--sf:#fff;--sg:rgba(184,134,11,.35);position:relative;display:grid;place-items:center;width:min(48px,100%);aspect-ratio:1;margin:0;padding:0;border:1px solid var(--border);border-radius:50%;background:var(--bg3);color:var(--fg);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .16s ease,background .16s ease,color .16s ease,border-color .16s ease,box-shadow .16s ease}
 .app-share-btn svg{width:22px;height:22px;display:block;pointer-events:none}
@@ -3940,26 +3971,26 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
 <!-- TOAST -->
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=176a59e"></script>
-<script src="./commercial-config.js?v=176a59e"></script>
-<script src="./event-runtime.js?v=176a59e"></script>
-<script src="./external-link-runtime.js?v=176a59e"></script>
-<script src="./auth-client.js?v=176a59e"></script>
-<script src="./native-loader.js?v=176a59e"></script>
-<script src="./billing-web.js?v=176a59e"></script>
-<script src="./i18n-catalog.js?v=176a59e"></script>
-<script src="./lang-detect.js?v=176a59e"></script>
-<script src="./i18n-runtime.js?v=176a59e"></script>
-<script src="./consent-runtime.js?v=176a59e"></script>
-<script src="./analytics-telemetry.js?v=176a59e"></script>
-<script src="./ga4-runtime.js?v=176a59e"></script>
-<script src="./win-match-core.js?v=176a59e"></script>
-<script src="./court-core.js?v=176a59e"></script>
-<script src="./smart-start.js?v=176a59e"></script>
-<script src="./app-runtime.js?v=176a59e"></script>
-<script src="./inline-runtime-2.js?v=176a59e"></script>
-<script src="./commercial-runtime.js?v=176a59e"></script>
-<script src="./inline-runtime-3.js?v=176a59e"></script>
+<script src="./version.js?v=3c51f1d"></script>
+<script src="./commercial-config.js?v=3c51f1d"></script>
+<script src="./event-runtime.js?v=3c51f1d"></script>
+<script src="./external-link-runtime.js?v=3c51f1d"></script>
+<script src="./auth-client.js?v=3c51f1d"></script>
+<script src="./native-loader.js?v=3c51f1d"></script>
+<script src="./billing-web.js?v=3c51f1d"></script>
+<script src="./i18n-catalog.js?v=3c51f1d"></script>
+<script src="./lang-detect.js?v=3c51f1d"></script>
+<script src="./i18n-runtime.js?v=3c51f1d"></script>
+<script src="./consent-runtime.js?v=3c51f1d"></script>
+<script src="./analytics-telemetry.js?v=3c51f1d"></script>
+<script src="./ga4-runtime.js?v=3c51f1d"></script>
+<script src="./win-match-core.js?v=3c51f1d"></script>
+<script src="./court-core.js?v=3c51f1d"></script>
+<script src="./smart-start.js?v=3c51f1d"></script>
+<script src="./app-runtime.js?v=3c51f1d"></script>
+<script src="./inline-runtime-2.js?v=3c51f1d"></script>
+<script src="./commercial-runtime.js?v=3c51f1d"></script>
+<script src="./inline-runtime-3.js?v=3c51f1d"></script>
 <style id="lnc-styles">
 /* Header bell + unread badge; hide redundant header controls on scoped pages. */
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -4111,9 +4142,9 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=176a59e"></script>
-<script src="./notifications-runtime.js?v=176a59e"></script>
-<script src="./pwa-runtime.js?v=176a59e"></script>
+<script src="./notification-center.js?v=3c51f1d"></script>
+<script src="./notifications-runtime.js?v=3c51f1d"></script>
+<script src="./pwa-runtime.js?v=3c51f1d"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
@@ -4124,8 +4155,8 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
      by web + iOS/Android via the same public-dist bundle); the app never reloads,
      so its state is preserved; back (button / browser / Android hardware) closes
      the overlay and frees the drum's WebGL. -->
-<script src="./inline-runtime-4.js?v=176a59e"></script>
-<script src="./inline-runtime-5.js?v=176a59e"></script>
-<script src="./inline-runtime-6.js?v=176a59e"></script>
+<script src="./inline-runtime-4.js?v=3c51f1d"></script>
+<script src="./inline-runtime-5.js?v=3c51f1d"></script>
+<script src="./inline-runtime-6.js?v=3c51f1d"></script>
 </body>
 </html>

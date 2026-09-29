@@ -5457,6 +5457,26 @@ function appShareManualCopy(value,target){
   showFeedback(appText('Не скопировано'),appText('Скопируй вручную:')+'\n\n'+value,'📤',0);
   appShareDone(target,'manual');
 }
+/* Home «Лотереи»: the static SEO pages exist on the web site only (scripts/build-seo-pages.mjs runs in
+   the web deploy, never in `cap sync`), so the block stays hidden inside the native apps. Each link
+   points at the page in the app's active language: English at the root, every other locale under
+   /<code>/ — the same URLs the pages' hreflang alternates use. */
+(function initHomeGuides(){
+  const box=document.getElementById('home-guides');
+  if(!box)return;
+  let native=false;
+  try{native=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());}catch(_e){}
+  if(native){box.remove();return;}
+  const apply=()=>{
+    let lang='en';
+    try{lang=(window.LotoI18n&&window.LotoI18n.language)||document.documentElement.lang||'en';}catch(_e){}
+    const prefix=lang==='en'?'/':'/'+encodeURIComponent(lang)+'/';
+    box.querySelectorAll('a[data-seo-path]').forEach(a=>{a.setAttribute('href',prefix+a.dataset.seoPath);});
+  };
+  apply();
+  box.hidden=false;
+  window.addEventListener('loto:languagechange',apply);
+})();
 // Итог настоящего нажатия (канал + что вышло) — в first-party аналитику; телеметрия сама проверяет,
 // что это был жест человека на этой кнопке, и ничего не шлёт без согласия.
 function appShareDone(target,result){try{window.LotoTelemetry?.shareDone?.(target,result);}catch(_e){}}
