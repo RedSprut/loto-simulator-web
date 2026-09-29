@@ -1432,7 +1432,9 @@
         // An hourly counter row has NO device: it says «агрегировано». Its network kind (isp = провайдер)
         // is a network, shown in its own column — never as a device type.
         { title: 'Устройство', key: 'device', html: function (r) { return r.aggregate || r.kind === 'visits' ? '<span class="ow-card-s">' + et('агрегировано') + '</span>' : esc(r.device || '—'); } },
-        { title: 'Сеть', key: 'network', html: function (r) { return esc(r.network ? label({ isp: 'провайдер', mobile: 'мобильная', hosting: 'дата-центр', vpn: 'VPN', tor: 'Tor', business: 'бизнес', education: 'учебная' }, r.network) : '—'); } },
+        // The panel's one network vocabulary (NET_LABELS, translated) — a raw code such as «unknown» never
+        // reaches the owner (LIVE showed it for a counter row whose network was not determined).
+        { title: 'Сеть', key: 'network', html: function (r) { return esc(r.network ? label(NET_LABELS, r.network) : '—'); } },
         { title: 'Кто', key: 'who', html: function (r) { return '<code>' + esc(r.who || '—') + '</code>'; } }
       ], rows, 'Сегодня событий ещё не было') + '</div>';
     if (host) setTimeout(function () { try { host.scrollTop = scroll; } catch (e) {} }, 0);
