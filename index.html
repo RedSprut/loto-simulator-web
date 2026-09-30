@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="98a6525" data-build-ts="2026-09-30T13:19:10.193Z">
+<html lang="en" data-build="5c6b7ec" data-build-ts="2026-09-30T13:37:42.642Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=98a6525"></script>
+<script src="./boot-runtime.js?v=5c6b7ec"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,14 +33,14 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=98a6525">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=5c6b7ec">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=98a6525">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=5c6b7ec">
 <meta name="twitter:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
@@ -209,15 +209,16 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
   .hdr{border-radius:0 0 18px 18px}
 }
 
-body[data-game="lotto"]{--hdr-a:#B81B44;--hdr-b:#7A0E2B;--hdr-c:#4A0919;--game-glow:rgba(184,27,68,.5);--gm:#CC2060;--gm-hi:#F06091;--gm-lo:#7E0F3A;--gm-txt:#FFF;--gb:#F4F0E8;--gb-hi:#FFF;--gb-lo:#B7AD9D;--gb-txt:#171018}
-body[data-game="viking"]{--hdr-a:#2A4BD8;--hdr-b:#1E7FC8;--hdr-c:#0FBFA6;--game-glow:rgba(30,110,200,.5);--gm:#2146C7;--gm-hi:#6685F3;--gm-lo:#0E236D;--gm-txt:#FFF;--gb:#111B45;--gb-hi:#46558F;--gb-lo:#05091C;--gb-txt:#FFF}
-body[data-game="euro"]{--hdr-a:#0E7A50;--hdr-b:#0E4B4E;--hdr-c:#123A44;--game-glow:rgba(16,120,80,.5);--gm:#F3C316;--gm-hi:#FFE98A;--gm-lo:#A96D00;--gm-txt:#172340;--gb:#194F90;--gb-hi:#6AA1DD;--gb-lo:#0B2858;--gb-txt:#FFF}
-body[data-game="powerball"]{--hdr-a:#B5162B;--hdr-b:#7A1250;--hdr-c:#12327E;--game-glow:rgba(120,30,110,.5);--gm:#F6F7F8;--gm-hi:#FFF;--gm-lo:#B7BCC2;--gm-txt:#15171A;--gb:#D71E28;--gb-hi:#F9656D;--gb-lo:#7D0B12;--gb-txt:#FFF}
-body[data-game="mega"]{--hdr-a:#C09018;--hdr-b:#6A5A2A;--hdr-c:#124A7E;--game-glow:rgba(160,120,40,.5);--gm:#F7F7F5;--gm-hi:#FFF;--gm-lo:#B8BCC2;--gm-txt:#16191D;--gb:#F2B705;--gb-hi:#FFE477;--gb-lo:#9B6700;--gb-txt:#231700}
-body[data-game="euromillions"]{--hdr-a:#123C8E;--hdr-b:#3A2A8E;--hdr-c:#6C1E8E;--game-glow:rgba(80,40,140,.5);--gm:#17499E;--gm-hi:#6C9DEB;--gm-lo:#0A2457;--gm-txt:#FFF;--gb:#F1C40F;--gb-hi:#FFE980;--gb-lo:#A46C00;--gb-txt:#1F1800}
-body[data-game="superenalotto"]{--hdr-a:#0E7A3C;--hdr-b:#6A6020;--hdr-c:#B5162B;--game-glow:rgba(60,110,50,.5);--gm:#098B4A;--gm-hi:#62D89C;--gm-lo:#044B28;--gm-txt:#FFF;--gb:#D42136;--gb-hi:#F56A78;--gb-lo:#78101D;--gb-txt:#FFF}
-body[data-game="lottomax"]{--hdr-a:#C4182F;--hdr-b:#8A1030;--hdr-c:#5E0C22;--game-glow:rgba(180,24,45,.5);--gm:#1B4FB8;--gm-hi:#6B91E8;--gm-lo:#0B2865;--gm-txt:#FFF;--gb:#D41F3A;--gb-hi:#F46D82;--gb-lo:#790D20;--gb-txt:#FFF}
-body[data-game="powerballau"]{--hdr-a:#5A2AC8;--hdr-b:#8A2AB8;--hdr-c:#B5169E;--game-glow:rgba(140,42,160,.5);--gm:#2548BA;--gm-hi:#718FEA;--gm-lo:#102462;--gm-txt:#FFF;--gb:#7B239B;--gb-hi:#C46ADE;--gb-lo:#3D0E50;--gb-txt:#FFF}
+[data-ball-game]{--gm-mark:initial;--gm-new:initial;--gm-hit:initial;--gb-mark:initial;--gb-new:initial;--gb-hit:initial}
+body[data-game="lotto"],[data-ball-game="lotto"]{--hdr-a:#B81B44;--hdr-b:#7A0E2B;--hdr-c:#4A0919;--game-glow:rgba(184,27,68,.5);--gm:#CC2060;--gm-hi:#F06091;--gm-lo:#7E0F3A;--gm-txt:#FFF;--gb:#F4F0E8;--gb-hi:#FFF;--gb-lo:#B7AD9D;--gb-txt:#171018}
+body[data-game="viking"],[data-ball-game="viking"]{--hdr-a:#2A4BD8;--hdr-b:#1E7FC8;--hdr-c:#0FBFA6;--game-glow:rgba(30,110,200,.5);--gm:#2146C7;--gm-hi:#6685F3;--gm-lo:#0E236D;--gm-txt:#FFF;--gb:#111B45;--gb-hi:#46558F;--gb-lo:#05091C;--gb-txt:#FFF}
+body[data-game="euro"],[data-ball-game="euro"]{--hdr-a:#0E7A50;--hdr-b:#0E4B4E;--hdr-c:#123A44;--game-glow:rgba(16,120,80,.5);--gm:#F3C316;--gm-hi:#FFE98A;--gm-lo:#A96D00;--gm-txt:#172340;--gb:#194F90;--gb-hi:#6AA1DD;--gb-lo:#0B2858;--gb-txt:#FFF;--gm-mark:#7C5CFF}
+body[data-game="powerball"],[data-ball-game="powerball"]{--hdr-a:#B5162B;--hdr-b:#7A1250;--hdr-c:#12327E;--game-glow:rgba(120,30,110,.5);--gm:#F6F7F8;--gm-hi:#FFF;--gm-lo:#B7BCC2;--gm-txt:#15171A;--gb:#D71E28;--gb-hi:#F9656D;--gb-lo:#7D0B12;--gb-txt:#FFF}
+body[data-game="mega"],[data-ball-game="mega"]{--hdr-a:#C09018;--hdr-b:#6A5A2A;--hdr-c:#124A7E;--game-glow:rgba(160,120,40,.5);--gm:#F7F7F5;--gm-hi:#FFF;--gm-lo:#B8BCC2;--gm-txt:#16191D;--gb:#F2B705;--gb-hi:#FFE477;--gb-lo:#9B6700;--gb-txt:#231700;--gb-mark:#7C5CFF}
+body[data-game="euromillions"],[data-ball-game="euromillions"]{--hdr-a:#123C8E;--hdr-b:#3A2A8E;--hdr-c:#6C1E8E;--game-glow:rgba(80,40,140,.5);--gm:#17499E;--gm-hi:#6C9DEB;--gm-lo:#0A2457;--gm-txt:#FFF;--gb:#F1C40F;--gb-hi:#FFE980;--gb-lo:#A46C00;--gb-txt:#1F1800;--gb-mark:#7C5CFF}
+body[data-game="superenalotto"],[data-ball-game="superenalotto"]{--hdr-a:#0E7A3C;--hdr-b:#6A6020;--hdr-c:#B5162B;--game-glow:rgba(60,110,50,.5);--gm:#098B4A;--gm-hi:#62D89C;--gm-lo:#044B28;--gm-txt:#FFF;--gb:#D42136;--gb-hi:#F56A78;--gb-lo:#78101D;--gb-txt:#FFF;--gm-new:#22C3E6;--gm-hit:#22C3E6}
+body[data-game="lottomax"],[data-ball-game="lottomax"]{--hdr-a:#C4182F;--hdr-b:#8A1030;--hdr-c:#5E0C22;--game-glow:rgba(180,24,45,.5);--gm:#1B4FB8;--gm-hi:#6B91E8;--gm-lo:#0B2865;--gm-txt:#FFF;--gb:#D41F3A;--gb-hi:#F46D82;--gb-lo:#790D20;--gb-txt:#FFF}
+body[data-game="powerballau"],[data-ball-game="powerballau"]{--hdr-a:#5A2AC8;--hdr-b:#8A2AB8;--hdr-c:#B5169E;--game-glow:rgba(140,42,160,.5);--gm:#2548BA;--gm-hi:#718FEA;--gm-lo:#102462;--gm-txt:#FFF;--gb:#7B239B;--gb-hi:#C46ADE;--gb-lo:#3D0E50;--gb-txt:#FFF}
 .hdr-back,.hdr-icon{width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,255,255,.22);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.1);color:#F9F2E7;flex-shrink:0;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:background .16s,border-color .16s,transform .1s,box-shadow .16s}
 
 @media(hover:hover) and (pointer:fine){.hdr-back:hover,.hdr-icon:hover{background:rgba(255,255,255,.2);border-color:rgba(255,255,255,.4)}}
@@ -850,8 +851,8 @@ body.dark input[type="number"]::-webkit-inner-spin-button,body.dark input[type="
 @media(min-width:381px) and (max-width:400px){.mres-row .mres-rballs{transform:translateX(-4px)}}
 @media(min-width:700px){#mres-ov.model-rows-long .if-sheet{height:92dvh}}
 
-body[data-game] :is(.rb[class*="rb-m-"],.dball[class$="-m"],.mb:not([class*="miss-"])[class$="-m"],.hball[class$="-m"],.sg-cball[class$="-m"],.if-rball[class*="rb-m-"],.if-ball[class*="rb-m-"],.nb[class*="sm-"],.binp[class*="fm-"]){--ball:var(--gm);--ball-hi:var(--gm-hi);--ball-lo:var(--gm-lo);color:var(--gm-txt);text-shadow:0 1px 2px rgba(0,0,0,.34)}
-body[data-game] :is(.rb[class*="rb-b-"],.dball[class$="-b"],.mb:not([class*="miss-"])[class$="-b"],.hball[class$="-b"],.sg-cball[class$="-b"],.if-rball[class*="rb-b-"],.if-ball[class*="rb-b-"],.nb[class*="sb-"],.binp[class*="fb-"]){--ball:var(--gb);--ball-hi:var(--gb-hi);--ball-lo:var(--gb-lo);color:var(--gb-txt);text-shadow:0 1px 2px rgba(0,0,0,.28)}
+body[data-game] :is(.rb[class*="rb-m-"],.dball[class$="-m"],.mb:not([class*="miss-"])[class$="-m"],.hball[class$="-m"],.sg-cball[class$="-m"],.if-rball[class*="rb-m-"],.if-ball[class*="rb-m-"],.nb[class*="sm-"],.binp[class*="fm-"]){--ball:var(--gm);--ball-hi:var(--gm-hi);--ball-lo:var(--gm-lo);color:var(--gm-txt);text-shadow:0 1px 2px rgba(0,0,0,.34);--ring-mark:var(--gm-mark,var(--gold));--ring-new:var(--gm-new,#37d67a);--ring-hit:var(--gm-hit,#2fb894)}
+body[data-game] :is(.rb[class*="rb-b-"],.dball[class$="-b"],.mb:not([class*="miss-"])[class$="-b"],.hball[class$="-b"],.sg-cball[class$="-b"],.if-rball[class*="rb-b-"],.if-ball[class*="rb-b-"],.nb[class*="sb-"],.binp[class*="fb-"]){--ball:var(--gb);--ball-hi:var(--gb-hi);--ball-lo:var(--gb-lo);color:var(--gb-txt);text-shadow:0 1px 2px rgba(0,0,0,.28);--ring-mark:var(--gb-mark,var(--gold));--ring-new:var(--gb-new,#37d67a);--ring-hit:var(--gb-hit,#2fb894)}
 body[data-game="powerball"] :is(.rb[class*="rb-m-"],.dball[class$="-m"],.mb[class$="-m"],.hball[class$="-m"],.sg-cball[class$="-m"],.if-rball[class*="rb-m-"],.if-ball[class*="rb-m-"],.nb[class*="sm-"]),body[data-game="mega"] :is(.rb[class*="rb-m-"],.dball[class$="-m"],.mb[class$="-m"],.hball[class$="-m"],.sg-cball[class$="-m"],.if-rball[class*="rb-m-"],.if-ball[class*="rb-m-"],.nb[class*="sm-"]){text-shadow:none}
 body[data-game] .qa-ball.bonus{color:var(--gb-txt);background:radial-gradient(circle at 32% 26%,var(--gb-hi),var(--gb) 58%,var(--gb-lo))!important;text-shadow:0 1px 2px rgba(0,0,0,.3)}
 .if-rowexp{font-size:13.5px;color:var(--sub2);line-height:1.55}
@@ -1790,8 +1791,13 @@ body :is(.if-sheet,.sg-sheet,.lang-box,.horo-sheet,.pro-sheet,.fb-box,.cc-box,.c
 .ct-ball{width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;border:0;padding:0;margin:0;flex:0 0 auto}
 button.ct-ball{cursor:pointer;min-width:44px;min-height:44px}
 .ct-ball-s{width:32px;height:32px;font-size:13px}
-.ct-ball-mark{box-shadow:0 0 0 3px var(--gold)}
-.ct-ball-new{box-shadow:0 0 0 3px #37d67a}
+
+.ct-ball{--ct-ring:0 0 #0000;--ct-glow:0 0 #0000;box-shadow:var(--ct-ring),var(--ct-glow),var(--ball-shadow)}
+.ct-ball-mark,.ct-ball-new,.ct-ball.ld-hit{margin:3px}
+.ct-ball-mark{--ct-ring:0 0 0 2px var(--bg2),0 0 0 5px var(--ring-mark)}
+.ct-ball-new{--ct-ring:0 0 0 2px var(--bg2),0 0 0 5px var(--ring-new)}
+.ct-ball.ld-hit{--ct-glow:0 0 0 2px var(--bg2),0 0 0 5px var(--ring-hit)}
+.ct-ball.ld-hit:is(.ct-ball-mark,.ct-ball-new){--ct-glow:0 0 10px 4px var(--ring-hit)}
 .ct-arrow{font-weight:900;color:var(--sub2)}
 .ct-sep{width:6px}
 .ct-source{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--sub2)}
@@ -3753,26 +3759,26 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
 
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=98a6525"></script>
-<script src="./commercial-config.js?v=98a6525"></script>
-<script src="./event-runtime.js?v=98a6525"></script>
-<script src="./external-link-runtime.js?v=98a6525"></script>
-<script src="./auth-client.js?v=98a6525"></script>
-<script src="./native-loader.js?v=98a6525"></script>
-<script src="./billing-web.js?v=98a6525"></script>
-<script src="./i18n-catalog.js?v=98a6525"></script>
-<script src="./lang-detect.js?v=98a6525"></script>
-<script src="./i18n-runtime.js?v=98a6525"></script>
-<script src="./consent-runtime.js?v=98a6525"></script>
-<script src="./analytics-telemetry.js?v=98a6525"></script>
-<script src="./ga4-runtime.js?v=98a6525"></script>
-<script src="./win-match-core.js?v=98a6525"></script>
-<script src="./court-core.js?v=98a6525"></script>
-<script src="./smart-start.js?v=98a6525"></script>
-<script src="./app-runtime.js?v=98a6525"></script>
-<script src="./inline-runtime-2.js?v=98a6525"></script>
-<script src="./commercial-runtime.js?v=98a6525"></script>
-<script src="./inline-runtime-3.js?v=98a6525"></script>
+<script src="./version.js?v=5c6b7ec"></script>
+<script src="./commercial-config.js?v=5c6b7ec"></script>
+<script src="./event-runtime.js?v=5c6b7ec"></script>
+<script src="./external-link-runtime.js?v=5c6b7ec"></script>
+<script src="./auth-client.js?v=5c6b7ec"></script>
+<script src="./native-loader.js?v=5c6b7ec"></script>
+<script src="./billing-web.js?v=5c6b7ec"></script>
+<script src="./i18n-catalog.js?v=5c6b7ec"></script>
+<script src="./lang-detect.js?v=5c6b7ec"></script>
+<script src="./i18n-runtime.js?v=5c6b7ec"></script>
+<script src="./consent-runtime.js?v=5c6b7ec"></script>
+<script src="./analytics-telemetry.js?v=5c6b7ec"></script>
+<script src="./ga4-runtime.js?v=5c6b7ec"></script>
+<script src="./win-match-core.js?v=5c6b7ec"></script>
+<script src="./court-core.js?v=5c6b7ec"></script>
+<script src="./smart-start.js?v=5c6b7ec"></script>
+<script src="./app-runtime.js?v=5c6b7ec"></script>
+<script src="./inline-runtime-2.js?v=5c6b7ec"></script>
+<script src="./commercial-runtime.js?v=5c6b7ec"></script>
+<script src="./inline-runtime-3.js?v=5c6b7ec"></script>
 <style id="lnc-styles">
 
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3924,15 +3930,15 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=98a6525"></script>
-<script src="./notifications-runtime.js?v=98a6525"></script>
-<script src="./pwa-runtime.js?v=98a6525"></script>
+<script src="./notification-center.js?v=5c6b7ec"></script>
+<script src="./notifications-runtime.js?v=5c6b7ec"></script>
+<script src="./pwa-runtime.js?v=5c6b7ec"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
 
-<script src="./inline-runtime-4.js?v=98a6525"></script>
-<script src="./inline-runtime-5.js?v=98a6525"></script>
-<script src="./inline-runtime-6.js?v=98a6525"></script>
+<script src="./inline-runtime-4.js?v=5c6b7ec"></script>
+<script src="./inline-runtime-5.js?v=5c6b7ec"></script>
+<script src="./inline-runtime-6.js?v=5c6b7ec"></script>
 </body>
 </html>
