@@ -56,10 +56,17 @@
   }
 
   // Программная точка входа: то же правило для кода, который раньше звал window.open(...,'_blank').
+  // false = not opened (foreign scheme or a blocked popup).
   function open(href){
     const url=parseUrl(href);
     if(!url||!NAVIGABLE.has(url.protocol))return false;
-    if(!isNative()){window.open(url.href,'_blank','noopener');return true;}
+    if(!isNative()){
+      // No 'noopener' (it makes window.open return null always); the opener is cut right away.
+      const win=window.open(url.href,'_blank');
+      if(!win)return false;
+      try{win.opener=null;}catch(_error){}
+      return true;
+    }
     window.location.assign(nativeHref(url));
     return true;
   }

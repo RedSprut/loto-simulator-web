@@ -1,7 +1,3 @@
-/* Mobile scroll-state controller — one passive, rAF-batched window scroll
-   listener drives header collapse/hide via classes on <html>. The bottom nav
-   intentionally keeps the 3D-draw dock geometry on Simulator/Analytics and does
-   not compact on scroll. Width-gated (max-width:699px); a no-op on desktop. */
 (function () {
   var doc = document.documentElement;
   var mobileQuery = window.matchMedia('(max-width:699px)');

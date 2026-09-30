@@ -1,6 +1,3 @@
-/* All math-model dialogs keep their close affordance inside the modal card.
-   It is the first sticky child of the card's own scroller, so it remains in the
-   top-right corner while the user swipes long model/Judge results. */
 (function(){
   const MODAL_CLOSES={
     'sg-ov':()=>window.closeSG?.(),

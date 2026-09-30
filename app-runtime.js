@@ -1,6 +1,3 @@
-// ═══════════════════════════════════════════════
-//  DATA
-// ═══════════════════════════════════════════════
 const LOTTERY_CONFIG={
   powerball:{name:'Powerball',range:{min:1,max:69},ballCount:5,extraBall:{count:1,range:{min:1,max:26}}},
   megaMillions:{name:'Mega Millions',range:{min:1,max:70},ballCount:5,extraBall:{count:1,range:{min:1,max:24}}},
@@ -11,9 +8,6 @@ const LOTTERY_CONFIG={
   lottoMax:{name:'Lotto Max',range:{min:1,max:52},ballCount:7,extraBall:{count:1,range:{min:1,max:52}}},
   powerballAustralia:{name:'Powerball Australia',range:{min:1,max:35},ballCount:7,extraBall:{count:1,range:{min:1,max:20}}}
 };
-// Canonical (results/backend) id → app id, for ALL nine games. Norsk Lotto's ids coincide, and it
-// was once left out: resolveConfigKey('lotto') gave null, so its FREE history limit read as 0,
-// analytics filed Lotto under the previous game and the owner filter listed eight lotteries.
 const LOTTERY_APP_KEYS={
   lotto:'lotto',
   powerball:'powerball',
@@ -26,13 +20,7 @@ const LOTTERY_APP_KEYS={
   powerballAustralia:'powerballau'
 };
 const APP_LOTTERY_KEYS=Object.fromEntries(Object.entries(LOTTERY_APP_KEYS).map(([configKey,appKey])=>[appKey,configKey]));
-try{window.LOTO_APP_LOTTERY_KEYS=APP_LOTTERY_KEYS;}catch(_e){} // owner analytics: map app key → canonical lottery id
-// Native apps (iOS/Android via Capacitor) bundle a static results/prizes snapshot at
-// build time, so without this they show whatever was frozen at the last store build.
-// The web build stays fresh because its same-origin results.json is republished by the
-// results pipeline. To give native the same auto-update, fetch the published data over
-// the network on native (Pages serves it with Access-Control-Allow-Origin: *), and fall
-// back to the bundled copy when offline. Web is unchanged (same-origin, already fresh).
+try{window.LOTO_APP_LOTTERY_KEYS=APP_LOTTERY_KEYS;}catch(_e){}  
 const IS_NATIVE_APP=(()=>{try{return !!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());}catch(_e){return false;}})();
 const NATIVE_DATA_BASE=String(window.LOTO_COMMERCIAL_CONFIG?.nativeDataBaseUrl||'https://lottosimulator.app/').replace(/\/*$/,'/');
 function resolveControlledResultsEndpoint(fallback){
@@ -46,15 +34,10 @@ function resolveControlledResultsEndpoint(fallback){
 }
 const RESULTS_JSON_URL=resolveControlledResultsEndpoint(IS_NATIVE_APP?`${NATIVE_DATA_BASE}results.json`:'./results.json');
 const RESULTS_ARCHIVE_URL='./results-archive.json';
-/* The 10 MB archive package is served only where it physically exists (repo checkout, native bundle
-   when included). The public web deploy never publishes it (deploy-pages.yml asserts so), yet every
-   cold visit fetched it and logged a 404. build-public-bundle.mjs stamps this to false. */
 const RESULTS_ARCHIVE_PUBLISHED=false;
 const PRIZES_JSON_URL=IS_NATIVE_APP?`${NATIVE_DATA_BASE}prizes.json`:'./prizes.json';
-const RESULTS_JSON_BUNDLED='./results.json';   // offline fallback for native
-const PRIZES_JSON_BUNDLED='./prizes.json';     // offline fallback for native
-// Jackpot/draw metadata comes from the same remote pipeline (Pages) on native, so all
-// four surfaces show identical fresh jackpots; the bundled copy is the offline fallback.
+const RESULTS_JSON_BUNDLED='./results.json';    
+const PRIZES_JSON_BUNDLED='./prizes.json';      
 const JACKPOTS_JSON_URL=IS_NATIVE_APP?`${NATIVE_DATA_BASE}jackpots.json`:'./jackpots.json';
 const JACKPOTS_JSON_BUNDLED='./jackpots.json';
 let resultsJsonCache=null;
@@ -123,9 +106,6 @@ function normalizeResultDraw(draw){
     sourceUrl:draw.sourceUrl||'',
     isUserOwned:draw.isUserOwned===true||!String(draw.source||'').trim(),
     drawId:draw.drawId??null,
-    // The operator's own draw label ("LOTTO-19.09.2026 18:30") is the ONLY trustworthy source of
-    // a real draw TIME, and it genuinely changes when the operator moves the draw. Calendar
-    // Analysis reads the time from here; games whose feed has no time simply never get one.
     drawName:draw.drawName||'',
     ruleVersion:draw.ruleVersion||'',
     ruleEra:draw.ruleEra||'',
@@ -148,7 +128,6 @@ async function fetchResultsJson(url=RESULTS_JSON_URL){
       if(!res.ok)throw new Error(`${url.split('/').pop()} HTTP ${res.status}`);
       data=await res.json();
     }catch(err){
-      // Native offline: a failed remote results fetch falls back to the bundled snapshot.
       if(IS_NATIVE_APP&&url===RESULTS_JSON_URL){
         const fb=await fetch(RESULTS_JSON_BUNDLED,{cache:'no-store'});
         if(!fb.ok)throw err;
@@ -195,7 +174,6 @@ async function loadPublicPrizes(gameKey){
       if(!res.ok)throw new Error(`prizes.json HTTP ${res.status}`);
       prizesJsonCache=await res.json();
     }catch(err){
-      // Native offline: fall back to the bundled prizes snapshot.
       if(IS_NATIVE_APP&&PRIZES_JSON_URL!==PRIZES_JSON_BUNDLED){
         const fb=await fetch(PRIZES_JSON_BUNDLED,{cache:'no-store'});
         if(!fb.ok)throw err;
@@ -220,10 +198,6 @@ function ruleEraForDraw(draw,eras=[]){
     ||eras.find(era=>draw.date>=era.from&&(!era.to||draw.date<=era.to))
     ||null;
 }
-/* «Вся история» for statistics and models: every draw whose era used today's MAIN rule (count +
-   range), its extras kept only when that era's extra groups were today's too — a 1–15 Mega Ball is
-   not a 1–24 one, a 5/59 Powerball row is not a 5/69 row. Same rule as eraComparability() in
-   supabase/functions/_shared/rule-registry.js, over the eras it publishes (tests/era-comparability.mjs). */
 function comparableHistory(draws,eras){
   const list=Array.isArray(draws)?draws:[],current=(eras||[]).find(era=>era.current||!era.to);
   if(!current)return list;
@@ -242,11 +216,6 @@ async function loadFullHistory(gameKey){
   if(analyticsHistoryCache.has(cacheKey)){
     try{
       const cachedPack=await analyticsHistoryCache.get(cacheKey);
-      /* A pack cached as FREE/restricted BEFORE PRO resolved must not stick once PRO is active.
-         This is why EuroJackpot (the default game, whose history loads at startup — potentially
-         before the backend confirms PRO) stayed on the FREE Period-Analysis table under active
-         PRO: the initial access resolution never cleared its cached restricted pack. Drop it and
-         fall through to reload the full archive; otherwise return the cache unchanged. */
       if(!(window.LotoCommercial?.access?.accessLevel==='pro' && cachedPack && cachedPack.restricted)) return cachedPack;
       analyticsHistoryCache.delete(cacheKey);analyticsHistoryReady.delete(cacheKey);
     }catch(_e){analyticsHistoryCache.delete(cacheKey);analyticsHistoryReady.delete(cacheKey);}
@@ -284,30 +253,15 @@ async function loadAnalyticsDraws(gameKey){
 function clearAnalyticsHistoryCache(){analyticsHistoryCache.clear();analyticsHistoryReady.clear();}
 window.addEventListener('loto:accesschange',event=>{
   const next=event.detail?.access?.accessLevel||'free';
-  /* Clear on the INITIAL resolution too (analyticsAccessLevel starts ''): the first free→pro
-     event must drop any history cached before PRO was confirmed, else EuroJackpot (default game)
-     keeps its pre-PRO restricted pack. */
   if(analyticsAccessLevel!==next)clearAnalyticsHistoryCache();
   analyticsAccessLevel=next;
-  /* Ticket rows covered by the FREE group-analysis limit («Доступно в PRO») unlock as soon as PRO is confirmed. */
   if(next==='pro'&&groupAnalysisState.active){clearGroupAnalysisState();try{renderSim();}catch(_g){}}
-  /* The FIRST time PRO is confirmed on this device, drop any FREE-era Period-Analysis settings
-     (saved scope / window / range) so every one of the 9 lotteries opens on the PRO default
-     «Вся история» (scope 'all'). A stale saved 'free'/'current'/last-N/date-range must NOT
-     override the PRO default at first open. One-time (flagged): the user's own PRO choices
-     afterwards persist normally. */
   if(next==='pro'){try{
     if(!localStorage.getItem('loto_pro_period_reset_v1')){
       Object.keys(localStorage).forEach(k=>{if(k==='loto_win'||k==='loto_range'||k.indexOf('loto_period_scope_')===0)localStorage.removeItem(k);});
       localStorage.setItem('loto_pro_period_reset_v1','1');
       try{IF_state=null;}catch(_i){}
     }
-    /* A period label built BEFORE PRO resolved shows the FREE/'current' fallback from a restricted
-       pack (e.g. «Текущие правила · 30»). Now that PRO is confirmed, re-render it: the cache was
-       just cleared, so IF_baseDraws reloads the full archive and the label flips to the PRO default
-       «Вся история · N». Fire-and-forget; a no-op if the generator isn't mounted yet. */
-    /* Async: a failed/cancelled archive load must not surface as an unhandled rejection; the label
-       simply keeps its previous text until the next refresh. */
     try{if(typeof PERIOD_refreshLabel==='function')PERIOD_refreshLabel().catch(()=>{});}catch(_r){}
   }catch(_e){}}
 });
@@ -362,9 +316,6 @@ let groupAnalysisState={active:false,limit:0,total:0};
 function hasConfirmedPro(){
   try{return window.LotoCommercial?.access?.accessLevel==='pro';}catch(e){return false;}
 }
-// Shared async-state renderer: one branded look (⏳ + lottery name) for loading, plus
-// error / offline states with Retry. Lets every data section distinguish loading from empty
-// instead of flashing an "empty" placeholder while the first fetch is still in flight.
 const LotoState={
   _tpl(cls,ico,title,sub,retry){
     const btn=retry?`<button type="button" class="lstate-retry" data-i18n-ignore>${escapeHtml(appText('Повторить'))}</button>`:'';
@@ -386,10 +337,6 @@ const LotoState={
   },
 };
 
-// ── Draws-database loading gate ────────────────────────────────────────────
-// This gate is analytics-only. It opens synchronously before the analytics page can paint,
-// then waits for the real auth/access state, every protected archive page, state hydration and
-// a complete render of every analytics section. There is deliberately no time-based escape.
 (function(){
   const el=document.getElementById('db-loading');if(!el)return;
   const page=document.getElementById('pg-ana');
@@ -425,16 +372,16 @@ const LotoState={
     try{
       const commercial=window.LotoCommercial;
       if(!commercial||typeof commercial.whenReady!=='function')throw new Error('commercial_runtime_unavailable');
-      await commercial.whenReady();                         // auth bootstrap has completed
-      await commercial.refreshAccess({strict:true});        // authoritative PRO/access check
+      await commercial.whenReady();                          
+      await commercial.refreshAccess({strict:true});         
       const isPro=commercial.access?.accessLevel==='pro';
       setText(isPro?'Загрузка полной базы тиражей':'Загрузка доступной базы тиражей',
         isPro?'Пожалуйста, подождите. Идёт загрузка полной базы тиражей.':'Пожалуйста, подождите. Идёт загрузка доступной базы тиражей.');
-      const pack=await loadFullHistory(game,{force});        // every API page + state write
+      const pack=await loadFullHistory(game,{force});         
       if(!pack||!Array.isArray(pack.draws)||!pack.draws.length)throw new Error('empty_history');
       if(commercial.access?.accessLevel==='pro'&&pack.restricted)throw new Error('pro_archive_restricted');
       if(myGeneration!==generation||activeGame!==game)return false;
-      await renderCompleteAnalytics();                       // all analytics surfaces are current
+      await renderCompleteAnalytics();                        
       if(myGeneration!==generation||activeGame!==game)return false;
       hide();return true;
     }catch(error){if(myGeneration===generation)showError(error);return false;}
@@ -473,7 +420,7 @@ const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({
 })[char]);
 const KEY=id=>'loto_private_draws_v2_'+id;
 const FAV_KEY=()=>'favs';
-const ROI_KEY=()=>'loto_roi_'+cur; // ROI stays personal (per-device, not shared)
+const ROI_KEY=()=>'loto_roi_'+cur;  
 function getBackendActionContext(){
   const l=L();
   let pool=[...(wheelPools[cur]||[])];
@@ -522,10 +469,6 @@ function renderBackendJudge(result,mountId,target,handlers){
     };
   }).filter(item=>item.orig.length===l.pM).sort((a,b)=>a.index-b.index).map(({index,...item})=>item);
   if(!plan.length){mount.innerHTML='<div class="if-empty">⚖️ Backend не вернул допустимых рядов для судьи.</div>';return false;}
-  // Recommendation mode (the Judge reviewed its OWN drafts): its replacements are its own
-  // decisions, not a proposal to the user. Apply them and show the finished rows — the Judge
-  // never publishes an argument with itself. Interactive swaps stay in analysis mode, where the
-  // rows belong to the user.
   if(handlers?.finalize||target?.finalize){
     const finalRows=plan.map(item=>{
       item.swaps.forEach(swap=>{swap.apply=true;});
@@ -547,7 +490,6 @@ function renderBackendJudge(result,mountId,target,handlers){
     applyLabel:handlers?.applyLabel||target?.applyLabel||'',
     onApply:handlers?.onApply||defaultApply
   };
-  // Fail-closed: a structural verdict must never be shown for zero drawn history.
   if(!(JUDGE_state[ns].drawsN>0)){mount.innerHTML='<div class="if-empty">⚖️ Анализ невозможен: история тиражей не загружена. Обновите официальные результаты.</div>';return false;}
   JUDGE_render(ns);
   const resultOverlay=mount.closest?.('[id$="-ov"]');
@@ -556,9 +498,6 @@ function renderBackendJudge(result,mountId,target,handlers){
   mount.scrollIntoView?.({behavior:'smooth',block:'nearest'});
   return true;
 }
-// Result modal for math-model generations: shows the generated rows and lets the
-// user either apply them to the main screen or send exactly these rows to the
-// existing Верховный судья (Judge), which keeps its own per-feature access budget.
 const MODEL_LABELS={freq:'горячие числа',bal:'комбинированный анализ',man:'сегментный охват',rnd:'pure random',markov:'цепи Маркова',gauss:'Гаусс · ЦПТ',delta:'интервальная модель Δ',bayes:'Байес · Дирихле',overdue:'gap-анализ',phys:'физическая модель лототрона',chaos:'детерминированный хаос',quantum:'квантовый коллапс',paradox:'система парадоксов',consensus:'консенсус моделей',qastro:'квантово-астрологическая модель',wheel:'колёсная матрица','world-hot':'мировой горячий профиль','world-mix':'мировой комбинированный профиль'};
 const modelLabel=model=>MODEL_LABELS[model]||model||'модель';
 const MODEL_INFO_FALLBACKS={
@@ -610,15 +549,11 @@ function showModelResult(result,model){
   if(window.LotoModals)window.LotoModals.openModal('mres-ov');else document.getElementById('mres-ov')?.classList.add('show');
   return true;
 }
-// Rows of the model Result modal. Each row can be analysed on its own (court-ui.js); a decision
-// taken there updates mresRows in place and re-renders this list.
 function renderModelResultRows(){
   const cls=L().cls;const mount=document.getElementById('mres-rows');
   if(mount){
     mount.replaceChildren();
     mresRows.forEach((r,i)=>{
-      // One centred row block: label sits above the balls, left-aligned to the first
-      // ball, so label + ball group read as a single unit (see .mres-row CSS).
       const rowEl=document.createElement('div');rowEl.className='mres-row';
       const heading=document.createElement('div');heading.className='if-seclbl mres-rlabel';heading.textContent='Ряд '+(i+1);
       const balls=document.createElement('div');balls.className='if-rowballs mres-rballs';
@@ -692,8 +627,6 @@ function renderBackendWorldAnalysis(analysis,targetId='world-analysis-out'){
   return true;
 }
 
-// ─── SHARED STORAGE (draws + favorites — visible to everyone with the link) ───
-// Timeout wrapper: prevents storage calls from hanging forever and freezing the UI
 function withTimeout(promise,ms=5000){
   return Promise.race([
     promise,
@@ -707,7 +640,7 @@ function storageScopeText(){return hasSharedStorage()?'Данные доступ
 async function storageGet(key,shared=true){
   if(hasSharedStorage()){
     try{ return await window.storage.get(key,shared); }
-    catch(e){ return null; } /* ключа ещё нет (первый запуск) — это не ошибка */
+    catch(e){ return null; }  
   }
   const value=localStorage.getItem(key);
   return value===null?null:{value};
@@ -717,8 +650,6 @@ function storageSet(key,value,shared=true){
   localStorage.setItem(key,value);
   return Promise.resolve(true);
 }
-// Removing a record. A shared-storage host is only required to provide get/set, so when it offers
-// no removal the record is emptied instead — readers treat an empty value as absent.
 function storageDrop(key,shared=true){
   if(hasSharedStorage()){
     const remove=window.storage.remove||window.storage.delete;
@@ -741,7 +672,7 @@ async function loadD(id){
 }
 async function saveD(id,arr){
   analyticsHistoryCache.delete(resolveConfigKey(id)||id);analyticsHistoryReady.delete(resolveConfigKey(id)||id);
-  drawsCache[id]=arr; // optimistic local update so UI never freezes
+  drawsCache[id]=arr;  
   try{ await withTimeout(storageSet(KEY(id),JSON.stringify(arr),true)); }
   catch(e){ console.error('Storage save failed',e); showFeedback('Не сохранилось в общую базу','Таймаут хранилища. Данные остались только на этом экране; перезагрузка может их сбросить.','⚠️',4200); }
 }
@@ -773,30 +704,13 @@ async function saveFavs(arr){
   catch(e){ console.error('Storage save failed',e); showFeedback('Избранное не сохранилось','Хранилище ответило таймаутом. Попробуйте ещё раз через несколько секунд.','⚠️',3800); }
 }
 
-// ─── TICKET PERSISTENCE (same storage layer as the draw database and favourites) ───
-// A combination and its analysis are ONE object: the row carries its provenance (source, every
-// decision, every rollback, review status), and next to it lives the working state of its review
-// (jury votes and proposals, defense and judge results, the pending queue). Both go into ONE
-// per-game record through the app's existing storage primitive, so a reload continues exactly
-// where the user stopped. There is no second history: the decisions are read back out of the
-// provenance, exactly as they are in memory. A ticket saved before this existed simply has no
-// record — nothing about it is invented.
 const TICKET_KEY=game=>'ticket_'+(game||cur);
 const TICKET_MAX_CHARS=250000;
-// ── One case per combination ─────────────────────────────────────────────────────────────
-// Every reviewed row keeps its own stored record. They used to live together inside the ticket
-// record, and a fully reviewed row weighs ~27 KB of per-persona evidence: the ninth one took the
-// shared record to the 250 000-char cap, and the overflow path then stripped the evidence out of
-// EVERY row at once and went on to delete whole reviews. One row's growth must never cost another
-// row its case, so each one is written on its own, under its own key, with its own budget. The
-// ticket record keeps the rows and the index of those keys, and stays a few KB whatever happens.
 const COURT_RECORD_KEY=(game,key)=>'court1_'+(game||cur)+'_'+encodeURIComponent(key);
-// A single case that will not fit even alone loses its own evidence — never anyone else's.
 const COURT_RECORD_MAX_CHARS=200000;
 const COURT_SESSION_MAX=MAX_ROWS;
 let courtSessions=Object.create(null);
 let ticketGeneration=0,ticketSaveTimer=0,ticketSaveReady=false;
-// Which cases are dirty, and which have been dropped, since the last write.
 let courtDirty=new Set(),courtRemoved=new Set(),courtSaveTimer=0;
 function courtSessionsTrim(store,forget){
   const keys=Object.keys(store);
@@ -813,9 +727,6 @@ function ticketRowSnapshot(row){
   if(Array.isArray(row.provPrev)&&row.provPrev.length)out.provPrev=row.provPrev;
   return out;
 }
-// Storage is finite and the server's per-persona evidence is by far the biggest part of a saved
-// session. When the record does not fit, the evidence goes first, then the sessions — the rows
-// and their provenance are never dropped, because that is the part that cannot be recomputed.
 function slimEvaluation(evaluation){
   if(!evaluation||typeof evaluation!=='object')return evaluation;
   const {metrics,sources,...rest}=evaluation;
@@ -830,21 +741,15 @@ function slimCourtSession(value){
   }
   return copy;
 }
-// One case, serialised. Only this case's own evidence is given up when it will not fit, and the
-// votes, the aggregate and the decisions on it are kept whatever happens.
 function courtRecordPayload(value){
   let text=JSON.stringify(value);
   if(text.length<=COURT_RECORD_MAX_CHARS)return text;
   return JSON.stringify(slimCourtSession(value));
 }
-// The ticket record: the rows, and the index of the cases that belong to them. Court evidence is
-// NOT in here, so this can no longer be pushed over its cap by a review.
 function ticketPayload(){
   const base={v:1,at:Date.now(),act,rows:rows.map(ticketRowSnapshot),sessionKeys:Object.keys(courtSessions)};
   let text=JSON.stringify(base);
   if(text.length<=TICKET_MAX_CHARS)return text;
-  // Nothing here is recomputable except the provenance chain a row carried before its last manual
-  // edit, so that is what goes first.
   text=JSON.stringify({...base,rows:base.rows.map(({provPrev,...rest})=>rest)});
   return text;
 }
@@ -853,13 +758,10 @@ function scheduleTicketSave(){
   clearTimeout(ticketSaveTimer);
   const game=cur;
   ticketSaveTimer=setTimeout(()=>{
-    // A switch to another lottery (or a restore that started meanwhile) invalidates this write:
-    // without the re-check it would save the freshly emptied ticket over the stored one.
     if(!ticketSaveReady||game!==cur)return;
     try{storageSet(TICKET_KEY(game),ticketPayload(),true).catch(()=>{});}catch(_e){}
   },300);
 }
-// Each touched case is written to its own record; a dropped one is removed from storage too.
 function writeCourtRecords(game){
   for(const key of courtDirty){
     const value=courtSessions[key];
@@ -882,8 +784,6 @@ function flushCourtRecords(){
   clearTimeout(courtSaveTimer);
   writeCourtRecords(cur);
 }
-// Applied only while the ticket is still the empty one selLot() just created: a restore must never
-// overwrite numbers the user has already typed in the moment the read took.
 function ticketIsPristine(){return rows.every(row=>!row||((row.m||[]).length===0&&(row.b||[]).length===0));}
 function restoreTicketRows(stored,l){
   const out=[];
@@ -899,9 +799,6 @@ function restoreTicketRows(stored,l){
   }
   return out;
 }
-// Read back every case this ticket lists, each from its own record, in parallel. A record written
-// by an older build still lives inside the ticket record; it is adopted here and written out on
-// its own from the next save, so nothing a user already has is lost.
 async function loadCourtSessions(game,record){
   const store=Object.create(null);
   const embedded=record&&record.sessions&&typeof record.sessions==='object'?record.sessions:null;
@@ -937,24 +834,13 @@ async function restoreTicket(game){
     const sessions=await loadCourtSessions(game,record);
     if(generation!==ticketGeneration||game!==cur)return;
     courtSessions=courtSessionsTrim(sessions);
-    // A case adopted from an older ticket record has no record of its own yet.
     if(record.sessions&&typeof record.sessions==='object')for(const key of Object.keys(courtSessions))courtDirty.add(key);
     renderSim();
-    // A ticket that comes back with its first rows already analysed points at the first one that
-    // has not been touched yet.
     try{focusFirstUntouchedRow();}catch(_e){}
   }
   ticketSaveReady=true;
-  // A ticket written by an older build carries its cases inside itself. Each one gets its own
-  // record NOW, not on a debounce: the ticket record is rewritten WITHOUT them the moment anything
-  // schedules a save, and a second restore would then find nothing left to adopt.
   if(courtDirty.size)writeCourtRecords(game);
 }
-// ONE rule for "where the user is", shared by the main screen and every court room: the first
-// complete row that has had NO court action at all. A row is untouched only when its own history
-// records no analysis (reviewStatus 'none'); being the current row, or having a saved session,
-// does not make a row reviewed and does not make it the default. Rows 1-2 settled, row 3
-// untouched and row 4 half-done therefore give row 3 — never row 4.
 function courtRowState(index){
   const ui=window.LotoCourtUI;if(!ui||typeof ui.reviewStatus!=='function')return null;
   const row=rows[index],l=L();
@@ -965,16 +851,12 @@ function firstUntouchedRowIndex(){
   for(let i=0;i<rows.length;i++)if(courtRowState(i)==='none')return i;
   return -1;
 }
-// Moving the selection is only ever a DEFAULT: it never takes the user off a row that has not
-// been touched yet, and a row picked by hand stays picked until the next time a default applies.
 function focusFirstUntouchedRow(){
   if(courtRowState(act)==='none')return false;
   const next=firstUntouchedRowIndex();
   if(next<0||next===act)return false;
   act=next;renderSim();return true;
 }
-// The open court holds the newest state of the review in memory; it writes it into courtSessions
-// here, BEFORE the record is built, so a tab that goes away never takes the last analysis with it.
 function flushTicketNow(){
   if(!ticketSaveReady)return false;
   try{if(window.LotoCourtApp&&typeof window.LotoCourtApp.flushSession==='function')window.LotoCourtApp.flushSession();}catch(_e){}
@@ -985,13 +867,9 @@ function flushTicketNow(){
 }
 window.addEventListener('pagehide',()=>{flushTicketNow();});
 
-// ─── PERSONAL STORAGE (ROI — stays only on this device) ───
 const loadROI=()=>{try{return JSON.parse(localStorage.getItem(ROI_KEY()))||{spent:0,won:0}}catch{return{spent:0,won:0}}};
 const saveROI=o=>localStorage.setItem(ROI_KEY(),JSON.stringify(o));
 
-// ═══════════════════════════════════════════════
-//  THEME
-// ═══════════════════════════════════════════════
 function initTheme(){
   const saved=localStorage.getItem('loto_theme');
   const mode=(saved==='light'||saved==='dark'||saved==='system')?saved:'system';
@@ -1018,20 +896,12 @@ function setThemePreference(mode,persist=true){
 function applyDark(){setThemePreference('dark');}
 function applyLight(){setThemePreference('light');}
 function applySystemTheme(){setThemePreference('system');}
-// The header control is a strict Light/Dark switch: every tap flips the theme the user SEES
-// (🌓 in light, 🌞 in dark). Until the first tap the app stays in system mode and follows the OS
-// live (see initTheme's prefers-color-scheme listener).
 function toggleDark(){
   setThemePreference(document.documentElement.dataset.theme==='dark'?'light':'dark');
 }
 
-// ═══════════════════════════════════════════════
-//  PAGE
-// ═══════════════════════════════════════════════
 function selPage(p){
   curPage=p;
-  // On the Simulator home screen the round Back control is redundant (it only resets
-  // rows), so hide it there and let the logo sit far-left with the bell beside it.
   try{document.documentElement.classList.toggle('on-sim',p==='sim');}catch(e){}
   try{document.documentElement.classList.toggle('on-ana',p==='ana');}catch(e){}
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('show'));
@@ -1047,7 +917,6 @@ function selPage(p){
   }
   else{updateHdr();}
 }
-/* Keyboard: the bottom bar items are role=button divs, so Enter/Space must activate them. */
 document.addEventListener('keydown',e=>{
   if(e.key!=='Enter'&&e.key!==' ')return;
   const item=e.target&&e.target.closest&&e.target.closest('.bnav .bn[data-route]');
@@ -1064,7 +933,6 @@ function bottomNavRoute(p){
   }
   selPage(p);
 }
-// The header logo is a Home link on Analytics only; on the Simulator it stays inert.
 function logoHome(){if(curPage==='ana')handleBack();}
 async function handleBack(){
   if(window.LotoAnalyticsGate?.blocking)return;
@@ -1072,9 +940,6 @@ async function handleBack(){
   else if(await customConfirm('Сбросить ряды?')){initRows();renderSim();resetBanner();}
 }
 
-// ═══════════════════════════════════════════════
-//  LOT SELECT
-// ═══════════════════════════════════════════════
 function formatPrice(l){
   if(!l.price)return '—';
   return `${l.price} ${l.currency||'NOK'}`;
@@ -1202,12 +1067,6 @@ function initLottery(gameKey){
   smartStartRecord(id,prev);
   return{gameKey:id,config:getLotteryConfig(id),rules:LOTS[id]};
 }
-/* ═══ SMART START: the lottery the app opens on (rules + weights live in smart-start.js) ═══
-   Behaviour = only lotteries the USER switches to (tabs, schedule strip, the drum's own switcher).
-   Re-tapping the lottery already open is not a choice, and the start-up pick, notification opens and
-   deep links go through selLot() and are never recorded — otherwise the app would teach itself its
-   own guesses. localStorage, so guests and signed-in users alike keep it across launches; sign-out
-   does not touch it. */
 const SMART_START_SESSION=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 function smartStartRecord(id,prev){
   try{
@@ -1215,9 +1074,6 @@ function smartStartRecord(id,prev){
     if(S&&LOTS[id]&&id!==prev)S.save(localStorage,S.recordPick(S.load(localStorage),id,Date.now(),SMART_START_SESSION));
   }catch(e){}
 }
-/* An explicitly requested game: ?game=<id> (or ?lottery=), a web-push cold start (?n_dest=…&n_lot=…),
-   or lotosimulator://game/<id> stashed by the native bridge before this script ran. `game`/`lottery`
-   are one-shot and removed from the address bar; the n_* parameters stay for NOTIF_consumeUrlDeepLink. */
 function smartStartExplicitGame(){
   let id=null;
   try{
@@ -1240,25 +1096,18 @@ function smartStartGame(){
     if(!S)return explicit||'euro';
     let timeZone='';try{timeZone=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}
     let picks=null;try{picks=S.load(localStorage);}catch(e){}
-    // The lotteries the user chose to follow (notification settings, synced for signed-in users):
-    // [] = all and ['__none__'] = none carry no preference; only a real subset narrows the choice.
     let interests=[];try{const p=JSON.parse(localStorage.getItem('loto_notif_prefs_v1')||'null');if(p&&Array.isArray(p.selected_lotteries))interests=p.selected_lotteries.map(String);}catch(e){}
     const pick=S.resolve({ids:Object.keys(LOTS),explicit,history:picks,interests,timeZone,now:Date.now(),
       deadlineAfter:(id,at)=>nextDraw(id,new Date(at)).date.getTime()});
-    window.__lotoSmartStart=pick;   // read-only diagnostics: {game, reason, region}
+    window.__lotoSmartStart=pick;    
     return pick.game;
   }catch(e){return explicit||'euro';}
 }
-/* A game link that arrives while the app is already running (native appUrlOpen). */
 window.addEventListener('loto:open-game',e=>{
   const id=resolveGameKey(e&&e.detail&&e.detail.game);
   window.__lotoPendingGameLink=null;
   if(id)revealUpcomingDraw(id);
 });
-/* ═══ ГЕРОЙСКИЙ БАННЕР: джекпоты только из единого jackpots.json ═══ */
-/* Jackpot/draw metadata from the ONE remote pipeline (jackpots.json). Native reads it
-   from the Pages URL (fresh online), falls back to the bundled copy + last cache when
-   offline. Web reads same-origin. No client-side scraping of lottery sites. */
 async function fetchJackpots(){
   const now=Date.now(),bust='?t='+Math.floor(now/300000);
   try{
@@ -1273,14 +1122,6 @@ async function getJackpot(id){
   const j=await fetchJackpots();
   const e=j&&j.values&&j.values[id];
   if(!e)return{status:'unavailable',validForNext:false};
-  /* Client CORRECTNESS gate (items 4 & 5) — the file's own `status` is NOT trusted to
-     decide display. The stored amount is shown as the NEXT jackpot ONLY when BOTH hold:
-       (a) it is labelled for the SAME upcoming draw the client is counting down to
-           (e.nextDrawDate === the locally-computed next-draw date), AND
-       (b) it was fetched AFTER the last completed draw (sourceUpdatedAt > last-draw time).
-     This makes a fresh-LOOKING file carrying a stale amount (e.g. a pre-draw cap that
-     survived its draw) fail closed: the amount is demoted to "last confirmed" or hidden.
-     'updating' therefore never auto-shows a saved amount — it must still pass (a)+(b). */
   let validForNext=false,updatedAfterNext=false;
   try{
     const l=LOTS[id];
@@ -1299,15 +1140,8 @@ async function getJackpot(id){
       }
     }
   }catch(_){}
-  /* Demote anything that fails the gate: keep a real amount visible as last-confirmed
-     (rollover-confirmed if it was re-fetched after the passed draw), else unavailable. */
   let status=e.status||'unavailable';
   if(!validForNext)status=e.amount?(updatedAfterNext?'rollover-confirmed':'last-confirmed'):'unavailable';
-  /* The amount is a number of MILLIONS in the source currency. It is shown in the app's one
-     jackpot format («$313 млн», «Ca. 735 млн NOK» — the unit is explicit, never a bare number
-     that could pass for 313 dollars). The source's own qualifier («Ca.» ≈ estimate prefix,
-     «ESTIMATED») and the source name stay as context; the source's unit/currency words
-     («MILLION», «MILLIONER NOK») are replaced by the formatted amount itself. */
   const currency=e.cur||e.currency||'';
   const prefix=/^[$€£]\s*$/.test(String(e.prefix||''))?'':String(e.prefix||'');
   let qualifier=String(e.sub||'').replace(/\bMILLION(?:ER|S)?\b/gi,'');
@@ -1321,10 +1155,6 @@ async function getJackpot(id){
   };
 }
 let heroToken=0;
-/* The amount line now carries the unit and the currency («Ca. 735 млн NOK», «Ca. 735 Millionen
-   NOK» once translated). Shrink the font just enough to keep it on ONE line on a phone; the
-   catalog translation lands a microtask after the text is set and the language can change later,
-   so the fit runs after both. Falls back to wrapping only below the minimum size. */
 function fitHeroPot(){
   const el=document.getElementById('hero-pot');if(!el||!el.isConnected)return;
   el.style.fontSize='';el.style.whiteSpace='nowrap';
@@ -1346,56 +1176,38 @@ async function renderHero(){
   {const _hd=document.getElementById('hero-deadline');_hd.textContent='🗓 ';const _hday=document.createElement('span');_hday.textContent=l.day;_hd.appendChild(_hday);_hd.appendChild(document.createTextNode(' · до '+scheduleTime(l)));}
   document.getElementById('hero-price').textContent='🎫 '+l.price+' '+l.currency+'/ряд';
   document.getElementById('hero-count').textContent=nd.countdown+' · '+nd.dateStr;
-  /* мгновенно: шанс, чтобы не мигало пусто */
   document.getElementById('hero-pot-lbl').textContent='Джекпот следующего тиража';
   document.getElementById('hero-pot').textContent='…';
   document.getElementById('hero-pot-sub').textContent='загружаю официальные данные';
   const jp=await getJackpot(myCur);
-  if(my!==heroToken||myCur!==cur)return; /* защита от гонки при переключении игр */
+  if(my!==heroToken||myCur!==cur)return;  
   const potLbl=document.getElementById('hero-pot-lbl'),potEl=document.getElementById('hero-pot'),potSub=document.getElementById('hero-pot-sub');
   potLbl.textContent='Джекпот следующего тиража';
   if(jp&&jp.amount&&jp.validForNext){
-    /* Official published amount VERIFIED for the NEXT draw (items 4 & 5): it is labelled
-       for the same upcoming draw the countdown targets AND was fetched after the last
-       completed draw. The date/countdown come from nextDraw(cur), so last-draw and
-       next-draw are never mixed, and a stale amount can never appear here. */
     potEl.textContent=jp.txt;
     potSub.textContent=jp.sub+(jp.offline?' · офлайн':'');
     setTimeout(fitHeroPot,0);
   }else if(jp&&(jp.status==='rollover-confirmed'||jp.status==='last-confirmed')&&jp.amount){
-    /* The draw window passed but the next-draw amount has not landed in the snapshot yet.
-       Show the last confirmed official amount with an honest label instead of the noisy,
-       recurring "updating" banner. */
     potLbl.textContent='Последняя подтверждённая сумма';
     potEl.textContent=jp.txt;
     potSub.textContent='ожидается новая официальная сумма'+(jp.sub?' · '+jp.sub:'')+(jp.offline?' · офлайн':'');
     setTimeout(fitHeroPot,0);
   }else{
-    /* No official amount available yet (operator has not published, or the source is down).
-       An honest, localized "awaiting official update" — never a permanent dash caused by a
-       stale loader. Odds are NOT a jackpot, so they are not substituted here. */
     potEl.textContent='—';
     potSub.textContent='ожидается официальное обновление';
     setTimeout(fitHeroPot,0);
   }
 }
 
-// Keep the browser chrome / iOS status-bar tint neutral. It follows the current
-// page background (light/dark), not the active lottery, so mobile Safari/Chrome
-// never paint coloured top/bottom browser areas when switching games.
 function updateThemeColor(){
   try{
     const cs=getComputedStyle(document.body);
     const bg=cs.getPropertyValue('--bg').trim();
     if(!bg)return;
-    // Root canvas (safe areas / overscroll) stays neutral on both edges.
     const root=document.documentElement.style;
     root.setProperty('--shell-top',bg);
     root.setProperty('--shell-bot',bg);
     root.setProperty('--shell-bg',bg);
-    // iOS Safari repaints this reliably only when the theme-color node itself changes;
-    // re-create it so light/dark theme switches update, while lottery switches remain
-    // neutral because `bg` is independent of body[data-game].
     document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{
       if(m.getAttribute('content')===bg&&m.dataset.dyn==='1')return;
       const next=document.createElement('meta');
@@ -1436,16 +1248,10 @@ function selLot(id){
   }
 }
 
-// ═══════════════════════════════════════════════
-//  ROWS & PICKER
-// ═══════════════════════════════════════════════
 function initRows(){rows=[nr(),nr()];act=0;}
 const nr=()=>({m:[],b:[]});
-function drawBonusCount(l){return l.pBo||0;} /* БИЛЕТ: сколько доп-чисел ОТМЕЧАЕТ ИГРОК (lotto/superenalotto/lottomax = 0) */
-function drawnBonusCount(l){return l.offBo||l.pBo||0;} /* ТИРАЖ: сколько доп-чисел ВЫТЯГИВАЕТСЯ (tillegg/jolly/bonus) */
-/* Tillegg / Jolly / Bonus: drawn but never picked, from the SAME drum after the main numbers —
-   so a drawn extra can never repeat a main number (tests/bonus-pool-rules.mjs, demo-drum registry
-   `same-main-pool`, server GAME_SPECS). Separate pools (Powerball, stars, Viking…) may coincide. */
+function drawBonusCount(l){return l.pBo||0;}  
+function drawnBonusCount(l){return l.offBo||l.pBo||0;}  
 function drawBonusFromMainPool(l){return !drawBonusCount(l)&&drawnBonusCount(l)>0;}
 function drawDrawnBonus(l,dM){return drawnBonusCount(l)>0?rnd(l.bB,drawnBonusCount(l),drawBonusFromMainPool(l)?dM:[]):[];}
 
@@ -1485,7 +1291,6 @@ function renderRows(){
       c.appendChild(div);
       return;
     }
-    // Visible provenance: replaced balls carry a marker and open their own history on tap.
     ensureManualProvenance(row,l);
     const court=window.LotoCourtUI,complete=row.m.length===l.pM;
     const prov=court&&complete?court.provenanceOf(row,cur):null;
@@ -1543,7 +1348,6 @@ function renderSimBtns(){
   const l=L(),c=document.getElementById('sim-btns');c.innerHTML='';
   const mk=(lbl,fn)=>{const b=document.createElement('button');b.className='btn-s '+l.cls;b.innerHTML=lbl;b.onclick=fn;c.appendChild(b);};
   mk('🔀 Fyll ut rekken',()=>{fillOne();quickRoll();});
-  // (The 3D-draw entry point lives in the permanent bottom nav — #bn-drum3d.)
   mk('⠿ Fyll ut resten',()=>{fillAll();quickRoll();});
   mk('🗑 Tøm',async()=>{if(await customConfirm('Вы действительно хотите очистить все ряды?','Удалить',{title:'Очистить ряды?'})){initRows();renderSim();resetBanner();}});
 }
@@ -1700,15 +1504,11 @@ function fillAll(){
     const before=r.m.length+r.b.length;
     if(r.m.length<l.pM){const e=rnd(l.mB,l.pM-r.m.length,r.m);r.m=[...r.m,...e].sort((a,b)=>a-b);}
     if(dBo>0&&r.b.length<dBo){const e=rnd(l.bB,dBo-r.b.length,r.b);r.b=[...r.b,...e].sort((a,b)=>a-b);}
-    // An empty row filled at random is a Home Generator row; a partly typed row stays manual.
     if(r.m.length+r.b.length!==before){if(before===0)setRowProvenance(r,{sourceType:'HOME_GENERATOR',modelId:'rnd'});else{markRowManual(r);ensureManualProvenance(r,l);}}
   });
   renderSim();
 }
 
-// ═══════════════════════════════════════════════
-//  GENERATION CONTROLS
-// ═══════════════════════════════════════════════
 const GEN_COUNT_KEY='loto_gen_count';
 function getGenCount(){
   const el=document.getElementById('gen-count');
@@ -1754,9 +1554,6 @@ function completeBonusList(nums,l){
   }
   return out.sort((a,b)=>a-b);
 }
-// ── Analytical court: always-available labels + lazily loaded court screens ──
-// Every row render needs its provenance caption, so the labels live here (eager). The court
-// screens themselves (court-ui.js) load only on first use: Home Jury/Defense, Analyze, history.
 const COURT_MODEL_NAMES={freq:'Частота',bal:'Комбинированный анализ',man:'Сегментный охват',rnd:'Случайный выбор',markov:'Цепи Маркова',gauss:'Гаусс · ЦПТ',delta:'Интервальная модель Δ',bayes:'Байес',overdue:'Давно не выпадавшие',phys:'Физика 3D',chaos:'Хаос',quantum:'Квантовый поток',paradox:'Система парадоксов',qastro:'Квантово-астральная модель',wheel:'Колёсная матрица','world-hot':'Мировой горячий профиль','world-mix':'Мировой комбинированный профиль',consensus:'Консенсус моделей',field:'Структурное поле',history:'История тиражей',structure:'Структура'};
 const courtCore=()=>window.LotoCourtCore||null;
 const courtRulesFor=gameId=>provRules(LOTS[gameId]||L());
@@ -1793,8 +1590,6 @@ function courtDefenseBadge(prov){
   if(summary.reviewers.length)return'🛡 '+appText('Проверено защитой');
   return'';
 }
-// The number a replaced ball originally was, following a chain of replacements back to the source.
-// A number that was replaced and later reverted resolves back to itself.
 function courtOriginalOf(prov,number){
   const C=courtCore();
   if(C&&C.originalNumberOf)return C.originalNumberOf(prov,number);
@@ -1804,15 +1599,12 @@ function courtOriginalOf(prov,number){
   }
   return n;
 }
-// Numbers currently in the combination that a replacement brought in AND that are not back at
-// their original value → that replacement. A reverted ball is not a change any more.
 function courtChangedNumbers(prov){
   const C=courtCore(),out=new Map();
   if(!C||!prov||prov.unavailable)return out;
   for(const change of C.changes(prov))out.set(change.number,{type:'transformation',from:change.from,to:change.number,actor:change.actor,at:change.at});
   return out;
 }
-// One-line visible origin under a combination: source · replacements (who) · defense badge.
 function courtRowCaption(prov){
   if(!prov||prov.unavailable)return appText('Источник недоступен');
   const parts=[courtSourceLabel(prov)];
@@ -1820,8 +1612,6 @@ function courtRowCaption(prov){
   const badge=courtDefenseBadge(prov);if(badge)parts.push(badge);
   return parts.join(' · ');
 }
-// Factual attribution of numbers that matched an official draw. Describes what happened to each
-// number; it never claims that anyone predicted or caused the match.
 function courtAttributionLines(rawProv,userMain,drawMain,gameId){
   const C=courtCore();if(!C)return[];
   const prov=C.provenanceOf({m:userMain,prov:rawProv},courtRulesFor(gameId));
@@ -1835,7 +1625,6 @@ function courtAttributionLines(rawProv,userMain,drawMain,gameId){
     return appText(`Совпало число ${n}. Источник: исходная комбинация (${courtSourceLabel(prov)}).`);
   });
 }
-// Visible source caption for result lists whose origin is fixed by the screen that produced them.
 function courtCaptionHtml(source){return '<div class="src-caption" data-i18n-ignore>'+escapeHtml(courtSourceLabel(source))+'</div>';}
 let courtAppPromise=null;
 function courtRevision(){
@@ -1843,13 +1632,9 @@ function courtRevision(){
   const match=script&&String(script.getAttribute('src')||'').match(/\?v=([^&"']+)/);
   return match?match[1]:'';
 }
-// Same-origin script (CSP script-src 'self'); packaged with the web/native bundle and precached by
-// the service worker, whose ignoreSearch match serves it offline despite the ?v= revision.
 function loadCourtApp(){
   if(window.LotoCourtApp)return Promise.resolve(window.LotoCourtApp);
   if(courtAppPromise)return courtAppPromise;
-  // The court's own copy is a lazy catalog part (i18n/court-<code>.json), fetched alongside the
-  // screen. A failed part never blocks the screen; it only leaves that copy untranslated.
   const copy=Promise.resolve(window.LotoI18n&&window.LotoI18n.loadPart?window.LotoI18n.loadPart('court'):null).catch(()=>null);
   courtAppPromise=Promise.all([copy,new Promise((resolve,reject)=>{
     const script=document.createElement('script');
@@ -1870,8 +1655,6 @@ async function withCourtApp(run){
   catch(_error){showFeedback('Анализ недоступен','Не удалось загрузить экран анализа. Проверьте подключение и попробуйте ещё раз.','⚠️',0);return null;}
   return run(app);
 }
-// Prediction leaderboard / history (leaders-ui.js) is lazy like the court: loaded on the first tap
-// of «Рейтинг прогнозов» or of a persona's ledger section. It reuses the court's i18n part + identity.
 let leadersAppPromise=null;
 function loadLeadersApp(){
   if(window.LotoLeadersApp)return Promise.resolve(window.LotoLeadersApp);
@@ -1900,10 +1683,6 @@ document.addEventListener('click',event=>{
   const [kind,id]=spec.split(':');
   window.LotoLeadersUI.open(kind&&id?{kind,id}:{});
 });
-// Owner dashboard (owner-analytics-lib.js + owner-dashboard.js, ≈48 KB) is not a startup script:
-// it loads only for a signed-in account that passes the server owner probe, or when #owner is
-// opened directly. owner-dashboard.js re-verifies ownership itself; every data call is checked
-// server-side, so loading it grants nothing.
 let ownerDashboardPromise=null,ownerProbedUser=null;
 function loadRuntimeScript(file){
   return new Promise((resolve,reject)=>{
@@ -1943,18 +1722,12 @@ async function probeOwnerDashboard(){
     });
     const body=await response.json().catch(()=>null);
     ownerProbedUser=user.id;
-    // The Owner Panel entry only. The owner NOTIFICATION centre is deliberately NOT loaded here:
-    // it is a part of the panel (owner-dashboard.js pulls owner-notifications.js when the panel
-    // opens), so no owner listener, timer or request exists on the public page.
     if(response.status===200&&body&&body.owner===true)await loadOwnerDashboard();
-  }catch(_error){/* network failure: the next access change probes again */}
+  }catch(_error){ }
 }
 window.loadOwnerDashboard=loadOwnerDashboard;
-// owner-dashboard.js loads its own notification centre through this (same ?v= revision, so the
-// service worker's network-first rule for owner scripts applies).
 window.LotoLoadRuntimeScript=loadRuntimeScript;
 window.addEventListener('loto:accesschange',()=>{probeOwnerDashboard();});
-// #owner and #owner?d=YYYY-MM-DD&s=day&b=commerce (deep links from owner notifications) both load the panel.
 window.addEventListener('hashchange',()=>{if(location.hash.indexOf('#owner')===0)loadOwnerDashboard().catch(()=>{});});
 if(location.hash.indexOf('#owner')===0)loadOwnerDashboard().catch(()=>{});
 setTimeout(()=>{probeOwnerDashboard();},1500);
@@ -1964,8 +1737,6 @@ window.LotoCourtUI=Object.freeze({
   rowCaption:courtRowCaption,changedNumbers:courtChangedNumbers,originalOf:courtOriginalOf,
   actorLabel:courtActorLabel,modelName:courtModelName,personaName:courtPersonaName,
   provLookup:rowProvLookup,reviewStatus:row=>{const C=courtCore();return C?C.reviewStatus(C.provenanceOf(row,courtRulesFor(cur))):null;},
-  // The court's working sessions live in the ticket record, next to the rows they analyse — one
-  // store, so a session can never outlive or drift away from its combination.
   sessions:Object.freeze({
     get:key=>(key&&courtSessions[key])||null,
     set:(key,value)=>{
@@ -1993,7 +1764,6 @@ window.LotoCourtUI=Object.freeze({
   revealForResult:()=>{if(window.LotoCourtApp)window.LotoCourtApp.revealForResult();},
   resume:(action,response)=>withCourtApp(app=>app.resume(action,response)),
 });
-// Every court entry point is a delegated button (no inline handlers under the CSP).
 document.addEventListener('click',event=>{
   const button=event.target&&event.target.closest&&event.target.closest('[data-court-open]');
   if(!button)return;
@@ -2003,8 +1773,6 @@ document.addEventListener('click',event=>{
   const ui=window.LotoCourtUI;
   if(kind==='home-jury')ui.openHome('jury');
   else if(kind==='home-defense')ui.openHome('defense');
-  // Верховный судья hands its FINAL recommendations to the existing Jury / Defense screens. The
-  // rows stay the Judge's own (kind:'judge'); nothing is written into the ticket to make it work.
   else if(kind==='judge-jury'||kind==='judge-defense'){
     if(!(window.supRecommendationRows&&window.supRecommendationRows().length))return;
     ui.openHome(kind==='judge-jury'?'jury':'defense',{kind:'judge'});
@@ -2013,20 +1781,14 @@ document.addEventListener('click',event=>{
   else if(kind==='generate')ui.open({kind:'rows',index:rowIndex},{view:'jury',mode:'generate'});
   else if(kind==='model')ui.open({kind:'model',index:rowIndex});
   else if(kind==='saved')ui.openSaved(Number(button.getAttribute('data-fav')),rowIndex);
-  // The ticket row is passed along with its index, so a rollback in the history writes back to
-  // THIS row instead of only describing what happened.
   else if(kind==='row-history'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur,null,{kind:'rows',index:rowIndex});}
   else if(kind==='ball'){const row=rows[rowIndex];if(row)ui.openRowHistory(row,cur,Number(button.getAttribute('data-n')),{kind:'rows',index:rowIndex});}
   else if(kind==='clear-ticket')confirmClearTicket();
 });
-// Wiping the ticket of THIS lottery: the combinations and everything the court recorded about
-// them. It is irreversible and it is asked for first. Nothing else the user owns — saved
-// combinations, ROI, notification settings, the other lotteries' tickets — is touched.
 function clearTicketNow(){
   const game=cur;
   if(window.LotoCourtApp)try{window.LotoCourtApp.close();}catch(_e){}
   clearTimeout(ticketSaveTimer);clearTimeout(courtSaveTimer);
-  // Every case of this lottery goes with its combinations, record by record.
   for(const key of Object.keys(courtSessions)){try{storageDrop(COURT_RECORD_KEY(game,key));}catch(_e){}}
   courtSessions=Object.create(null);courtDirty=new Set();courtRemoved=new Set();
   initRows();
@@ -2045,10 +1807,6 @@ function confirmClearTicket(){
   );
 }
 
-// ── Календарный анализ (calendar-core.js + calendar-ui.js) ──
-// A PRO screen with its own full-page overlay. Both files load ONLY on the first tap of the home
-// card, so they add nothing to the startup payload; the analysis runs over the draws the existing
-// archive pipeline already serves (loadFullHistory / loadD) — there is no second data source.
 let calendarAppPromise=null;
 function hideAuthCaptcha(){
   const host=document.getElementById('acc-captcha');
@@ -2084,8 +1842,6 @@ window.LotoCalendar=Object.freeze({
     try{
       const app=await loadCalendarApp();
       const result=await app.open();
-      /* A run may have just been spent; refresh the card counter from the server snapshot
-         whoever emitted it (the archive walk emits, but the card must never lag behind). */
       refreshCalendarTrialBadge();
       return result;
     }
@@ -2099,10 +1855,6 @@ document.addEventListener('click',event=>{
   event.preventDefault();
   window.LotoCalendar.open();
 });
-/* The free-run counter on the home card. It is the ONLY place that can show the package before
-   anything is spent («Осталось 3 из 3»), because opening the screen IS the first run. The number
-   is always what is LEFT and it comes from the server snapshot — the client never counts. PRO,
-   PRO Lifetime and the owner keep the plain PRO badge and see no counter at all. */
 function refreshCalendarTrialBadge(){
   const line=document.getElementById('calan-btn-left');
   if(!line)return;
@@ -2117,9 +1869,6 @@ window.addEventListener('loto:accesschange',refreshCalendarTrialBadge);
 window.addEventListener('loto:languagechange',refreshCalendarTrialBadge);
 setTimeout(refreshCalendarTrialBadge,1200);
 
-// ── Combination provenance (court-core.js) ──
-// Every visible row records where it came from. A source is never invented: a row whose origin
-// is unknown (e.g. saved before provenance existed) is reported as "source unavailable".
 function provRules(l=L()){return{mainMax:l.mB};}
 function provTargetDraw(game=cur){
   try{const l=LOTS[game];return l&&window.LotoWinMatchCore?LotoWinMatchCore.nextDrawDate({days:l.drawDays||[],tz:l.timeZone||'UTC',time:l.dl||'23:59'},new Date()):null;}catch(_e){return null;}
@@ -2158,13 +1907,8 @@ function provSourceFromOrigin(origin){
   if(o.source==='generator'||o.source==='smartgen'||o.source==='rnd'||o.source==='man')return{sourceType:'HOME_GENERATOR',modelId};
   return null;
 }
-// A manual edit means the old provenance no longer describes the numbers. Once the row is complete
-// again it gets a MANUAL_ENTRY record linked to the provenance it was edited from.
 function markRowManual(row){
   if(!row)return;
-  // The numbers no longer match the recorded provenance, so it stops describing THIS row — but it
-  // is not thrown away: it stays on the row as the parent record, so "Combination history" can
-  // still show where the row came from before the manual edit.
   if(row.prov&&row.prov.id){
     row.provParent=row.prov.id;
     row.provPrev=[...(Array.isArray(row.provPrev)?row.provPrev:[]),row.prov].slice(-PROV_CHAIN_MAX);
@@ -2172,7 +1916,6 @@ function markRowManual(row){
   delete row.prov;row.manual=true;
 }
 const PROV_CHAIN_MAX=4;
-// Parent lookup for a row's lineage: the provenance records the row carried before its edits.
 function rowProvLookup(row){
   const chain=Array.isArray(row&&row.provPrev)?row.provPrev:[];
   return id=>chain.find(node=>node&&node.id===id)||null;
@@ -2182,8 +1925,6 @@ function ensureManualProvenance(row,l=L()){
   const prov=createRowProv(row,{sourceType:'MANUAL_ENTRY',parentId:row.provParent});
   if(prov)row.prov=prov;
 }
-// setRowProvenance/attachRowProvenance replace the record outright (a new source, not an edit of
-// the old one), so the parent chain is dropped with it.
 function clearProvChain(row){if(row){delete row.provParent;delete row.provPrev;}}
 function renderRowProvenance(){
   const box=document.getElementById('row-prov');if(!box)return;
@@ -2195,8 +1936,6 @@ function renderRowProvenance(){
   const label=document.createElement('span');label.className='row-prov-label';
   if(row.m.length===l.pM){
     const prov=ui.provenanceOf(row,cur),badge=ui.defenseBadge(prov);
-    // The row says where its review stands, so an already analysed row can be picked up again
-    // instead of looking like a fresh one.
     const review=ui.reviewStatus?ui.reviewStatus(row):null;
     const status=review&&review.state==='done'?appText('Разобран')
       :review&&review.state==='in_progress'?appText(`Разбирается · нерешённых: ${review.pending}`):'';
@@ -2210,8 +1949,6 @@ function renderRowProvenance(){
   box.hidden=false;
 }
 window.addEventListener('loto:languagechange',()=>{try{renderRowProvenance();}catch(_e){}});
-// Win/match detail: the source of the matched combination and a factual origin line per matched
-// number. It describes what happened to each number; it never claims a prediction.
 function wmProvenanceHtml(match,fallbackLabel){
   const ui=window.LotoCourtUI;
   let label=fallbackLabel,lines=[];
@@ -2245,12 +1982,7 @@ function setGeneratedRows(gen,status,unique=false,origin,source){
   resetBanner();
   showGenStatus(status);
   goToRows();
-  // Record the produced user-visible playable rows for the personal win/match system (origin +
-  // target draw). Defensive: never let history capture break generation.
   try{if(window.LotoWinMatch&&LotoWinMatch.ready)LotoWinMatch.record(cur,rows,origin||{source:'generator'});}catch(_e){}
-  // Rows a CLIENT-side mechanism formed are predictions too: fixed in the server ledger before the
-  // draw, for a signed-in account. Server-computed rows (PRO models, wheel, Judge, jury) are
-  // written by the server itself and are deliberately not reported here, so nothing counts twice.
   try{LotoPredictionClient.record(cur,rows,origin,source);}catch(_e){}
   return revealResult(document.getElementById('rows-c'),'start');
 }
@@ -2293,7 +2025,7 @@ function genBonus(l,draws,mode='bayes'){
     const w=rangeNums(l.bB).map(n=>(bf.get(n)||0)+.05);
     return weightedDistinct(w,dBo,l.bB);
   }
-  if(mode==='bayes'&&bf){ /* сглаживание Лапласа α=2: данные ведут, но не диктуют */
+  if(mode==='bayes'&&bf){  
     const w=rangeNums(l.bB).map(n=>(bf.get(n)||0)+2);
     return weightedDistinct(w,dBo,l.bB);
   }
@@ -2301,8 +2033,6 @@ function genBonus(l,draws,mode='bayes'){
 }
 function rangeNums(max){return Array.from({length:max},(_,i)=>i+1);}
 function defaultSumRange(l){
-  /* One formula for all nine games (±≈2σ of a random row's sum). Lotto used to have a fixed 95–150
-     from the days it was the only game — it rejected 23 % of real Lotto draws since 2015. */
   const avg=l.pM*(l.mB+1)/2;
   const spread=Math.max(18,Math.round(l.mB*l.pM*.22));
   return{min:Math.max(l.pM,Math.round(avg-spread)),max:Math.min(l.pM*l.mB,Math.round(avg+spread))};
@@ -2367,7 +2097,6 @@ function filterGeneratedRows(out,count,l=L(),draws=[]){
   }
   return ok.slice(0,count);
 }
-/* ═══ НОВЫЕ МЕТОДЫ: математика · физика · квантовая механика ═══ */
 function weightedDistinct(weights,k,maxN,rng){
   const r=rng||Math.random,w=[...weights],res=[];
   for(let t=0;t<k;t++){
@@ -2388,10 +2117,9 @@ function physicsDraw(maxN,k){throw new Error('backend_only');}
 function chaosDraw(maxN,k){throw new Error('backend_only');}
 let lastQuantumSrc='';
 async function quantumStream(n){throw new Error('backend_only');}
-/* ═══ СИСТЕМА ПАРАДОКСОВ · контринтуитивные, но реальные явления лото ═══ */
 const PDX_TYPES=[
   {key:'crowd',  name:'Парадокс толпы',        short:'против популярных чисел',
-   note:'Числа 1–31 часто связывают с датами, а узоры выбирают вручную. Это не меняет шанс выпадения; менее популярная комбинация лишь может снизить ожидаемое число совладельцев, если она выиграет.'},
+   note:'Числа 1–31 часто выбирают по датам, а многие игроки отмечают популярные комбинации: числа подряд или фигуры на билете. Шанс выпадения от этого не меняется; менее популярная комбинация лишь снижает вероятность делить выигрыш с другими.'},
   {key:'clash',  name:'Инверсия ошибки игрока', short:'горячее × просроченное',
    note:'Игрок избегает недавних чисел («уже выпадали»). Но у шара нет памяти. Смешиваю самые частые и самые «просроченные» числа выбранного окна.'},
   {key:'cluster',name:'Парадокс кластера',      short:'соседняя пара чисел',
@@ -2458,17 +2186,12 @@ async function generateSelectedRows(){
   const algo=document.getElementById('direct-algo')?.value||'freq';
   const requestedCount=getGenCount();
   const gen=await withModelBusy('Генерирую математическую модель…',()=>generateRowsByAlgo(algo,requestedCount,{user:true}));
-  // null/empty ⇒ the Trial/PRO flow was offered (>5 on FREE) or nothing to show — never a partial result.
   if(!gen?.length)return;
   const count=gen.length;
-  // Advanced math models present their rows in the Result modal (Use rows / Judge).
-  // The basic free generators (freq/bal/rnd/man) go straight to the main screen.
   if(!['freq','bal','rnd','man'].includes(algo)&&typeof window.showModelResult==='function'){
     window.showModelResult(gen.map(r=>({main:r.m,bonus:r.b})),algo);
     return;
   }
-  // Exact-count contract: a successful basic generation returns EXACTLY the requested rows.
-  // A mismatch is an error, never a silently-truncated "success".
   if(count!==requestedCount){
     showFeedback('Не получилось',`Не удалось создать ${requestedCount} ${rowWord(requestedCount)}. Попробуйте ещё раз.`,'⚠️',3200);
     return;
@@ -2585,9 +2308,6 @@ async function WORLD_open(targetId='world-analysis-out'){
   }
 }
 
-// ═══════════════════════════════════════════════
-//  WHEEL MATRIX
-// ═══════════════════════════════════════════════
 function clearWheelStatus(){
   const el=document.getElementById('wheel-status');
   if(!el)return;
@@ -2719,16 +2439,12 @@ async function applyWheelMatrix(){
   el.textContent=`Матрица готова: ${rows.length} ${rowWord(rows.length)} · пары исходной матрицы ${built.cov.covered}/${built.cov.total} · пул ${built.pool.length} чисел · фильтры применены`;
 }
 
-// ═══════════════════════════════════════════════
-//  DRAW + BANNER
-// ═══════════════════════════════════════════════
 async function doDraw(){
   return withBusy('Симуляция тиража…',async()=>{
     const l=L();fillAll();
     const dM=nextUniqueMain(l,'simulation'),dB=drawDrawnBonus(l,dM);
     lastDraw={main:dM,bonus:dB};
     showBanner(dM,dB);renderSim();
-    // track ROI: add spending
     const spent=rows.filter(r=>r.m.length===l.pM).length*l.price;
     const roi=loadROI();roi.spent+=spent;saveROI(roi);
   });
@@ -2746,7 +2462,6 @@ function resetBanner(){
 
 function showBanner(dM,dB){
   const l=L();
-  // drawn
   document.getElementById('wb-drawn').innerHTML=dM.map(n=>`<div class="dball ${l.cls}-m">${n}</div>`).join('');
   const bw=document.getElementById('wb-bonus-wrap');
   if(dB.length>0){
@@ -2754,7 +2469,6 @@ function showBanner(dM,dB){
     document.getElementById('wb-blbl').textContent=bonusLabel(l);
     document.getElementById('wb-bonus').innerHTML=dB.map(n=>`<div class="dball ${l.cls}-b">${n}</div>`).join('');
   }else bw.style.display='none';
-  // rows
   let best=null;
   let rowsH='';
   rows.forEach((row,i)=>{
@@ -2880,7 +2594,6 @@ function megaMultiplier(){
   const r=Math.random()*32;
   return r<15?2:r<25?3:r<29?4:r<31?5:10;
 }
-/* Оценки указаны в валюте выбранной игры; для тиражных разрядов это ориентиры. */
 function estimatePrizeNok(p,l,simulate=false){
   if(!p)return 0;
   const id=l.id||'',key=p.key||'';
@@ -2922,7 +2635,6 @@ function runLifeSim(){
         <div class="life-stat"><span>Праздников</span><b>${hits} 🎉</b></div>
       </div>`;
     if(final){
-      /* золотой серпантин со звёздами — праздник самого путешествия */
       const FEST=['🎊','✨','⭐','🪙','🎉'];
       html='<div class="life-fest">'+Array.from({length:16},()=>{
         const e=FEST[Math.floor(Math.random()*FEST.length)];
@@ -2935,7 +2647,6 @@ function runLifeSim(){
         const tiers=Object.entries(tierCnt).sort((a,b)=>b[1]-a[1]);
         html+='<div class="life-sec">Все выигрыши за 50 лет</div><div class="life-tiers">'+tiers.map(([n,c])=>`<span class="life-tier">${n} × ${c}</span>`).join('')+'</div>';
       }
-      /* честная надежда: реальный шанс джекпота именно этих рядов за эти 50 лет */
       const pOne=1/jackpotCombos(l);
       const pJack=1-Math.pow(1-pOne,total*ticket.length);
       const oneIn=Math.round(1/pJack);
@@ -2977,12 +2688,8 @@ function closeLifeSim(){
   if(out){out.innerHTML='';out.removeAttribute('style');}
 }
 
-// ═══════════════════════════════════════════════
-//  CHECK REAL TICKET
-// ═══════════════════════════════════════════════
 function buildCheckFields(){
   const l=L();
-  /* the DRAW's extras: for Lotto/SuperEnalotto/Lotto Max the drawn tillegg/Jolly/Bonus (never picked) */
   const dBo=drawnBonusCount(l);
   document.getElementById('chk-lbl-m').textContent=`Выпавшие главные числа (${l.pM} из ${l.mB})`;
   const mi=document.getElementById('chk-main-inp');mi.innerHTML='';mi.className=`check-inp-row ticket-count-${l.pM}`;
@@ -3008,7 +2715,6 @@ function buildCheckFields(){
 
 function checkTicket(){
   const l=L();
-  /* the DRAW's extras: for Lotto/SuperEnalotto/Lotto Max the drawn tillegg/Jolly/Bonus (never picked) */
   const dBo=drawnBonusCount(l);
   const dM=[];
   for(let i=0;i<l.pM;i++){
@@ -3031,7 +2737,6 @@ function checkTicket(){
   }
   fillAll();
   showBanner(dM,dB);
-  // scroll to banner
   document.getElementById('win-banner').scrollIntoView({behavior:'smooth'});
   document.getElementById('chk-result').innerHTML=`<div style="color:#34c759;font-size:13px;font-weight:600;margin-top:6px">✅ Проверка выполнена — смотри баннер выше</div>`;
 }
@@ -3063,14 +2768,6 @@ async function checkAgainstSavedDraw(){
   showFeedback('Проверено',`Тираж ${date}: совпадения подсвечены вверху, как в купоне Norsk Tipping.`,'🔍',2200);
 }
 
-// ═══════════════════════════════════════════════
-//  FAVORITES
-// ═══════════════════════════════════════════════
-// Owner analytics (analytics-telemetry.js decides consent): a product action reported from the
-// place that KNOWS it happened — a save that really wrote, a check that really ran. Codes only.
-// The ONE support contact (commercial-config supportEmail → supportUrl = mailto:): the paywall shows
-// «Поддержка · address», About shows the address. A plain same-window mailto: link — no target — is
-// what iOS (UIApplication.open), Android (ACTION_VIEW intent) and browsers all hand to the mail app.
 function applySupportContact(){
   try{
     const c=window.LOTO_COMMERCIAL_CONFIG||{};
@@ -3096,10 +2793,8 @@ async function saveFav(){
   favs.unshift({name,rows:normalizeGeneratedRows(rows,l).map(r=>r.prov?{m:[...r.m],b:[...r.b],prov:r.prov}:{m:[...r.m],b:[...r.b]}),lot:cur});
   await saveFavs(favs.slice(0,10));
   appUsage('combination_saved','ticket',{rows:rows.length});
-  // Mark these rows as SAVED (not played) in the personal win/match history, preserving origin.
   try{if(window.LotoWinMatch&&LotoWinMatch.ready)normalizeGeneratedRows(rows,l).forEach(r=>LotoWinMatch.markSavedPlayed(cur,r.m,r.b,false));}catch(_e){}
   await renderFavs();
-  // Keep server-side saved-ticket watches in step if the user opted in.
   try{const st=window.LotoNotifications&&window.LotoNotifications.getState();if(st&&st.prefs.enabled&&st.prefs.saved_ticket_results)NOTIF_syncWatches(true);}catch(e){}
   showFeedback('Сохранено','Комбинации добавлены в Избранное и видны по этой ссылке.','⭐');
 }
@@ -3120,7 +2815,6 @@ async function renderFavs(){
     displayRows.forEach((row,rowIndex)=>{
       let balls=row.m.map(n=>`<div class="hball ${l.cls}-m">${n}</div>`).join('');
       if(row.b&&row.b.length>0){balls+=`<div class="fav-sep" aria-hidden="true">|</div>`;balls+=row.b.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}
-      // Source label + per-combination analysis. Legacy rows honestly show "source unavailable".
       const analyze=court&&row.m.length===l.pM?`<button type="button" class="fav-analyze" data-court-open="saved" data-fav="${favIndex}" data-row="${rowIndex}" title="${escapeHtml(appText('Анализ комбинации'))}" aria-label="${escapeHtml(appText('Анализ комбинации'))}">🔍</button>`:'';
       const source=court?`<div class="fav-prov" data-i18n-ignore>${escapeHtml(court.rowCaption(court.provenanceOf(row,fav.lot)))}</div>`:'';
       rowsH+=`<div class="fav-rowline"><div class="fav-rowballs">${balls}</div>${analyze}</div>${source}`;
@@ -3148,8 +2842,6 @@ async function useFav(i){
   });
   if(!loaded)return;
   appUsage('favorite_use','favorites');
-  // The loading overlay is gone before navigation. Move first, then open the
-  // confirmation so the modal manager records/restores the NEW (rows) position.
   goToRows({immediate:true});
   showFeedback('Загружено','Комбинации из Избранного снова поставлены в симулятор.','✅');
 }
@@ -3179,9 +2871,6 @@ async function delFav(i){
   const favs=await loadFav();favs.splice(i,1);await saveFavs(favs);await renderFavs();
 }
 
-// ═══════════════════════════════════════════════
-//  ANALYTICS
-// ═══════════════════════════════════════════════
 async function selAT(id){
   curAT=id;
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('vis'));
@@ -3214,7 +2903,6 @@ async function renderCompleteAnalytics(){
 
 function buildInpFields(){
   const l=L();
-  /* the DRAW's extras: for Lotto/SuperEnalotto/Lotto Max the drawn tillegg/Jolly/Bonus (never picked) */
   const dBo=drawnBonusCount(l);
   if(!document.getElementById('inp-date').value)document.getElementById('inp-date').valueAsDate=new Date();
   if(typeof refreshLocalizedDates==='function')refreshLocalizedDates();
@@ -3272,7 +2960,6 @@ function clearPayoutInp(){
   document.querySelectorAll('.payout-inp').forEach(i=>i.value='');
 }
 
-// ─── OFFICIAL RESULTS IMPORTS ────────────
 function getOfficialProvider(id){
   const l=LOTS[id];
   if(!l)return null;
@@ -3291,7 +2978,7 @@ function officialApiUrl(id){
   const l=LOTS[id],to=new Date(),from=new Date();
   if(!l.officialGame)throw new Error(`${l.name}: официальный импорт не подключён`);
   to.setDate(to.getDate()+1);
-  from.setDate(from.getDate()-105); // Norsk Tipping exposes lottery results about 15 weeks back.
+  from.setDate(from.getDate()-105);  
   return `https://api.norsk-tipping.no/LotteryGameInfo/v2/api/results/${encodeURIComponent(l.officialGame)}?fromDate=${ymd(from)}&toDate=${ymd(to)}`;
 }
 function socrataApiUrl(id){
@@ -3421,8 +3108,6 @@ function validateDrawRecord(d,id,official=false){
   }
   return errs;
 }
-/* Только прямой запрос к allowlisted официальному API. Публичные CORS-прокси
-   запрещены; при CORS используется контролируемая общая база/backend. */
 async function fetchJsonResilient(url,init){
   const attempts=[];
   const tryFetch=async(u,opts)=>{
@@ -3430,7 +3115,6 @@ async function fetchJsonResilient(url,init){
     if(!res.ok)throw new Error('HTTP '+res.status);
     return res.json();
   };
-  /* 1) напрямую */
   try{return await tryFetch(url,init);}catch(e){attempts.push('直:'+e.message);}
   throw new Error('источник недоступен из этой среды. База проекта обновляется автоматическим серверным процессом; этот предпросмотр блокирует внешние запросы.');
 }
@@ -3535,7 +3219,6 @@ async function updateOfficialAll(quiet){
     return null;
   }
 }
-/* автообновление при открытии: не чаще одного раза в 6 часов, тихо в фоне */
 async function autoUpdateOnOpen(){
   setTimeout(autoCheckFavorites,1500);
   if(window.LOTO_COMMERCIAL_CONFIG?.allowClientNetworkUpdates===false)return;
@@ -3586,7 +3269,6 @@ async function openOfficialResults(){
 
 async function addDraw(){
   const l=L();
-  /* the DRAW's extras: for Lotto/SuperEnalotto/Lotto Max the drawn tillegg/Jolly/Bonus (never picked) */
   const dBo=drawnBonusCount(l);
   const date=document.getElementById('inp-date').value;
   if(!date){showFeedback('Нужна дата','Введите дату тиража.','⚠️',2800);return;}
@@ -3626,14 +3308,8 @@ function ruleParameters(era){
   const groups=(era.extraGroups||[]).map(group=>`${ruleGroupLabel(group)}: ${group.count}/${group.max}`);
   return[main,...groups].join(' · ');
 }
-/* Выбранная эпоха правил ('' = вся доступная база). Состояние рядом с рендером: его читает
-   renderRuleSummary при каждой перерисовке (смена лотереи, обновление, подтверждение PRO). */
 let HIST_eraFilter='';
-/* id эпохи попадает и в data-атрибут, и в inline-обработчик → только безопасный алфавит. */
 const HIST_eraToken=value=>/^[A-Za-z0-9._:-]+$/.test(String(value??''))?String(value):'';
-// Карточка эпохи = кнопка фильтра (HIST_pickEra). Счётчик считается по ТЕМ ЖЕ тиражам, что
-// отрисованы ниже (FREE — официальное окно, PRO — весь архив), поэтому число на карточке всегда
-// равно числу видимых строк и не обходит ограничения FREE/PRO.
 function ruleEraPick(id,title,detail,count){
   const token=HIST_eraToken(id);
   const selected=HIST_eraFilter===token;
@@ -3654,12 +3330,6 @@ function renderRuleSummary(draws,eras,currentCount){
   return`<div class="rule-era"><b>${escapeHtml(historyText('Как используется архив'))}</b>${escapeHtml(summary)}</div>${all}${blocks}`;
 }
 
-// ── Canonical deletion policy (single source of truth for every platform) ──
-// An archive draw is OFFICIAL when it carries a source (imported from results.json
-// or a named operator feed) — the user never created it, so it must never be
-// deletable. Manually added draws (addDraw) are stored WITHOUT a source and ARE
-// user-owned, so they stay deletable. Used by both the render (no delete control is
-// even created for official draws) and delDraw (re-checks before mutating).
 function isOfficialDraw(d){
   if(!d)return false;
   if(d.isOfficialDraw===true)return true;
@@ -3668,30 +3338,20 @@ function isOfficialDraw(d){
 }
 function canDeleteItem(item){
   if(!item)return false;
-  if(isOfficialDraw(item))return false;                        // official draws: never deletable, on any platform
-  return item.isUserOwned===true||!String(item.source||'').trim(); // only user-owned entries, including legacy local rows
+  if(isOfficialDraw(item))return false;                         
+  return item.isUserOwned===true||!String(item.source||'').trim();  
 }
 async function renderHistory(){
   const c0=document.getElementById('hist-list');
   const firstPaint=c0&&!c0.querySelector('.hist-item');
-  // Branded loading on first paint; a real fetch failure of the PRIMARY results feed now shows
-  // an error/offline state with Retry instead of a misleading "no draws" empty. We probe
-  // results.json (the always-served recent-draws feed) — NOT the results archive, which is
-  // intentionally absent on the web build (older draws are supplementary) and must never turn
-  // history into an error. Cached loads skip straight through with no flicker.
   try{
     if(firstPaint&&!resultsJsonCache)LotoState.loading(c0,cur);
     await fetchResultsJson(RESULTS_JSON_URL);
   }catch(_err){ if(c0)LotoState.error(c0,()=>renderHistory()); return; }
-  // The full base (PRO: every archive page from the backend) can fail like any network load.
-  // Show the same error/offline state with Retry — never let the rejection escape to the
-  // diagnostic banner as a raw backend code.
   let pack;
   try{pack=await loadFullHistory(cur);}
   catch(_err){ if(c0)LotoState.error(c0,()=>renderHistory()); return; }
   const l=L(),draws=pack.draws,eras=pack.eras;
-  /* Эпоха принадлежит своей лотерее: если после смены игры, обновления архива или PRO её id
-     исчез — возвращаемся ко всей базе, иначе история осталась бы пустой. */
   if(HIST_eraFilter&&!eras.some(era=>HIST_eraToken(era.id)===HIST_eraFilter))HIST_eraFilter='';
   document.getElementById('hist-title').textContent=historyText('История ({{0}} всего · {{1}} по текущим правилам)',draws.length,pack.currentCount);
   const summary=document.getElementById('hist-rule-summary');
@@ -3699,9 +3359,6 @@ async function renderHistory(){
   const c=document.getElementById('hist-list');
   if(!draws.length){c.innerHTML=`<div class="empty">📭 ${escapeHtml(historyText('Тиражей нет'))}</div>`;HIST_filter();return;}
   c.innerHTML='';
-  // Build the full base into a detached fragment and insert it ONCE — a single reflow instead of
-  // thousands of live appendChild mutations. With content-visibility:auto on .hist-item this keeps
-  // the huge PRO base light on memory and avoids the mid-build churn that could crash mobile.
   const histFrag=document.createDocumentFragment();
   draws.forEach(d=>{
     const div=document.createElement('div');div.className='hist-item';
@@ -3717,25 +3374,17 @@ async function renderHistory(){
         balls+=(group.numbers||[]).map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');
       });
     }else if(d.bonus&&d.bonus.length){histSepCount=1;histBallCount+=d.bonus.length;balls+=`<div class="hist-sep">|</div>`;balls+=d.bonus.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}
-    // SuperEnalotto SuperStar — official gold extra number drawn alongside the 6 main + Jolly. Only
-    // SE draws carry `superStar`, so the presence check alone scopes it; shown after the Jolly with
-    // its own separator. Display-only — it is never added to main/bonus, so no model/analytics change.
     if(d.superStar!=null){histSepCount++;histBallCount++;balls+=`<div class="hist-sep" role="separator" aria-label="SuperStar">★</div>`;balls+=`<div class="hball superstar" title="SuperStar">${escapeHtml(String(d.superStar))}</div>`;}
     const src=` · ${escapeHtml(drawLotteryName(d,cur))}`;
     const era=ruleEraForDraw(d,eras),isCurrent=era?.current??d.ruleEra!=='legacy';
-    div.dataset.ruleEra=era?HIST_eraToken(era.id):'';   // ключ быстрого фильтра по эпохе (HIST_filter)
+    div.dataset.ruleEra=era?HIST_eraToken(era.id):'';    
     const badgeLabel=historyText(isCurrent?'Текущие правила':'Старые правила');
     const badgeTitle=era?`${era.id} · ${ruleParameters(era)}`:'';
     const badge=era?`<span class="rule-badge ${isCurrent?'current':''}" title="${escapeHtml(badgeTitle)}">${escapeHtml(badgeLabel)}</span>`:'';
-    const canDelete=canDeleteItem(d);   // official draws → no delete control at all
+    const canDelete=canDeleteItem(d);    
     const action=canDelete?`<button class="btn-del" data-loto-event-click="delDraw('${d.date}')">🗑</button>`:'<span></span>';
     if(!canDelete)div.classList.add('no-action');
     const ballClass=histBallCount>=8?'hist-balls hist-many':'hist-balls';
-    // Rule label ("Текущие/Старые правила") must sit on its OWN full-width line below the
-    // date+name — never inline to the right of the name and never inside the balls column —
-    // so it can't squeeze the ball grid and clip extra/bonus balls. `.hist-head` keeps the
-    // date + rule together as column 1 on desktop (where .hist-main is display:contents) and
-    // stacked above the balls on mobile (where .hist-main is a block).
     const ruleLine=badge?`<div class="hist-rule">${badge}</div>`:'';
     div.innerHTML=`<div class="hist-main"><div class="hist-head"><div class="hist-date">${escapeHtml(formatHistoryDate(d.date))}${src}</div>${ruleLine}</div><div class="${ballClass}" style="--hist-ball-count:${Math.max(1,histBallCount)};--hist-sep-count:${histSepCount}">${balls}</div></div>${action}`;
     histFrag.appendChild(div);
@@ -3747,7 +3396,6 @@ async function renderHistory(){
 async function delDraw(date){
   const draws=await loadD(cur);
   const item=draws.find(d=>d.date===date);
-  // Defence in depth: even a direct/scripted call can never delete an official draw.
   if(item&&isOfficialDraw(item)){showFeedback('Официальный тираж','Официальные тиражи удалять нельзя.','🔒',2600);return;}
   if(!(await customConfirm(`Удалить тираж ${date}?`,'Удалить',{title:'Удалить тираж?'})))return;
   await saveD(cur,draws.filter(d=>d.date!==date));
@@ -3817,12 +3465,6 @@ function tierProbability(l,match){
 }
 function fmtInt(n){return Math.round(n).toLocaleString(appLocale());}
 function fmtChance(n){return n>=1000000?(n/1000000).toFixed(n>=10000000?0:1).replace('.',',')+' млн':fmtInt(n);}
-/* Jackpot amount (a number of MILLIONS in the game's currency) in the app's one jackpot format:
-   «$298 млн», «€29,6 млн», «23,5 млн NOK», «55 млн CAD». Written in the source language like every
-   other UI string here; the i18n runtime translates «млн» in place for the active locale, the
-   digits follow the active locale. Never a bare number or a currency-formatted «298,00 $».
-   `lang` = the active language for text the runtime does not translate (attributes such as a
-   chart tooltip). */
 function fmtJackpot(v,currency,lang='ru'){
   const c=currency||L().currency||'NOK';
   try{if(window.LotoI18n&&typeof window.LotoI18n.formatJackpot==='function'){const s=window.LotoI18n.formatJackpot(v,c,lang,appLocale());if(s)return s;}}catch(_e){}
@@ -3913,11 +3555,9 @@ async function renderSugg(){
   c.innerHTML=html;
 }
 
-// ─── PAIR ANALYSIS ────────────────────────────
 async function renderPairs(){
   const l=L(),draws=await loadAnalyticsDraws(cur),c=document.getElementById('pair-out');
   if(draws.length<10){c.innerHTML='<div class="empty">Нужно мин. 10 тиражей</div>';return;}
-  // Build co-occurrence for top 15 numbers
   const freq=buildFreq(draws,'main',l.mB);
   const top=[...freq.entries()].sort((a,b)=>b[1]-a[1]).slice(0,12).map(e=>e[0]).sort((a,b)=>a-b);
   const matrix={};
@@ -3933,7 +3573,6 @@ async function renderPairs(){
   const heat=['var(--pair-heat0)','var(--pair-heat1)','var(--pair-heat2)','var(--pair-heat3)','var(--pair-heat4)'];
   const getColor=v=>{if(!v)return heat[0];const i=Math.min(4,Math.ceil(v/maxVal*4));return heat[i];};
   let html=`<div style="font-size:12px;color:var(--sub2);margin-bottom:8px">Топ-12 частых чисел · пары</div><div class="pair-wrap"><div class="pair-grid" style="grid-template-columns:22px ${top.map(()=>'22px').join(' ')}">`;
-  // header row
   html+=`<div class="pair-axis"></div>${top.map(n=>`<div class="pair-axis">${n}</div>`).join('')}`;
   top.forEach(a=>{
     html+=`<div class="pair-axis">${a}</div>`;
@@ -3946,16 +3585,12 @@ async function renderPairs(){
   c.innerHTML=html;
 }
 
-// ─── CHI2 ─────────────────────────────────────
 async function renderChi(){
   const l=L(),draws=await loadAnalyticsDraws(cur),c=document.getElementById('chi-out');
   if(draws.length<10){c.innerHTML='<div class="empty">Нужно мин. 10 тиражей</div>';return;}
   const freq=buildFreq(draws,'main',l.mB);
   const obs=[...freq.values()],tot=obs.reduce((s,v)=>s+v,0),exp=tot/l.mB;
   const pearson=obs.reduce((s,o)=>s+Math.pow(o-exp,2)/exp,0);
-  /* В одном тираже k чисел выбираются без возвращения. Обычная мультиномиальная
-     χ² занижает статистику; ковариация простой случайной выборки даёт поправку
-     (N−1)/(N−k), после которой асимптотически получаем χ²(N−1). */
   const correction=(l.mB-1)/(l.mB-l.pM);
   const chi2=pearson*correction;
   const df=l.mB-1,p=chi2pvalue(chi2,df);
@@ -3981,7 +3616,6 @@ async function renderChi(){
   }
 }
 
-// ─── COMPARISON TABLE ─────────────────────────
 function renderComparison(){
   const ids=Object.keys(LOTS);
   const formula=l=>`${l.pM} из ${l.mB}${l.pBo>0?` + ${l.pBo} из ${l.bB}`:''}`;
@@ -4008,7 +3642,6 @@ function renderComparison(){
   document.getElementById('cmp-table').innerHTML=html;
 }
 
-// ─── ROI ──────────────────────────────────────
 function renderROI(){
   const c=document.getElementById('roi-out');
   const roi=loadROI(),currency=L().currency||'NOK';
@@ -4031,13 +3664,8 @@ function renderROI(){
 function addWon(){const v=+document.getElementById('won-inp').value;if(!v||v<0)return;const roi=loadROI();roi.won+=v;saveROI(roi);renderROI();}
 async function resetROI(){if(!(await customConfirm('Сбросить ROI?')))return;saveROI({spent:0,won:0});renderROI();}
 
-// ─── PRIZE TIERS (real payout data) ────────────
 const prizeVisibleCounts={};
 function prizeTierAmount(tier){return tier?.prizeAmount??tier?.prizeNOK??null;}
-/* The official source does NOT provide this draw's prize table: no category (the jackpot row aside)
-   carries an amount, while a LATER draw of the same game already has its table — the operator has
-   moved on, so it is absent, not late. The newest draw without amounts is still awaited. Shown as
-   «Данные недоступны»: never $0, a dash or a substituted value. */
 function prizeTableUnavailable(draw,draws){
   const hasTable=d=>Array.isArray(d&&d.payoutTiers)&&d.payoutTiers.slice(1).some(t=>{const a=prizeTierAmount(t)??t?.prize;return a!==null&&a!==undefined;});
   if(!draw||!Array.isArray(draw.payoutTiers)||hasTable(draw))return false;
@@ -4075,7 +3703,6 @@ async function renderPrizes(){
     return;
   }
 
-  // per-draw cards
   let html='';
   const visible=prizeVisibleCounts[cur]||15;
   withPayouts.slice(0,visible).forEach(d=>{
@@ -4111,7 +3738,6 @@ async function renderPrizes(){
   html+=`<div style="font-size:10px;color:var(--sub2);margin-top:10px;text-align:center">Призы и победители открыты бесплатно · ${withPayouts.length} тиражей</div>`;
   outEl.innerHTML=html;
 
-  // averages per tier
   const tierAgg={};
   const prizeTiers=getPrizeTiers(l);
   prizeTiers.forEach(t=>{tierAgg[t.match]={label:t.label,prizes:[],winners:[]};});
@@ -4135,16 +3761,12 @@ async function renderPrizes(){
   avgEl.innerHTML=avgHtml||'<div class="empty">Нет данных</div>';
 }
 
-// ─── PRECISE PER-DRAW NAVIGATION (from notifications) ─────────────────────────
-// Opens the EXACT draw a notification refers to (gameId+drawId/date), never the last
-// draw. Reuses the notification-center 17-locale dictionary via LotoNotifCenter._t so
-// no user-visible string is added outside a fully-translated key set.
 function _ncText(key,arg){try{return(window.LotoNotifCenter&&window.LotoNotifCenter._t)?window.LotoNotifCenter._t(key,arg):key;}catch(e){return key;}}
 function _normDrawDate(v){if(!v)return null;const m=String(v).match(/\d{4}-\d{2}-\d{2}/);return m?m[0]:null;}
 function _focusPrizeCard(card){
   if(!card)return;
   try{card.scrollIntoView({behavior:'smooth',block:'center'});}catch(e){card.scrollIntoView();}
-  card.classList.remove('nc-draw-highlight');void card.offsetWidth; // restart animation
+  card.classList.remove('nc-draw-highlight');void card.offsetWidth;  
   card.classList.add('nc-draw-highlight');
   setTimeout(()=>{try{card.classList.remove('nc-draw-highlight');}catch(e){}},2800);
 }
@@ -4154,9 +3776,6 @@ async function _showPrizeAwaitingOrNotFound(gameId,date,outEl){
   try{const draws=await loadD(cur);known=!!(date&&draws.some(d=>d.date===date));}catch(e){}
   let lot=gameId||cur||'';try{lot=(L&&L().name)||lot;}catch(e){}
   const label=lot+(date?(' · '+date):'');
-  // A draw the notification points to may simply not be in our data yet — that is "awaiting
-  // the official result", never "not found" (which read as a bug to users). Known-but-no-prizes
-  // stays the more specific "awaiting prize data".
   const msg=known?_ncText('nc.status.awaitingData'):_ncText('nc.status.awaiting');
   const banner=document.createElement('div');
   banner.className='prize-draw-card';
@@ -4177,7 +3796,6 @@ async function revealPrizeDraw(gameId,drawId,dateStr,cb){
     const outEl=document.getElementById('prize-out');
     const sel=date?'.prize-draw-card[data-draw-date="'+date+'"]':null;
     let card=(date&&outEl)?outEl.querySelector(sel):null;
-    // Reveal more pages until the target draw's card is materialised (or all shown).
     let guard=0;
     while(!card&&date&&outEl&&outEl.querySelector('button[onclick="showMorePrizes()"]')&&guard++<50){
       prizeVisibleCounts[cur]=(prizeVisibleCounts[cur]||15)+15;
@@ -4200,12 +3818,10 @@ async function revealResultDraw(gameId,drawId,dateStr,cb){
     const safe=window.CSS&&CSS.escape?CSS.escape(String(drawId||date||'')):String(drawId||date||'').replace(/["\\]/g,'\\$&');
     let row=list&&drawId?list.querySelector('.hist-item[data-draw-id="'+safe+'"]'):null;
     if(!row&&list&&date)row=list.querySelector('.hist-item[data-draw-date="'+date+'"]');
-    /* Переход из уведомления ведёт к КОНКРЕТНОМУ тиражу: если он скрыт эпохой или поиском,
-       снимаем оба фильтра, иначе подсветка уводила бы к невидимой строке. */
     if(row&&row.style.display==='none'){
       const search=document.getElementById('hist-search');
       if(search)search.value='';
-      HIST_eraFilter='';HIST_syncEraPicks();HIST_filter();   // без прокрутки: ниже к строке ведёт _focusPrizeCard
+      HIST_eraFilter='';HIST_syncEraPicks();HIST_filter();    
     }
     if(row){_focusPrizeCard(row);done();return;}
     if(typeof window.showFeedback==='function')window.showFeedback((L&&L().name)||gameId,_ncText('nc.status.awaiting'),'⏳',4200);
@@ -4224,7 +3840,6 @@ window.revealPrizeDraw=revealPrizeDraw;
 window.revealResultDraw=revealResultDraw;
 window.revealUpcomingDraw=revealUpcomingDraw;
 
-// ─── JACKPOT CHART ────────────────────────────
 async function renderJackpotChart(){
   let all=[];
   try{all=await loadPublicPrizes(cur);}catch{all=await loadAnalyticsDraws(cur);}
@@ -4244,7 +3859,6 @@ async function renderJackpotChart(){
   c.innerHTML=html;
 }
 
-// ─── КАЛЬКУЛЯТОР ОХВАТА ──────────────────────
 function renderCombinationAnalysis(){
   const l=L();
   const currency=l.currency||'NOK',combos=jackpotCombos(l),totalCost=combos*l.price,totalCostM=(totalCost/1e6).toFixed(1);
@@ -4338,7 +3952,6 @@ async function renderStats(){
   <div class="rule-summary">${eraStats||`<div class="rule-era">${escapeHtml(historyText('Исторические эпохи не найдены.'))}</div>`}</div>`;
 }
 
-// ─── EXPORT/IMPORT ────────────────────────────
 async function doExport(){
   const data={};
   for(const id of Object.keys(LOTS)){ data[id]=await loadD(id); }
@@ -4494,9 +4107,6 @@ async function importValidatedDraws(data){
   return imported;
 }
 
-// ═══════════════════════════════════════════════
-//  SMART GEN
-// ═══════════════════════════════════════════════
 function zonedParts(date,timeZone){
   const out={};
   new Intl.DateTimeFormat('en-US',{timeZone,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(date).forEach(p=>{if(p.type!=='literal')out[p.type]=p.value;});
@@ -4521,8 +4131,6 @@ function nextDraw(lotId,at){
   }
   const mins=Math.max(0,Math.ceil((nd-now)/60000)),dLeft=Math.floor(mins/1440),hLeft=Math.floor((mins%1440)/60),mLeft=mins%60;
   const left=(dLeft?dLeft+' д. ':'')+(hLeft?hLeft+' ч. ':'')+(!dLeft&&mLeft?mLeft+' мин.':'');
-  // Draw date in the game's timezone, formatted in the ACTIVE app locale — never a hardcoded
-  // Russian month/weekday (that leaked "Сб, 19 сен 2026" into every non-Russian UI language).
   const dateStr=new Intl.DateTimeFormat(appLocale(),{weekday:'short',day:'numeric',month:'short',year:'numeric',timeZone:tz}).format(nd);
   return{date:nd,dateStr,countdown:'⏳ До дедлайна: '+left.trim(),timeLabel:scheduleTime(l)};
 }
@@ -4571,27 +4179,14 @@ async function generateCombos(){
 function shufSlice(arr,n){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.slice(0,n).sort((a,b)=>a-b);}
 
 let rollTimers=[];
-/* ═══ МУЛЬТИЯЗЫЧНОСТЬ: страны всех лотерей каталога ═══ */
 const LOCALE_CATALOG=window.LOTO_I18N_CATALOG?.locales||{};
 const LANG_ORDER=Object.keys(LOCALE_CATALOG);
-/* Language-PICKER display order only: English, Norsk, Українська first, Русский last, all others in
-   their existing catalog order. LANG_ORDER itself stays the raw catalog order (source of truth for
-   flags/logic); translations, flags, switching logic and count are untouched. */
 const LANG_PICKER_HEAD=['en','no','uk'];
 const LANG_PICKER_ORDER=[...LANG_PICKER_HEAD,...LANG_ORDER.filter(c=>!LANG_PICKER_HEAD.includes(c)&&c!=='ru'),'ru'].filter(c=>LOCALE_CATALOG[c]);
 const LANG_FLAGS=Object.fromEntries(LANG_ORDER.map(code=>[code,LOCALE_CATALOG[code].flag]));
-/* Язык интерфейса определяет ОДИН общий детектор (lang-detect.js / LotoLang), одинаковый для
-   Web, iOS и Android: сохранённый ручной выбор → exact locale → base language → English.
-   Никакой страны, IP или геолокации; жёсткого «русского по умолчанию» тоже нет. */
 let curLang=(window.LotoLang&&window.LotoLang.detect())||'en';
 if(!LOCALE_CATALOG[curLang])curLang='en';
 const APP_LOCALES={ru:'ru-RU',en:'en-GB',no:'nb-NO',sv:'sv-SE',da:'da-DK',fi:'fi-FI',de:'de-DE',fr:'fr-FR',es:'es-ES',it:'it-IT',pt:'pt-PT',pl:'pl-PL',nl:'nl-NL',et:'et-EE',lv:'lv-LV',lt:'lt-LT',uk:'uk-UA'};
-// The active UI language is the single source of truth for ALL locale-dependent formatting
-// (dates, numbers, currency). Prefer the live i18n language, then <html lang>, then curLang, so a
-// stale curLang or the device/browser/OS locale can never leak a foreign locale into formatting.
-// Активный язык интерфейса как КОД каталога (для Intl и для locale, отправляемой бэкенду).
-// Один общий источник — LotoLang.current(); локального запасного языка здесь нет и быть не может:
-// запасной вариант ровно один на весь проект — English, и он живёт в lang-detect.js.
 function uiLang(){
   try{return (window.LotoLang&&window.LotoLang.current())||document.documentElement.lang||'en';}
   catch(_e){return 'en';}
@@ -4601,12 +4196,6 @@ function appLocale(){
   try{lang=(window.LotoI18n&&window.LotoI18n.language)||document.documentElement.lang||curLang;}catch(_e){lang=curLang;}
   return APP_LOCALES[lang]||APP_LOCALES[curLang]||'en-GB';
 }
-// ── Localized native date inputs (iOS Safari device-locale month fix) ──────────────────────────
-// A native <input type=date> shows its value (incl. the MONTH name) in the DEVICE system locale on
-// iOS Safari — the page cannot override this via lang or JS. For every user-facing date input we
-// hide the native text (CSS color:transparent) and paint an overlay formatted with the ACTIVE app
-// locale (appLocale), so the visible month always follows the selected app language. The underlying
-// ISO value, min/max, validation, change events and the native picker are all preserved.
 const _ldateReg=[];
 function _paintLdate(input,ov){
   const v=input.value;
@@ -4645,11 +4234,6 @@ function openLangPicker(){
   document.getElementById('lang-ov').classList.add('show');
 }
 function closeLangPicker(){document.getElementById('lang-ov').classList.remove('show');}
-/* Optically centre each .pro-crown-icon emoji inside its gold circle. Emoji glyphs are NOT centred
-   inside their own em box (crown ink sits low, sparkle a touch off), and the offset differs per
-   platform emoji font (Apple Color Emoji vs Noto). So we render the actual glyph to a canvas with
-   its box-middle at the centre, scan the real ink bounds, and feed the residual offset back as
-   --crown-dx/--crown-dy px vars → the VISIBLE ink lands dead-centre on every device. Idempotent. */
 function centerCrownEmoji(el){
   try{
     const cs=getComputedStyle(el);const F=parseFloat(cs.fontSize)||44;const ch=(el.textContent||'').trim();
@@ -4662,7 +4246,6 @@ function centerCrownEmoji(el){
     let minX=S,minY=S,maxX=-1,maxY=-1;
     for(let y=0;y<S;y++)for(let x=0;x<S;x++){if(d[(y*S+x)*4+3]>16){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y;}}
     if(maxX<0)return;
-    /* ink centre offset from the canvas centre (= box-middle) → move the glyph the opposite way */
     const dx=-(((minX+maxX)/2)-S/2),dy=-(((minY+maxY)/2)-S/2);
     el.style.setProperty('--crown-dx',dx.toFixed(2)+'px');
     el.style.setProperty('--crown-dy',dy.toFixed(2)+'px');
@@ -4675,10 +4258,6 @@ try{
   setTimeout(centerAllCrowns,600);
   window.centerAllCrowns=centerAllCrowns;
 }catch(_e){}
-/* The i18n runtime can change language without the picker (native bridge, a restored choice, a
-   programmatic setLanguage). The shell's own language variable and every date it formats through
-   appLocale() must follow, or a stale curLang renders dates in the previous language. selectLang()
-   sets curLang before it dispatches, so its own change is a no-op here. */
 window.addEventListener('loto:languagechange',e=>{
   const code=e&&e.detail&&e.detail.language;
   if(!code||!LOCALE_CATALOG[code]||code===curLang)return;
@@ -4690,8 +4269,6 @@ window.addEventListener('loto:languagechange',e=>{
 async function selectLang(code){
   if(!LOCALE_CATALOG[code])return;
   curLang=code;
-  /* Ручной выбор сохраняется навсегда: перезагрузка, перезапуск PWA/приложения, обновление
-     версии и смена системного языка его больше не переопределяют. */
   if(window.LotoLang)window.LotoLang.save(code);
   else{try{localStorage.setItem('loto_lang',code);}catch(_e){}}
   await applyLang();
@@ -4704,8 +4281,6 @@ async function selectLang(code){
     updateHdr();
     renderSavedDrawOptions();
   }
-  // Refresh date-bearing elements that are rendered outside the screen renderers (they format via
-  // appLocale and would otherwise keep the previous language's date until the game is re-selected).
   try{const _nd=nextDraw(cur);const _s=document.getElementById('ndb-sub');if(_s)_s.textContent=_nd.dateStr+' · '+_nd.timeLabel;const _sg=document.getElementById('sg-date');if(_sg)_sg.textContent=_nd.dateStr;}catch(_e){}
   refreshLocalizedDates();
   if(window.LotoI18n)window.LotoI18n.localizeTree(document,true);
@@ -4714,8 +4289,6 @@ async function selectLang(code){
 function cycleLang(){openLangPicker();}
 document.addEventListener('DOMContentLoaded',()=>{void applyLang();setupLocalizedDateInputs();});
 function stopRolls(){rollTimers.forEach(clearInterval);rollTimers=[];}
-/* универсальный эффект для любых результатов: прокрутка к блоку + вращение шаров.
-   Возвращает длительность анимации (мс), чтобы модалки ждали её окончания. */
 function revealResult(rootEl,scrollBlock){
   if(!rootEl)return 0;
   setTimeout(()=>rootEl.scrollIntoView({behavior:'smooth',block:scrollBlock||'center'}),80);
@@ -4748,7 +4321,6 @@ function revealResult(rootEl,scrollBlock){
   return Math.round(maxDur+450);
 }
 function rollBalls(){
-  /* «слот-машина»: шары кувыркаются и останавливаются один за другим */
   if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches)return;
   const l=L();
   const combos=[...document.querySelectorAll('#sg-result .sg-combo')];
@@ -4803,9 +4375,6 @@ function useGen(){
 function sgOut(e){if(e.target===document.getElementById('sg-ov'))closeSG();}
 function closeSG(){document.getElementById('sg-ov').classList.remove('show');}
 
-// ═══════════════════════════════════════════════
-//  CHI² MATH
-// ═══════════════════════════════════════════════
 function chi2cdf(x,k){if(x<=0)return 0;return gammp(k/2,x/2);}
 function chi2pvalue(x,k){if(x<=0)return 1;return gammq(k/2,x/2);}
 function gammp(a,x){
@@ -4847,9 +4416,6 @@ function gcf(a,x){
 }
 function lgamma(x){const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,1.208650973866179e-3,-5.395239384953e-6];let y=x,t=x+5.5;t-=(x+.5)*Math.log(t);let s=1.000000000190015;for(let j=0;j<6;j++){y++;s+=c[j]/y;}return -t+Math.log(2.5066282746310005*s/x);}
 
-// ═══════════════════════════════════════════════
-//  CUSTOM CONFIRM (replaces native confirm() which can be blocked in sandboxed iframes)
-// ═══════════════════════════════════════════════
 let _ccResolve=null,_ccEsc=null;
 function customConfirm(msg,okLabel,options={}){
   return new Promise(resolve=>{
@@ -4868,9 +4434,6 @@ function customConfirm(msg,okLabel,options={}){
     if(okBtn)okBtn.textContent=appText(okText);
     if(closeBtn)closeBtn.setAttribute('aria-label',appText('Закрыть'));
     ov.__lotoClose=()=>ccAnswer(false);
-    // The confirm must sit ABOVE whatever modal triggered it (e.g. qab-ov z620 > cc-ov's static
-    // z500 hid the OK button, so «Удалить сохранённую дату» silently did nothing). Compute the
-    // top currently-open overlay and place cc-ov just above it, so its buttons are always clickable.
     let ccTopZ=0;
     document.querySelectorAll('[id$="-ov"].show').forEach(o=>{if(o===ov)return;const z=parseInt(getComputedStyle(o).zIndex,10);if(Number.isFinite(z)&&z>ccTopZ)ccTopZ=z;});
     ov.style.zIndex=String(Math.max(500,ccTopZ+10));
@@ -4887,10 +4450,6 @@ function ccAnswer(val){
 function ccOut(){}
 window.customConfirm=customConfirm;
 
-// Выход из аккаунта обрывает сессию на всех устройствах этого браузера/приложения, поэтому одно
-// случайное нажатие не должно его выполнять. Обе кнопки выхода (PRO-окно и личный кабинет) идут
-// через ОДИН этот диалог, так что формулировка и поведение одинаковы на Web, iOS и Android.
-// Возвращает true только после явного подтверждения.
 function confirmSignOut(){
   return customConfirm('Вы действительно хотите выйти из аккаунта?','Выйти',
     {title:'Выход из аккаунта',cancelLabel:'Отмена'});
@@ -4931,9 +4490,6 @@ function closeFeedback(){
 }
 function fbOut(){}
 
-// ═══════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════
 initTheme();
 initGenControls();
 selLot(smartStartGame());
@@ -4946,11 +4502,6 @@ window.addEventListener('DOMContentLoaded',()=>{
   else settle();
 });
 
-// ── Canonical bottom-nav definition + read-only build diagnostics (§nav / §diag) ──
-// One nav definition for every platform (this same index.html is served to desktop,
-// mobile browser, PWA and both Capacitor apps). assertBottomNav() fails loudly if a
-// stale cache ever serves an old 2-item nav; __APP_DIAGNOSTICS__ lets us tell exactly
-// which bundle a device loaded (build SHA, bundle type, nav routes, i18n, policy).
 const NAV_ITEMS=[
   {id:'bn-sim',route:'sim',labelKey:'nav.simulator',icon:'simulator'},
   {id:'bn-drum3d',route:'drum3d',labelKey:'nav.drum3d',icon:'die'},
@@ -4967,8 +4518,6 @@ function assertBottomNav(){
   const nav=assertBottomNav();
   let lang='?';try{lang=(window.LotoI18n&&window.LotoI18n.language)||document.documentElement.lang;}catch(e){}
   const build=document.documentElement.getAttribute('data-build')||'dev';
-  // Read the active service-worker cache name so a device can PROVE which bundle it
-  // is really running (a stale phone shows an old shell version ≠ this page's build).
   let swVersion='n/a';const swControlled=!!(navigator.serviceWorker&&navigator.serviceWorker.controller);
   try{if(window.caches){const ks=await caches.keys();const shell=ks.find(k=>/^loto-shell-/.test(k));if(shell)swVersion=shell.replace(/-(static|data)$/,'');}}catch(e){}
   const swMismatch=swVersion!=='n/a'&&swVersion.indexOf(build)===-1;
@@ -4989,18 +4538,12 @@ function assertBottomNav(){
   if(swMismatch)console.warn('[APP] stale shell: SW cache '+swVersion+' ≠ page build '+build+' — a fresh service worker should take over shortly.');
 })();
 
-/* ═══════════════════════════════════════════════════════════
-   СТРУКТУРНОЕ ПОЛЕ ДАННЫХ · метамодель Lotto Simulator
-   Сервисы: контекст анализа, окно тиражей, Field Strength Score,
-   парные связи, энтропия, 10 исследовательских строк, экран.
-   ═══════════════════════════════════════════════════════════ */
 
-/* ── Сервис 1: окно последних тиражей (единая точка для ВСЕХ моделей) ── */
 function IF_getWin(){const v=parseInt(localStorage.getItem('loto_win')||'0');return isFinite(v)?v:0;}
 function IF_setWin(v){localStorage.setItem('loto_win',String(parseInt(v)||0));localStorage.removeItem('loto_range');IF_state=null;}
 function IF_getRange(){try{const r=JSON.parse(localStorage.getItem('loto_range'));return(r&&r.from&&r.to)?r:null;}catch(e){return null;}}
 function IF_setRange(from,to){localStorage.setItem('loto_range',JSON.stringify({from,to}));localStorage.setItem('loto_win','0');IF_state=null;}
-function IF_getScope(){const value=localStorage.getItem('loto_period_scope_'+cur);if(['all','current','free'].includes(value))return value;/* No explicit choice yet: PRO defaults to the FULL base ('all', all available draws); FREE/guest to current rules. The user can switch afterwards. */try{return window.LotoCommercial?.access?.accessLevel==='pro'?'all':'current';}catch(_e){return 'current';}}
+function IF_getScope(){const value=localStorage.getItem('loto_period_scope_'+cur);if(['all','current','free'].includes(value))return value; try{return window.LotoCommercial?.access?.accessLevel==='pro'?'all':'current';}catch(_e){return 'current';}}
 function IF_setScope(value){localStorage.setItem('loto_period_scope_'+cur,['all','free'].includes(value)?value:'current');IF_state=null;}
 function IF_window(draws){
   if(!Array.isArray(draws))return[];
@@ -5017,7 +4560,6 @@ async function IF_baseDraws(gameKey=cur){
 }
 async function loadSelectedAnalysisDraws(gameKey=cur){return IF_window(await IF_baseDraws(gameKey));}
 
-/* ── Сервис 2: LotteryAnalysisContext — единственная точка входа моделей ── */
 async function IF_ctx(){
   const l=L();
   const all=await IF_baseDraws(cur);
@@ -5038,23 +4580,18 @@ async function IF_ctx(){
     sourceStatus:getOfficialProvider(cur)?'live':'local'
   };
 }
-var IF_state=null; /* var: селЛот вызывает IF_reset при инициализации до объявления */
+var IF_state=null;  
 
-/* ── Сервис 3: парные связи (lift) — раздельно для основных и бонусных ── */
 function IF_pairs(draws,key,maxN){throw new Error('backend_only');}
 
-/* ── Сервис 4: энтропия распределения ── */
 function IF_entropy(cnt,maxN){throw new Error('backend_only');}
 
-/* ── Сервис 5: Field Strength Score (25/15/15/20/15/10) ── */
 function IF_scores(draws,key,maxN,perDraw){throw new Error('backend_only');}
 
-/* ── Сервис 6: генерация 10 типизированных строк поля ── */
 function IF_weightsFrom(scores,pow){throw new Error('backend_only');}
 function IF_pickBonus(bScores,l,type,rng){throw new Error('backend_only');}
 function IF_buildRows(A,Ab,l,ctx){throw new Error('backend_only');}
 
-/* ── Сервис 7: запуск отдельного Информационного поля ── */
 async function IF_run(){
   const ctx=await IF_ctx();
   const l=L();
@@ -5077,7 +4614,6 @@ async function IF_run(){
     const strongBalls=A.scores.filter(s=>s.score>=70).length;
     const strongLinks=[...A.pairs.lift.values()].filter(p=>p.lift>=1.5&&p.obs>=2).length;
     IF_state={ctx,A,Ab,rows,strongBalls,strongLinks,lot:cur,tab:'field'};
-    /* сохранить эксперимент локально */
     try{localStorage.setItem('loto_if_exp',JSON.stringify({lottery:cur,window:ctx.selectedDrawWindow,drawsUsed:ctx.currentDraws.length,date:new Date().toISOString(),rows:rows.map(r=>({type:r.type,m:r.m,b:r.b,score:r.fieldScore}))}));}catch(e){}
     const sum=[[ctx.currentDraws.length,'тиражей в анализе'],[rows.length,'строк создано'],[strongBalls,'сильных шаров'],[strongLinks,'сильных связей']];
     document.getElementById('if-summary').innerHTML=sum.map(x=>'<div class="if-sumcard"><div class="if-sumv">'+x[0]+'</div><div class="if-suml">'+x[1]+'</div></div>').join('')+
@@ -5088,7 +4624,6 @@ async function IF_run(){
 function IF_close(){document.getElementById('if-ov').classList.remove('show');}
 function IF_reset(){IF_state=null;}
 
-/* ── Экран: вкладки ── */
 function IF_tab(t){
   if(!IF_state)return;
   IF_state.tab=t;
@@ -5145,19 +4680,13 @@ function IF_useRows(){
   IF_close();
   setGeneratedRows(IF_state.rows,'Готово: 10 исследовательских строк · Структурное поле данных · '+IF_state.ctx.lotteryName+' · '+IF_state.ctx.currentDraws.length+' тиражей.',true,undefined,{sourceType:'MATHEMATICAL_MODEL',modelId:'field'});
 }
-/* инициализация селектора окна */
 document.addEventListener('DOMContentLoaded',()=>{
   const sel=document.getElementById('if-win');
   if(sel)sel.value=String(IF_getWin());
 });
 
 
-/* ═══════════════════════════════════════════════════════════
-   КОНСЕНСУС МОДЕЛЕЙ · структурный анализ итоговых строк
-   ═══════════════════════════════════════════════════════════ */
 
-/* ── Реестр базовых моделей с семействами (динамический; world-* исключены —
-      они смешивают лотереи, что запрещено принципом контекста) ── */
 const CONS_MODELS=[
   {id:'freq',   name:'Частотный анализ',      family:'Историческая частотность'},
   {id:'bal',    name:'Балансированный',       family:'Горячие / холодные числа'},
@@ -5178,7 +4707,6 @@ const CONS_ROWS_PER_MODEL=10;
 var CONS_state=null;
 function CONS_reset(){CONS_state=null;}
 
-/* ── Запуск: все модели × 10 строк через единый контекст ── */
 async function CONS_run(){
   const ctx=await IF_ctx();
   const l=L();
@@ -5195,7 +4723,6 @@ async function CONS_run(){
   body.innerHTML='<div class="if-empty">🧠 Модели создают исследовательские строки…</div>';
   await withModelBusy('Генерирую математическую модель…',async()=>{
   await new Promise(r=>setTimeout(r,60));
-  /* 1) строки всех базовых моделей */
   const modelRows=[];
   for(const M of CONS_MODELS){
     let rows=[];
@@ -5212,7 +4739,6 @@ async function CONS_run(){
     body.innerHTML='<div class="if-empty">🧠 '+M.name+' — готово…</div>';
     await new Promise(r=>setTimeout(r,10));
   }
-  /* 2) Consensus Score: только базовые модели (40/25/20/15) */
   const maxN=l.mB;
   const byNum=Array.from({length:maxN+1},()=>({models:new Set(),fams:new Set(),freq:0,perModel:new Map()}));
   for(const r of modelRows)for(const n of r.m){
@@ -5224,22 +4750,17 @@ async function CONS_run(){
   const cons=[];
   for(let n=1;n<=maxN;n++){
     const e=byNum[n];
-    /* устойчивость: среднее появлений на поддержавшую модель, норм. к 10 строкам */
     const stab=e.models.size?[...e.perModel.values()].reduce((a,b)=>a+b,0)/e.models.size/CONS_ROWS_PER_MODEL:0;
     const score=100*(0.40*(e.models.size/totModels)+0.25*(e.fams.size/totFams)+0.20*(e.freq/maxFreq)+0.15*Math.min(stab,1));
     cons.push({n,score:Math.round(score),models:e.models.size,fams:e.fams.size,freq:e.freq,stab});
   }
-  /* 3) Структурное поле данных: анализ + 10 строк с учётом консенсуса */
   const A=IF_scores(ctx.currentDraws,'main',l.mB,l.pM);
   const bonusCnt=drawBonusCount?drawBonusCount(l):(l.pBo||0);
   const Ab=(l.bB&&bonusCnt)?IF_scores(ctx.currentDraws,'bonus',l.bB,bonusCnt):null;
-  /* поле видит консенсус: подмешиваем Consensus Score в веса поля (но не в сам Consensus Score!) */
   const blended={...A,scores:A.scores.map(s=>({...s,score:Math.round(0.6*s.score+0.4*((cons[s.n-1]||{}).score||0))}))};
   const fieldRows=IF_buildRows(blended,Ab,l,ctx).map(r=>{const fixed=normalizeGeneratedRow(r,l);return{modelId:'field',modelName:'Структурное поле данных',family:'Исследовательская meta-модель',rowNumber:0,lotteryId:ctx.lotteryId,window:ctx.currentDraws.length,m:fixed.m,b:fixed.b,typeName:r.typeName,explanation:r.explanation,generatedAt:r.generatedAt};});
   CONS_state={ctx,l,modelRows,fieldRows,cons,A,Ab,lot:cur,pickN:5,pickMode:'mixed'};
-  /* сохранить эксперимент */
   try{localStorage.setItem('loto_cons_exp',JSON.stringify({lottery:cur,window:ctx.selectedDrawWindow,drawsUsed:ctx.currentDraws.length,models:CONS_MODELS.map(m=>m.id),date:new Date().toISOString()}));}catch(e){}
-  /* 4) сводка + топ чисел */
   const sum=[[CONS_MODELS.length,'базовых моделей'],[modelRows.length,'строк моделей'],[fieldRows.length,'строк структурного анализа'],[modelRows.length+fieldRows.length,'всего кандидатов'],[totFams,'семейств моделей'],[ctx.currentDraws.length,'тиражей использовано']];
   document.getElementById('cons-summary').innerHTML=sum.map(x=>'<div class="if-sumcard"><div class="if-sumv">'+x[0]+'</div><div class="if-suml">'+x[1]+'</div></div>').join('');
   const top=[...cons].sort((a,b)=>b.score-a.score).slice(0,12);
@@ -5253,7 +4774,6 @@ async function CONS_run(){
 }
 function CONS_close(){document.getElementById('cons-ov').classList.remove('show');}
 
-/* ── Модал «Собрать итоговую выборку» ── */
 const PICK_MODES=[
   ['consensus','Максимальный консенсус','Строки с высокой поддержкой среди разных моделей и математических семейств.'],
   ['balance','Баланс и разнообразие','Строки с контролем диапазонов, суммы, чётности и минимизацией повторов.'],
@@ -5274,7 +4794,6 @@ function PICK_setN(n){CONS_state.pickN=n;CONS_openPick();}
 function PICK_setMode(m){CONS_state.pickMode=m;CONS_openPick();}
 function PICK_close(){document.getElementById('pick-ov').classList.remove('show');}
 
-/* ── Candidate Score + двухэтапный диверсифицированный отбор ── */
 function CONS_candidateScore(row,st){throw new Error('backend_only');}
 async function PICK_go(){
   const st=CONS_state;if(!st)return;
@@ -5289,7 +4808,6 @@ async function PICK_go(){
   for(let i=0;i<phrases.length;i++){body.innerHTML='<div class="if-empty">'+phrases[i]+'</div>';await new Promise(r=>setTimeout(r,260));}
   const{l,ctx,cons}=st;
   const pairKey=(a,b)=>Math.min(a,b)+'-'+Math.max(a,b);
-  /* кандидаты: строки моделей + строки поля; контрольный режим — свежий random */
   let pool;
   if(st.pickMode==='random'){
     pool=Array.from({length:st.pickN},()=>({modelId:'control',modelName:'Контрольная random',family:'Равномерная случайность',m:rnd(l.mB,l.pM).sort((a,b)=>a-b),b:(drawBonusCount(l)&&l.bB)?rnd(l.bB,drawBonusCount(l)).sort((a,b)=>a-b):[],typeName:'Контрольная random-строка'}));
@@ -5297,11 +4815,9 @@ async function PICK_go(){
     pool=[...st.modelRows,...st.fieldRows].map(r=>{const fixed=normalizeGeneratedRow(r,l);return{...r,m:fixed.m,b:fixed.b};});
   }
   pool.forEach(r=>{r.cs=CONS_candidateScore(r,st);});
-  /* режим-зависимый детерминированный порядок: при равных целях режимы выбирают разное */
   {let seed=0;for(const ch of st.pickMode)seed=(seed*31+ch.charCodeAt(0))>>>0;
    const rng=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
    for(let i=pool.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}}
-  /* Этап 2: последовательный диверсифицированный выбор */
   const chosen=[],usedPairs=new Set();
   const dedup=new Set();
   pool=pool.filter(r=>{const k=r.m.join(',');if(dedup.has(k))return false;dedup.add(k);return true;});
@@ -5336,7 +4852,6 @@ async function PICK_go(){
   const matrixRows=ensureUniqueGeneratedRows(chosen.map(r=>{const fixed=normalizeGeneratedRow(r,l);return{...r,m:fixed.m,b:fixed.b};}),l);
   st.matrix=matrixRows;
   try{localStorage.setItem('loto_matrix_exp',JSON.stringify({lottery:cur,mode:st.pickMode,n:st.pickN,date:new Date().toISOString(),rows:matrixRows.map(r=>({m:r.m,b:r.b,model:r.modelId,cs:r.cs}))}));}catch(e){}
-  /* рендер итоговой матрицы */
   const totalCand=st.modelRows.length+st.fieldRows.length;
   document.getElementById('matrix-sub').textContent=matrixRows.length+' '+rowWord(matrixRows.length)+' из '+totalCand+' исследовательских результатов';
   document.getElementById('matrix-ctx').textContent=ctx.lotteryName+' · последние '+ctx.currentDraws.length+' доступных тиражей · режим: '+(PICK_MODES.find(m=>m[0]===st.pickMode)||[])[1];
@@ -5390,20 +4905,14 @@ function MATRIX_judge(){
 }
 
 
-/* ═══════════════ ПОДЕЛИТЬСЯ (Web Share API + буфер) ═══════════════ */
 function rowsAsText(rws,l){
   return rws.map((r,i)=>(i+1)+') '+r.m.join(' ')+(r.b&&r.b.length?' | '+r.b.join(' '):'')).join('\n');
 }
-// Адрес, который уходит получателю. В Capacitor страница живёт на capacitor://localhost или
-// https://localhost — у получателя такая ссылка не откроется, поэтому там всегда канонический сайт.
 function appShareUrl(){
   const canonical=document.querySelector('link[rel="canonical"]')?.href||'https://lottosimulator.app/';
   const local=!/^https?:$/.test(location.protocol)||/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   return local?canonical:location.href.split(/[?#]/)[0];
 }
-// Системное меню «Поделиться»: native (Capacitor Share, iOS/Android) → Web Share API.
-// 'shared' / 'cancelled' — меню показано (пользователь поделился или сам закрыл), false — меню
-// недоступно, нужен fallback.
 async function openShareSheet(payload){
   const nativeShare=window.LotoNativeShare;
   if(nativeShare&&typeof nativeShare.share==='function'){
@@ -5422,18 +4931,14 @@ async function shareText(title,text){
   try{await navigator.clipboard.writeText(payload.text);showCopyToast('📋 Скопировано — вставь в любой мессенджер');}
   catch(e){showFeedback('Поделиться','Скопируй вручную:\n\n'+payload.text,'📤',9000);}
 }
-// «Поделиться Lotto Simulator» — ОДНА логика для блока на главной (#home-share) и для About.
-// Приглашение — на языке интерфейса, адрес — всегда канонический сайт без параметров: ни
-// сессия, ни capacitor://localhost получателю не уходят.
 const APP_SHARE_INVITE='Попробуй Lotto Simulator — симулятор лотерей со статистикой тиражей, генератором чисел и 3D-барабаном. Не продаёт билеты и не гарантирует выигрыш.';
 function appSharePayload(){
   const url=document.querySelector('link[rel="canonical"]')?.href||'https://lottosimulator.app/';
   const text=appText(APP_SHARE_INVITE);
   return {title:'Lotto Simulator',text,url,full:text+'\n'+url};
 }
-// Официальные URL-механизмы публикации (только адрес/текст в параметрах, без ключей и трекинга).
 const APP_SHARE_LINKS={
-  facebook:p=>'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(p.url),
+  facebook:p=>'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(p.url)+'#no_universal_links',
   x:p=>'https://x.com/intent/tweet?text='+encodeURIComponent(p.text)+'&url='+encodeURIComponent(p.url),
   reddit:p=>'https://www.reddit.com/submit?url='+encodeURIComponent(p.url)+'&title='+encodeURIComponent(p.text),
   telegram:p=>'https://t.me/share/url?url='+encodeURIComponent(p.url)+'&text='+encodeURIComponent(p.text),
@@ -5441,26 +4946,34 @@ const APP_SHARE_LINKS={
   linkedin:p=>'https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(p.url),
   email:p=>'mailto:?subject='+encodeURIComponent(p.title)+'&body='+encodeURIComponent(p.full),
 };
-// Instagram и TikTok не принимают веб-ссылку в редактор: текст+ссылка копируются, окно говорит об
-// этом, а его кнопка (новый жест пользователя — без блокировки всплывающих окон) открывает сервис:
-// на iOS/Android universal/app link отдаёт его приложению, иначе открывается сайт.
 const APP_SHARE_COPY_OPEN={
   instagram:{url:'https://www.instagram.com/',label:'Открыть Instagram'},
   tiktok:{url:'https://www.tiktok.com/',label:'Открыть TikTok'},
 };
 function openAppShareUrl(href){
-  // mailto: система отдаёт почтовому клиенту и в браузере, и в Capacitor (iOS/Android).
-  if(href.startsWith('mailto:')){location.href=href;return;}
-  if(window.LotoLinks)window.LotoLinks.open(href);else window.open(href,'_blank','noopener');
+  if(href.startsWith('mailto:')){location.href=href;return true;}
+  if(window.LotoLinks)return window.LotoLinks.open(href)!==false;
+  window.open(href,'_blank','noopener');
+  return true;
+}
+async function appShareCopyAndOffer(p,title,open){
+  let copied=true;
+  try{await writeClipboardText(p.full);}catch(e){copied=false;}
+  const opts=open?{primaryText:open.label,primaryAction:()=>openAppShareUrl(open.url),secondaryText:'Закрыть',secondaryAction:()=>{}}:undefined;
+  if(copied)showFeedback(title||'Текст и ссылка скопированы',(title?appText('Текст и ссылка скопированы')+'. ':'')+appText('Вставьте их в сообщение или публикацию.'),'📋',0,opts);
+  else showFeedback(title||'Не скопировано',appText('Скопируй вручную:')+'\n\n'+p.full,'📤',0,opts);
+  return copied?'copied':'manual';
 }
 function appShareManualCopy(value,target){
   showFeedback(appText('Не скопировано'),appText('Скопируй вручную:')+'\n\n'+value,'📤',0);
   appShareDone(target,'manual');
 }
-/* Home «Лотереи»: the static SEO pages exist on the web site only (scripts/build-seo-pages.mjs runs in
-   the web deploy, never in `cap sync`), so the block stays hidden inside the native apps. Each link
-   points at the page in the app's active language: English at the root, every other locale under
-   /<code>/ — the same URLs the pages' hreflang alternates use. */
+function watchAppShareMail(p){
+  if(window.LotoLinks&&window.LotoLinks.isNative())return;
+  let left=0;const mark=()=>{left=1;};
+  addEventListener('blur',mark);
+  setTimeout(()=>{removeEventListener('blur',mark);if(!left&&!document.hidden&&document.hasFocus())appShareCopyAndOffer(p,'Отправить по электронной почте');},2500);
+}
 (function initHomeGuides(){
   const box=document.getElementById('home-guides');
   if(!box)return;
@@ -5477,15 +4990,21 @@ function appShareManualCopy(value,target){
   box.hidden=false;
   window.addEventListener('loto:languagechange',apply);
 })();
-// Итог настоящего нажатия (канал + что вышло) — в first-party аналитику; телеметрия сама проверяет,
-// что это был жест человека на этой кнопке, и ничего не шлёт без согласия.
 function appShareDone(target,result){try{window.LotoTelemetry?.shareDone?.(target,result);}catch(_e){}}
 let appShareBusy=false;
 async function shareAppTo(target,btn){
   const p=appSharePayload();
   const link=APP_SHARE_LINKS[target];
-  // Синхронно, внутри жеста: иначе Safari/Firefox блокируют новое окно.
-  if(link){openAppShareUrl(link(p));appShareDone(target,'opened');return;}
+  if(link){
+    const href=link(p);
+    if(openAppShareUrl(href)){
+      appShareDone(target,'opened');
+      if(target==='email')watchAppShareMail(p);
+      return;
+    }
+    appShareDone(target,await appShareCopyAndOffer(p,'',{url:href,label:document.querySelector('#home-share [data-share="'+target+'"]').getAttribute('aria-label')}));
+    return;
+  }
   if(target==='copy'){
     try{await writeClipboardText(p.url);}catch(e){appShareManualCopy(p.url,target);return;}
     showCopyToast(appText('🔗 Ссылка скопирована'));appShareDone(target,'copied');
@@ -5494,13 +5013,9 @@ async function shareAppTo(target,btn){
   }
   const dest=APP_SHARE_COPY_OPEN[target];
   if(dest){
-    try{await writeClipboardText(p.full);}catch(e){appShareManualCopy(p.full,target);return;}
-    appShareDone(target,'copied');
-    showFeedback(appText('Текст и ссылка скопированы'),appText('Вставьте их в сообщение или публикацию.'),'📋',0,
-      {primaryText:dest.label,primaryAction:()=>openAppShareUrl(dest.url),secondaryText:'Закрыть',secondaryAction:()=>{}});
+    appShareDone(target,await appShareCopyAndOffer(p,'',dest));
     return;
   }
-  // Системное меню со всеми установленными приложениями; без него — текст+ссылка в буфер.
   if(appShareBusy)return;
   appShareBusy=true;
   try{
@@ -5514,7 +5029,6 @@ async function shareAppTo(target,btn){
 function shareApp(){return shareAppTo('system');}
 window.shareApp=shareApp;
 window.shareAppTo=shareAppTo;
-// Символ «Поделиться»: на iOS/iPadOS/macOS — системный (квадрат со стрелкой), на остальных — три узла.
 try{if(/iPhone|iPad|iPod|Macintosh/i.test(navigator.userAgent||''))document.documentElement.setAttribute('data-share-glyph','apple');}catch(e){}
 function shareRows(){
   const l=L();fillAll();
@@ -5529,7 +5043,6 @@ function shareMatrix(){
   shareText(appText('Матрица консенсуса')+' · '+st.ctx.lotteryName,appText('Итоговая матрица консенсуса')+' · '+st.ctx.lotteryName+'\n'+rowsAsText(st.matrix,st.l));
 }
 
-/* ═══════════════ ПОБЕДНАЯ КОМБИНАЦИЯ + БИЛЕТ ═══════════════ */
 function ticketOrCombo(ev){
   if(ev&&ev.target&&ev.target.closest('button'))return;
   if(lastDraw)TK_open();else WC_open();
@@ -5595,32 +5108,17 @@ function TK_open(){
 }
 function TK_close(){document.getElementById('ticket-ov').classList.remove('show');}
 
-/* ═══════════════ ВЕРХОВНЫЙ СУДЬЯ ═══════════════ */
-// Two states that are never mixed, because they are two different user intentions:
-//   mode 'analyze'   — the user already has combinations: the Judge reads exactly those.
-//   mode 'recommend' — the user has none: the Judge may draft its own rows, but ONLY after
-//                      the user explicitly asks for it.
-// Opening (or closing) this window must never create, replace or re-label a single row.
-// It used to call fillAll() on open, which filled the two empty starter rows with random
-// numbers, stamped them HOME_GENERATOR · Случайный выбор and presented them as "your 2 rows".
 var SUP_state=null;
-// The combinations the user really has right now: complete rows only, read-only copies.
 function supExistingRows(src){
   const l=L();
   const list=src==='sim'?rows:((CONS_state&&CONS_state.matrix)||[]);
   return list.filter(r=>r&&Array.isArray(r.m)&&r.m.length===l.pM).map(r=>({m:[...r.m],b:[...(r.b||[])]}));
 }
-// How many rows the Judge may propose when it has to pick them itself. Both existing FREE rules
-// apply and neither is invented here: the generator's rows-per-run cap, and the group-analysis
-// cap (the Judge still has to weigh every row it drafts). PRO keeps the usual MAX_ROWS.
 function supRecommendMax(){
   if(hasConfirmedPro())return MAX_ROWS;
   const perRun=Math.max(1,Number(window.LotoCommercial?.freeGenerationRowsPerRun)||5);
   return Math.max(1,Math.min(MAX_ROWS,perRun,groupAnalysisFreeLimit()));
 }
-// Draft rows the Judge weighs when it proposes combinations itself. They exist only inside this
-// call: they are never written into `rows`, never stored and never get provenance of their own —
-// only the verdict the user asks for becomes a real combination.
 function supDraftRows(count){
   const l=L(),dBo=drawBonusCount(l),out=[];
   for(let i=0;i<count;i++)out.push({m:rnd(l.mB,l.pM),b:dBo>0?rnd(l.bB,dBo):[]});
@@ -5628,7 +5126,7 @@ function supDraftRows(count){
 }
 function SUP_open(src){
   const l=L(),game=l.short||l.name;
-  supRecRows=[];supRecMeta={drawsN:0};   // a previous recommendation never leaks into a new session
+  supRecRows=[];supRecMeta={drawsN:0};    
   const existing=supExistingRows(src);
   if(existing.length){
     const processingRows=prepareRowsForGroupAnalysis(existing,'judge');
@@ -5672,7 +5170,6 @@ function SUP_renderSelection(){
       '<option value="'+st.total+'"'+(st.n===st.total?' selected':'')+'>'+last+'</option></select>';
   }
 }
-// One line that always says what the button will do with the chosen number.
 function SUP_renderPick(){
   const st=SUP_state,el=document.getElementById('sup-sel');if(!st||!el)return;
   el.textContent=st.mode==='recommend'?`Судья подберёт рядов: ${st.n}`:`Для анализа выбрано: ${st.n} / ${st.total}`;
@@ -5683,8 +5180,6 @@ function SUP_setN(n,el){
   document.querySelectorAll('#sup-counts .pick-cnt').forEach(b=>b.classList.toggle('on',+b.textContent===st.n));
   SUP_renderPick();
 }
-// The rows handed to the Judge. In 'analyze' mode these are the user's own rows; in 'recommend'
-// mode the Judge drafts them here, at the moment the user presses the button — never on open.
 function getSupSelectedRows(){
   const st=SUP_state;if(!st)return[];
   const n=Math.max(1,Math.min(Math.max(1,st.total),parseInt(st.n,10)||1));
@@ -5692,37 +5187,23 @@ function getSupSelectedRows(){
   return srcRows.slice(0,n);
 }
 window.getSupSelectedRows=getSupSelectedRows;
-// Provenance of a row this window produced: a Judge recommendation is the Judge's own work, not
-// the generator that drew the draft numbers it weighed.
 function supRowSource(){return{sourceType:SUP_state&&SUP_state.mode==='recommend'?'JUDGE_RECOMMENDATION':'JUDGE'};}
 function supStatusText(count){
   return supRowSource().sourceType==='JUDGE_RECOMMENDATION'
     ?`Готово: ${count} ${rowWord(count)} · Верховный судья · Рекомендация.`
     :`Готово: ${count} ${rowWord(count)} · Верховный судья.`;
 }
-// Options the backend Judge (commercial-runtime) applies for THIS window. `finalize` is the whole
-// difference between the two processes: in recommendation mode the Judge is reviewing ITS OWN
-// drafts, so its replacements are its own internal decisions and are applied before the result is
-// shown. In analysis mode the rows belong to the user, so the replacements stay a proposal.
 window.supJudgeOptions=function(){
   if(!SUP_state||SUP_state.mode!=='recommend')return{};
-  // JUDGE_apply already shows the transfer state, closes the sheet and jumps to the rows. This
-  // onApply only runs if a resumed action lost its finalize flag and fell back to the review UI.
   return{finalize:true,onApply:(finalRows)=>{
     SUP_close();
     setGeneratedRows(finalRows,supStatusText(finalRows.length),false,undefined,{sourceType:'JUDGE_RECOMMENDATION'});
   }};
 };
 
-// ── FINAL Верховный судья recommendations ───────────────────────────────────────────────────
-// The Judge's finished decision on rows it created itself. It lives here, in memory, until the
-// user takes one of the three explicit paths under it (accept · jury · defense). Nothing reaches
-// the ticket, storage or saved combinations before that.
 let supRecRows=[],supRecMeta={drawsN:0};
 function supRecommendationRows(){return supRecRows;}
 function supRecommendationRow(index){return supRecRows[index]||null;}
-// A Jury/Defense decision taken on a recommendation updates it in place — exactly like the model
-// Result modal — and re-renders the list. It is still not committed to the ticket.
 function supRecommendationUpdate(index,row){
   if(!supRecRows[index]||!row||!Array.isArray(row.m))return false;
   const next={m:[...row.m],b:[...(row.b||[])]};
@@ -5734,13 +5215,10 @@ function supRecommendationUpdate(index,row){
 window.supRecommendationRows=supRecommendationRows;
 window.supRecommendationRow=supRecommendationRow;
 window.supRecommendationUpdate=supRecommendationUpdate;
-// The Judge has finished deliberating: keep the final rows and show them. drawsN is the real size
-// of the analysed period reported by the run that produced them.
 function SUP_showRecommendation(finalRows,meta){
   const l=L();
   const list=normalizeGeneratedRows(finalRows,l).filter(r=>r.m.length===l.pM);
   if(!list.length){showFeedback('Верховный судья','Судья не смог собрать рекомендацию. Попробуйте ещё раз.','⚖️',3600);return false;}
-  // In-memory provenance from the start, so Jury and Defense see the real origin of the input.
   list.forEach(row=>{const prov=validRowProv(row,l)||createRowProv(row,{sourceType:'JUDGE_RECOMMENDATION'});if(prov)row.prov=prov;else delete row.prov;});
   supRecRows=list;supRecMeta={drawsN:Math.max(0,Number(meta&&meta.drawsN)||0)};
   if(SUP_state)SUP_state.mode='recommend';
@@ -5753,12 +5231,8 @@ function SUP_showRecommendation(finalRows,meta){
   }
   return true;
 }
-// The final screen: clean rows and three honest paths. No self-replacement chips — the Judge does
-// not argue with the recommendation it has just made.
 function SUP_renderRecommendation(){
   const l=L(),res=document.getElementById('sup-result');if(!res||!supRecRows.length)return;
-  // Russian source text goes into the DOM as-is: the i18n observer localizes it and keeps the
-  // source, so a language switch while the screen is open re-translates it correctly.
   const checked=supRecMeta.drawsN>0?` <span>Проверено по ${supRecMeta.drawsN} тиражам выбранного периода.</span>`:'';
   res.innerHTML='<div class="if-seclbl">'+`⚖️ Рекомендации Верховного судьи · ${supRecRows.length} ${rowWord(supRecRows.length)}`+'</div>'+
     '<div class="if-note" style="margin:0 0 12px"><span>Судья составил эти ряды сам и сам их проверил: каждое число взвешено по структуре поля за выбранный период — частота, пары, пропуски, зоны, чётность, суммы. Это его итоговое решение, а не прогноз.</span>'+checked+'</div>'+
@@ -5773,7 +5247,6 @@ function SUP_renderRecommendation(){
       '<button class="btn-exp" type="button" data-loto-event-click="SUP_share()">📤 Поделиться</button>'+
     '</div>';
 }
-// The only place a recommendation becomes a real row of the ticket.
 async function SUP_accept(){
   if(!supRecRows.length)return;
   const list=supRecRows.map(r=>{const row={m:[...r.m],b:[...(r.b||[])]};if(r.prov)row.prov=r.prov;return row;});
@@ -5791,10 +5264,8 @@ async function SUP_go(){
   res.innerHTML='<div class="if-empty" style="padding:20px">⚖️ Судья взвешивает голоса рядов и структуру поля…</div>';
   await new Promise(r=>setTimeout(r,60));
   const ctx=await IF_ctx();
-  /* голоса чисел в переданных рядах */
   const support=new Array(l.mB+1).fill(0),supB=new Array((l.bB||0)+1).fill(0);
   selectedRows.forEach(r=>{r.m.forEach(n=>{if(n>=1&&n<=l.mB)support[n]++;});(r.b||[]).forEach(n=>{if(l.bB&&n>=1&&n<=l.bB)supB[n]++;});});
-  /* сила поля по выбранному периоду */
   let A=null,Ab=null;
   if(ctx.currentDraws.length>=5){
     A=IF_scores(ctx.currentDraws,'main',l.mB,l.pM);
@@ -5825,7 +5296,6 @@ async function SUP_go(){
     verdict.push({m,b});
   }
   st.verdict=ensureUniqueGeneratedRows(verdict,l);
-  // Recommendation mode: the rows are the Judge's own finished decision → the final screen.
   if(st.mode==='recommend'){SUP_showRecommendation(st.verdict,{drawsN:ctx.currentDraws.length});return;}
   const issued=st.verdict;
   res.innerHTML='<div class="if-seclbl">Вердикт судьи · '+verdict.length+' '+rowWord(verdict.length)+'</div>'+
@@ -5853,7 +5323,6 @@ function SUP_share(){
   shareText(title+' · '+L().name,'⚖️ '+title+' · '+L().name+'\n'+rowsAsText(list,L()));
 }
 
-/* ═══════════════ ПЕРИОД АНАЛИЗА: динамические пресеты от базы ═══════════════ */
 async function PERIOD_range(){
   const from=document.getElementById('period-from').value,to=document.getElementById('period-to').value;
   if(!from||!to||from>to){showCopyToast('Укажи корректный диапазон: «от» раньше «до»');return;}
@@ -5867,32 +5336,20 @@ async function PERIOD_range(){
 }
 let PERIOD_opening=false;
 async function PERIOD_open(){
-  if(PERIOD_opening)return;                 /* one tap only: ignore repeats while the base loads */
+  if(PERIOD_opening)return;                  
   PERIOD_opening=true;
-  /* Open the modal INSTANTLY on the first tap with a loading state, then fill it once the base is
-     ready. Previously the modal was shown only AFTER loadFullHistory finished, so for a big base
-     (EuroJackpot = 986 draws) the button felt stuck and needed a second tap. */
   const ov=document.getElementById('period-ov'),presetsEl=document.getElementById('period-presets');
-  /* Show the ⏳ placeholder ONLY when the base isn't hydrated yet. In the normal flow the label
-     already preloaded the full archive, so the list renders in the same microtask and the window
-     opens directly as the full period picker — no intermediate empty ⏳ window. */
   if(presetsEl&&!hasHydratedAnalyticsHistory(cur))presetsEl.innerHTML='<div class="pick-mode"><div class="pick-mode-t">⏳</div></div>';
   if(window.LotoModals)window.LotoModals.openModal('period-ov');else ov.classList.add('show');
   try{
   const l=L();
   let pack=await loadFullHistory(cur);
-  /* Guarantee the PRO menu is NEVER built from a restricted/FREE pack (the backend has the full
-     history — e.g. EuroJackpot = 986 draws). If PRO still sees a restricted pack (a stale pre-PRO
-     cache), force a fresh load of the full archive before rendering. */
   if(window.LotoCommercial?.access?.accessLevel==='pro'&&pack.restricted){
     try{pack=await loadFullHistory(cur,{force:true});}catch(_e){}
   }
   const freeDraws=await loadD(cur),isPro=window.LotoCommercial?.access?.accessLevel==='pro'&&!pack.restricted;
   const allDraws=isPro?(pack.draws||[]):freeDraws,currentDraws=isPro?(pack.currentDraws||[]):freeDraws;
   const draws=IF_getScope()==='all'?allDraws:IF_getScope()==='free'?freeDraws:currentDraws,n=draws.length;
-  /* Presets + date bounds come from the FULL available base (PRO: all history; FREE: the free
-     window), NOT the currently-selected scope — otherwise selecting a small scope (e.g. 'free')
-     would hide «За N лет» / «Последние 150/100/50», truncating the menu. */
   const baseDraws=isPro?allDraws:freeDraws,bn=baseDraws.length;
   if(bn){
     const newest=baseDraws[0].date,oldest=baseDraws[bn-1].date;
@@ -5903,7 +5360,7 @@ async function PERIOD_open(){
     if(typeof refreshLocalizedDates==='function')refreshLocalizedDates();
   }
   const y=d=>{const now=Date.now();return baseDraws.filter(x=>x&&x.date&&(now-new Date(x.date).getTime())<=d*365.25*24*3600*1000).length;};
-  const presets=[];   /* [value, label, locked] */
+  const presets=[];    
   if(isPro){
     presets.push(['all',appText('Вся история')+' · '+allDraws.length+' '+appText('тиражей'),false]);
     presets.push(['current',appText('Текущие правила')+' · '+currentDraws.length+' '+appText('тиражей'),false]);
@@ -5911,9 +5368,6 @@ async function PERIOD_open(){
     [[1,'За 1 год'],[2,'За 2 года'],[3,'За 3 года']].forEach(([yy,lbl])=>{const c=y(yy);if(c>=10&&c<bn)presets.push([c,appText(lbl)+' · '+c,false]);});
     [150,100,50].forEach(k=>{if(bn>k)presets.push([k,appText('Последние')+' '+k,false]);});
   }else{
-    /* FREE sees the SAME full table as PRO, but every PRO period is LOCKED → paywall; only the
-       FREE-период is usable. FREE should see what PRO unlocks, not a truncated table. Counts for
-       the locked rows use the full available total from metadata (pack.total) where known. */
     const ft=Number(pack.total)||0;
     presets.push(['all',appText('Вся история')+(ft?(' · '+ft+' '+appText('тиражей')):''),true]);
     presets.push(['current',appText('Текущие правила'),true]);
@@ -5934,9 +5388,6 @@ async function PERIOD_open(){
   }finally{PERIOD_opening=false;}
 }
 function PERIOD_close(){PERIOD_opening=false;document.getElementById('period-ov').classList.remove('show');}
-/* Every period selection shows the shared ⏳ loading UI with a localized description of WHAT was
-   chosen (min visible flash via withBusy), then closes the picker and returns to the generator
-   (period-ov is nested, so the generator stays mounted). */
 async function PERIOD_set(v){
   IF_setWin(v);CONS_reset();
   const n=(await IF_baseDraws(cur)).length;
@@ -5962,8 +5413,6 @@ async function PERIOD_custom(){
   if(v>available){showCopyToast('Доступно только '+available+' тиражей');return;}
   await PERIOD_set(v);
 }
-/* FREE tapped a PRO-only period: show the unified paywall confirm. «Остаться здесь» keeps the user
-   in the (nested) Period-Analysis table; «Перейти в PRO» opens the full paywall. Never applies. */
 async function PERIOD_lockedPro(){
   const go=await customConfirm(
     appText('Полная история доступна в PRO. Бесплатные расчёты используют официальное скользящее FREE-окно выбранной лотереи.'),
@@ -5985,7 +5434,6 @@ async function PERIOD_refreshLabel(){
   if(note)note.textContent=w>0?('Последние '+Math.min(w,n)+' из '+n+' доступных'):(scopeLabel+' · '+n+' тиражей');
 }
 
-/* ═══════════════ АВТОПРОВЕРКА БИЛЕТОВ + ПРАЗДНИК ═══════════════ */
 function CELE_show(title,msg,icon){
   const burst=document.getElementById('cele-burst');
   const EMO=['🎉','✨','💰','🪙','⭐','🏆','🎊'];
@@ -6001,12 +5449,7 @@ function CELE_show(title,msg,icon){
 }
 function CELE_close(){document.getElementById('cele-ov').classList.remove('show');}
 function notifyAllowed(){return localStorage.getItem('loto_notify')==='1'&&typeof Notification!=='undefined'&&Notification.permission==='granted';}
-/* Shared 🔔 Notifications section — thin UI over LotoNotifications (one engine for
-   iOS/APNs, Android/FCM, Web Push). The legacy in-app "win alert" is folded into the
-   saved_ticket_results category; loto_notify is kept mirrored so autoCheckFavorites still
-   works as a local fallback while the app is open. */
 function NOTIF_lotList(){try{return Object.keys(LOTS);}catch(e){return[];}}
-/* selected_lotteries tri-state, shared with notification-center.js: [] = all, ['__none__'] = none, [ids…] = subset. The sentinel matches no real lottery, so the backend delivers nothing for it. */
 var NOTIF_NONE='__none__';
 function NOTIF_selectedGames(sel){sel=sel||[];if(sel.indexOf(NOTIF_NONE)>=0)return[];const all=NOTIF_lotList();if(!sel.length)return all.slice();return all.filter(id=>sel.indexOf(id)>=0);}
 function NOTIF_canonLots(ids){const all=NOTIF_lotList();const uniq=all.filter(id=>ids.indexOf(id)>=0);if(!uniq.length)return[NOTIF_NONE];if(uniq.length===all.length)return[];return uniq;}
@@ -6015,26 +5458,18 @@ function NOTIF_boot(){
   window.LotoNotifications.onChange(NOTIF_render);
   window.LotoNotifications.init();
   window.addEventListener('loto-push-open',e=>NOTIF_openDestination(e.detail||{}));
-  /* The user centre routes a tapped OWNER push out of its own stream as `loto-owner-open`. The
-     owner centre is loaded only with the Owner Panel, so the shell must be able to honour that tap
-     on its own — otherwise an owner push opened nothing while the panel was closed. */
   window.addEventListener('loto-owner-open',e=>{const d=e.detail||{};NOTIF_openDestination({destination:'owner',notificationType:'owner_event',deepLink:d.deepLink||d.deeplink||d.link});});
   try{navigator.serviceWorker&&navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='LOTO_PUSH_OPEN')NOTIF_openDestination(e.data.data||{});});}catch(e){}
   NOTIF_consumeUrlDeepLink();
 }
 function NOTIF_openDestination(d){
   try{
-    // Owner notifications (destination = owner) open the Owner Panel deep link, never the user centre.
     if(d&&(d.destination==='owner'||d.notificationType==='owner_event')){
       const link=(d.deepLink&&/^#owner/.test(String(d.deepLink)))?String(d.deepLink):'#owner';
-      /* One tap can reach us twice (the runtime's `loto-push-open` and the user centre's
-         `loto-owner-open` both fire for the same native notification); honour it once. */
       const now=Date.now();
       if(window.__lotoOwnerLinkAt&&window.__lotoOwnerLink===link&&now-window.__lotoOwnerLinkAt<3000)return;
       window.__lotoOwnerLink=link;window.__lotoOwnerLinkAt=now;
       window.__lotoPendingOwnerLink=link;
-      // The owner centre lives INSIDE the panel, so the panel is the one entry point for a
-      // tapped owner push. A non-owner reaching here gets the server's «access denied» card.
       loadOwnerDashboard().then(()=>window.LotoOwnerDashboard&&window.LotoOwnerDashboard.openLink&&window.LotoOwnerDashboard.openLink(link)).catch(()=>{});
       return;
     }
@@ -6052,9 +5487,6 @@ function NOTIF_master(on){
 function NOTIF_allow(){document.getElementById('notif-explain').style.display='none';window.LotoNotifications.enableMaster().then(NOTIF_mirrorLegacy);}
 function NOTIF_notNow(){document.getElementById('notif-explain').style.display='none';}
 function NOTIF_cat(k,v){window.LotoNotifications.setCategory(k,v).then(()=>{NOTIF_mirrorLegacy();if(k==='saved_ticket_results')NOTIF_syncWatches(v);});}
-/* Saved tickets live only on-device. When saved_ticket_results is ON, register the local
-   favorites as minimal server-side watches so results can be checked while the app is closed;
-   OFF clears them. Numbers only, no extra data. */
 async function NOTIF_collectWatches(){
   try{
     const favs=await loadFav();const out=[];
@@ -6071,10 +5503,6 @@ function NOTIF_allLots(on){window.LotoNotifications.setSelectedLotteries(on?[]:[
 function NOTIF_toggleLot(id){const s=window.LotoNotifications.getState();const sel=NOTIF_selectedGames(s.prefs.selected_lotteries);const i=sel.indexOf(id);if(i>=0)sel.splice(i,1);else sel.push(id);window.LotoNotifications.setSelectedLotteries(NOTIF_canonLots(sel));}
 function NOTIF_openSettings(){if(!window.LotoNotifications.openAppSettings())showFeedback('Настройки','Откройте настройки устройства → приложение → Уведомления.','🔔',4200);}
 function NOTIF_mirrorLegacy(){const s=window.LotoNotifications.getState();const on=s.prefs.enabled&&s.prefs.saved_ticket_results&&s.permission==='granted';try{localStorage.setItem('loto_notify',on?'1':'0');}catch(e){}}
-/* The permission flow must never fail silently. Every outcome that is not «delivering» gets a
-   sentence naming what happened and where the user answers it: the browser's own site permission,
-   signing in, or simply waiting for the server. Without this the consent block just collapsed and
-   the switch stayed empty with no explanation — the reported bug. */
 function NOTIF_problemText(s){
   const P=window.LotoNotifications.PHASE;
   if(s.phase===P.ACTIVE||s.phase===P.DENIED||s.phase===P.NOT_SUPPORTED||s.phase===P.NEEDS_INSTALL||s.phase===P.REGISTERING)return'';
@@ -6100,9 +5528,6 @@ function NOTIF_render(s){
   show('notif-main',s.supported&&s.phase!==P.NEEDS_INSTALL&&s.phase!==P.DENIED);
   const master=document.getElementById('notif-master');if(master)master.checked=s.prefs.enabled&&s.permission==='granted';
   show('notif-cats',s.prefs.enabled&&s.permission==='granted');
-  /* Render from the runtime's resolver, never from an ad-hoc `!==false` guess: an unset key
-     must read as ITS default (the same one the runtime stores and the server gates on), so a
-     checkbox can never show ON while the stored/effective value is OFF. */
   const cp=(window.LotoNotifications.normalizePrefs?window.LotoNotifications.normalizePrefs(s.prefs):s.prefs);
   ['draw_results','jackpot_updates','prize_breakdown','deadline_reminders','saved_ticket_results'].forEach(k=>{const el=document.getElementById('notif-cat-'+k);if(el)el.checked=cp[k]===true;});
   const picked=NOTIF_selectedGames(s.prefs.selected_lotteries);const all=picked.length===NOTIF_lotList().length;const allEl=document.getElementById('notif-all-lots');if(allEl)allEl.checked=all;
@@ -6112,34 +5537,17 @@ function NOTIF_render(s){
   if(problem){const msg=NOTIF_problemText(s);problem.textContent=msg;problem.style.display=msg?'':'none';}
   const lbl=document.getElementById('notif-state-label');
   if(lbl){
-    /* «Готовим» only while it is actually still being prepared: once a reason is known the
-       label must not keep promising progress the problem note is denying. */
     const trouble=s.phase!==P.ACTIVE&&!!s.error;
     const preparing=!trouble&&(s.phase===P.REGISTERING||(s.phase===P.GRANTED&&s.prefs.enabled&&!s.transportReady));
     lbl.textContent=s.phase===P.ACTIVE?'· Включены':preparing?'· Готовим уведомления':s.phase===P.DENIED?'· Отключены системой':trouble?'· Не включены':s.phase===P.NOT_SUPPORTED?(native?'· Недоступны в приложении':'· Недоступны в этом браузере'):'';
   }
 }
-/* ══ PERSONAL WIN / MATCH SYSTEM ══════════════════════════════════════════════════════════════
-   Replaces the old "any saved favorite → ЕСТЬ ВЫИГРЫШ → generic Prizes tab" chain. A user-visible
-   playable row carries origin + creation time + the exact draw it was aimed at; when that draw's
-   official result arrives it is compared per-game (checkPrize) and classified:
-     • played  → real ticket the user marked as played → "У вас выигрыш"
-     • saved / generated → a match, NOT a claimed money win → "Есть призовое совпадение"
-   One summary opens a dedicated detail record (never the generic analytics Prizes tab). Pure
-   logic (dedup, retention, draw association, guards) lives in win-match-core.js. Defensive: any
-   failure here never breaks generation/the app. */
-/* Persona accuracy ledger (Judge · Defense Counsel · Jurors). The win/match scan hands over EVERY
-   row it settles against an official draw; court-core turns the advice the user actually APPLIED in
-   that row into facts with one key per persona, number, combination and draw, so a rescan, a reload
-   or the one-time backfill can never count a fact twice. Local and personal, like the history. */
 const LotoPersonaLedger=(function(){
   const KEY='loto_persona_facts_v1',BACKFILL='loto_persona_facts_backfill_v1';
   const core=()=>window.LotoCourtCore;
   const load=()=>{try{const v=JSON.parse(localStorage.getItem(KEY)||'null');return v&&v.v===1&&Array.isArray(v.facts)?v:{v:1,facts:[]};}catch(_e){return{v:1,facts:[]};}};
   const save=v=>{try{localStorage.setItem(KEY,JSON.stringify(v));}catch(_e){}};
   function rule(l){const picked=drawBonusCount(l);return{extraFromMain:drawBonusFromMainPool(l),bonusPicked:picked>0,mainChance:l.mB?l.pM/l.mB:0,bonusChance:picked>0&&l.bB?drawnBonusCount(l)/l.bB:0};}
-  /* One combination can be recorded for the same draw more than once (before and after a swap):
-     the variant carrying the most history is the one that was actually kept. */
   function latest(list){const by=new Map();for(const e of list||[]){const id=e&&e.prov&&e.prov.id;if(!id)continue;const cur=by.get(id);if(!cur||(e.prov.events||[]).length>=(cur.prov.events||[]).length)by.set(id,e);}return[...by.values()];}
   function record(list,draw){try{
     const C=core(),l=LOTS[draw.gameId];if(!C||!C.recommendationFacts||!l)return 0;
@@ -6148,7 +5556,6 @@ const LotoPersonaLedger=(function(){
     if(!facts.length)return 0;
     const merged=C.mergeFacts(load(),facts);if(merged.added)save(merged.ledger);return merged.added;
   }catch(_e){return 0;}}
-  /* One-time migration: rows the scan settled before this ledger existed. Idempotent like record(). */
   function backfill(history,drawsByGame){try{
     if(localStorage.getItem(BACKFILL))return;
     const groups=new Map();
@@ -6173,7 +5580,6 @@ const LotoWinMatch=(function(){
   const saveHist=a=>{if(ON)jset(CORE.HISTORY_KEY,CORE.retentionCleanup(a,Date.now()));};
   const loadMatches=()=>jget(CORE.MATCH_KEY,[]);
   const saveMatches=a=>jset(CORE.MATCH_KEY,(a||[]).slice(0,200));
-  /* The record the popup currently shows — lets "Статистика призов" land on ITS game. */
   let shown=null;
   const gname=id=>{try{const l=LOTS[id];return l&&(l.short||l.name)||id;}catch(_e){return id;}};
   const SRC={drum3d:'3D-симулятор',model:'Математическая модель',freq:'Модель частоты',bal:'Комбинированная модель',rnd:'Случайный генератор',man:'Сегментный охват',wheel:'Колёсная система',smartgen:'Генератор комбинаций',markov:'Модель Маркова',gauss:'Модель Гаусса',delta:'Интервальная модель',bayes:'Модель Байеса',overdue:'Gap-анализ',phys:'Физическая модель',chaos:'Модель хаоса',quantum:'Квантовая модель',paradox:'Система парадоксов','world-hot':'Мировой профиль','world-mix':'Мировой микс',manual:'Ручной ввод',saved:'Сохранённая комбинация',legacy:'Сохранённая комбинация',ticket:'Сыгранный билет',consensus:'Консенсус моделей',judge:'Верховный судья',generator:'Генератор'};
@@ -6181,14 +5587,12 @@ const LotoWinMatch=(function(){
   function sched(id){const l=LOTS[id];if(!l)return null;return{days:l.drawDays||[],tz:l.timeZone||'UTC',time:l.dl||'23:59'};}
   function targetDraw(id){try{const s=sched(id);return s?CORE.nextDrawDate(s,new Date()):null;}catch(_e){return null;}}
   function fmtMoney(amount,cur){try{return new Intl.NumberFormat(appLocale?appLocale():'en').format(amount)+(cur?(' '+cur):'');}catch(_e){return String(amount)+(cur?(' '+cur):'');}}
-  // Record ONLY user-visible playable rows (full main length for the game). Never internal trials.
   function record(id,rowList,origin){ if(!ON)return; try{
     id=id||cur; if(!Array.isArray(rowList)||!rowList.length)return; const l=LOTS[id]; if(!l)return;
     const clean=rowList.map(r=>({m:(r&&(r.m||r.main))||[],b:(r&&(r.b||r.bonus))||[],prov:(r&&r.prov)||null})).filter(r=>Array.isArray(r.m)&&r.m.length===l.pM);
     if(!clean.length)return;
     let h=loadHist(); h=CORE.recordRows(h,id,clean,origin||{source:'generator'},{now:Date.now(),targetDrawDate:targetDraw(id)}); saveHist(h);
   }catch(_e){} }
-  // Mark a saved combination as an actually-played ticket (Type A eligibility). Explicit user act only.
   function markSavedPlayed(id,m,b,played){ if(!ON)return; try{
     const l=LOTS[id]; if(!l)return; const mm=CORE.sortNums(m),bb=CORE.sortNums(b);
     let h=loadHist(); let hit=h.find(e=>e.gameId===id&&CORE.sortNums(e.main).join('-')===mm.join('-')&&CORE.sortNums(e.bonus).join('-')===bb.join('-'));
@@ -6196,7 +5600,6 @@ const LotoWinMatch=(function(){
     else{hit.saved=true;hit.played=!!played;}
     saveHist(h);
   }catch(_e){} }
-  // One-time migration of legacy favorites → history (saved, NEVER played, aimed at the NEXT draw).
   async function migrateFavorites(){ if(!ON)return; try{
     if(localStorage.getItem(MIGK))return;
     let favs=[]; try{favs=await loadFav();}catch(_e){favs=[];}
@@ -6229,10 +5632,6 @@ const LotoWinMatch=(function(){
       const lk='loto_wm_lastscan_'+id, last=localStorage.getItem(lk)||'';
       const nd=draws.filter(d=>d&&d.date&&d.date>last).sort((a,b)=>a.date.localeCompare(b.date));
       for(const d of nd){ const drawObj={gameId:id,date:d.date,main:d.main||[],bonus:d.bonus||[],drawId:d.drawId!=null?d.drawId:null};
-        /* The game schedule is passed so an OFF-SCHEDULE official draw (SuperEnalotto's
-           public-holiday Monday draws, Lotto Max's 2025-01-02) still reaches the rows that were
-           already live for it. `nd` is sorted oldest-first above, so the earliest draw a row was
-           live for claims it and the next scheduled draw cannot count it twice. */
         const settled=[];
         const ms=CORE.scanDrawAgainstHistory(h,drawObj,l,checkPrize,sched(id),e=>settled.push(e)); changed=true;
         if(settled.length)LotoPersonaLedger.record(settled,drawObj);
@@ -6253,8 +5652,6 @@ const LotoWinMatch=(function(){
     jset(NKEY,notified.slice(-500));
     const title=s.playedWins?T('У вас выигрыш'):T('Есть призовое совпадение');
     const body=title+' · '+gname(matches[0].gameId)+(matches.length>1?(' · '+matches.length):'');
-    // Persist the local result in the shared notification center. This keeps the exact match
-    // reopenable after the celebration is dismissed and uses the same stable dedup identity.
     try{if(window.LotoNotifCenter&&LotoNotifCenter.add){const first=matches[0];LotoNotifCenter.add({id:'wm:'+CORE.notificationKey(first),lotteryId:first.gameId,eventType:'saved_ticket_results',drawId:first.drawId!=null?first.drawId:first.drawDate,title,body,createdAt:new Date().toISOString(),payload:{winMatch:true,played:s.playedWins>0,title,body,matchId:matches.length===1?first.id:null,matchIds:matches.map(m=>m.id),drawDate:first.drawDate}});}}catch(_e){}
     if(notifyAllowed())try{ new Notification('🎰 Lotto Simulator',{body}); }catch(_e){}
     if(matches.length===1)openDetail(matches[0].id); else renderSummary(matches);
@@ -6266,7 +5663,6 @@ const LotoWinMatch=(function(){
     const dMain=new Set(m.drawMain||[]),dBon=new Set(m.drawBonus||[]);
     const created=new Date(m.createdAt); const cdate=isNaN(created)?'':created.toLocaleDateString(appLocale?appLocale():'en')+' '+created.toLocaleTimeString(appLocale?appLocale():'en',{hour:'2-digit',minute:'2-digit'});
     const bonusGame=(l.pBo||l.offBo||0)>0;
-    // Tillegg / Jolly / Lotto Max Bonus: never picked, matched by a ticket MAIN number.
     const extraFromMain=drawBonusFromMainPool(l);
     const bonusHit=extraFromMain?(m.userMain||[]).filter(n=>dBon.has(n)).length:m.bonusHit;
     const title=m.played?('🎉 '+T('У вас выигрыш!')):('🎯 '+T('Есть призовое совпадение'));
@@ -6284,10 +5680,6 @@ const LotoWinMatch=(function(){
       `<div style="margin-top:8px;opacity:.85">${T('Выигрышные числа')}</div>`+
       ballRow(m.drawMain,new Set(m.userMain),cls,bcls,bonusGame?m.drawBonus:null,new Set(extraFromMain?m.userMain:m.userBonus))+
       `<div style="margin-top:10px">${matchLine}</div>`+
-      /* The prize-category name is prose ("2-й приз · 6+tillegg", "ДЖЕКПОТ 🏆") and every game's
-         categories are in the translation catalog — but data-i18n-ignore used to pin it here, so a
-         German or Norwegian winner read the category in Russian. Translate it and leave the node
-         localizable so a language switch re-renders it too. */
       `<div>${T('Призовая категория')}: <b>${escapeHtml(T(m.tier||''))}</b></div>`+
       `<div style="margin-top:6px">${payoutLine}</div>`+
       `<div style="margin-top:10px;font-size:12.5px;opacity:.8">${statusLine}</div>`+
@@ -6304,9 +5696,6 @@ const LotoWinMatch=(function(){
   function openDetail(id){ try{ const store=loadMatches(); const m=store.find(x=>x.id===id); if(!m)return false; const el=document.getElementById('wm-body'); if(!el)return false; el.innerHTML=detailHtml(m); if(window.LotoI18n)try{window.LotoI18n.localizeTree(el,true);}catch(_e){} shown=m; showWm(); return true; }catch(_e){return false;} }
   function showWm(){const o=document.getElementById('wm-ov');if(o)o.classList.add('show');}
   function closeDetail(){const o=document.getElementById('wm-ov');if(o)o.classList.remove('show');}
-  /* Reuses the notification-centre deep link: the match's OWN game, the Prizes tab, scrolled to
-     that draw's card (paging the list until it materialises). Without a single shown record
-     (multi-match summary) it can only fall back to the Prizes tab of the current game. */
   function openPrizeStats(){ const m=shown; closeDetail();
     try{ if(m&&typeof revealPrizeDraw==='function'){revealPrizeDraw(m.gameId,m.drawId,m.drawDate);return;} }catch(_e){}
     try{ if(curPage!=='ana')selPage('ana'); }catch(_e){}
@@ -6315,9 +5704,7 @@ const LotoWinMatch=(function(){
   return { record, scan, markSavedPlayed, openDetail, closeDetail, openPrizeStats, openHistory, ready:ON };
 })();
 window.LotoWinMatch=LotoWinMatch;
-/* Compat entry point (kept name/call-sites): scan new official draws for personal matches. */
 async function autoCheckFavorites(){ try{ await LotoWinMatch.scan(); }catch(_e){} }
-/* праздник и в симуляторе при реальном призовом уровне */
 const _origShowBanner=showBanner;
 showBanner=function(dM,dB){
   _origShowBanner(dM,dB);
@@ -6326,7 +5713,6 @@ showBanner=function(dM,dB){
     const l=L();let best=null;
     rows.forEach(row=>{const p=checkPrize(row.m,row.b,dM,dB,l);if(p&&(!best||p.lvl>best.lvl))best=p;});
     if(best&&best.lvl>=4){
-      /* средний реальный приз этого уровня из базы, если есть */
       let extra='';
       try{
         const tiers=getPrizeTiers(l);
@@ -6335,30 +5721,13 @@ showBanner=function(dM,dB){
     }
   }catch(e){}
 };
-/* хуки */
 document.addEventListener('DOMContentLoaded',()=>{
   const lotTabs=document.getElementById('lot-tabs');
   enableHorizontalScroller(lotTabs,true);
   enableHorizontalScroller(document.getElementById('sched-strip'));
   setTimeout(()=>{PERIOD_refreshLabel().catch(()=>{});NOTIF_boot();},500);
   setTimeout(autoCheckFavorites,4500);
-  /* ══ OVERLAY PAGE SCROLLBAR ══════════════════════════════════════════════════════════════
-     Only runs where the probe in the first inline script found that this platform's scrollbars
-     take layout width and therefore switched the native page bar off. Everywhere else — Safari,
-     touch, a Mac set to "show scroll bars when scrolling" — the native bar already floats over
-     the content for free and this does nothing, so there is never a second bar.
-     It is a real scrollbar, not an indicator: the thumb is draggable, the track is clickable
-     (page at a time, like the platform default), and wheel/keyboard/trackpad are untouched
-     because nothing here intercepts them — the bar only ever READS window.scrollY and writes it
-     back through the same scrollTo() the browser would use.
-     Geometry is recomputed on scroll, on resize and whenever the document's height changes, all
-     coalesced into one rAF so a long page does not pay for it twice in a frame. */
   (function(){
-    /* `html.loto-overlay-bars` is the single source of truth: the bar exists exactly while that
-       class does. The guard is checked on every sync rather than once at startup, so the widget
-       cannot drift out of step with the class — and a test can turn it on in any engine, instead
-       of only in whichever ones happen to use space-taking scrollbars on the machine running it.
-       Until it is on, this costs one class check per rAF-coalesced scroll and builds nothing. */
     var MIN_THUMB=34,bar=null,thumb=null,raf=0,drag=null;
     var enabled=function(){return document.documentElement.classList.contains('loto-overlay-bars');};
     var metrics=function(){
@@ -6366,8 +5735,6 @@ document.addEventListener('DOMContentLoaded',()=>{
       var view=window.innerHeight;
       var full=Math.max(de.scrollHeight,document.body?document.body.scrollHeight:0);
       var max=Math.max(0,full-view);
-      /* The thumb is as big a share of the track as the viewport is of the document — the same
-         proportion a native bar uses, so it reads as "how much of the page you can see". */
       var size=max>0?Math.max(MIN_THUMB,Math.round(view*view/full)):0;
       return {view:view,max:max,size:size,travel:Math.max(0,view-size),
         y:Math.min(max,Math.max(0,window.scrollY||de.scrollTop||0))};
@@ -6401,8 +5768,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     var build=function(){
       bar=document.createElement('div');
       bar.className='loto-sbar';
-      /* Decoration for assistive tech: the document is already scrollable and reachable by
-         keyboard, and a second announced control would only add noise. */
       bar.setAttribute('aria-hidden','true');
       thumb=document.createElement('div');
       thumb.className='loto-sbar-thumb';
@@ -6419,7 +5784,6 @@ document.addEventListener('DOMContentLoaded',()=>{
       thumb.addEventListener('pointermove',onMove);
       thumb.addEventListener('pointerup',onUp);
       thumb.addEventListener('pointercancel',onUp);
-      /* Clicking the track pages towards the click, which is what the platform does by default. */
       bar.addEventListener('pointerdown',function(e){
         if(e.button||drag)return;
         var m=metrics();if(!m.max)return;
@@ -6432,8 +5796,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     };
     addEventListener('scroll',sync,{passive:true});
     addEventListener('resize',sync);
-    /* The document grows and shrinks on its own — a route change, a lottery switch, an archive
-       that finished loading — and none of that fires scroll or resize. */
     var observe=function(){
       if(!window.ResizeObserver||!document.body)return;
       try{new ResizeObserver(sync).observe(document.body);}catch(_){}
@@ -6444,7 +5806,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   })();
   let saRaf=0;
   const saUpd=()=>{
-    if(saRaf)return; /* защита от каскада мутаций: не чаще кадра */
+    if(saRaf)return;  
     saRaf=requestAnimationFrame(()=>{
       saRaf=0;
       const sa=document.getElementById('scroll-anchors'),btn=document.getElementById('sa-btn');
@@ -6452,7 +5814,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       const doc=document.documentElement;
       const full=Math.max(doc.scrollHeight,document.body.scrollHeight);
       const need=full>window.innerHeight*2;
-      if(sa.classList.contains('show')!==need)sa.classList.toggle('show',need); /* пишем только при изменении */
+      if(sa.classList.contains('show')!==need)sa.classList.toggle('show',need);  
       if(!need)return;
       const maxTop=Math.max(0,full-window.innerHeight);
       const mid=(window.scrollY||doc.scrollTop||0)<maxTop/2;
@@ -6462,7 +5824,6 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(btn.dataset.dir!==dir)btn.dataset.dir=dir;
     });
   };
-  /* Собственная плавная прокрутка: видимые шары, стоп касанием */
   let saAnim=0;
   const SA_stop=()=>{if(saAnim){cancelAnimationFrame(saAnim);saAnim=0;document.body.classList.remove('sa-flight');saUpd();}};
   ['touchstart','pointerdown','wheel'].forEach(ev=>window.addEventListener(ev,e=>{
@@ -6473,12 +5834,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     const btn=document.getElementById('sa-btn');
     const doc=document.documentElement;
     const goingDown=!btn||btn.dataset.dir!=='up';
-    /* Constant cruise, but the target (bottom/top) is RECOMPUTED every frame from the LIVE
-       scrollHeight. The full PRO base is content-visibility:auto, so its height is only an estimate
-       until rows are painted; a target captured once would land among not-yet-rendered rows (blank
-       gaps) and never reach the true end. Per-frame travel is also capped to ~1.2 viewports so we
-       never outrun rendering — this prevents the blank rows AND the paint-burst crash/reload. */
-    const V=3.0;                                   /* px/ms ≈ 3000 px/s cruise */
+    const V=3.0;                                    
     const cap=()=>Math.max(300,window.innerHeight*1.2);
     let last=performance.now(),settle=0,guard=0;
     document.body.classList.add('sa-flight');
@@ -6490,13 +5846,10 @@ document.addEventListener('DOMContentLoaded',()=>{
       const target=goingDown?maxTop:0;
       const remaining=target-cur;
       if(Math.abs(remaining)<=1.5){
-        /* At the live edge: wait a few frames for content-visibility to finish sizing (scrollHeight
-           may still grow) before declaring done, so "down" truly reaches the end of the full base. */
         if(++settle>=4){saAnim=0;document.body.classList.remove('sa-flight');saUpd();return;}
       }else settle=0;
       const move=Math.sign(remaining)*Math.min(Math.abs(remaining),V*dtms,cap());
       window.scrollTo(0,cur+move);
-      /* Hard safety stop (≈20s) so a pathological layout can never spin the rAF loop forever. */
       if(++guard>1200){saAnim=0;document.body.classList.remove('sa-flight');saUpd();return;}
       saAnim=requestAnimationFrame(step);
     };
@@ -6509,7 +5862,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 
-/* ═══ ПОДПИСКА: безопасный runtime загружается после основного приложения ═══ */
 function openSubInfo(){window.LotoCommercial?.openPaywall('');document.getElementById('pro-ov').classList.add('show');}
 function PRO_close(){document.getElementById('pro-ov').classList.remove('show');}
 function PRO_showPlans(){window.LotoCommercial?.openPaywall('');}
@@ -6518,7 +5870,6 @@ function PRO_selectMethod(){}
 function PRO_continueCheckout(){window.LotoCommercial?.purchase();}
 
 
-/* ═══ Картина тиража: сколько «соседей» выиграло бы (по реальной статистике базы) ═══ */
 var CROWD_cache=null,CROWD_lot=null;
 async function crowdStats(){
   if(CROWD_cache&&CROWD_lot===cur)return CROWD_cache;
@@ -6545,9 +5896,8 @@ async function crowdStats(){
   })).filter(t=>t.avgV>0||t.avgW>0);
   let src='real';
   if(!tiers.length){
-    /* фолбэк: вероятности уровней × типичный объём проданных рядов */
     src='calc';n=0;
-    const vol=Math.max(200000,Math.round(jackpotCombos(l)*0.08)); /* объём рынка: джекпот берётся в ~8% тиражей */
+    const vol=Math.max(200000,Math.round(jackpotCombos(l)*0.08));  
     tiers=getPrizeTiers(l).map(t=>{
       const prob=tierProbability(l,t.match);
       const v=estimatePrizeNok({key:t.match,name:t.label,lvl:0},l)||0;
@@ -6564,13 +5914,12 @@ async function renderCrowd(dM,dB){
   const l=L();
   const {tiers,n,src}=await crowdStats();
   if(!tiers.length||(src==='real'&&n<3)){box.innerHTML='';return;}
-  /* мой лучший уровень в этом тираже */
   let my=null;
   rows.forEach(r=>{const p=checkPrize(r.m,r.b,dM,dB,l);if(p&&(!my||p.lvl>my.lvl))my=p;});
   const jitter=x=>Math.max(0,Math.round(x*(0.82+Math.random()*0.36)));
   box.innerHTML='<div class="crowd-t">🌍 Картина тиража</div>'+
     tiers.slice(0,10).map(t=>{
-      const isMe=!!(my&&my.key&&t.key&&String(my.key)===t.key);   /* checkPrize keys = payout tier `match` keys */
+      const isMe=!!(my&&my.key&&t.key&&String(my.key)===t.key);    
       const w=jitter(t.avgW);
       return '<div class="crowd-row'+(isMe?' me':'')+'"><span class="crowd-tier">'+t.label+(isMe?' · + ты! 🎉':'')+'</span><span class="crowd-n">'+(w>0?w.toLocaleString(appLocale())+' чел.':'—')+'</span><span class="crowd-p">'+(t.avgV?fmtInt(t.avgV)+' '+(l.currency||'NOK'):'')+'</span></div>';
     }).join('')+
@@ -6578,24 +5927,19 @@ async function renderCrowd(dM,dB){
 }
 
 
-/* ═══════════ КВАНТОВО-АСТРАЛЬНЫЙ ГЕНЕРАТОР ═══════════
-   Криптографическая энтропия устройства +
-   настоящая астрономия (фаза Луны, Луна в знаке на дату тиража).
-   Символическая интерпретация, не предсказание — шансы не меняет. */
 var QA_state=null;
-var QA_skipSession=false; /* «пропустить» действует только до следующего открытия генератора */
+var QA_skipSession=false;  
 const QA_ZODIAC=[['♈','Овен'],['♉','Телец'],['♊','Близнецы'],['♋','Рак'],['♌','Лев'],['♍','Дева'],['♎','Весы'],['♏','Скорпион'],['♐','Стрелец'],['♑','Козерог'],['♒','Водолей'],['♓','Рыбы']];
 const QA_PHASES=[['🌑','Новолуние'],['🌒','Растущий серп'],['🌓','Первая четверть'],['🌔','Растущая Луна'],['🌕','Полнолуние'],['🌖','Убывающая Луна'],['🌗','Последняя четверть'],['🌘','Убывающий серп']];
 function QA_daysJ2000(d){return (d.getTime()/86400000)-10957.5;}
 function QA_moonPhase(d){
   const syn=29.530588853;
-  const age=((QA_daysJ2000(d)-5.597)%syn+syn)%syn; /* от новолуния 06.01.2000 18:14 UTC */
+  const age=((QA_daysJ2000(d)-5.597)%syn+syn)%syn;  
   const idx=Math.floor((age/syn)*8+0.5)%8;
   const illum=Math.round((1-Math.cos(2*Math.PI*age/syn))/2*100);
   return{idx,age,illum,emoji:QA_PHASES[idx][0],name:QA_PHASES[idx][1]};
 }
 function QA_moonSign(d){
-  /* Низкоточная астрономическая модель орбиты Луны с основными возмущениями (~0.5–1°). */
   const day=d.getTime()/86400000-10956;
   const rad=Math.PI/180,norm=x=>((x%360)+360)%360,sin=x=>Math.sin(x*rad);
   const node=norm(125.1228-.0529538083*day),peri=norm(318.0634+.1643573223*day);
@@ -6686,15 +6030,13 @@ function QA_share(){
 }
 
 
-/* ═══ Натальные данные: дата/время рождения → глубокий анализ ═══ */
 function QA_birth(){try{const v=JSON.parse(localStorage.getItem('loto_birth'));return v&&v.y?v:null;}catch(e){return null;}}
 function QA_zodiacFromDate(d,m){
-  /* границы западного зодиака */
   const B=[[3,21,4,19,0],[4,20,5,20,1],[5,21,6,20,2],[6,21,7,22,3],[7,23,8,22,4],[8,23,9,22,5],[9,23,10,22,6],[10,23,11,21,7],[11,22,12,21,8],[12,22,1,19,9],[1,20,2,18,10],[2,19,3,20,11]];
   for(const[m1,d1,m2,d2,z]of B){
     if((m===m1&&d>=d1)||(m===m2&&d<=d2))return z;
   }
-  return 9; /* козерог на стыке года */
+  return 9;  
 }
 function QA_lifePath(d,m,y){
   let n=String(d)+String(m)+String(y);
@@ -6742,7 +6084,6 @@ function QAB_save(withTime){
     [hh,mm]=t.split(':').map(Number);
   }
   localStorage.setItem('loto_birth',JSON.stringify({d,m,y,hh,mm}));
-  /* автокоррекция знака по дате */
   const realSign=QA_zodiacFromDate(d,m);
   const chosen=QA_getSign();
   if(chosen!==realSign){
@@ -6758,14 +6099,11 @@ function QAB_save(withTime){
 function QA_refreshBirthUI(){
   const b=QA_birth();
   const text=b?(String(b.d).padStart(2,'0')+'.'+String(b.m).padStart(2,'0')+'.'+b.y+(b.hh!=null?' · '+String(b.hh).padStart(2,'0')+':'+String(b.mm).padStart(2,'0'):'')):'не указана';
-  /* refresh EVERY birthline (QA generator + judge cabinet) so save/delete reflects at once */
   ['qa-birthval','supc-birthval'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=text;});
 }
 
 
-/* iOS: без touchstart-слушателя Safari игнорирует :active на кнопках */
 document.addEventListener('touchstart',function(){},{passive:true});
-/* Барабан лет + авто-переход полей даты рождения */
 document.addEventListener('DOMContentLoaded',()=>{
   const ys=document.getElementById('qab-y');
   if(ys&&ys.options.length<=1){
@@ -6778,7 +6116,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     dEl.addEventListener('input',()=>{
       let v=dEl.value.replace(/\D/g,'').slice(0,2);
       if(dEl.value!==v)dEl.value=v;
-      /* 2 цифры — или одна, но однозначная (4-9): дальше день продолжаться не может */
       if(v.length===2||(v.length===1&&+v>3)){mEl.focus();}
     });
   }
@@ -6788,8 +6125,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     const before=tEl.value;
     const digits=before.replace(/\D/g,'').slice(0,4);
     let formatted=digits.length>2?digits.slice(0,2)+':'+digits.slice(2):digits;
-    /* After entering the two hour digits, insert the separator and place the
-       caret in the minute segment. Empty state remains the visible --:-- hint. */
     if(digits.length===2&&before.length<2+1&&!before.includes(':'))formatted+=':';
     if(formatted!==before)tEl.value=formatted;
     if(formatted.length===3&&tEl===document.activeElement){try{tEl.setSelectionRange(3,3);}catch(e){}}
@@ -6797,7 +6132,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 
-/* ═══════════ ГОРОСКОП НА ПЕРГАМЕНТЕ ═══════════ */
 var HORO_sign=0;
 const HORO_FLAVOR=[
  ['Твой огонь Овна сегодня — двигатель:','Импульс первопроходца ведёт тебя:','Марс подмигивает Овну:','Твоя овенская прямота — сила дня:'],
@@ -6831,11 +6165,6 @@ function HORO_text(sign){
   lucky.sort((a,b)=>a-b);
   const flavor=HORO_FLAVOR[sign][Math.floor(rng()*HORO_FLAVOR[sign].length)];
   const en=pick(HORO_POOL.energy);
-  /* Every phrase is returned WHOLE, as it stands in the catalog. The old `flavor+' '+lowercased
-     sentence` glued two catalog sentences into one text node the translator could no longer
-     match, so a Polish or English horoscope came out half Russian («…is the engine: today
-     побеждает не скорость…»). HORO_open renders each part in its own node; the share text
-     translates each part with appText. */
   return{
     moonPhase:ph.emoji+' '+ph.name,
     moonSign:'Луна в знаке '+QA_ZODIAC[ms][1],
@@ -6865,8 +6194,6 @@ function HORO_open(sign){
 function HORO_close(){document.getElementById('horo-ov').classList.remove('show');}
 function HORO_share(){
   const t=HORO_text(HORO_sign);
-  /* moonPhase / moonSign are composites («🌕 Полнолуние», «Луна в знаке Овен»): share their parts
-     as exact catalog keys, not as one string the translator can only match piecewise. */
   const now=new Date(),ph=QA_moonPhase(now),ms=QA_moonSign(now);
   shareText(appText('Гороскоп ·')+' '+appText(QA_ZODIAC[HORO_sign][1]),
     '📜 '+QA_ZODIAC[HORO_sign][0]+' '+appText(QA_ZODIAC[HORO_sign][1])+' · '+new Date().toLocaleDateString(appLocale(),{day:'numeric',month:'long'})+'\n'+
@@ -6874,7 +6201,6 @@ function HORO_share(){
 }
 
 
-/* ═══ После любой генерации/загрузки — на главный экран к рядам ═══ */
 function goToRows(options){
   try{
     const immediate=!!(options&&options.immediate);
@@ -6898,12 +6224,11 @@ function goToRows(options){
       land();
       flash();
     },150);
-    setTimeout(land,700); /* докоррекция после закрытия листа и анимаций */
+    setTimeout(land,700);  
   }catch(e){}
 }
 
 
-/* ═══ Выбор количества рядов (1–50) для колеса и моделей ═══ */
 var GENN_mode='wheel';
 function setGenCount(n){
   n=Math.max(1,Math.min(MAX_ROWS,parseInt(n)||5));
@@ -6913,7 +6238,6 @@ function setGenCount(n){
     if(![...sel.options].some(o=>o.value===String(n))){
       const o=document.createElement('option');
       o.value=String(n);o.textContent=n+' '+rowWord(n);
-      /* вставляем по порядку */
       const after=[...sel.options].find(x=>+x.value>n);
       sel.insertBefore(o,after||null);
     }
@@ -6950,7 +6274,6 @@ function GENN_go(){
 }
 
 
-/* ═══ Занятость генерации: песочные часы, прогресс, защита от двойного тапа ═══ */
 var GEN_BUSY=false,BUSY_t0=0,BUSY_timer=null,BUSY_minMs=480;
 function BUSY_show(label,options){
   const opts=options||{};
@@ -6982,13 +6305,13 @@ async function BUSY_hide(){
   clearInterval(BUSY_timer);
   document.getElementById('busy-fill').style.width='100%';
   const shown=performance.now()-BUSY_t0;
-  await new Promise(r=>setTimeout(r,Math.max(220,BUSY_minMs-shown))); /* минимум показа — глазом видно */
+  await new Promise(r=>setTimeout(r,Math.max(220,BUSY_minMs-shown)));  
   overlay.classList.remove('show');
   const box=overlay.querySelector('.busy-box');if(box)box.classList.remove('busy-hourglass-only');
   const sub=document.getElementById('busy-sub');if(sub)sub.hidden=false;
 }
 async function withBusy(label,fn,options){
-  if(GEN_BUSY)return; /* двойной тап игнорируем — генерация уже идёт */
+  if(GEN_BUSY)return;  
   GEN_BUSY=true;
   BUSY_minMs=Math.max(0,Number(options&&options.minMs)||480);
   BUSY_show(label,options);
@@ -7003,7 +6326,6 @@ async function withTransferBusy(fn){
 }
 
 
-/* ═══════════ ИССЛЕДОВАТЕЛЬСКИЙ НАБОР + ВЕРДИКТ СУДЬИ-СЛЕДОВАТЕЛЯ ═══════════ */
 var ADV_state=null;
 const ADV_NAMES={freq:'Частотный анализ',bal:'Сбалансированный',man:'Сегментный охват',markov:'Цепи Маркова',gauss:'Гаусс · ЦПТ',delta:'Интервальная модель Δ',bayes:'Байес · Дирихле',overdue:'Gap-анализ',phys:'Физическая модель лототрона',chaos:'Детерминированный хаос',quantum:'Квантовый коллапс',rnd:'Pure random','world-hot':'Мировой горячий','world-mix':'Мировой смешанный',qastro:'Квантово-астральный',wheel:'Колёсная матрица',paradox:'Система парадоксов'};
 function ADV_injectButtons(){
@@ -7049,7 +6371,6 @@ async function ADV_go(){
   const dd=QA_nextDrawDate();
   document.getElementById('adv-go').style.display='none';
   if(SUPC_pending&&SUPC_pending.algo===st.algo){
-    /* пришли по направлению судьи — автоматически в его кабинет */
     setTimeout(()=>{showCopyToast('⚖️ Переношу дело в кабинет судьи…');ADV_judge();},900);
   }
   document.getElementById('adv-result').innerHTML=
@@ -7061,7 +6382,6 @@ async function ADV_go(){
     '<button class="btn-exp" style="margin:0" data-loto-event-click="ADV_share()">📤 Поделиться</button>'+
     '<button class="btn-exp" style="margin:0" data-loto-event-click="ADV_judge()">⚖️ Вердикт судьи</button></div>';
 }
-/* Судья-следователь: проверяет каждое число совета силой поля и исправляет слабые */
 async function ADV_judge(){
   const st=ADV_state;if(!st||!st.rows)return;
   const l=L();
@@ -7114,8 +6434,7 @@ function ADV_shareVerdict(){
 }
 
 
-/* ═══════════ ПЕРСОНАЛЬНЫЙ СОВЕТ СУДЬИ: звёзды + натал + база → направление → вердикт ═══════════ */
-var SUPC_pending=null; /* {algo, reason} — активное направление судьи */
+var SUPC_pending=null;  
 function SUPC_open(){
   setTimeout(()=>SUPC_way('astro'),30);
   const zs=QA_getSign();
@@ -7141,11 +6460,6 @@ async function SUPC_route(){
     const draws=await loadSelectedAnalysisDraws(cur);
     let cv=0,structured=false;
     if(draws.length>=5){
-      /* Client-safe field-structure gauge for the astrological direction: the raw frequency
-         spread of the main balls over the selected period. The full IF_scores model is PRO /
-         backend-only (stripped to `throw backend_only` in production), so calling it here broke
-         «Через звёзды». `structured` = the field is measurably more uneven than pure chance
-         (Poisson baseline 1/√mean) — same "выражена / ровная" split, no backend needed. */
       const f=buildFreq(draws,'main',l.mB);
       const sc=rangeNums(l.mB).map(n=>f.get(n)||0);
       const mean=sc.reduce((a,b)=>a+b,0)/sc.length||1;
@@ -7155,12 +6469,11 @@ async function SUPC_route(){
     return{draws:draws.length,cv,structured};
   });
   if(!data)return;
-  const elem=zs%4; /* стихия знака */
+  const elem=zs%4;  
   const birth=QA_birth();
   const lp=birth?QA_lifePath(birth.d,birth.m,birth.y):null;
   const ph=QA_moonPhase(QA_nextDrawDate());
-  const structured=data.structured; /* поле выражено или ровное — по частотному разбросу */
-  /* направление: стихия × состояние поля × луна/число судьбы */
+  const structured=data.structured;  
   const routes={
     0:structured?['overdue','структура неравномерна — профиль огня выбрал числа с большим относительным пропуском']:['quantum','структура ровная — профиль огня выбрал квантовый коллапс'],
     1:structured?['freq','поле выражено — земля доверяет фактам: частотный анализ по вашей базе']:['bayes','поле ровное — земле подойдёт байесовская осторожность: данные ведут, но не диктуют'],
@@ -7184,7 +6497,6 @@ function SUPC_goModel(){
 }
 
 
-/* ═══ Судья: две роли. Роль «Только база» — лидеры пар/троек/четвёрок ═══ */
 var SUPC_dbN=3;
 function SUPC_way(w){
   document.getElementById('supc-astro-block').style.display=w==='astro'?'':'none';
@@ -7229,7 +6541,6 @@ async function SUPC_db(){
       const bf=buildFreq(draws,'bonus',l.bB);
       bonusTop=[...bf.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
     }
-    /* сборка рядов вокруг лидеров: четвёрка → тройки → пары */
     const seeds=[];
     quads.slice(0,2).forEach(q=>seeds.push(q[0].split('-').map(Number)));
     triples.slice(0,6).forEach(t=>seeds.push(t[0].split('-').map(Number)));
@@ -7283,16 +6594,12 @@ function SUPC_dbShare(){
   if(!window.SUPC_dbRows)return;
   shareText(appText('Совет судьи')+' · '+L().name,'⚖️📊 '+appText('Совет судьи по лидерам базы')+' · '+L().name+' · '+appText('тираж')+' '+QA_nextDrawDate().toLocaleDateString(appLocale(),{day:'numeric',month:'short'})+'\n'+rowsAsText(window.SUPC_dbRows,L()));
 }
-/* ═══ Поиск по истории + фильтр по эпохе правил ═══
-   Один проход по уже отрисованным строкам, без перезагрузки и без запроса к архиву: строка
-   видна, когда совпала и с эпохой (data-rule-era), и со строкой поиска. */
 function HIST_pickEra(id){
   const next=HIST_eraToken(id);
   if(next===HIST_eraFilter)return;
   HIST_eraFilter=next;
   HIST_syncEraPicks();
   HIST_filter();
-  /* На длинном архиве список резко укорачивается — возвращаем к началу отфильтрованной истории. */
   document.getElementById('hist-rule-summary')?.scrollIntoView({block:'nearest',behavior:'smooth'});
 }
 function HIST_syncEraPicks(){
@@ -7326,10 +6633,6 @@ function HIST_filter(){
 }
 
 
-/* ═══ Позиционный аудит честности: Coronel-Brizio, Hernández-Montoya, Rapallo, Scalas (arXiv:0806.4595) ═══
-   У честной k/N-лотереи i-е по возрастанию число имеет E[Y(i)]=(N+1)i/(k+1),
-   Cov[Y(i),Y(j)]=i(k−j+1)(N+1)(N−k)/((k+1)²(k+2)), i≤j.
-   Q = m·(ȳ−μ)ᵀV⁻¹(ȳ−μ) ~ χ²(k). */
 function POSQ_invert(A){
   const n=A.length,M=A.map((row,i)=>[...row,...row.map((_,j)=>i===j?1:0)]);
   for(let c=0;c<n;c++){
@@ -7369,9 +6672,6 @@ function POSQ_audit(draws,l){
   return{Q,p:chi2pvalue(Q,k),k,m:used,ybar,mu};
 }
 
-/* ═══════════════ ВЕРХОВНЫЙ СУДЬЯ · интерактивный разбор (для всех систем) ═══════════════
-   Судья оценивает силой поля каждый шар и ПРЕДЛАГАЕТ замены. Решает пользователь:
-   каждую замену можно включить или отключить. Работает с любым набором рядов. */
 const JUDGE_state={};
 function JUDGE_plan(rows,l,draws){throw new Error('backend_only');}
 function JUDGE_effective(p){
@@ -7451,9 +6751,6 @@ async function JUDGE_apply(ns){
   const st=JUDGE_state[ns];if(!st||!st.onApply)return;
   const proposed=st.plan.reduce((sum,p)=>sum+p.swaps.length,0);
   const active=st.plan.reduce((sum,p)=>sum+p.swaps.filter(s=>s.apply).length,0);
-  // Close the sheet BEFORE applying the rows. Otherwise the rows are updated and
-  // scrolled correctly underneath a still-visible Judge overlay (notably sup-ov),
-  // which looks like a dead button to the user.
   await withTransferBusy(async()=>{
     const mount=document.getElementById(st.mountId);
     const overlay=mount&&mount.closest?mount.closest('[id$="-ov"]'):null;
@@ -7480,7 +6777,6 @@ async function JUDGE_open(ns,rows,mountId,onApply,opts){
   const mp=document.getElementById(mountId);if(mp&&mp.scrollIntoView)try{mp.scrollIntoView({behavior:'smooth',block:'nearest'});}catch(e){}
 }
 
-/* ═══════════════ СИСТЕМА ПАРАДОКСОВ · модальное окно ═══════════════ */
 var PDX_state=null;
 function PDX_open(){
   const l=L();
@@ -7568,7 +6864,6 @@ function PDX_judge(){
   });
 }
 
-/* ═══ РАЗБОР МОЕЙ КОМБИНАЦИИ · судья о выбранных рядах ═══ */
 let JC_pending=null;
 function JC_close(){
   const ov=document.getElementById('jc-ov');
@@ -7623,20 +6918,7 @@ async function JC_continue(){
   JUDGE_state['jc']={plan:data.plan,l,drawsN:data.drawsN,mountId:'jc-mount',intro,applyLabel:'Применить в билете',onApply:(finalRows,meta)=>{JC_close();const choice=JUDGE_choiceText(meta);setGeneratedRows(finalRows,choice+'. Комбинация применена в билете. ⚖️',false,undefined,{sourceType:'JUDGE'});}};
   JUDGE_render('jc');
 }
-/* ═══════════════ MODAL MANAGER ═══════════════
- * Invariant: one user action → at most ONE visible top-level overlay.
- * Every top-level modal is a body-level element whose id ends in "-ov" and is
- * toggled with the .show class. There is no single open()/close() call site
- * (23+ inline functions toggle .show directly), and opening one never closed
- * the others → overlays stacked (e.g. Верховный судья sup-ov over jc-ov).
- * This observer centralises the invariant WITHOUT touching those call sites:
- * whenever an overlay gains .show, every other visible content overlay is
- * closed. busy-ov (loading spinner) is transient and may briefly overlay. */
 (function(){
-  // The avatar editor is a nested account tool: it must not replace/close the account
-  // overlay underneath it, otherwise a successful save returns to a vanished cabinet.
-  // Nested utility dialogs stay above their parent feature (birth-date editor
-  // over Quantum-Astral, confirmation over the editor) instead of replacing it.
   var TRANSIENT={'busy-ov':1,'aved-ov':1};
   var NESTED={'qab-ov':1,'cc-ov':1,'period-ov':1,'court-layer-ov':1,'accq-ov':1};
   var CRITICAL={
@@ -7670,11 +6952,6 @@ async function JC_continue(){
     if(locked)return;
     locked=true;lockY=window.scrollY||window.pageYOffset||0;
     document.body.style.top='-'+lockY+'px';
-    // Measured BEFORE the lock: the width the page scrollbar is currently taking out of the
-    // viewport. 0 on an overlay-scrollbar platform, ~15 on a classic one. The lock is about to
-    // remove that bar, so reserve exactly this much and the page behind the modal cannot move.
-    // Reserving unconditionally would shift it the other way wherever the bar was already 0 —
-    // see the `html.loto-modal-locked` rule.
     var lane=window.innerWidth-document.documentElement.clientWidth;
     document.body.classList.add('loto-modal-open');
     if(lane>0)document.documentElement.classList.add('loto-modal-locked');
@@ -7704,8 +6981,6 @@ async function JC_continue(){
       if(candidate&&candidate!==document.body&&!opened.contains(candidate))openers[opened.id]=candidate;
       else if(lastTrigger&&!opened.contains(lastTrigger))openers[opened.id]=lastTrigger;
     }
-    /* Nested dialogs become the active focus/escape target but deliberately
-       leave their parent overlay mounted underneath. */
     if(NESTED[opened.id]){
       labelModal(opened);activeModal=opened.id;lockBody();focusInitial(opened);return;
     }
@@ -7729,34 +7004,21 @@ async function JC_continue(){
     for(var i=0;i<recs.length;i++){
       var el=recs[i].target,old=recs[i].oldValue||'';
       var wasShown=/(^|\s)show(\s|$)/.test(old),isShown=el.classList.contains('show');
-      if(!wasShown&&isShown&&isContentModal(el))opened=el; /* last open in the batch wins */
+      if(!wasShown&&isShown&&isContentModal(el))opened=el;  
       if(wasShown&&!isShown&&isContentModal(el))closedId=el.id;
     }
     if(opened)activate(opened);
     else recomputeActive(closedId);
   });
-  /* attach() only sees the overlays that exist at DOMContentLoaded. A LAZY overlay (the Owner
-     Panel and its notification centre are built on first open) is still matched by the live
-     tops() selector, so it took part in visibleContent()/activate() while its own .show changes
-     were invisible to this observer: a normal modal stripped its .show without running its real
-     close(), leaving html{overflow:hidden} and its timers alive, and recomputeActive() could lock
-     the body against an overlay whose closing it would never see — the page froze. Lazy overlays
-     must therefore register here the moment they are inserted. */
   function observeModal(el){
     if(!el||el.parentElement!==document.body||el.__lotoObserved)return false;
     el.__lotoObserved=true;labelModal(el);
     obs.observe(el,{attributes:true,attributeFilter:['class'],attributeOldValue:true});
     return true;
   }
-  /* A late overlay may already be .show when it announces itself (it is built and shown in the
-     same tick), and the observer only reports CHANGES — so apply the invariant once, here. */
   function register(el){if(observeModal(el)&&el.classList.contains('show'))activate(el);}
   function attach(){tops().forEach(observeModal);}
-  /* remember the control that triggered a modal so focus can return to it */
   document.addEventListener('pointerdown',function(e){var t=e.target&&e.target.closest&&e.target.closest('button,a,[onclick],[role="button"]');if(t)lastTrigger=t;},true);
-  /* Safari/WebKit: Tab skips buttons by default, so the first/last-focusable wrap below never
-     fires and focus walks out of the dialog into the page behind it. Whatever the engine, focus
-     that lands OUTSIDE the active modal is pulled back to its edge in the direction of travel. */
   var lastTabShift=false;
   document.addEventListener('focusin',function(e){
     if(!activeModal)return;
@@ -7796,7 +7058,6 @@ async function JC_continue(){
     closeActiveModal:function(){if(activeModal)this.closeModal(activeModal);},
     replaceModal:function(from,to){this.closeModal(from);this.openModal(to);},
     visibleTopLevelModals:function(){return visibleContent().map(function(el){return el.id;});},
-    /* A lazily created body-level overlay announces itself here (see register above). */
     register:function(id){register(typeof id==='string'?document.getElementById(id):id);},
     managesBodyScroll:true,
     get active(){return activeModal;}

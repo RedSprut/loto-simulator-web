@@ -1,13 +1,8 @@
-/* Личный кабинет — единый источник для Web/iOS/Android. Читает реальные данные из
-   window.LotoCommercial (Supabase access-state / entitlements) и window.LotoAuth
-   (Supabase Auth + Storage). Строки на русском переводятся рантайм-наблюдателем i18n. */
 (function(){
   const $=id=>document.getElementById(id);
   const T=v=>String(v==null?'':v);
   let magicSending=false,avatarBusy=false;
-  // Avatar editor state (crop/move/zoom/rotate). avEd holds the loaded bitmap + transform.
   const avEd={img:null,w:0,h:0,scale:1,minScale:1,rot:0,step:0,offx:0,offy:0,drag:null,pts:new Map(),pinch:null};
-  // Calendar state: shown month + tentative selection (committed only on «Готово»).
   let calY,calM,calSelIso=null,calYearView=false;
   const pad2=n=>String(n).padStart(2,'0');
   const isoOf=(y,m,d)=>`${y}-${pad2(m+1)}-${pad2(d)}`;
@@ -23,10 +18,9 @@
       for(let y=now;y>=1920;y--)h+=`<button type="button" class="cal-yr${y===calY?' sel':''}" data-loto-event-click="AccountUI.calPickYear(${y})">${y}</button>`;
       yv.innerHTML=h;return;
     }
-    // localized weekday short names (Mon-first)
-    let wdh='';for(let i=1;i<=7;i++){const dd=new Date(2024,0,i);/*2024-01-01 is Monday*/wdh+=`<span>${dd.toLocaleDateString(loc,{weekday:'short'})}</span>`;}
+    let wdh='';for(let i=1;i<=7;i++){const dd=new Date(2024,0,i); wdh+=`<span>${dd.toLocaleDateString(loc,{weekday:'short'})}</span>`;}
     wd.innerHTML=wdh;
-    const first=new Date(calY,calM,1);let start=(first.getDay()+6)%7; // Mon=0
+    const first=new Date(calY,calM,1);let start=(first.getDay()+6)%7;  
     const daysIn=new Date(calY,calM+1,0).getDate();
     const prevDays=new Date(calY,calM,0).getDate();
     const todayIso=isoOf(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
@@ -81,13 +75,9 @@
     }
   }
   let loadedUid=null,profileCache=null,profileRequestSeq=0,avatarRevision=0;
-  // ── Profile: loading → (no profile yet: edit + "Сохранить информацию") | (saved: view + "Редактировать") ──
-  // Two rules drive every button here: a successful save must never leave an active "Save"
-  // standing, and we never ask to save — or send — data that has not actually changed. "Changed"
-  // is a real comparison against the last snapshot the SERVER confirmed, not a keystroke flag.
   const PROFILE_EMPTY={displayName:'',birthday:''};
-  let profileMode='loading';               // 'loading' | 'empty' | 'view' | 'edit'
-  let savedProfile={...PROFILE_EMPTY};     // last values confirmed by the server
+  let profileMode='loading';                
+  let savedProfile={...PROFILE_EMPTY};      
   let profileSaving=false;
   const hasSavedProfile=()=>Boolean(savedProfile.displayName||savedProfile.birthday);
   function readProfileForm(){
@@ -118,7 +108,6 @@
     show('acc-canceldata-btn',profileMode==='edit');
     const save=$('acc-savedata-btn');
     if(save){
-      // A first profile can always be saved; an existing one only once something really changed.
       save.disabled=profileSaving||(profileMode==='edit'&&!profileDirty());
       save.textContent=T(profileMode==='empty'?'Сохранить информацию':'Сохранить изменения');
       save.setAttribute('aria-busy',String(profileSaving));
@@ -140,15 +129,12 @@
     const name=(p&&p.displayName||'').trim();
     const nameEl=$('acc-name');if(nameEl){nameEl.textContent=name;nameEl.hidden=!name;}
     savedProfile={displayName:name,birthday:((p&&p.birthday)||'').slice(0,10)};
-    // Never overwrite what the user is currently typing: a getProfile() started before the edit
-    // can still land afterwards.
     if(profileMode!=='edit'){
       writeProfileForm(savedProfile);
       setProfileMode(hasSavedProfile()?'view':'empty');
     }else renderProfileCard();
     maybeGreetBirthday(p);
   }
-  // Birthday value lives in a hidden input (ISO YYYY-MM-DD or empty) with a localized display.
   function fmtBirthdayDisplay(iso){
     const t=Date.parse((iso||'')+'T12:00:00Z');
     if(!iso||!Number.isFinite(t))return '';
@@ -162,37 +148,27 @@
     const text=fmtBirthdayDisplay(iso);
     if(disp)disp.textContent=text||'Не указан';
     if(btn)btn.classList.toggle('empty',!text);
-    // Picking or clearing a date changes the form, so the Save button state must follow.
     renderProfileCard();
   }
   async function loadAvatar(force){
     const {user,confirmed}=accountState();
     const uid=confirmed?user.id:null;
     if(!uid){profileRequestSeq++;loadedUid=null;profileCache=null;setAvatar(null);resetProfileState();const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}return;}
-    if(!force&&uid===loadedUid)return; // profile already loaded for this account
+    if(!force&&uid===loadedUid)return;  
     loadedUid=uid;
     const requestSeq=++profileRequestSeq,revision=avatarRevision;
-    // Show the skeleton, not an empty form with an active Save, until we know whether a profile
-    // already exists. An edit in progress keeps its own state.
     if(profileMode!=='edit')setProfileMode('loading');
     try{const p=await (window.LotoAuth&&window.LotoAuth.getProfile&&window.LotoAuth.getProfile());
-      // A profile request started before a successful upload/removal must never overwrite the
-      // newer stored avatar when its slower response arrives.
       if(requestSeq!==profileRequestSeq||revision!==avatarRevision||accountState().user?.id!==uid)return;
       applyProfile(p);
-      // Persist the current UI locale so a future birthday greeting can be in the right language.
       try{const loc=uiLang();if(p&&p.locale!==loc)window.LotoAuth.updateProfile({locale:loc}).catch(()=>{});}catch(_e2){}
     }catch(_e){
-      // The profile could not be read. Do not leave the card stuck on the skeleton, and do not
-      // claim "no profile yet" — fall back to whatever we last knew.
       if(requestSeq===profileRequestSeq){
         loadedUid=null;
         if(profileMode==='loading')setProfileMode(hasSavedProfile()?'view':'empty');
       }
     }
   }
-  // In-app birthday greeting: when the signed-in user's birthday (month+day) is today, show a
-  // localized congratulation once per day. Fully client-side — no push infrastructure touched.
   function maybeGreetBirthday(p){
     try{
       const b=p&&p.birthday;if(!b)return;
@@ -201,8 +177,6 @@
       const key='loto_bday_greeted_'+now.getFullYear();
       if(localStorage.getItem(key))return;
       localStorage.setItem(key,'1');
-      // Fixed, fully-localizable strings (no name interpolation, so the i18n observer
-      // translates them to the user's language).
       if(typeof showFeedback==='function')showFeedback('С днём рождения! 🎂','Пусть сегодня удача будет на вашей стороне! 🎉','🎉',7000);
     }catch(_e){}
   }
@@ -210,13 +184,12 @@
     const n=$(elId);if(!n)return;
     n.textContent=T(text);n.dataset.kind=kind||'info';n.hidden=!text;
   }
-  // App Store / Google Play badges — Web only, ordered by platform, "Скоро" if no URL yet.
   function renderStores(){
     const targets=[['acc-stores','acc-stores-btns'],['home-stores','home-stores-btns'],['analytics-stores','analytics-stores-btns']]
       .map(([elId,btnId])=>({el:$(elId),btns:$(btnId)})).filter(x=>x.el&&x.btns);
     if(!targets.length)return;
     const native=!!((window.LotoNativeBilling&&window.LotoNativeBilling.isNative)||(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform()));
-    if(native){targets.forEach(x=>{x.el.hidden=true;x.btns.innerHTML='';});return;} // never render this block inside native apps
+    if(native){targets.forEach(x=>{x.el.hidden=true;x.btns.innerHTML='';});return;}  
     const cfg=window.LOTO_COMMERCIAL_CONFIG||{};
     const appStore=cfg.appStoreUrl||'',googlePlay=cfg.googlePlayUrl||'';
     const ua=navigator.userAgent||'';
@@ -228,7 +201,7 @@
     const google=`<a class="store-badge${googlePlay?'':' soon'}" ${googlePlay?`href="${googlePlay}" target="_blank" rel="noopener"`:'aria-disabled="true" role="link"'}>`+
       `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#00D3FF" d="M3.5 2.3 13.6 12 3.5 21.7c-.32-.18-.5-.55-.5-1V3.3c0-.45.18-.82.5-1Z"/><path fill="#FFCE00" d="m17.7 8.1 2.9 1.7c.9.52.9 1.98 0 2.5l-2.9 1.6L14.9 12l2.8-3.9Z"/><path fill="#00F076" d="M3.5 2.3c.32-.18.7-.2 1.03 0l10.37 6-2.3 2.3L3.5 2.3Z"/><path fill="#FF3A44" d="m12.6 13.4 2.3 2.3-10.37 6c-.33.2-.71.18-1.03 0l9.1-8.3Z"/></svg>`+
       `<span class="sb-txt"><span class="sb-small" data-i18n-ignore>Get it on</span><span class="sb-big" data-i18n-ignore>Google Play</span></span>${googlePlay?'':'<span class="sb-soon">Скоро</span>'}</a>`;
-    const badges=isAndroid?(google+apple):(apple+google); // iOS: App Store first; Android: Google Play first; desktop: both
+    const badges=isAndroid?(google+apple):(apple+google);  
     targets.forEach(x=>{x.btns.innerHTML=badges;x.el.hidden=false;});
   }
 
@@ -255,7 +228,6 @@
       :hasEmailPending?'Ожидается подтверждение e-mail':'Гостевой режим · вход не требуется для Free';
 
     if($('acc-signin'))$('acc-signin').hidden=confirmed;
-    // Surface a pending Magic-Link callback result (expired / used / failed) in the sign-in card.
     try{const am=window.LotoCommercial&&window.LotoCommercial.authMessage;
       if(am&&am.text&&!confirmed)msg('acc-auth-msg',am.text,am.kind);
     }catch(_e){}
@@ -308,20 +280,16 @@
     return 'Не удалось сохранить фото. Попробуйте ещё раз.';
   }
 
-  // ── Avatar photo editor engine ────────────────────────────────────────────
-  const AV_INPUT_MAX=30*1024*1024; // generous input cap; the SAVED crop is a small JPEG
-  const AV_OUT=512;                // exported avatar square (px)
-  let avObjUrl=null;               // object URL for the picked source file (revoked on close)
-  // Decode any picked file to a drawable bitmap. createImageBitmap covers JPG/PNG/WebP
-  // everywhere and HEIC where the engine supports it (iOS/Safari/WKWebView). Fallback to
-  // an <img> element + decode() for engines that only decode via the DOM.
+  const AV_INPUT_MAX=30*1024*1024;  
+  const AV_OUT=512;                 
+  let avObjUrl=null;                
   async function avLoadBitmap(file){
     try{return await createImageBitmap(file,{imageOrientation:'from-image'});}catch(_e){}
     try{return await createImageBitmap(file);}catch(_e){}
     if(avObjUrl){try{URL.revokeObjectURL(avObjUrl);}catch(_e){}}
     avObjUrl=URL.createObjectURL(file);
     const img=new Image();img.decoding='async';img.src=avObjUrl;
-    await img.decode(); // throws on formats this engine cannot render (e.g. HEIC on desktop Chrome)
+    await img.decode();  
     return img;
   }
   function avStageSize(){const st=$('aved-stage');const dpr=Math.min(window.devicePixelRatio||1,2.5);
@@ -332,7 +300,6 @@
     ctx.save();ctx.translate(S/2+avEd.offx,S/2+avEd.offy);ctx.rotate(avEd.rot);ctx.scale(avEd.scale,avEd.scale);
     ctx.drawImage(avEd.img,-avEd.w/2,-avEd.h/2);ctx.restore();
   }
-  // Keep the inscribed crop circle fully covered by the (rotated) image at all times.
   function avClamp(){
     const cv=$('aved-canvas');if(!cv)return;const R=cv.width/2;
     const hx=Math.max(0,avEd.scale*avEd.w/2-R),hy=Math.max(0,avEd.scale*avEd.h/2-R);
@@ -375,8 +342,6 @@
     async onFile(e){
       const file=e.target.files&&e.target.files[0];e.target.value='';
       if(!file)return;
-      // Accept JPG/PNG/WebP/HEIC/HEIF (HEIC comes from iPhones). The crop is re-encoded to
-      // JPEG on save, so the stored avatar is always a small, universally-decodable image.
       const okType=/^image\/(jpeg|png|webp|heic|heif)$/i.test(file.type||'')||/\.(jpe?g|png|webp|heic|heif)$/i.test(file.name||'')||(file.type||'').startsWith('image/');
       if(!okType){msg('acc-avatar-msg','Поддерживаются JPG, PNG, WebP или HEIC.','error');return;}
       if(file.size>AV_INPUT_MAX){msg('acc-avatar-msg','Файл слишком большой. Максимум 30 МБ.','error');return;}
@@ -405,7 +370,6 @@
       const busy=$('aved-busy');if(busy)busy.classList.add('on');
       const saveBtn=$('aved-save');if(saveBtn)saveBtn.disabled=true;
       try{
-        // Render the cropped circle region to a fixed-size square, re-encoded as JPEG.
         const S=$('aved-canvas').width,k=AV_OUT/S;const out=document.createElement('canvas');
         out.width=AV_OUT;out.height=AV_OUT;const ctx=out.getContext('2d');
         ctx.fillStyle='#12121a';ctx.fillRect(0,0,AV_OUT,AV_OUT);
@@ -413,17 +377,10 @@
         ctx.scale(avEd.scale*k,avEd.scale*k);ctx.drawImage(avEd.img,-avEd.w/2,-avEd.h/2);ctx.restore();
         const blob=await new Promise((res,rej)=>out.toBlob(b=>b?res(b):rej(new Error('encode_failed')),'image/jpeg',0.9));
         const outFile=new File([blob],'avatar.jpg',{type:'image/jpeg'});
-        // Real persistence: uploadAvatar resolves ONLY after the file is stored in Supabase
-        // Storage AND the profiles row is written (both awaited server-side). That resolution
-        // IS the success confirmation — anything less throws and is handled below (editor stays
-        // open, localized error, retry possible).
         const info=await withBusy('Загрузка фотографии…',async()=>{
           BUSY_stage('Сохраняю фото профиля…');
           return window.LotoAuth.uploadAvatar(outFile);
         });
-        // Use only the URL returned after Supabase Storage + profile persistence. A temporary
-        // blob preview cannot survive navigation/reload and can be overwritten by a late
-        // getProfile response.
         if(!info?.avatarUrl)throw new Error('avatar_url_missing');
         avatarRevision++;profileRequestSeq++;
         profileCache={...(profileCache||{}),avatarUrl:info.avatarUrl,avatarPath:info.avatarPath||null,avatarUpdatedAt:info.avatarUpdatedAt||null};
@@ -435,9 +392,6 @@
     },
     async removeAvatar(){
       if(avatarBusy)return;
-      // Фото профиля удаляется с сервера безвозвратно, поэтому спрашиваем до, а не после.
-      // Диалог асинхронный, и за время ответа могла начаться загрузка нового фото — отсюда
-      // вторая проверка занятости уже после подтверждения.
       if(!(await customConfirm('Вы действительно хотите удалить фото профиля?','Удалить',
         {title:'Удалить фото профиля?',cancelLabel:'Отмена'})))return;
       if(avatarBusy)return;avatarBusy=true;
@@ -448,16 +402,6 @@
     },
     register(){return this.sendMagic('register');},
     signIn(){return this.sendMagic('login');},
-    // A sign-in challenge, but only where one is actually configured AND switched on: with no
-    // site key nothing loads and this resolves to '' in a few microseconds, so the flow is
-    // byte-for-byte what it is today. The token is meaningful only once Attack Protection →
-    // CAPTCHA is enabled in the Supabase dashboard, which is deliberately the LAST step of the
-    // rollout — flipping it before clients send a token would break every sign-in, native first.
-    // A distinct action means a token solved here can never be redeemed as a Calendar trial.
-    // Both actions use the SAME passwordless email/Magic-Link flow; `mode` only decides whether a
-    // brand-new account may be created ("register") or the link is for an existing account only
-    // ("login"). Either way the callback signs the user into the SAME auth.users.id and restores
-    // their profile, photo and (server-side) PRO — a new device never forks a second account.
     async sendMagic(mode){
       if(magicSending)return;
       const input=$('acc-email-input');const email=((input&&input.value)||'').trim();
@@ -467,7 +411,6 @@
       msg('acc-auth-msg','Отправляем ссылку…','info');
       try{const captcha=await authCaptchaToken();
         await window.LotoCommercial.sendMagicLink(email,mode,captcha);
-        // A plan was chosen before this sign-in: the link carries the purchase, and the user is told so.
         const buying=!!(window.LotoCommercial&&window.LotoCommercial.purchaseIntentPending);
         msg('acc-auth-msg',buying
           ?'Ссылка отправлена. Откройте письмо и подтвердите e-mail — после этого оплата выбранного тарифа PRO продолжится автоматически.'
@@ -508,8 +451,6 @@
     async saveData(){
       if(profileSaving)return false;
       const next=readProfileForm();
-      // Nothing changed → nothing to send. (Save is already disabled in this state; this is the
-      // guard for keyboard/programmatic activation.)
       if(profileMode==='edit'&&next.displayName===savedProfile.displayName&&next.birthday===savedProfile.birthday){
         msg('acc-data-msg','',null);setProfileMode('view');return true;
       }
@@ -518,32 +459,25 @@
       try{
         const info=await window.LotoAuth.updateProfile({displayName:next.displayName||null,birthday:next.birthday||null,locale:uiLang()});
         profileSaving=false;
-        // Leave edit mode BEFORE applyProfile so it refreshes the form from the server's answer.
         profileMode=hasSavedProfile()||next.displayName||next.birthday?'view':'empty';
         applyProfile(info);
         msg('acc-data-msg','Изменения сохранены.','success');
         return true;
       }catch(err){
-        // A failed save must never look like a success, and must never lose what was typed:
-        // stay in edit mode, still dirty, with the existing saved values untouched.
         profileSaving=false;renderProfileCard();
         const c=String((err&&err.message)||err||'');
         msg('acc-data-msg',/invalid_birthday/.test(c)?'Проверьте дату рождения.':/account_required/.test(c)?'Войдите в аккаунт, чтобы сохранить данные.':'Не удалось сохранить изменения. Повторите попытку.','error');
         return false;
       }
     },
-    // Three real outcomes, so this is its own dialog rather than customConfirm (which has two).
     answerUnsaved(choice){
       const resolve=pendingUnsaved;pendingUnsaved=null;
       const ov=$('accq-ov');
-      // Clear __lotoClose FIRST: closeOverlay() delegates to it and returns, so leaving it in
-      // place would resolve nothing and never hide the dialog.
       if(ov)ov.__lotoClose=null;
       if(window.LotoModals)window.LotoModals.closeModal('accq-ov');
       else if(ov)ov.classList.remove('show');
       if(resolve)resolve(choice);
     },
-    // Кнопка кабинета: сначала подтверждение (тот же диалог, что и в PRO-окне), потом выход.
     async requestSignOut(){
       if(!(await window.confirmSignOut()))return false;
       await AccountUI.signOut();
@@ -551,8 +485,6 @@
     },
     async signOut(){try{await window.LotoCommercial.signOut();avatarRevision++;profileRequestSeq++;setAvatar(null);profileCache=null;loadedUid=null;const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}msg('acc-auth-msg','',null);msg('acc-avatar-msg','',null);msg('acc-data-msg','',null);render();}catch(_e){}},
     async deleteAccount(){
-      // Two explicit confirmations before an irreversible deletion. The first spells out exactly
-      // what is removed and warns that the store subscription must be cancelled separately.
       const ok1=await customConfirm(
         appText('Вы действительно хотите удалить свой аккаунт? Профиль, аватар, сохранённые комбинации и настройки будут удалены без возможности восстановления. Активную подписку нужно отменить отдельно в App Store или Google Play.'),
         appText('Продолжить'),{title:appText('Удаление аккаунта'),cancelLabel:appText('Отмена')});
@@ -561,8 +493,8 @@
         appText('Удалить навсегда'),{title:appText('Подтверждение'),cancelLabel:appText('Отмена')});
       if(!ok2)return;
       try{
-        await window.LotoAuth.deleteAccount();                 // server deletes; identity from JWT only
-        try{await window.LotoCommercial.signOut();}catch(_e){}  // clear the commercial-runtime session
+        await window.LotoAuth.deleteAccount();                  
+        try{await window.LotoCommercial.signOut();}catch(_e){}   
         avatarRevision++;profileRequestSeq++;setAvatar(null);profileCache=null;loadedUid=null;
         const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}
         msg('acc-auth-msg','',null);msg('acc-avatar-msg','',null);msg('acc-data-msg','',null);render();
@@ -572,16 +504,12 @@
   };
   window.AccountUI=AccountUI;
 
-  // Leaving the cabinet with unsaved edits asks first — and only when something really is unsaved.
-  // Returns true when it is safe to leave.
   let pendingUnsaved=null;
   function askUnsaved(){
     return new Promise(resolve=>{
       pendingUnsaved=resolve;
       const ov=$('accq-ov');
       if(!ov){pendingUnsaved=null;resolve('discard');return;}
-      // closeOverlay() hands control to __lotoClose and returns, so this handler owns the
-      // hiding. Escape / native Back / the modal manager all land here and mean "keep editing".
       ov.__lotoClose=()=>{
         ov.__lotoClose=null;ov.classList.remove('show');
         const r=pendingUnsaved;pendingUnsaved=null;if(r)r('keep');
@@ -597,17 +525,11 @@
     AccountUI.cancelEdit();
     return true;
   }
-  // openSignIn() nominates the e-mail field for the modal manager's focus step. The manager can
-  // re-run that step (its observer re-activates the overlay after the class change), so the
-  // marker has to survive as long as the sign-in screen does — and never outlive it, or a plain
-  // trip to the cabinet would try to focus a field that is hidden for a signed-in user.
   function clearSignInFocus(){const input=$('acc-email-input');if(input)input.removeAttribute('autofocus');}
   window.openAccount=function(){
     clearSignInFocus();
     const el=$('account-ov');
     if(el)el.__lotoClose=()=>{
-      // Escape / native Back / the modal manager all come through here, so the unsaved guard has
-      // to live here too — otherwise it is trivially bypassed.
       if(profileDirty()){void confirmLeaveProfile().then(ok=>{if(ok)window.closeAccount();});return;}
       clearSignInFocus();
       el.classList.remove('show');document.body.classList.remove('account-open');const pb=$('profile-btn');if(pb)pb.setAttribute('aria-expanded','false');
@@ -618,15 +540,8 @@
     render();loadAvatar(true);
     try{window.LotoCommercial&&window.LotoCommercial.refreshAccess&&window.LotoCommercial.refreshAccess();}catch(_e){}
   };
-  // The single sign-in destination for every "требуется вход" gate in the app
-  // (LotoCommercial.requestSignIn calls this). It opens the account screen the app already
-  // has and puts the user ON the e-mail form — sign in and registration are the same
-  // passwordless flow, so one screen serves both.
   window.openSignIn=function(reason){
     window.openAccount();
-    // openAccount() renders synchronously, so the card's real visibility is known here — and
-    // still before the manager's focus frame, which is where the e-mail field actually gets
-    // focus. An already signed-in user just gets the plain cabinet.
     const card=$('acc-signin');
     if(!card||card.hidden)return;
     const input=$('acc-email-input');
@@ -646,18 +561,13 @@
 
   function wire(){
     const f=$('acc-avatar-file');if(f&&!f.__wired){f.__wired=1;f.addEventListener('change',e=>AccountUI.onFile(e));}
-    // Live dirty tracking: "Сохранить изменения" enables only once a value really differs.
     const nameInput=$('acc-displayname');
     if(nameInput&&!nameInput.__wired){nameInput.__wired=1;nameInput.addEventListener('input',()=>renderProfileCard());}
-    // Immediately reflect a fresh Magic-Link login / entitlement change, and open the cabinet
-    // straight after a successful sign-in (not the home screen).
     window.addEventListener('loto:accesschange',()=>{
       render();loadAvatar();
       try{
         const am=window.LotoCommercial&&window.LotoCommercial.authMessage;
         const st=accountState();
-        // A sign-in that was asked for BY a feature owes the user that feature, not the
-        // cabinet: the commercial runtime is about to reopen it (see AUTH_RESUME_KEY).
         const owed=!!(window.LotoCommercial&&window.LotoCommercial.authResumePending);
         if(am&&am.justConfirmed&&st.confirmed&&!owed&&!window.__accAutoOpened){
           window.__accAutoOpened=true;
@@ -666,7 +576,6 @@
         }
       }catch(_e){}
     });
-    // Re-render on language switch so the localized dates follow the new locale.
     window.addEventListener('loto:languagechange',()=>render());
     renderStores();
     render();

@@ -1,27 +1,4 @@
-/* Splash-прелоадер (вылетающие шары логотипа): класс loto-booting ставится ДО
-   первого кадра, чтобы основной UI не мигал до появления шаров. Это первый inline-
-   скрипт, поэтому build выносит его в boot-runtime.js (parser-blocking, исполняется
-   раньше <body>). Скрытие/удаление splash — в IIFE в конце этого же скрипта. */
 document.documentElement.classList.add('loto-booting');
-/* THE PAGE SCROLLBAR MUST BE VISIBLE AND MUST TAKE NO LAYOUT WIDTH.
-   A platform CLASSIC scrollbar is part of the layout: the browser subtracts it from the viewport,
-   so the header, the page background and every centred box stop short of the window's right edge
-   and the engine paints its track in the strip that is left — a permanent light band down the
-   right of the site, straight across the dark header. No CSS turns a classic bar into an overlay
-   one: the engine picks that from the OS ("Show scroll bars" on macOS), and `scrollbar-gutter`
-   and `::-webkit-scrollbar` only ever made it worse.
-   So on any desktop pointer the native PAGE bar is switched off (`html.loto-overlay-bars`, next
-   to the `.loto-booting` rules) and replaced by a real overlay one — see LotoPageScrollbar
-   further down, which draws a draggable thumb over the right edge and keeps it in sync with the
-   document. Hiding without replacing is not a fix: the bar is how you see where you are in a
-   long page and how you drag to somewhere else, and the ↑↓ anchors are a shortcut, not a
-   substitute. Touch keeps the platform's own bar, which is transient by design and costs
-   nothing.
-   The probe still runs, because "does this platform's bar take layout width" is the reason the
-   native one CANNOT be kept on Chromium and Firefox here; on Safari it does not, and the reason
-   is instead that its overlay bar fades to nothing a second after you stop scrolling.
-   It runs on documentElement, before <body> exists and before the first paint, so the strip
-   never flashes. Inner sheets and panels are NOT affected — they keep their own bar. */
 (function(){
   try{
     var probe=document.createElement('div');
@@ -29,27 +6,14 @@ document.documentElement.classList.add('loto-booting');
     document.documentElement.appendChild(probe);
     var takesSpace=probe.offsetWidth-probe.clientWidth>0;
     probe.remove();
-    /* Two reasons to take over the page bar, and a mouse is enough on its own. Where the native
-       one takes layout width it has to go, or the site loses that width. Where it does not —
-       Safari — the native overlay bar fades out a second after you stop scrolling, so at rest
-       there is nothing to see and nothing to grab; the app's bar stays put and can be dragged
-       at any time, which is what a scrollbar is for. Doing both gives every desktop browser the
-       same bar instead of one behaviour per engine.
-       A coarse pointer keeps the platform's own: touch scrollbars are transient by design, the
-       app hides them everywhere else on touch, and mobile must not change. */
     var fine=false;
     try{fine=matchMedia('(pointer:fine)').matches;}catch(_e){}
     if(takesSpace||fine)document.documentElement.classList.add('loto-overlay-bars');
   }catch(_){}
 })();
-/* No FREE-before-PRO flash: the body starts `access-pending` (tier badges hidden); reveal them
-   only once the real access level has resolved. refreshAccess() awaits the backend before its
-   first emit, so the first accesschange already carries the true tier. A timeout is a safety net
-   so badges never stay hidden if that event never fires. */
 (function(){var clr=function(){document.body&&document.body.classList.remove('access-pending');window.__lotoTierResolved=true;};
   window.addEventListener('loto:accesschange',function h(){clr();window.removeEventListener('loto:accesschange',h);});
   setTimeout(clr,6000);})();
-/* диагностический ловец: покажет любую ошибку прямо на экране */
 window.__bootErrors=[];
 window.onerror=function(msg,src,line,col,err){
   try{
@@ -67,16 +31,9 @@ window.onerror=function(msg,src,line,col,err){
 };
 window.addEventListener('unhandledrejection',function(e){
   var r=e&&e.reason;
-  /* Magic-link / OAuth callback failures (expired · already-used · invalid link) are a normal
-     user scenario, especially now that native deep-links feed the callback URL into the auth
-     flow; that flow already shows a localized message. Don't ALSO trip the raw diagnostic
-     error banner for this one handled case (every other error still surfaces). */
   if(r&&(r.name==='AuthCallbackError'||r.__isAuthCallbackError)){try{e.preventDefault();}catch(_e){}return;}
   window.onerror(String(r&&r.message||r||'promise rejection'),'',0,0);
 });
-/* Скрыть splash после появления приложения. Основной путь ждёт явную отметку
-   готовности первого стабильного кадра; fail-open остаётся только для ошибок
-   загрузки, чтобы приложение не зависало за прелоадером. */
 (function(){
   var d=document.documentElement;
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -104,11 +61,6 @@ window.addEventListener('unhandledrejection',function(e){
     s.classList.add('ls-hide');
     setTimeout(function(){if(s&&s.parentNode)s.parentNode.removeChild(s);reveal();},520);
   }
-  /* Единственный шлюз показа приложения: ждём, пока i18n применит определённый язык
-     (window.__lotoI18nApplied). Иначе splash мог исчезнуть раньше перевода, и пользователь с
-     польским/украинским устройством на миг увидел бы исходный русский текст. Ожидание
-     ограничено 3 с (и почти всегда равно нулю: __lotoI18nApplied выставляется в finally, даже
-     если чанк локали не загрузился), поэтому за splash приложение зависнуть не может. */
   var i18nWaiting=false;
   function whenLanguageApplied(run){
     if(window.__lotoI18nApplied){run();return;}
@@ -127,7 +79,6 @@ window.addEventListener('unhandledrejection',function(e){
     });
   }
   window.__lotoMarkAppReady=function(){appReady=true;requestHide();};
-  // Отсчёт от появления DOM (шары уже в разметке), чтобы анимация всегда была видна.
   function arm(){
     anchor=anchor||Date.now();
     requestAnimationFrame(function(){requestAnimationFrame(hideNativeLaunchSplash);});
