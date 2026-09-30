@@ -5469,6 +5469,7 @@ async function PERIOD_refreshLabel(){
   if(btn)btn.textContent=(w>0?w+' тиражей':scopeLabel)+' ▾';
   if(note)note.textContent=w>0?('Последние '+Math.min(w,n)+' из '+n+' доступных'):(scopeLabel+' · '+n+' тиражей');
 }
+window.addEventListener('loto:languagechange',()=>{PERIOD_refreshLabel().catch(()=>{});});
 
 function CELE_show(title,msg,icon){
   const burst=document.getElementById('cele-burst');
@@ -7140,3 +7141,7 @@ async function JC_continue(){
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach,{once:true});else attach();
 })();
+window.addEventListener('loto:nativeback',function(e){
+  if(e.defaultPrevented||window.LotoModals?.active||document.body.classList.contains('drum3d-open'))return;
+  if(typeof curPage!=='undefined'&&curPage!=='sim'&&typeof selPage==='function'){e.preventDefault();selPage('sim');}
+});
