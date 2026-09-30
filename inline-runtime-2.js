@@ -41,5 +41,5 @@
     });
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
-  document.addEventListener('loto:language-changed',()=>document.querySelectorAll('.modal-static-close').forEach(b=>b.setAttribute('aria-label',appText('Закрыть'))));
+  window.addEventListener('loto:languagechange',()=>document.querySelectorAll('.modal-static-close').forEach(b=>b.setAttribute('aria-label',appText('Закрыть'))));
 })();

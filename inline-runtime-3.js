@@ -3,19 +3,28 @@
   const T=v=>String(v==null?'':v);
   let magicSending=false,avatarBusy=false;
   const avEd={img:null,w:0,h:0,scale:1,minScale:1,rot:0,step:0,offx:0,offy:0,drag:null,pts:new Map(),pinch:null};
-  let calY,calM,calSelIso=null,calYearView=false;
+  let calY,calM,calSelIso=null,calYearView=false,calOpts=null;
   const pad2=n=>String(n).padStart(2,'0');
   const isoOf=(y,m,d)=>`${y}-${pad2(m+1)}-${pad2(d)}`;
+  const ISO_RE=/^\d{4}-\d{2}-\d{2}$/;
+  const todayIsoLocal=()=>{const n=new Date();return isoOf(n.getFullYear(),n.getMonth(),n.getDate());};
+  const calMin=()=>(calOpts&&ISO_RE.test(calOpts.min||''))?calOpts.min:'1920-01-01';
+  const calMax=()=>(calOpts&&ISO_RE.test(calOpts.max||''))?calOpts.max:(calOpts&&calOpts.allowFuture?'2099-12-31':todayIsoLocal());
   function calRender(){
     const loc=uiLang();
     const title=$('cal-title');
     try{title.textContent=new Date(calY,calM,1).toLocaleDateString(loc,{month:'long',year:'numeric'});}catch(_e){title.textContent=`${calM+1}.${calY}`;}
+    title.setAttribute('aria-label',appText('Выбрать месяц и год'));title.setAttribute('aria-expanded',calYearView?'true':'false');
+    $('cal-prev').setAttribute('aria-label',appText('Назад'));$('cal-next').setAttribute('aria-label',appText('Вперёд'));
     const yv=$('cal-yearsel'),grid=$('cal-grid'),wd=$('cal-weekdays');
     yv.hidden=!calYearView;grid.hidden=calYearView;wd.hidden=calYearView;
-    $('cal-prev').style.visibility=calYearView?'hidden':'';$('cal-next').style.visibility=calYearView?'hidden':'';
+    const minIso=calMin(),maxIso=calMax();
+    const firstIso=isoOf(calY,calM,1),lastIso=isoOf(calY,calM,new Date(calY,calM+1,0).getDate());
+    $('cal-prev').style.visibility=(calYearView||firstIso<=minIso)?'hidden':'';$('cal-next').style.visibility=(calYearView||lastIso>=maxIso)?'hidden':'';
+    const clr=$('cal-clear');if(clr)clr.hidden=!(calOpts&&calOpts.clearable);
     if(calYearView){
-      const now=new Date().getFullYear();let h='';
-      for(let y=now;y>=1920;y--)h+=`<button type="button" class="cal-yr${y===calY?' sel':''}" data-loto-event-click="AccountUI.calPickYear(${y})">${y}</button>`;
+      const top=Number(maxIso.slice(0,4)),bottom=Number(minIso.slice(0,4));let h='';
+      for(let y=top;y>=bottom;y--)h+=`<button type="button" class="cal-yr${y===calY?' sel':''}" data-loto-event-click="AccountUI.calPickYear(${y})">${y}</button>`;
       yv.innerHTML=h;return;
     }
     let wdh='';for(let i=1;i<=7;i++){const dd=new Date(2024,0,i); wdh+=`<span>${dd.toLocaleDateString(loc,{weekday:'short'})}</span>`;}
@@ -23,20 +32,36 @@
     const first=new Date(calY,calM,1);let start=(first.getDay()+6)%7;  
     const daysIn=new Date(calY,calM+1,0).getDate();
     const prevDays=new Date(calY,calM,0).getDate();
-    const todayIso=isoOf(new Date().getFullYear(),new Date().getMonth(),new Date().getDate());
+    const todayIso=todayIsoLocal();
     let cells='';
     for(let i=0;i<start;i++){const d=prevDays-start+1+i;cells+=`<button type="button" class="cal-day other" disabled>${d}</button>`;}
     for(let d=1;d<=daysIn;d++){
       const iso=isoOf(calY,calM,d);
-      const future=iso>todayIso;
+      const outside=iso<minIso||iso>maxIso;
       const cls='cal-day'+(iso===calSelIso?' sel':'')+(iso===todayIso?' today':'');
-      cells+=`<button type="button" class="${cls}" ${future?'disabled':''} data-loto-event-click="AccountUI.calPickDay('${iso}')">${d}</button>`;
+      let label=iso;try{label=new Date(calY,calM,d).toLocaleDateString(loc,{weekday:'long',day:'numeric',month:'long',year:'numeric'});}catch(_e){}
+      cells+=`<button type="button" class="${cls}" ${outside?'disabled':''} aria-label="${escapeHtml(label)}"${iso===calSelIso?' aria-pressed="true"':''} data-loto-event-click="AccountUI.calPickDay('${iso}')">${d}</button>`;
     }
     const rem=(7-((start+daysIn)%7))%7;
     for(let i=1;i<=rem;i++)cells+=`<button type="button" class="cal-day other" disabled>${i}</button>`;
     grid.innerHTML=cells;
   }
 
+  function openDatePicker(opts){
+    calOpts=opts||{};
+    const cur=String(calOpts.value||'').slice(0,10);
+    calSelIso=ISO_RE.test(cur)?cur:null;
+    let baseIso=calSelIso||(ISO_RE.test(calOpts.initial||'')?calOpts.initial:todayIsoLocal());
+    if(baseIso<calMin())baseIso=calMin();if(baseIso>calMax())baseIso=calMax();
+    calY=Number(baseIso.slice(0,4));calM=Number(baseIso.slice(5,7))-1;calYearView=false;
+    calRender();
+    const ov=$('cal-ov');if(!ov)return;
+    ov.__lotoClose=()=>AccountUI.calClose();
+    let topZ=0;document.querySelectorAll('[id$="-ov"].show').forEach(o=>{if(o===ov)return;const z=parseInt(getComputedStyle(o).zIndex,10);if(Number.isFinite(z)&&z>topZ)topZ=z;});
+    ov.style.zIndex=String(Math.max(580,topZ+10));
+    ov.classList.add('show');
+  }
+  window.LotoDatePicker=Object.freeze({open:openDatePicker,close:()=>AccountUI.calClose()});
   function fmtDate(iso){
     const t=Date.parse(iso||'');
     if(!Number.isFinite(t))return '';
@@ -423,20 +448,15 @@
     async manage(){try{await window.LotoCommercial.accountPortal();}catch(_e){}},
     async restore(){try{await window.LotoCommercial.restorePurchase();}catch(_e){}},
     openCalendar(){
-      const cur=(($('acc-birthday')||{}).value||'').slice(0,10);
-      calSelIso=/^\d{4}-\d{2}-\d{2}$/.test(cur)?cur:null;
-      const base=calSelIso?new Date(calSelIso+'T12:00:00Z'):new Date(1990,0,1);
-      calY=base.getUTCFullYear?base.getFullYear():base.getFullYear();calM=base.getMonth();calYearView=false;
-      calRender();
-      const ov=$('cal-ov');if(ov)ov.classList.add('show');
+      openDatePicker({value:(($('acc-birthday')||{}).value||'').slice(0,10),initial:'1990-01-01',clearable:true,onPick:setBirthdayValue});
     },
     calNav(dir){calM+=dir;if(calM<0){calM=11;calY--;}else if(calM>11){calM=0;calY++;}calRender();},
     calToggleYears(){calYearView=!calYearView;calRender();},
     calPickYear(y){calY=y;calYearView=false;calRender();},
     calPickDay(iso){calSelIso=iso;calRender();},
-    calClear(){calSelIso=null;setBirthdayValue(null);this.calClose();},
-    calClose(){const ov=$('cal-ov');if(ov)ov.classList.remove('show');},
-    calDone(){setBirthdayValue(calSelIso||null);this.calClose();},
+    calClear(){calSelIso=null;const o=calOpts;this.calClose();if(o&&o.onPick)o.onPick(null);},
+    calClose(){const ov=$('cal-ov');if(ov)ov.classList.remove('show');calOpts=null;},
+    calDone(){const o=calOpts,iso=calSelIso||null;this.calClose();if(o&&o.onPick&&(iso||o.clearable))o.onPick(iso);},
     editData(){
       writeProfileForm(savedProfile);
       msg('acc-data-msg','',null);

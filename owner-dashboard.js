@@ -546,6 +546,9 @@
     ensureStyles();
     ovEl = D.createElement('div');
     ovEl.id = 'ow-ov';
+    // The owner panel keeps the platform date inputs: it has its own language (ru/en/no), so the app's
+    // date overlay + in-app picker (index.html localizeDateInput) must not take these over.
+    ovEl.setAttribute('data-native-date', '');
     ovEl.setAttribute('data-i18n-ignore', '');
     ovEl.setAttribute('data-ow-theme', resolveTheme());
     ovEl.innerHTML =

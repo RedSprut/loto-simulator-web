@@ -309,7 +309,7 @@ const WHEEL_POOL_MAX=18;
 const L=()=>LOTS[cur];
 const LOTTERY_LABELS=Object.fromEntries(Object.entries(LOTS).map(([id,l])=>[id,l.short||l.name]));
 const OFFICIAL_LOTS=Object.keys(LOTS);
-const lotteryName=id=>LOTTERY_LABELS[id]||LOTS[id]?.name||String(id||'').toUpperCase();
+const lotteryName=id=>{const key=resolveGameKey(id)||id;return LOTTERY_LABELS[key]||LOTS[key]?.name||String(id||'').toUpperCase();};
 const appText=value=>window.LotoI18n?.translate?window.LotoI18n.translate(value):String(value??'');
 const historyText=(value,...args)=>appText(String(value??'').replace(/{{(\d+)}}/g,(_match,index)=>String(args[Number(index)]??'')));
 let groupAnalysisState={active:false,limit:0,total:0};
@@ -1017,7 +1017,7 @@ function renderLotteryNav(){
     strip.innerHTML=Object.entries(LOTS).map(([id,l],i)=>`
       ${i?'<div class="ss-div"></div>':''}
       <div class="ss-item ${id===cur?'on':''}" id="ss-${id}" role="button" tabindex="0" aria-current="${id===cur?'true':'false'}" data-loto-event-click="initLottery('${id}')" data-loto-event-keydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();initLottery('${id}');}">
-        <div class="ss-name" style="color:${mColor(l.cls)}">${l.short||l.name}</div>
+        <div class="ss-name" style="color:${l.cls==='lotto'||l.cls==='viking'?mColor(l.cls):'var(--teal-ink)'}">${l.short||l.name}</div>
         <div class="ss-day"><span>${l.day}</span> · до ${scheduleTime(l)}</div>
         <div class="ss-price">${formatPrice(l)}/ряд</div>
       </div>`).join('');
@@ -1146,7 +1146,7 @@ async function getJackpot(id){
   const prefix=/^[$€£]\s*$/.test(String(e.prefix||''))?'':String(e.prefix||'');
   let qualifier=String(e.sub||'').replace(/\bMILLION(?:ER|S)?\b/gi,'');
   if(currency)qualifier=qualifier.replace(new RegExp('\\b'+currency+'\\b','g'),'');
-  qualifier=qualifier.split('·').map(s=>s.trim()).filter(Boolean).join(' · ');
+  qualifier=qualifier.split('·').map(s=>s.trim()).filter(Boolean).map(s=>/^ESTIMATED$/i.test(s)?appText('Оценка'):s).join(' · ');
   return{
     status,validForNext,amount:e.amount||null,
     txt:e.amount?prefix+fmtJackpot(e.amount,currency):'',
@@ -1269,7 +1269,7 @@ function updateHdr(){
   const l=L();
   const dBo=drawBonusCount(l);
   const f=rows.filter(r=>r.m.length===l.pM&&(dBo===0||r.b.length===dBo)).length;
-  document.getElementById('hdr-title').textContent=f>0?`${f} ${rowWord(f)}, ${fmtInt(f*l.price)} ${l.currency||'NOK'}`:'Fyll ut minst 2 rekker';
+  document.getElementById('hdr-title').textContent=f>0?`${f} ${rowWord(f)}, ${fmtInt(f*l.price)} ${l.currency||'NOK'}`:lotteryName(cur);
 }
 function updateAnaHdr(){
   const title=document.getElementById('hdr-title');
@@ -4197,6 +4197,7 @@ function appLocale(){
   return APP_LOCALES[lang]||APP_LOCALES[curLang]||'en-GB';
 }
 const _ldateReg=[];
+const _nativeValue=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');
 function _paintLdate(input,ov){
   const v=input.value;
   if(!v){ov.textContent=input.getAttribute('data-ldate-ph')||'';ov.classList.add('ph');return;}
@@ -4206,18 +4207,53 @@ function _paintLdate(input,ov){
   catch(_e){ov.textContent=v;}
   ov.classList.remove('ph');
 }
+function _openLdatePicker(input,event){
+  if(!window.LotoDatePicker||input.disabled||input.readOnly)return false;
+  if(event){event.preventDefault();event.stopPropagation();}
+  window.LotoDatePicker.open({
+    value:input.value,min:input.min,max:input.max,allowFuture:!input.max,clearable:!input.required,
+    initial:input.max&&input.max<new Date().toISOString().slice(0,10)?input.max:undefined,
+    onPick:iso=>{
+      const next=iso||'';
+      if(next===input.value)return;
+      input.value=next;
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      input.dispatchEvent(new Event('change',{bubbles:true}));
+      try{input.focus({preventScroll:true});}catch(_e){}
+    }
+  });
+  return true;
+}
 function localizeDateInput(input){
-  if(!input||input.dataset.ldate)return;
+  if(!input||input.dataset.ldate||!input.parentNode)return;
   input.dataset.ldate='1';
   const wrap=document.createElement('span');wrap.className='ldate';
   input.parentNode.insertBefore(wrap,input);wrap.appendChild(input);
-  const ov=document.createElement('span');ov.className='ldate-ov';wrap.appendChild(ov);
+  const ov=document.createElement('span');ov.className='ldate-ov';ov.setAttribute('aria-hidden','true');wrap.appendChild(ov);
+  try{const cs=getComputedStyle(input);ov.style.padding=cs.padding;ov.style.fontSize=cs.fontSize;ov.style.borderWidth=cs.borderWidth;ov.style.borderRadius=cs.borderRadius;
+    if(cs.display.startsWith('inline')&&input.style.width!=='100%'&&!input.classList.contains('date-inp')&&!input.classList.contains('num-inp'))wrap.classList.add('ldate-inline');}catch(_e){}
   const upd=()=>_paintLdate(input,ov);
   input.addEventListener('input',upd);input.addEventListener('change',upd);
+  if(_nativeValue&&_nativeValue.set)try{Object.defineProperty(input,'value',{configurable:true,get(){return _nativeValue.get.call(this);},set(v){_nativeValue.set.call(this,v);upd();}});}catch(_e){}
+  ov.addEventListener('click',e=>_openLdatePicker(input,e));
+  input.addEventListener('click',e=>{_openLdatePicker(input,e);});
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '||(e.altKey&&e.key==='ArrowDown')||e.key==='F4')_openLdatePicker(input,e);});
   _ldateReg.push({input,ov});upd();
 }
-function refreshLocalizedDates(){for(const r of _ldateReg){try{_paintLdate(r.input,r.ov);}catch(_e){}}}
-function setupLocalizedDateInputs(){['inp-date','period-from','period-to'].forEach(id=>{const e=document.getElementById(id);if(e)localizeDateInput(e);});}
+function refreshLocalizedDates(){
+  for(let i=_ldateReg.length-1;i>=0;i--){const r=_ldateReg[i];if(!r.input.isConnected){_ldateReg.splice(i,1);continue;}try{_paintLdate(r.input,r.ov);}catch(_e){}}
+}
+function _autoLocalizeDates(root){
+  if(!root||!root.querySelectorAll)return;
+  const list=root.matches&&root.matches('input[type=date]')?[root]:root.querySelectorAll('input[type=date]');
+  list.forEach(el=>{if(!el.dataset.ldate&&!el.closest('[data-native-date]'))localizeDateInput(el);});
+}
+function setupLocalizedDateInputs(){
+  ['inp-date','period-from','period-to'].forEach(id=>{const e=document.getElementById(id);if(e)localizeDateInput(e);});
+  _autoLocalizeDates(document.body);
+  try{new MutationObserver(recs=>{for(const r of recs)for(const n of r.addedNodes)if(n.nodeType===1)_autoLocalizeDates(n);})
+    .observe(document.body,{childList:true,subtree:true});}catch(_e){}
+}
 async function applyLang(){
   document.documentElement.lang=curLang;
   if(window.LotoI18n)await window.LotoI18n.setLanguage(curLang);
@@ -6920,7 +6956,7 @@ async function JC_continue(){
 }
 (function(){
   var TRANSIENT={'busy-ov':1,'aved-ov':1};
-  var NESTED={'qab-ov':1,'cc-ov':1,'period-ov':1,'court-layer-ov':1,'accq-ov':1};
+  var NESTED={'qab-ov':1,'cc-ov':1,'period-ov':1,'court-layer-ov':1,'accq-ov':1,'cal-ov':1};
   var CRITICAL={
     'cc-ov':1,'fb-ov':1,'prev-ov':1,'pro-ov':1,'mres-ov':1,'jc-ov':1,'court-ov':1,
     'cons-ov':1,'qa-ov':1,'adv-ov':1,'sup-ov':1,'pdx-ov':1,'matrix-ov':1,
@@ -6982,7 +7018,7 @@ async function JC_continue(){
       else if(lastTrigger&&!opened.contains(lastTrigger))openers[opened.id]=lastTrigger;
     }
     if(NESTED[opened.id]){
-      labelModal(opened);activeModal=opened.id;lockBody();focusInitial(opened);return;
+      labelModal(opened);activeModal=opened.id;lockBody();focusInitial(opened);webHistoryOpen();return;
     }
     guard=true;
     try{tops().forEach(function(el){
@@ -6991,13 +7027,50 @@ async function JC_continue(){
       delete openers[el.id];closeOverlay(el,'replace');
     });}
     finally{guard=false;}
-    labelModal(opened);activeModal=opened.id;lockBody();focusInitial(opened);
+    labelModal(opened);activeModal=opened.id;lockBody();focusInitial(opened);webHistoryOpen();
   }
   function recomputeActive(closedId){
     var v=visibleContent();activeModal=v.length?v[v.length-1].id:null;
     if(activeModal){lockBody();return;}
-    unlockBody();if(closedId)requestAnimationFrame(function(){restoreFocus(closedId);});
+    unlockBody();webHistoryClosed();if(closedId)requestAnimationFrame(function(){restoreFocus(closedId);});
   }
+  var WEB_HISTORY=(function(){try{return !(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());}catch(_){return true;}})();
+  var histPushed=false,histIgnorePops=0,sentinelHref='',foreignPops=0,foreignTimer=0;
+  var nativeHistoryBack=history.back.bind(history);
+  if(WEB_HISTORY)try{history.back=function(){
+    foreignPops++;clearTimeout(foreignTimer);
+    foreignTimer=setTimeout(function(){if(foreignPops>0){foreignPops=0;if(activeModal)webHistoryOpen();}},1000);
+    return nativeHistoryBack();
+  };}catch(_){}
+  function isSentinel(state){return !!(state&&state.lotoModal);}
+  function webHistoryOpen(){
+    if(!WEB_HISTORY||histPushed||foreignPops>0)return;
+    try{history.pushState({lotoModal:1},'');histPushed=true;sentinelHref=location.href;}catch(_){}
+  }
+  function webHistoryClosed(){
+    if(!WEB_HISTORY||!histPushed)return;
+    histPushed=false;
+    try{if(isSentinel(history.state)){histIgnorePops++;nativeHistoryBack();}}catch(_){}
+  }
+  if(WEB_HISTORY)window.addEventListener('popstate',function(e){
+    if(foreignPops>0){
+      foreignPops--;
+      if(!foreignPops){clearTimeout(foreignTimer);if(activeModal&&!histPushed)webHistoryOpen();}
+      return;
+    }
+    if(histIgnorePops>0){
+      histIgnorePops--;e.stopImmediatePropagation();
+      if(activeModal&&!histPushed)webHistoryOpen();
+      return;
+    }
+    if(!histPushed||isSentinel(e.state))return;
+    if(location.href!==sentinelHref){histPushed=false;return;}
+    histPushed=false;e.stopImmediatePropagation();
+    if(!activeModal)return;
+    var el=document.getElementById(activeModal);
+    closeOverlay(el,'back');recomputeActive(el&&el.id);
+    if(activeModal)webHistoryOpen();
+  });
   var obs=new MutationObserver(function(recs){
     if(guard)return;
     var opened=null,closedId=null;
@@ -7017,7 +7090,10 @@ async function JC_continue(){
     return true;
   }
   function register(el){if(observeModal(el)&&el.classList.contains('show'))activate(el);}
-  function attach(){tops().forEach(observeModal);}
+  function attach(){
+    try{if(WEB_HISTORY&&isSentinel(history.state))history.replaceState(null,'');}catch(_){}
+    tops().forEach(observeModal);
+  }
   document.addEventListener('pointerdown',function(e){var t=e.target&&e.target.closest&&e.target.closest('button,a,[onclick],[role="button"]');if(t)lastTrigger=t;},true);
   var lastTabShift=false;
   document.addEventListener('focusin',function(e){

@@ -234,7 +234,7 @@
     p.set('navH', '64px'); p.set('navB', '6px'); p.set('navGap', '6px');
 
     var navItem = document.getElementById('bn-drum3d');
-    if (navItem) { var curOn = document.querySelector('.bn.on'); prevActiveBn = curOn ? curOn.id : 'bn-sim'; document.querySelectorAll('.bn').forEach(function (x) { x.classList.remove('on'); }); navItem.classList.add('on'); }
+    if (navItem) { var curOn = document.querySelector('.bn.on'); prevActiveBn = curOn ? curOn.id : 'bn-sim'; document.querySelectorAll('.bn').forEach(function (x) { x.classList.remove('on'); x.setAttribute('aria-current', 'false'); }); navItem.classList.add('on'); navItem.setAttribute('aria-current', 'page'); }
 
     overlay = document.createElement('div');
     overlay.id = 'drum3d-overlay';
@@ -264,7 +264,7 @@
         var nextApp = DRUM_TO_APP[d.game];
         if (nextApp && nextApp !== currentAppId()) {
           try { var prevApp = currentAppId(); selLot(nextApp); smartStartRecord(nextApp, prevApp); } catch (err) {}
-          try { document.querySelectorAll('.bn').forEach(function (x) { x.classList.remove('on'); }); navItem.classList.add('on'); } catch (err2) {}
+          try { document.querySelectorAll('.bn').forEach(function (x) { x.classList.remove('on'); x.setAttribute('aria-current', 'false'); }); navItem.classList.add('on'); navItem.setAttribute('aria-current', 'page'); } catch (err2) {}
         }
         try { pushDrumFavorites(); } catch (err3) {}  
       }
@@ -300,8 +300,8 @@
     if (langHandler) { window.removeEventListener('loto:languagechange', langHandler); langHandler = null; }
     if (msgHandler) { window.removeEventListener('message', msgHandler); msgHandler = null; }
     try {
-      document.querySelectorAll('.bn').forEach(function (x) { x.classList.remove('on'); });
-      var back = document.getElementById(prevActiveBn || 'bn-sim'); if (back) back.classList.add('on');
+      document.querySelectorAll('.bn').forEach(function (x) { x.classList.remove('on'); x.setAttribute('aria-current', 'false'); });
+      var back = document.getElementById(prevActiveBn || 'bn-sim'); if (back) { back.classList.add('on'); back.setAttribute('aria-current', 'page'); }
       var focusEl = document.getElementById('bn-drum3d'); if (focusEl) focusEl.focus();
     } catch (e) {}
     if (!fromPop && history.state && history.state.drum3d) history.back();
