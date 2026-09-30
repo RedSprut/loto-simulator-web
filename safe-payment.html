@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="color-scheme" content="light">
-  <title>Безопасная оплата | Lotto Simulator</title>
+  <title>Safe payment | Lotto Simulator</title>
   <meta name="description" content="How payment for Lotto Simulator PRO works: Apple, Google Play or a secure web checkout only. The app never asks for card numbers, CVV or passwords by message.">
   <link rel="canonical" href="https://lottosimulator.app/safe-payment.html">
   <link rel="icon" href="./favicon-64.png?v=20260831">
@@ -17,9 +17,7 @@
     .domain{padding:12px;border-left:4px solid #b8860b;background:#fff;overflow-wrap:anywhere}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
     .button{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 15px;border-radius:7px;background:#2b1710;color:#fff;text-decoration:none;font-weight:800;max-width:100%;flex-wrap:wrap;text-align:center}.button .support-addr{min-width:0;overflow-wrap:anywhere}
     .secondary{background:#fff;color:#2b1710;border:1px solid #b5894c}[hidden]{display:none!important}
-    /* Без вспышки исходного (русского) текста: пока i18n не применил язык, main невидим.
-       Страховка в самой анимации — через 3 с она показывает контент, поэтому сбой i18n,
-       выключенный JS или отключённые анимации дают показ, а не вечно пустую страницу. */
+    
     html.i18n-pending main{animation:legalI18nHold 3s steps(1,end) forwards}
     @keyframes legalI18nHold{from{opacity:0}to{opacity:1}}
   </style>
@@ -27,24 +25,24 @@
 <body>
   <main>
     <header>
-      <h1>Безопасная оплата</h1>
-      <label><span>Язык</span><br><select id="safe-language" aria-label="Язык"></select></label>
+      <h1>Safe payment</h1>
+      <label><span data-i18n-entry="2283">Language</span><br><select data-i18n-entry-aria-label="2283" id="safe-language" aria-label="Language"></select></label>
     </header>
-    <p class="domain" id="safe-domain">Коммерческий домен ещё не активирован. Оплата на этом адресе отключена.</p>
-    <h2>Как проходит оплата</h2>
+    <p class="domain" id="safe-domain">The commercial domain is not active yet. Payment is disabled at this address.</p>
+    <h2>How payment works</h2>
     <ul>
-      <li>На iPhone и iPad подписка оформляется только через системный экран Apple.</li>
-      <li>На Android подписка оформляется только через Google Play.</li>
-      <li>В браузере защищённый checkout откроется через RevenueCat и Paddle только после письменного compliance-подтверждения.</li>
+      <li>On iPhone and iPad, subscriptions are available only through Apple’s system screen.</li>
+      <li>On Android, subscriptions are available only through Google Play.</li>
+      <li>In a browser, secure checkout will open through RevenueCat and Paddle only after written compliance approval.</li>
     </ul>
-    <h2>Защита от фишинга</h2>
-    <p>Lotto Simulator никогда не просит отправлять номер карты, CVV, пароль или код подтверждения через e-mail, чат, SMS либо push-уведомление.</p>
-    <p>Не вводите платёжные данные на домене, который отличается от официального адреса приложения или системного экрана Apple, Google Play либо Paddle.</p>
-    <h2>Что оплачивает PRO</h2>
-    <p>PRO оплачивает только дополнительные программные функции симулятора и аналитического инструмента. Приложение не продаёт билеты, не принимает ставки и не гарантирует выигрыш.</p>
+    <h2>Phishing protection</h2>
+    <p>Lotto Simulator never asks you to send your card number, CVV, password, or verification code by email, chat, SMS, or push notification.</p>
+    <p>Do not enter payment details on a domain that differs from the app’s official address or the Apple, Google Play, or Paddle system screen.</p>
+    <h2>What PRO pays for</h2>
+    <p>PRO pays only for additional software features of the simulator and analytics tool. The app does not sell tickets, accept bets, or guarantee winnings.</p>
     <div class="actions">
-      <a class="button" href="./">Вернуться в приложение</a>
-      <a class="button secondary" id="safe-support" href="#" hidden>Поддержка</a>
+      <a class="button" href="./">Return to the app</a>
+      <a class="button secondary" id="safe-support" href="#" hidden>Support</a>
       <a class="button secondary" id="safe-app-store" href="#" hidden>App Store</a>
       <a class="button secondary" id="safe-play-store" href="#" hidden>Google Play</a>
     </div>

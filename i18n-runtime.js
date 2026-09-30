@@ -154,13 +154,30 @@
     return !parent||/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA|CODE|PRE)$/.test(parent.tagName)||parent.closest('[data-i18n-ignore]');
   }
 
+  // The web build (scripts/prerender-en-shell.mjs) ships the static pages in English. Where one
+  // English word belongs to entries with different translations («Retry» = «Повторить» and
+  // «Повторить загрузку»), the element names its entry: data-i18n-entry="<catalog index>" for its
+  // first text node, data-i18n-entry-<attribute> for an attribute. Read once, for the English the
+  // build wrote; text a script puts there later is its own source. Native bundles never carry it.
+  function hintedEntry(element,name,current){
+    const hint=element&&typeof element.getAttribute==='function'?element.getAttribute(name):null;
+    if(hint===null||hint===undefined||!normalize(current))return null;
+    element.removeAttribute(name);
+    const entry=catalog.entries[Number(hint)];
+    return entry&&!/[А-Яа-яЁё]/.test(current)?entry[0]:null;
+  }
+  function hintedSource(node,current){
+    const source=hintedEntry(node.parentElement,'data-i18n-entry',current);
+    return source===null?current:current.match(/^\s*/)[0]+source+current.match(/\s*$/)[0];
+  }
+
   function localizeTextNode(node,force=false){
     if(skipTextNode(node))return;
     const current=node.nodeValue||'';
     let source=textSources.get(node);
     const last=textLast.get(node);
     if(source===undefined||current!==last){
-      source=current;textSources.set(node,source);
+      source=source===undefined?hintedSource(node,current):current;textSources.set(node,source);
     }
     const target=translate(source);
     textLast.set(node,target);
@@ -173,7 +190,7 @@
     if(!state){state=new Map();attributeState.set(element,state);}
     const current=element.getAttribute(name)||'';
     let item=state.get(name);
-    if(!item||current!==item.last)item={source:current,last:current};
+    if(!item||current!==item.last)item={source:item?current:(hintedEntry(element,`data-i18n-entry-${name}`,current)??current),last:current};
     const target=translate(item.source);
     item.last=target;state.set(name,item);
     if(current!==target)element.setAttribute(name,target);
