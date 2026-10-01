@@ -101281,7 +101281,7 @@
         "date": "2026-09-04",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 219.5,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "6",
@@ -101320,8 +101320,8 @@
             "winners": 260187
           }
         ],
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/04-09-2026"
+        "source": "Lottologia",
+        "sourceUrl": "https://lottologia.com/superenalotto/estrazioni"
       },
       {
         "date": "2026-09-03",
