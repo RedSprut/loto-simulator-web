@@ -86529,7 +86529,7 @@
         "date": "2026-08-04",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 60,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86586,8 +86586,8 @@
             "winners": 124039
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-08-04"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2026-07-31",
@@ -87105,7 +87105,7 @@
         "date": "2026-07-03",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 542,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87162,8 +87162,8 @@
             "winners": 219451
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-07-03"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2026-06-30",
@@ -87681,7 +87681,7 @@
         "date": "2026-06-02",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 346,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87738,8 +87738,8 @@
             "winners": 194400
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-06-02"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2026-05-29",
@@ -88257,7 +88257,7 @@
         "date": "2026-05-01",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 178,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -88314,8 +88314,8 @@
             "winners": 154963
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-05-01"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2026-04-28",
@@ -88769,7 +88769,7 @@
         "date": "2026-04-03",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 90,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -88826,8 +88826,8 @@
             "winners": 120557
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-04-03"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2026-03-31",
@@ -89345,7 +89345,7 @@
         "date": "2026-03-03",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 473,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -89402,8 +89402,8 @@
             "winners": 194102
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-03-03"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2026-02-27",
@@ -89857,7 +89857,7 @@
         "date": "2026-02-03",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 323,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -89914,8 +89914,8 @@
             "winners": 173180
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-02-03"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2026-01-30",
@@ -90433,7 +90433,7 @@
         "date": "2026-01-02",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 157,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -90490,8 +90490,8 @@
             "winners": 177722
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-01-02"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2025-12-30",
@@ -91009,7 +91009,7 @@
         "date": "2025-12-02",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 90,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -91066,8 +91066,8 @@
             "winners": 120432
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2025-12-02"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2025-11-28",
@@ -91521,7 +91521,7 @@
         "date": "2025-11-04",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 800,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -91578,8 +91578,8 @@
             "winners": 393585
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2025-11-04"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2025-10-31",
@@ -92097,7 +92097,7 @@
         "date": "2025-10-03",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 520,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -92154,8 +92154,8 @@
             "winners": 228334
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2025-10-03"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2025-09-30",
@@ -92673,7 +92673,7 @@
         "date": "2025-09-02",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 302,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -92730,8 +92730,8 @@
             "winners": 259995
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2025-09-02"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2025-08-29",
@@ -93249,7 +93249,7 @@
         "date": "2025-08-01",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 140,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -93306,8 +93306,8 @@
             "winners": 132117
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2025-08-01"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2025-07-29",
@@ -93825,7 +93825,7 @@
         "date": "2025-07-01",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 50,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -93882,8 +93882,8 @@
             "winners": 126615
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2025-07-01"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2025-06-27",

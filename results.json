@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-01T11:49:43.098Z",
-    "sourceFetchedAt": "2026-10-01T11:49:43.098Z",
+    "generatedAt": "2026-10-01T15:34:45.718Z",
+    "sourceFetchedAt": "2026-10-01T15:34:45.718Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "9fa9e48a922b63b2",
     "updatedAt": "2026-10-01",
@@ -70,7 +70,7 @@
       "megaMillions": {
         "status": "ok",
         "source": "NY Open Data / Mega Millions",
-        "fetched": 293,
+        "fetched": 2541,
         "merged": 155
       },
       "euroMillions": {
