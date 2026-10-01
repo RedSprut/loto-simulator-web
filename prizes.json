@@ -100634,6 +100634,52 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-10-01",
+        "lotteryId": "superEnalotto",
+        "currency": "EUR",
+        "jackpot": 34.2,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 34200000,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 28421.35,
+            "winners": 6
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 250.85,
+            "winners": 695
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 20.74,
+            "winners": 25242
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 5,
+            "winners": 370069
+          }
+        ],
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/01-10-2026"
+      },
+      {
         "date": "2026-09-29",
         "lotteryId": "superEnalotto",
         "currency": "EUR",

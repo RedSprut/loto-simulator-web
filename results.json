@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-01T18:36:56.423Z",
-    "sourceFetchedAt": "2026-10-01T18:36:56.423Z",
+    "generatedAt": "2026-10-01T22:01:22.874Z",
+    "sourceFetchedAt": "2026-10-01T22:01:22.874Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "60e055ddc558b94d",
     "updatedAt": "2026-10-01",
@@ -11971,13 +11971,53 @@
         "bonus": [
           73
         ],
-        "jackpot": null,
+        "jackpot": 34.2,
         "lotteryId": "superEnalotto",
-        "source": "National-Lottery.com / SuperEnalotto",
-        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/01-10-2026",
         "drawId": null,
         "ruleVersion": "superenalotto-6-90",
-        "ruleEra": "current"
+        "ruleEra": "current",
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 34200000,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 28421.35,
+            "winners": 6
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 250.85,
+            "winners": 695
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 20.74,
+            "winners": 25242
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 5,
+            "winners": 370069
+          }
+        ],
+        "superStar": 42,
+        "currency": "EUR"
       },
       {
         "date": "2026-09-29",
