@@ -15,10 +15,10 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-01T10:27:20.210Z",
-    "sourceFetchedAt": "2026-10-01T10:27:20.210Z",
+    "generatedAt": "2026-10-01T11:09:14.390Z",
+    "sourceFetchedAt": "2026-10-01T11:09:14.390Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "79682b86f39cd35a",
+    "snapshotVersion": "9fa9e48a922b63b2",
     "updatedAt": "2026-10-01",
     "latestDrawByGame": {
       "lotto": "2026-09-26",
@@ -29,7 +29,7 @@
       "euroMillions": "2026-09-29",
       "superEnalotto": "2026-09-29",
       "lottoMax": "2026-09-29",
-      "powerballAustralia": "2026-09-24"
+      "powerballAustralia": "2026-10-01"
     },
     "recordCountByGame": {
       "lotto": 602,
@@ -40,7 +40,7 @@
       "euroMillions": 1045,
       "superEnalotto": 4275,
       "lottoMax": 49,
-      "powerballAustralia": 441
+      "powerballAustralia": 442
     },
     "sourceStatusByGame": {
       "lotto": {
@@ -94,8 +94,8 @@
       "powerballAustralia": {
         "status": "ok",
         "source": "Australia National Lottery / The Lott",
-        "fetched": 1584,
-        "merged": 441
+        "fetched": 1585,
+        "merged": 442
       }
     },
     "validationStatus": "ok"
@@ -8873,10 +8873,10 @@
           8,
           11
         ],
-        "jackpot": null,
+        "jackpot": 17,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "payoutTiers": [
           {
@@ -8975,10 +8975,10 @@
           10,
           12
         ],
-        "jackpot": null,
+        "jackpot": 130,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9077,10 +9077,10 @@
           10,
           12
         ],
-        "jackpot": null,
+        "jackpot": 37.6,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9179,10 +9179,10 @@
           2,
           3
         ],
-        "jackpot": null,
+        "jackpot": 28.4,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9281,10 +9281,10 @@
           6,
           10
         ],
-        "jackpot": null,
+        "jackpot": 17,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9383,10 +9383,10 @@
           1,
           11
         ],
-        "jackpot": null,
+        "jackpot": 111.5,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9485,10 +9485,10 @@
           7,
           12
         ],
-        "jackpot": null,
+        "jackpot": 98.7,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9587,10 +9587,10 @@
           4,
           12
         ],
-        "jackpot": null,
+        "jackpot": 89.3,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9689,10 +9689,10 @@
           3,
           5
         ],
-        "jackpot": null,
+        "jackpot": 78.1,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "ruleVersion": "euromillions-2-12",
         "ruleEra": "current",
@@ -9791,10 +9791,10 @@
           6,
           9
         ],
-        "jackpot": null,
+        "jackpot": 69.6,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9893,10 +9893,10 @@
           4,
           9
         ],
-        "jackpot": null,
+        "jackpot": 59,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "ruleVersion": "euromillions-2-12",
         "ruleEra": "current",
@@ -9995,10 +9995,10 @@
           4,
           12
         ],
-        "jackpot": null,
+        "jackpot": 49.3,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "ruleVersion": "euromillions-2-12",
         "ruleEra": "current",
@@ -10097,10 +10097,10 @@
           6,
           10
         ],
-        "jackpot": null,
+        "jackpot": 37.3,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "payoutTiers": [
           {
@@ -10199,10 +10199,10 @@
           4,
           8
         ],
-        "jackpot": null,
+        "jackpot": 28.3,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "ruleVersion": "euromillions-2-12",
         "ruleEra": "current",
@@ -10301,10 +10301,10 @@
           1,
           2
         ],
-        "jackpot": null,
+        "jackpot": 17,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "payoutTiers": [
           {
@@ -14425,6 +14425,85 @@
     ],
     "powerballAustralia": [
       {
+        "date": "2026-10-01",
+        "main": [
+          2,
+          3,
+          6,
+          10,
+          11,
+          16,
+          24
+        ],
+        "bonus": [
+          14
+        ],
+        "jackpot": null,
+        "lotteryId": "powerballAustralia",
+        "source": "The Lott",
+        "sourceUrl": "https://www.thelott.com/powerball/results",
+        "drawId": 1585,
+        "currency": "AUD",
+        "payoutTiers": [
+          {
+            "match": "7+1",
+            "label": "Division 1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "7+0",
+            "label": "Division 2",
+            "prizeAmount": 73060.7,
+            "winners": 10
+          },
+          {
+            "match": "6+1",
+            "label": "Division 3",
+            "prizeAmount": 11585.2,
+            "winners": 78
+          },
+          {
+            "match": "6+0",
+            "label": "Division 4",
+            "prizeAmount": 517.6,
+            "winners": 1523
+          },
+          {
+            "match": "5+1",
+            "label": "Division 5",
+            "prizeAmount": 207.45,
+            "winners": 2873
+          },
+          {
+            "match": "4+1",
+            "label": "Division 6",
+            "prizeAmount": 88.85,
+            "winners": 41764
+          },
+          {
+            "match": "5+0",
+            "label": "Division 7",
+            "prizeAmount": 50.75,
+            "winners": 56809
+          },
+          {
+            "match": "3+1",
+            "label": "Division 8",
+            "prizeAmount": 23.7,
+            "winners": 259554
+          },
+          {
+            "match": "2+1",
+            "label": "Division 9",
+            "prizeAmount": 14.35,
+            "winners": 737446
+          }
+        ],
+        "ruleVersion": "powerballau-7-35",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-09-24",
         "main": [
           1,
@@ -15134,85 +15213,6 @@
         ],
         "ruleVersion": "powerballau-7-35",
         "ruleEra": "current"
-      },
-      {
-        "date": "2026-07-23",
-        "main": [
-          7,
-          11,
-          12,
-          18,
-          27,
-          30,
-          34
-        ],
-        "bonus": [
-          16
-        ],
-        "jackpot": 40,
-        "lotteryId": "powerballAustralia",
-        "source": "The Lott",
-        "sourceUrl": "https://www.thelott.com/powerball/results",
-        "drawId": 1575,
-        "ruleVersion": "powerballau-7-35",
-        "ruleEra": "current",
-        "currency": "AUD",
-        "payoutTiers": [
-          {
-            "match": "7+1",
-            "label": "Division 1",
-            "prizeAmount": 40000000,
-            "winners": 1
-          },
-          {
-            "match": "7+0",
-            "label": "Division 2",
-            "prizeAmount": 38148.45,
-            "winners": 20
-          },
-          {
-            "match": "6+1",
-            "label": "Division 3",
-            "prizeAmount": 11650.25,
-            "winners": 81
-          },
-          {
-            "match": "6+0",
-            "label": "Division 4",
-            "prizeAmount": 499.5,
-            "winners": 1648
-          },
-          {
-            "match": "5+1",
-            "label": "Division 5",
-            "prizeAmount": 196.05,
-            "winners": 3175
-          },
-          {
-            "match": "4+1",
-            "label": "Division 6",
-            "prizeAmount": 86.85,
-            "winners": 44609
-          },
-          {
-            "match": "5+0",
-            "label": "Division 7",
-            "prizeAmount": 49,
-            "winners": 61436
-          },
-          {
-            "match": "3+1",
-            "label": "Division 8",
-            "prizeAmount": 23.55,
-            "winners": 272585
-          },
-          {
-            "match": "2+1",
-            "label": "Division 9",
-            "prizeAmount": 14.4,
-            "winners": 768155
-          }
-        ]
       }
     ]
   }
