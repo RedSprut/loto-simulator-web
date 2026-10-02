@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="82885ea" data-build-ts="2026-09-30T16:16:00.695Z">
+<html lang="en" data-build="30d0316" data-build-ts="2026-10-02T07:34:27.874Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=82885ea"></script>
+<script src="./boot-runtime.js?v=30d0316"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,14 +33,14 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=82885ea">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=30d0316">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=82885ea">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=30d0316">
 <meta name="twitter:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
@@ -1426,6 +1426,62 @@ body.light .mb[class*="miss-"]{text-shadow:none}
   .pro-next-glow::before{animation:none;background:linear-gradient(135deg,#FFC62E,#D68A00 50%,#FFC62E)}
   .pro-next-glow::after{display:none}
 }
+.loto-onboarding-open{overflow:hidden}
+.onboarding-overlay{position:fixed;inset:0;z-index:850;display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:rgba(10,6,11,.68);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);overscroll-behavior:contain;touch-action:none}
+.onboarding-sheet{position:relative;width:min(100%,720px);max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;border:1px solid color-mix(in srgb,var(--gold2) 72%,transparent);border-radius:26px;background:var(--bg2);color:var(--fg);box-shadow:0 24px 90px rgba(0,0,0,.48);scrollbar-color:var(--gold) transparent;scrollbar-width:thin}
+.onboarding-welcome{padding:24px 22px 22px;text-align:center;background:linear-gradient(150deg,var(--hdr-a,#0E7A50),var(--hdr-b,#0E4B4E) 44%,var(--hdr-c,#123A44) 100%);color:#fff}
+.onboarding-welcome:before{content:"";position:absolute;inset:1px;border-radius:25px;background:linear-gradient(155deg,rgba(255,255,255,.12),transparent 50%);pointer-events:none}
+.onboarding-brand{position:relative;color:#FFE7A0;font-size:11px;font-weight:900;letter-spacing:1.6px;text-transform:uppercase}
+.onboarding-welcome h1{position:relative;margin:7px 48px 7px;font:900 clamp(24px,6vw,34px)/1.15 'Unbounded',sans-serif;letter-spacing:-.5px}
+.onboarding-lead{position:relative;max-width:540px;margin:0 auto 16px;color:rgba(255,255,255,.9);font-size:14px;line-height:1.5}
+.onboarding-unknown-rows{position:relative;display:grid;gap:7px;width:min(100%,420px);margin:0 auto 18px;padding:12px;border:1px solid rgba(255,255,255,.2);border-radius:18px;background:rgba(7,23,25,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.onboarding-unknown-row{display:flex;justify-content:center;min-width:0}
+.onboarding-unknown-balls{display:flex;justify-content:center;gap:clamp(3px,1.2vw,8px);max-width:100%}
+.onboarding-unknown-ball{display:grid;place-items:center;width:clamp(24px,7vw,34px);height:clamp(24px,7vw,34px);flex:0 1 auto;border:1px solid rgba(255,255,255,.46);border-radius:50%;background:radial-gradient(circle at 32% 25%,rgba(255,255,255,.34),rgba(255,255,255,.12) 52%,rgba(4,23,29,.34));color:#fff8df;font:800 15px/1 'Manrope',sans-serif;box-shadow:inset 0 -3px 5px rgba(0,0,0,.18),0 2px 5px rgba(0,0,0,.14)}
+.onboarding-unknown-ball.bonus{border-color:rgba(255,220,111,.72);color:#ffe58c}
+.onboarding-cta,.onboarding-tool-cta{position:relative;isolation:isolate;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:11px 18px;border:1px solid rgba(255,240,191,.64);border-radius:16px;background:linear-gradient(150deg,#FFE49A,#E9B44C 58%,#B8860B);color:#28180A;font:900 14px/1.25 'Manrope',sans-serif;text-align:center;cursor:pointer;box-shadow:0 7px 22px rgba(0,0,0,.25);transition:filter .15s,transform .12s}
+.onboarding-cta{width:min(100%,420px);font-size:15px}
+.onboarding-cta:disabled{opacity:.7;cursor:wait}
+.onboarding-close{position:absolute;top:12px;right:12px;z-index:3;display:grid;place-items:center;width:42px;height:42px;border:1px solid rgba(255,255,255,.36);border-radius:13px;background:rgba(7,18,20,.25);color:#fff;font:400 28px/1 system-ui,sans-serif;cursor:pointer}
+.onboarding-close:focus-visible,.onboarding-cta:focus-visible,.onboarding-tool-cta:focus-visible{outline:3px solid #fff1b8;outline-offset:3px}
+.onboarding-discovery{max-width:760px;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);padding:0 18px 20px;background:var(--bg2)}
+.onboarding-discovery-header{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 -18px 14px;padding:18px 64px 13px 20px;border-bottom:1px solid var(--border);background:linear-gradient(150deg,var(--hdr-a,#0E7A50),var(--hdr-b,#0E4B4E) 48%,var(--hdr-c,#123A44));color:#fff}
+.onboarding-discovery-heading h2{margin:0 0 4px;font:900 clamp(20px,5vw,27px)/1.2 'Unbounded',sans-serif}
+.onboarding-discovery-heading p{margin:0;color:rgba(255,255,255,.88);font-size:13px;line-height:1.4}
+.onboarding-discovery-header .onboarding-close{top:14px;right:14px}
+.onboarding-discovery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.onboarding-feature{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:start;gap:5px 10px;min-width:0;padding:13px;border:1px solid var(--border);border-radius:17px;background:var(--bg3);box-shadow:var(--card-shadow)}
+.onboarding-feature-icon{display:grid;place-items:center;width:42px;height:42px;border:1px solid color-mix(in srgb,var(--gold) 60%,var(--border));border-radius:13px;background:color-mix(in srgb,var(--gold) 13%,var(--bg2));color:var(--gold-ink)}
+.onboarding-feature-icon svg{display:block;width:25px;height:25px}
+.onboarding-feature-text{min-width:0}
+.onboarding-feature h3{margin:2px 0 5px;color:var(--fg);font-size:14px;line-height:1.3}
+.onboarding-feature p{margin:0;color:var(--sub2);font-size:12px;line-height:1.45}
+.onboarding-feature-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:5px}
+.onboarding-tool-cta{min-height:42px;max-width:100%;padding:9px 12px;border-color:color-mix(in srgb,var(--gold) 65%,transparent);background:linear-gradient(150deg,var(--bg2),var(--bg3));color:var(--fg);font-size:12px}
+.onboarding-button-icon{display:inline-grid;place-items:center;flex:0 0 auto;width:20px;height:20px;color:var(--gold-ink)}
+.onboarding-button-icon svg{display:block;width:18px;height:18px}
+.onboarding-tool-cta.pro-next-glow{box-shadow:0 0 12px rgba(240,166,20,.22)}
+.onboarding-tool-cta.pro-next-glow:before{border-radius:16px}
+.onboarding-tool-cta.pro-next-glow:after{border-radius:22px}
+.onboarding-scroll-cue{position:sticky;bottom:0;margin:12px -18px -20px;padding:22px 18px 12px;background:linear-gradient(transparent,var(--bg2) 45%);color:var(--gold-ink);font-size:11px;font-weight:800;text-align:center;pointer-events:none}
+@media(max-width:520px){
+  .onboarding-overlay{align-items:flex-end;padding:0 max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+  .onboarding-sheet,.onboarding-discovery{width:100%;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 8px);border-radius:24px 24px 18px 18px}
+  .onboarding-welcome{padding:22px 12px 16px}
+  .onboarding-welcome h1{margin-left:48px;margin-right:48px}
+  .onboarding-lead{max-width:340px;font-size:13px}
+  .onboarding-unknown-rows{padding:10px 7px}
+  .onboarding-unknown-ball{width:clamp(21px,7.2vw,28px);height:clamp(21px,7.2vw,28px);font-size:12px}
+  .onboarding-discovery{padding:0 12px 16px}
+  .onboarding-discovery-header{margin:0 -12px 10px;padding:16px 62px 12px 14px}
+  .onboarding-discovery-header .onboarding-close{top:12px;right:12px}
+  .onboarding-discovery-grid{grid-template-columns:1fr;gap:8px}
+  .onboarding-feature{grid-template-columns:38px minmax(0,1fr);gap:4px 9px;padding:11px}
+  .onboarding-feature-icon{width:38px;height:38px}
+  .onboarding-feature-icon svg{width:23px;height:23px}
+  .onboarding-scroll-cue{margin-left:-12px;margin-right:-12px;margin-bottom:-16px}
+}
+@media(prefers-reduced-motion:reduce){.onboarding-overlay{scroll-behavior:auto}.onboarding-cta,.onboarding-tool-cta{transition:none}}
 
 #pro-ov [hidden]{display:none!important}
 
@@ -1466,10 +1522,6 @@ body.light .mb[class*="miss-"]{text-shadow:none}
 .hist-pro-title{font-family:'Unbounded',sans-serif;font-size:14px;font-weight:900;color:var(--gold)}.hist-pro-copy{font-size:12.5px;line-height:1.5;color:var(--sub2);margin:7px auto 10px;max-width:330px}.hist-pro-card .btn-exp{margin:0}
 .commercial-dev-panel{position:fixed;z-index:1000;left:10px;bottom:calc(84px + env(safe-area-inset-bottom));display:grid;gap:7px;width:min(360px,calc(100vw - 20px));padding:11px;border:1px solid #ffffff35;border-radius:14px;background:#111e;color:#fff;font:12px/1.35 system-ui;box-shadow:0 8px 30px #0009;backdrop-filter:blur(12px)}.commercial-dev-panel>b{font-size:11px;letter-spacing:1px;color:#f5ce7b}.commercial-dev-panel>[data-developer-status]{font-weight:700}.commercial-dev-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.commercial-dev-scenarios{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.commercial-dev-panel button{min-height:40px;padding:8px;border:1px solid #ffffff35;border-radius:9px;background:#292929;color:#fff;font:800 12px system-ui;cursor:pointer}.commercial-dev-panel button.on{border-color:#f5ce7b;background:linear-gradient(145deg,#e9b44c,#9a6b15);color:#211406;box-shadow:0 0 0 2px #f5ce7b33}.commercial-dev-panel small{color:#ffffffa8;font-size:10px}
 .pro-preview{display:grid;gap:6px;margin-top:12px;padding:13px;border-radius:14px;border:1px dashed #C9A55A;background:rgba(255,250,235,.42);color:#5A3E0C;font-size:12.5px;line-height:1.45}.pro-preview b{font-size:13px}.pro-preview span{display:block}
-.commercial-onboarding{position:relative;margin:10px 12px 0;padding:14px 46px 14px 15px;border:1.5px solid var(--gold);border-radius:17px;background:linear-gradient(145deg,var(--bg2),var(--bg3));box-shadow:var(--card-shadow);display:grid;gap:5px;color:var(--fg)}
-.commercial-onboarding-kicker{font-size:10px;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold)}.commercial-onboarding>b{font-family:'Unbounded',sans-serif;font-size:13px}.commercial-onboarding>span{font-size:12px;line-height:1.45;color:var(--sub2)}
-.commercial-onboarding-action{width:max-content;max-width:100%;margin-top:4px;padding:9px 13px;border:0;border-radius:11px;background:linear-gradient(145deg,var(--gold2),var(--gold));color:#2A1608;font:800 12px 'Manrope',sans-serif;cursor:pointer}.commercial-onboarding-close{position:absolute;right:9px;top:9px;width:30px;height:30px;border:1px solid var(--border);border-radius:9px;background:var(--bg3);color:var(--sub2);cursor:pointer}
-@media(min-width:700px){.commercial-onboarding{max-width:920px;margin-left:auto;margin-right:auto}}
 
 
 .horo-sheet{box-shadow:inset 0 0 0 3px rgba(138,107,46,.5),inset 0 0 0 5px rgba(251,243,220,.85),inset 0 0 0 7px rgba(138,107,46,.3),inset 0 0 60px rgba(140,100,30,.16),0 -18px 60px rgba(0,0,0,.45)!important}
@@ -2084,6 +2136,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
 </style>
 </head>
 <body class="access-pending">
+  <svg class="icon-sprite" aria-hidden="true" focusable="false"><symbol id="share-nodes-icon" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.8"/><circle cx="6" cy="12" r="2.8"/><circle cx="18" cy="19" r="2.8"/><path d="m8.5 13.4 7 4.1M15.5 6.5l-7 4.1"/></g></symbol></svg>
 
 <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0">Lotto Simulator — lottery statistics, draw simulator & number generator</h1>
 
@@ -2103,7 +2156,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="db-loading-ico" aria-hidden="true">⏳</div>
     <div class="db-loading-title" id="db-loading-title">Loading the full draws database</div>
     <div class="db-loading-msg" id="db-loading-msg">Please wait. The full draws database is loading.</div>
-    <button type="button" class="db-loading-retry" id="db-loading-retry" hidden data-i18n-entry="1459">Retry</button>
+    <button type="button" class="db-loading-retry" id="db-loading-retry" hidden data-i18n-entry="1474">Retry</button>
   </div>
 </div>
 
@@ -2219,7 +2272,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
         </div>
       </div>
       <div class="gen-actions">
-        <button class="btn-exp" data-loto-event-click="generateSelectedRows()" style="margin-top:0" data-i18n-entry="1761">Generate</button>
+        <button class="btn-exp" id="generate-selected-rows" data-loto-event-click="generateSelectedRows()" style="margin-top:0" data-i18n-entry="1783">Generate</button>
         <button class="btn-exp" data-loto-event-click="WORLD_open()" style="margin-top:0">Lotto analysis around the world</button>
       </div>
       <div class="filter-grid">
@@ -2233,7 +2286,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       </div>
       <button class="btn-exp" id="copy-rows-btn" data-loto-event-click="copyRowsForNorsk(this)" style="margin-top:10px">📋 Copy rows</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <button class="btn-exp" style="margin:0" data-loto-event-click="shareRows()">📤 Share</button>
+        <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="shareRows()" data-i18n-entry="1488">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
         <button class="btn-exp" style="margin:0" data-loto-event-click="SUP_open('sim')">⚖️ Supreme Judge</button>
       </div>
       <div id="world-analysis-out" class="warn-note" style="display:none"></div>
@@ -2322,7 +2375,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
           <div class="check-inp-row" id="chk-main-inp"></div>
         </div>
         <div class="ticket-check-group" id="chk-bonus-wrap" style="display:none">
-          <div class="ticket-check-label" id="chk-lbl-b" data-i18n-entry="501">Bonus numbers</div>
+          <div class="ticket-check-label" id="chk-lbl-b" data-i18n-entry="495">Bonus numbers</div>
           <div class="check-inp-row" id="chk-bonus-inp"></div>
         </div>
       </div>
@@ -2371,7 +2424,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
   <section class="app-share" id="home-share" aria-labelledby="home-share-title">
     <h2 class="acc-stores-title app-share-title" id="home-share-title">Share Lotto Simulator</h2>
     <div class="app-share-body">
-    <button type="button" class="app-share-main" data-share="system" data-loto-event-click="shareAppTo('system')"><svg class="share-glyph-nodes" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.8"/><circle cx="6" cy="12" r="2.8"/><circle cx="18" cy="19" r="2.8"/><path d="m8.5 13.4 7 4.1M15.5 6.5l-7 4.1"/></g></svg><svg class="share-glyph-apple" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 15V4M8 8l4-4 4 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 11H5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span data-i18n-entry="1473">Share</span></button>
+    <button type="button" class="app-share-main" data-share="system" data-loto-event-click="shareAppTo('system')"><svg class="share-glyph-nodes" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg><svg class="share-glyph-apple" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 15V4M8 8l4-4 4 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 11H5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span data-i18n-entry="1488">Share</span></button>
     <div class="app-share-list" role="group" aria-labelledby="home-share-title">
       <button type="button" class="app-share-btn" data-share="facebook" aria-label="Share on Facebook" title="Share on Facebook" data-loto-event-click="shareAppTo('facebook')"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9.1 23.69v-7.98H6.63v-3.67h2.47v-1.58c0-4.08 1.85-5.98 5.86-5.98.4 0 .96.04 1.47.1a8.68 8.68 0 0 1 1.14.2v3.33a8.62 8.62 0 0 0-.65-.04 26.81 26.81 0 0 0-.73-.01c-.71 0-1.26.1-1.67.31a1.69 1.69 0 0 0-.68.62c-.26.42-.37 1-.37 1.75v1.3h3.92l-.39 2.1-.29 1.56h-3.25v8.24C19.4 23.24 24 18.18 24 12.04c0-6.63-5.37-12-12-12s-12 5.37-12 12c0 5.63 3.87 10.35 9.1 11.65Z"/></svg></button>
       <button type="button" class="app-share-btn" data-share="x" aria-label="Share on X" title="Share on X" data-loto-event-click="shareAppTo('x')"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M14.23 10.16 22.98 0h-2.07l-7.59 8.82L7.25 0H.26l9.17 13.34L.26 24H2.33l8.02-9.32L16.75 24h6.99zm-2.84 3.3-.93-1.33L3.08 1.56h3.18l5.97 8.53.93 1.33 7.75 11.09h-3.18z"/></svg></button>
@@ -2406,8 +2459,8 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <div class="card-t">Add real lottery draw</div>
       <div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px">Lottery drawing date</div><input class="date-inp" type="date" id="inp-date" aria-label="Lottery drawing date"></div>
       <div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px">Jackpot size (millions in game currency) - optional</div><input class="num-inp" type="number" id="inp-jackpot" placeholder="For example: 85"></div>
-      <div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px" id="lbl-m-inp" data-i18n-entry="743">Main numbers</div><div style="display:flex;gap:6px;flex-wrap:wrap" id="inp-main"></div></div>
-      <div id="inp-bwrap" style="display:none;margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px" id="lbl-b-inp" data-i18n-entry="500">Bonus</div><div style="display:flex;gap:6px;flex-wrap:wrap" id="inp-bonus"></div></div>
+      <div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px" id="lbl-m-inp" data-i18n-entry="738">Main numbers</div><div style="display:flex;gap:6px;flex-wrap:wrap" id="inp-main"></div></div>
+      <div id="inp-bwrap" style="display:none;margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--sub2);margin-bottom:5px" id="lbl-b-inp" data-i18n-entry="494">Bonus</div><div style="display:flex;gap:6px;flex-wrap:wrap" id="inp-bonus"></div></div>
       <div style="margin-bottom:10px">
         <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" data-loto-event-click="togglePayoutInp()">
           <div style="font-size:12px;font-weight:600;color:var(--sub2)">💵 Lottery prize table (optional)</div>
@@ -2516,7 +2569,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="ana-column ana-freq-right">
     <div class="card"><div class="card-t">🔥 Hot and ❄️ Cold</div><div class="hc-grid" id="hc-grid"><div class="empty" style="width:100%">Min. required. 5 lottery draws</div></div></div>
     <div class="card"><div class="card-t">Main number frequency</div><div class="freq-wrap"><div class="freq-chart" id="fc-main"></div></div></div>
-    <div class="card" id="fc-bc" style="display:none"><div class="card-t" id="fc-bt" data-i18n-entry="501">Bonus numbers</div><div class="freq-wrap"><div class="freq-chart" id="fc-bonus"></div></div></div>
+    <div class="card" id="fc-bc" style="display:none"><div class="card-t" id="fc-bt" data-i18n-entry="495">Bonus numbers</div><div class="freq-wrap"><div class="freq-chart" id="fc-bonus"></div></div></div>
     </div>
     
     <div class="card">
@@ -2630,7 +2683,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <div class="if-note" style="margin:0 0 10px">Each model has its own way of reading the history of lottery draws for a selected period: some look for frequency, others for pair connections, others for omissions and cycles. None of them predict the future - they show the structure of the past from which you assemble your strategy.</div>
       <div class="sg-algo" id="al-freq" data-loto-event-click="selAlgo('freq')"><div class="sg-algo-icon">🔥</div><div><div class="sg-algo-name">Frequency analysis</div><div class="sg-algo-desc">The weight of a number is proportional to its observed frequency: pₙ = cₙ / Σc</div></div></div>
       <div class="sg-algo" id="al-bal" data-loto-event-click="selAlgo('bal')"><div class="sg-algo-icon">⚖️</div><div><div class="sg-algo-name">Balanced</div><div class="sg-algo-desc">About 40% hot + 30% medium + 30% cold; rounding alternates between lines</div></div></div>
-      <div class="sg-algo" id="al-rnd" data-loto-event-click="selAlgo('rnd')"><div class="sg-algo-icon">🎲</div><div><div class="sg-algo-name" data-i18n-entry="1668">Pure random</div><div class="sg-algo-desc">Uniform selection of k different numbers without returning with a cryptographic seed device</div></div></div>
+      <div class="sg-algo" id="al-rnd" data-loto-event-click="selAlgo('rnd')"><div class="sg-algo-icon">🎲</div><div><div class="sg-algo-name" data-i18n-entry="1687">Pure random</div><div class="sg-algo-desc">Uniform selection of k different numbers without returning with a cryptographic seed device</div></div></div>
       <div class="sg-algo" id="al-man" data-loto-event-click="selAlgo('man')"><div class="sg-algo-icon">📐</div><div><div class="sg-algo-name">Segment coverage</div><div class="sg-algo-desc">Uniform range coverage - numbers are selected from different segments</div></div></div>
       <div class="sg-algo" id="al-world-hot" data-loto-event-click="selAlgo('world-hot')"><div class="sg-algo-icon">🌍</div><div><div class="sg-algo-name">World Hot</div><div class="sg-algo-desc">Profile of all saved games, normalized for the current lottery</div></div></div>
       <div class="sg-algo" id="al-world-mix" data-loto-event-click="selAlgo('world-mix')"><div class="sg-algo-icon">🌐</div><div><div class="sg-algo-name">World Combined</div><div class="sg-algo-desc">Hot + medium + cold zones for each row</div></div></div>
@@ -2695,7 +2748,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <button class="btn-draw euro" style="margin-top:12px" data-loto-event-click="WC_check()">🔍 Check my ticket</button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
       <button class="btn-exp" style="margin:0" data-loto-event-click="WC_fav()">⭐ Add to favorites</button>
-      <button class="btn-exp" style="margin:0" data-loto-event-click="WC_share()">📤 Share</button>
+      <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="WC_share()" data-i18n-entry="1488">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
     </div>
     <button class="btn-close2" data-loto-event-click="WC_close()">Close</button>
   </div>
@@ -2709,7 +2762,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     </div>
     <div id="tk-body" style="margin-top:12px"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
-      <button class="btn-exp" style="margin:0" data-loto-event-click="shareRows()">📤 Share</button>
+      <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="shareRows()" data-i18n-entry="1488">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
       <button class="btn-exp" style="margin:0" data-loto-event-click="TK_close()">Close</button>
     </div>
   </div>
@@ -2721,7 +2774,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <div><div class="if-title">🔮 Quantum-astral generator</div><div class="if-sub" id="qa-ctx">Quantum flow · sign · Moon · natal chart</div></div>
       <button class="btn-close2" data-loto-event-click="QA_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
     </div>
-    <div class="if-seclbl" data-i18n-entry="2045">Your zodiac sign</div>
+    <div class="if-seclbl" data-i18n-entry="2072">Your zodiac sign</div>
     <div class="qa-signs" id="qa-signs"></div>
     <div class="qa-birthline" id="qa-birthline" data-loto-event-click="QAB_open()">🎂 Date of birth: <b id="qa-birthval">not specified</b> · configure</div>
     <div class="qa-moon" id="qa-moon"></div>
@@ -2767,7 +2820,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
           <circle cx="106" cy="39" r="1.8" fill="#3A2E20"/>
           <circle cx="294" cy="39" r="1.8" fill="#3A2E20"/>
         </g>
-        <text id="horo-title" x="200" y="82" text-anchor="middle" font-size="27" font-weight="900" fill="#4A3418" style="font-family:'Unbounded',sans-serif" data-i18n-entry="1095">Leo</text>
+        <text id="horo-title" x="200" y="82" text-anchor="middle" font-size="27" font-weight="900" fill="#4A3418" style="font-family:'Unbounded',sans-serif" data-i18n-entry="1099">Leo</text>
       </svg>
     </div>
     <div class="horo-date" id="horo-date"></div>
@@ -2778,7 +2831,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="horo-seal"><span id="horo-seal-glyph">♌</span></div>
     <div class="horo-note">The horoscope creates a personal symbolic profile; the probability of any valid combination remains the same. 📜</div>
     <div class="horo-btns">
-      <button class="btn-draw euro" data-loto-event-click="HORO_share()">📤 Share horoscope</button>
+      <button class="btn-draw euro share-action-button" data-loto-event-click="HORO_share()">Share horoscope<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
       <button class="btn-exp" style="margin-top:8px" data-loto-event-click="HORO_close()">Close</button>
     </div>
   </div>
@@ -2836,7 +2889,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <button class="pick-mode" id="supc-way-db" data-loto-event-click="SUPC_way('db')" style="text-align:center"><div style="font-size:20px">📊</div><div class="pick-mode-t">Base only</div><div style="font-size:10px;color:var(--sub2)">leaders of pairs · threes · fours</div></button>
     </div>
     <div id="supc-astro-block">
-    <div class="if-seclbl" style="margin-top:0" data-i18n-entry="537">Your zodiac sign</div>
+    <div class="if-seclbl" style="margin-top:0" data-i18n-entry="531">Your zodiac sign</div>
     <div class="supc-signs" id="supc-signs"></div>
     <div class="qa-birthline" id="supc-birthline" data-loto-event-click="QAB_open()" style="border-color:var(--srow-border);color:var(--sub2)">🎂 Date of birth: <b id="supc-birthval" style="color:var(--gold)">not specified</b> · configure</div>
     <button class="btn-draw euro" style="margin-top:12px" data-loto-event-click="SUPC_route()">Get directions</button>
@@ -2935,7 +2988,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
         </div>
         <div class="pro-selected-plan" id="pro-selected-plan">Plan unavailable</div>
         <div class="pro-fine" id="pro-price-note">Plans are currently unavailable. Purchasing is disabled until a valid Offering is received.</div>
-        <button type="button" class="btn-exp pro-offering-retry" id="pro-offering-retry" data-loto-event-click="LotoCommercial.retryOffering()" hidden data-i18n-entry="1462">Retry</button>
+        <button type="button" class="btn-exp pro-offering-retry" id="pro-offering-retry" data-loto-event-click="LotoCommercial.retryOffering()" hidden data-i18n-entry="1477">Retry</button>
         <div class="pro-fine" id="pro-provider-trial" hidden></div>
         <div class="pro-signin-prompt" id="pro-signin-prompt" role="alert" hidden>
           <div>To pay for the selected subscription, sign in or create an account</div>
@@ -3071,9 +3124,9 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="pick-counts" id="genn-chips" style="grid-template-columns:repeat(5,1fr)"></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <input type="number" class="num-inp" id="genn-custom" min="1" max="50" placeholder="or yours: 1–50" style="flex:1">
-      <button class="btn-exp" style="margin:0;width:auto;padding:0 16px" data-loto-event-click="GENN_custom()" data-i18n-entry="1336">OK</button>
+      <button class="btn-exp" style="margin:0;width:auto;padding:0 16px" data-loto-event-click="GENN_custom()" data-i18n-entry="1343">OK</button>
     </div>
-    <button class="btn-draw euro" style="margin-top:12px" id="genn-go" data-loto-event-click="GENN_go()" data-i18n-entry="2020">Generate</button>
+    <button class="btn-draw euro" style="margin-top:12px" id="genn-go" data-loto-event-click="GENN_go()" data-i18n-entry="2047">Generate</button>
     <button class="btn-close2" data-loto-event-click="GENN_close()">Close</button>
   </div>
 </div>
@@ -3092,7 +3145,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="if-seclbl">Or your number of lottery draws</div>
     <div style="display:flex;gap:8px">
       <input type="number" class="num-inp" id="period-custom" min="5" placeholder="for example 73" style="flex:1">
-      <button class="btn-exp" style="margin:0;width:auto;padding:0 18px" data-loto-event-click="PERIOD_custom()" data-i18n-entry="1336">OK</button>
+      <button class="btn-exp" style="margin:0;width:auto;padding:0 18px" data-loto-event-click="PERIOD_custom()" data-i18n-entry="1343">OK</button>
     </div>
     <button class="btn-close2" data-loto-event-click="PERIOD_close()">Close</button>
   </div>
@@ -3139,7 +3192,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="matrix-actions">
       <button class="btn-draw euro" data-loto-event-click="MATRIX_use()">Use in simulator</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <button class="btn-exp" style="margin:0" data-loto-event-click="shareMatrix()">📤 Share</button>
+        <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="shareMatrix()" data-i18n-entry="1488">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
         <button class="btn-exp" style="margin:0" data-loto-event-click="MATRIX_judge()">⚖️ Check the matrix with a judge</button>
       </div>
       <button class="btn-exp matrix-copy" id="matrix-copy-btn" data-loto-event-click="MATRIX_copy(this)">📋 Copy</button>
@@ -3175,6 +3228,9 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
 #about-ov .about-scroll::-webkit-scrollbar{display:none}
 .about-box .about-sh{font-weight:900;font-size:13.5px;margin:12px 0 4px;opacity:.95}
 .about-box .about-p{font-size:13.5px;line-height:1.55;margin:0 0 8px;opacity:.92}
+.about-box .about-p a:link,.about-box .about-p a:visited{color:var(--fg);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px;overflow-wrap:anywhere}
+.about-box .about-p a:hover,.about-box .about-p a:focus-visible,.about-box .about-p a:active{color:var(--fg);text-decoration-thickness:2px}
+.about-box .about-p a:focus-visible{outline:2px solid var(--fg);outline-offset:3px;border-radius:2px}
 .about-box .about-ul{margin:0 0 8px;padding-left:20px}
 .about-box .about-ul li{font-size:13.5px;line-height:1.5;margin-bottom:4px;opacity:.92}
 .about-box .about-warn,.about-box .about-accept{border-left:3px solid var(--gold,#C9A55A);padding-left:10px;font-weight:600}
@@ -3378,11 +3434,18 @@ body.account-open .bnav{z-index:570}
 .share-glyph-apple{display:none}
 :root[data-share-glyph="apple"] .share-glyph-apple{display:block}
 :root[data-share-glyph="apple"] .share-glyph-nodes{display:none}
+#home-share .share-glyph-apple{display:none!important}
+#home-share .share-glyph-nodes{display:block!important}
+#about-share .share-glyph-apple{display:none!important}
+#about-share .share-glyph-nodes{display:block!important}
 .app-share{width:min(calc(100% - 28px),1120px);margin:14px auto 10px;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--bg2);box-shadow:var(--card-shadow);text-align:center}
 .app-share .app-share-title{margin:0 0 14px;font-family:inherit;font-size:15px;font-weight:800;color:var(--fg);line-height:1.3;overflow-wrap:anywhere}
 .app-share-body{display:flex;flex-direction:column;align-items:center;gap:14px}
 .app-share-main{display:inline-flex;align-items:center;justify-content:center;gap:9px;width:min(100%,300px);min-height:48px;margin:0;padding:0 22px;border:none;border-radius:999px;background:linear-gradient(160deg,var(--gold2),var(--gold));color:#2A1608;font:800 15px/1.2 'Manrope',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;box-shadow:0 6px 18px rgba(184,134,11,.28)}
 .app-share-main svg{width:20px;height:20px;flex:0 0 auto}
+.icon-sprite{position:absolute;width:0;height:0;overflow:hidden}
+.share-action-icon{display:inline-block;width:18px;height:18px;flex:0 0 auto;vertical-align:middle}
+.share-action-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex-direction:row-reverse}
 
 .app-guides{width:min(calc(100% - 28px),1120px);margin:14px auto 10px;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--bg2);box-shadow:var(--card-shadow);text-align:center}
 .app-guides[hidden]{display:none}
@@ -3496,7 +3559,7 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
 <div class="acc-ov" id="account-ov" role="dialog" aria-modal="true" aria-labelledby="acc-title">
   <div class="acc-screen">
     <div class="acc-topbar">
-      <button data-i18n-entry-title="1203" data-i18n-entry-aria-label="1203" class="acc-back" data-loto-event-click="closeAccount()" type="button" aria-label="Back" title="Back">‹</button>
+      <button data-i18n-entry-title="1209" data-i18n-entry-aria-label="1209" class="acc-back" data-loto-event-click="closeAccount()" type="button" aria-label="Back" title="Back">‹</button>
       <div class="acc-topbar-title" id="acc-title">Account</div>
       <span class="acc-topbar-spacer" aria-hidden="true"></span>
     </div>
@@ -3607,7 +3670,7 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
 <div class="cal-ov" id="cal-ov" role="dialog" aria-modal="true" aria-label="Choose a date">
   <div class="cal-box">
     <div class="cal-head">
-      <button data-i18n-entry-aria-label="1203" type="button" class="cal-nav" id="cal-prev" data-loto-event-click="AccountUI.calNav(-1)" aria-label="Back">‹</button>
+      <button data-i18n-entry-aria-label="1209" type="button" class="cal-nav" id="cal-prev" data-loto-event-click="AccountUI.calNav(-1)" aria-label="Back">‹</button>
       <button type="button" class="cal-title" data-loto-event-click="AccountUI.calToggleYears()" aria-label="Choose month and year"><span id="cal-title" data-i18n-ignore></span></button>
       <button type="button" class="cal-nav" id="cal-next" data-loto-event-click="AccountUI.calNav(1)" aria-label="Next">›</button>
     </div>
@@ -3661,7 +3724,7 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
     <div class="lang-title" style="text-align:center;padding:0 44px">About the application</div>
     <div style="text-align:center;font-weight:900;font-size:18px;margin-top:4px">Lotto Simulator</div>
     <div style="text-align:center;font-weight:800;opacity:.85;margin-bottom:14px">Version <span id="about-version">1.0</span></div>
-    <button class="btn-exp about-share" id="about-share" type="button" data-share="system" data-share-from="about" data-loto-event-click="shareApp()"><svg class="share-glyph-nodes" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><g stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.8"/><circle cx="6" cy="12" r="2.8"/><circle cx="18" cy="19" r="2.8"/><path d="m8.5 13.4 7 4.1M15.5 6.5l-7 4.1"/></g></svg><svg class="share-glyph-apple" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 15V4M8 8l4-4 4 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 11H5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span>Share Lotto Simulator</span></button>
+    <button class="btn-exp about-share" id="about-share" type="button" data-share="system" data-share-from="about" data-loto-event-click="shareApp()"><svg class="share-glyph-nodes" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg><span>Share Lotto Simulator</span></button>
 
     <div class="about-h">What's new in version 1.0</div>
     <ul class="about-ul">
@@ -3691,14 +3754,14 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
     </div>
 
     <div class="about-h">Legal information</div>
-    <div class="about-sh" data-i18n-entry="821">Disclaimer</div>
+    <div class="about-sh" data-i18n-entry="817">Disclaimer</div>
     <p class="about-p">Lotto Simulator is not a lottery operator, does not sell real lottery tickets, accept bets, accept money for drawings, pay out winnings or organize real money drawings.</p>
     <p class="about-p">The app does not guarantee winnings, does not guarantee correct prediction of future lottery drawings, is not financial advice, and is not a recommendation to purchase actual lottery tickets. Lotto Simulator is not an official application of third party lottery operators unless such affiliation is specifically stated.</p>
     <div class="about-sh">Terms of Use</div>
     <p class="about-p">By using Lotto Simulator, you agree to use the application solely for mathematical, statistical, research, educational and entertainment purposes. You take any actions outside the application yourself.</p>
     <div class="about-sh">Responsible Use</div>
     <p class="about-p">Lotto Simulator is intended for mathematical research, statistical analysis, simulation, educational use and entertainment. Please play responsibly. The application does not encourage excessive gambling and does not guarantee financial results.</p>
-    <div class="about-sh" data-i18n-entry="1329">Disclaimer</div>
+    <div class="about-sh" data-i18n-entry="1336">Disclaimer</div>
     <p class="about-p">To the maximum extent permitted by applicable law, the developer is not responsible for user decisions based on model results, purchase of actual tickets from third party operators, financial losses, lost profits, misinterpretation of analysis results, changes in rules or information by third party operators, or for errors or changes in external data sources.</p>
     <div class="about-sh">Privacy</div>
     <p class="about-p">Lotto Simulator treats your data with care. Saved combinations and settings are stored on your device. To operate advanced functions, an anonymous account is used without mandatory registration.</p>
@@ -3765,26 +3828,26 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
 
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=82885ea"></script>
-<script src="./commercial-config.js?v=82885ea"></script>
-<script src="./event-runtime.js?v=82885ea"></script>
-<script src="./external-link-runtime.js?v=82885ea"></script>
-<script src="./auth-client.js?v=82885ea"></script>
-<script src="./native-loader.js?v=82885ea"></script>
-<script src="./billing-web.js?v=82885ea"></script>
-<script src="./i18n-catalog.js?v=82885ea"></script>
-<script src="./lang-detect.js?v=82885ea"></script>
-<script src="./i18n-runtime.js?v=82885ea"></script>
-<script src="./consent-runtime.js?v=82885ea"></script>
-<script src="./analytics-telemetry.js?v=82885ea"></script>
-<script src="./ga4-runtime.js?v=82885ea"></script>
-<script src="./win-match-core.js?v=82885ea"></script>
-<script src="./court-core.js?v=82885ea"></script>
-<script src="./smart-start.js?v=82885ea"></script>
-<script src="./app-runtime.js?v=82885ea"></script>
-<script src="./inline-runtime-2.js?v=82885ea"></script>
-<script src="./commercial-runtime.js?v=82885ea"></script>
-<script src="./inline-runtime-3.js?v=82885ea"></script>
+<script src="./version.js?v=30d0316"></script>
+<script src="./commercial-config.js?v=30d0316"></script>
+<script src="./event-runtime.js?v=30d0316"></script>
+<script src="./external-link-runtime.js?v=30d0316"></script>
+<script src="./auth-client.js?v=30d0316"></script>
+<script src="./native-loader.js?v=30d0316"></script>
+<script src="./billing-web.js?v=30d0316"></script>
+<script src="./i18n-catalog.js?v=30d0316"></script>
+<script src="./lang-detect.js?v=30d0316"></script>
+<script src="./i18n-runtime.js?v=30d0316"></script>
+<script src="./consent-runtime.js?v=30d0316"></script>
+<script src="./analytics-telemetry.js?v=30d0316"></script>
+<script src="./ga4-runtime.js?v=30d0316"></script>
+<script src="./win-match-core.js?v=30d0316"></script>
+<script src="./court-core.js?v=30d0316"></script>
+<script src="./smart-start.js?v=30d0316"></script>
+<script src="./app-runtime.js?v=30d0316"></script>
+<script src="./inline-runtime-2.js?v=30d0316"></script>
+<script src="./commercial-runtime.js?v=30d0316"></script>
+<script src="./inline-runtime-3.js?v=30d0316"></script>
 <style id="lnc-styles">
 
 html.on-sim #main-hdr .hdr-back{display:none}
@@ -3936,15 +3999,15 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=82885ea"></script>
-<script src="./notifications-runtime.js?v=82885ea"></script>
-<script src="./pwa-runtime.js?v=82885ea"></script>
+<script src="./notification-center.js?v=30d0316"></script>
+<script src="./notifications-runtime.js?v=30d0316"></script>
+<script src="./pwa-runtime.js?v=30d0316"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
 
-<script src="./inline-runtime-4.js?v=82885ea"></script>
-<script src="./inline-runtime-5.js?v=82885ea"></script>
-<script src="./inline-runtime-6.js?v=82885ea"></script>
+<script src="./inline-runtime-4.js?v=30d0316"></script>
+<script src="./inline-runtime-5.js?v=30d0316"></script>
+<script src="./inline-runtime-6.js?v=30d0316"></script>
 </body>
 </html>

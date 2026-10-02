@@ -2181,15 +2181,16 @@ async function generateFreeRowsByAlgo(algo,count){
 }
 
 async function generateRowsByAlgo(algo,count){return generateFreeRowsByAlgo(algo,count);}
-async function generateSelectedRows(){
+async function generateSelectedRows(options={}){
   if(GEN_BUSY)return;
-  const algo=document.getElementById('direct-algo')?.value||'freq';
-  const requestedCount=getGenCount();
+  const algo=options.algorithm||document.getElementById('direct-algo')?.value||'freq';
+  const requestedCount=Math.max(1,Math.min(MAX_ROWS,Number(options.rowCount)||getGenCount()));
   const gen=await withModelBusy('Генерирую математическую модель…',()=>generateRowsByAlgo(algo,requestedCount,{user:true}));
   if(!gen?.length)return;
   const count=gen.length;
   if(!['freq','bal','rnd','man'].includes(algo)&&typeof window.showModelResult==='function'){
     window.showModelResult(gen.map(r=>({main:r.m,bonus:r.b})),algo);
+    window.dispatchEvent(new CustomEvent('loto:first-generation-success'));
     return;
   }
   if(count!==requestedCount){
@@ -2198,6 +2199,7 @@ async function generateSelectedRows(){
   }
   const labels={freq:'горячие числа',bal:'комбинированный анализ',rnd:'pure random',man:'сегментный охват',wheel:'колесная матрица','world-hot':'мировой горячий профиль','world-mix':'мировой комбинированный профиль',markov:'цепи Маркова',gauss:'Гаусс · ЦПТ',delta:'интервальная модель Δ',bayes:'Байес · Дирихле',overdue:'gap-анализ',phys:'физическая модель лототрона',chaos:'детерминированный хаос',quantum:'квантовый коллапс',paradox:'система парадоксов'};
   setGeneratedRows(gen,`Готово: ${count} ${rowWord(count)} · ${labels[algo]||algo} · база сохранённых тиражей не очищается при обновлении.`,true,{source:(algo==='rnd'?'rnd':(algo==='man'?'man':'model')),modelId:algo},{sourceType:'HOME_GENERATOR',modelId:algo});
+  window.dispatchEvent(new CustomEvent('loto:first-generation-success'));
 }
 function rowsToNorskText(){
   const l=L();
@@ -4495,7 +4497,9 @@ window.confirmSignOut=confirmSignOut;
 function showFeedback(title,msg,icon='✅',autoMs=2200,options){
   const ov=document.getElementById('fb-ov');
   if(!ov)return;
-  document.getElementById('fb-icon').textContent=icon;
+  const iconEl=document.getElementById('fb-icon');
+  if(icon==='share-nodes')iconEl.innerHTML='<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg>';
+  else iconEl.textContent=icon;
   document.getElementById('fb-title').textContent=appText(title);
   document.getElementById('fb-msg').textContent=appText(msg);
   const actions=document.querySelector('#fb .fb-actions');
@@ -4965,7 +4969,7 @@ async function shareText(title,text){
   const payload={title,text:text+'\n\n🎰 Lotto Simulator · '+appShareUrl()};
   if(await openShareSheet(payload))return;
   try{await navigator.clipboard.writeText(payload.text);showCopyToast('📋 Скопировано — вставь в любой мессенджер');}
-  catch(e){showFeedback('Поделиться','Скопируй вручную:\n\n'+payload.text,'📤',9000);}
+  catch(e){showFeedback('Поделиться','Скопируй вручную:\n\n'+payload.text,'share-nodes',9000);}
 }
 const APP_SHARE_INVITE='Попробуй Lotto Simulator — симулятор лотерей со статистикой тиражей, генератором чисел и 3D-барабаном. Не продаёт билеты и не гарантирует выигрыш.';
 function appSharePayload(){
@@ -5280,7 +5284,7 @@ function SUP_renderRecommendation(){
       '<button class="btn-draw '+l.cls+'" type="button" data-loto-event-click="SUP_accept()">Принять рекомендации судьи</button>'+
       '<button class="btn-exp" type="button" data-court-open="judge-jury">👥 Передать присяжным</button>'+
       '<button class="btn-exp" type="button" data-court-open="judge-defense">🛡 Обратиться к защите</button>'+
-      '<button class="btn-exp" type="button" data-loto-event-click="SUP_share()">📤 Поделиться</button>'+
+      '<button class="btn-exp share-action-button" type="button" data-loto-event-click="SUP_share()">Поделиться<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>'+
     '</div>';
 }
 async function SUP_accept(){
@@ -5338,7 +5342,7 @@ async function SUP_go(){
     issued.map((r,i)=>'<div class="if-rowballs">'+r.m.map(n=>'<div class="if-rball rb-m-'+l.cls+'">'+n+'</div>').join('')+(r.b.length?'<div style="width:6px"></div>'+r.b.map(n=>'<div class="if-rball rb-b-'+l.cls+'">'+n+'</div>').join(''):'')+'</div>'+courtCaptionHtml(supRowSource())).join('')+
     '<div class="if-note">'+appText('Выбрано рядов для голосования')+': '+selectedRows.length+' / '+st.total+'. '+appText('Это исследовательские строки, а не прогноз.')+'</div>'+
     '<button class="btn-draw '+l.cls+'" style="margin-top:10px" data-loto-event-click="SUP_use()">Использовать в симуляторе</button>'+
-    '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="SUP_share()">📤 Поделиться вердиктом</button>';
+    '<button class="btn-exp share-action-button" style="margin-top:8px" data-loto-event-click="SUP_share()">Поделиться вердиктом<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>';
   document.getElementById('sup-go').style.display='none';
   });
 }
@@ -6047,7 +6051,7 @@ async function QA_go(){
     (rows.meta.baseN?'<br>Данные базы: структурные веса рассчитаны по '+rows.meta.baseN+' тиражам':'')+'</div>'+
     '<button class="btn-draw euro qa-go" style="margin-top:12px" data-loto-event-click="QA_use()">Использовать в симуляторе</button>'+
     '<button class="btn-exp" style="margin-top:8px;border-color:#C9A55A;color:#F5CE7B" data-loto-event-click="HORO_open()">📜 Гороскоп на сегодня</button>'+
-    '<button class="btn-exp" style="margin-top:8px;border-color:#6B4BA8;color:#E8DEFA" data-loto-event-click="QA_share()">📤 Поделиться со Вселенной</button>';
+    '<button class="btn-exp share-action-button" style="margin-top:8px;border-color:#6B4BA8;color:#E8DEFA" data-loto-event-click="QA_share()">Поделиться со Вселенной<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>';
 }
 async function QA_use(){
   const st=QA_state;if(!st||!st.rows)return;
@@ -6416,7 +6420,7 @@ async function ADV_go(){
     '<div class="if-note" style="margin-top:8px">«'+(ADV_NAMES[st.algo]||st.algo)+'» советую применить эти числа на тираж '+dd.toLocaleDateString(appLocale(),{weekday:'short',day:'numeric',month:'short'})+'.</div>'+
     '<button class="btn-draw '+l.cls+'" style="margin-top:12px" data-loto-event-click="ADV_use()">Использовать в билете</button>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'+
-    '<button class="btn-exp" style="margin:0" data-loto-event-click="ADV_share()">📤 Поделиться</button>'+
+    '<button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="ADV_share()">Поделиться<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>'+
     '<button class="btn-exp" style="margin:0" data-loto-event-click="ADV_judge()">⚖️ Вердикт судьи</button></div>';
 }
 async function ADV_judge(){
@@ -6617,7 +6621,7 @@ async function SUPC_db(){
     data.rows.map(r=>'<div class="adv-row">'+ADV_ballsHtml(r,l)+'</div>').join('')+
     '<div class="if-note" style="margin-top:8px">Лидеры прошлого не повышают шанс будущего тиража — гарантий не существует. Это исследование структуры базы.</div>'+
     '<button class="btn-draw '+l.cls+'" style="margin-top:12px" data-loto-event-click="SUPC_dbUse()">Использовать в билете</button>'+
-    '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="SUPC_dbShare()">📤 Поделиться</button>';
+    '<button class="btn-exp share-action-button" style="margin-top:8px" data-loto-event-click="SUPC_dbShare()">Поделиться<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>';
 }
 async function SUPC_dbUse(){
   if(!window.SUPC_dbRows)return;
@@ -6868,7 +6872,7 @@ function PDX_renderRows(){
     '<button class="btn-draw '+l.cls+'" style="margin-top:12px" data-loto-event-click="PDX_use()">Использовать в билете</button>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">'+
     '<button class="btn-exp" style="margin:0" data-loto-event-click="PDX_copy(this)">📋 Копировать</button>'+
-    '<button class="btn-exp" style="margin:0" data-loto-event-click="PDX_share()">📤 Поделиться</button></div>'+
+    '<button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="PDX_share()">Поделиться<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button></div>'+
     '<button class="btn-exp" style="margin-top:8px" data-loto-event-click="PDX_judge()">⚖️ Что скажет Верховный судья</button>'+
     '<div id="pdx-jmount" style="margin-top:6px"></div>'+
     '<button class="btn-exp" style="margin-top:10px" data-loto-event-click="PDX_go()">🔄 Пересобрать парадоксы</button>';
