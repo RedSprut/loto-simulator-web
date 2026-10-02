@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-10-02T14:50:48.515Z",
+  "updated": "2026-10-02T18:02:51.597Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-09-26",
       "expectedLastDraw": "2026-09-26",
       "nextDrawDate": "2026-10-03",
-      "updatedAt": "2026-10-02T14:50:48.515Z",
-      "sourceUpdatedAt": "2026-10-02T14:50:48.515Z",
+      "updatedAt": "2026-10-02T18:02:51.597Z",
+      "sourceUpdatedAt": "2026-10-02T18:02:51.597Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -36,8 +36,8 @@
       "lastDrawDate": "2026-09-30",
       "expectedLastDraw": "2026-09-30",
       "nextDrawDate": "2026-10-07",
-      "updatedAt": "2026-10-02T14:50:48.515Z",
-      "sourceUpdatedAt": "2026-10-02T14:50:48.515Z",
+      "updatedAt": "2026-10-02T18:02:51.597Z",
+      "sourceUpdatedAt": "2026-10-02T18:02:51.597Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -51,25 +51,19 @@
       ]
     },
     "euro": {
-      "amount": "1150",
-      "prefix": "Ca. ",
-      "sub": "MILLIONER NOK",
-      "cur": "NOK",
       "currency": "NOK",
-      "display": "Ca. 1150 MILLIONER NOK",
+      "cur": "NOK",
       "lastDrawDate": "2026-09-29",
       "expectedLastDraw": "2026-09-29",
       "nextDrawDate": "2026-10-02",
-      "updatedAt": "2026-10-02T14:50:48.515Z",
-      "sourceUpdatedAt": "2026-10-02T14:50:48.515Z",
-      "sourceNextDraw": null,
-      "status": "fresh",
+      "updatedAt": "2026-10-02T18:02:51.597Z",
+      "status": "unavailable",
       "synced": true,
-      "source": "norsk-tipping.no",
+      "source": null,
       "sourceAttempts": [
         {
           "source": "norsk-tipping.no",
-          "ok": true,
+          "ok": false,
           "sourceUrl": "https://www.norsk-tipping.no/lotteri/eurojackpot"
         }
       ]
@@ -84,8 +78,8 @@
       "lastDrawDate": "2026-09-30",
       "expectedLastDraw": "2026-09-30",
       "nextDrawDate": "2026-10-03",
-      "updatedAt": "2026-10-02T14:50:48.515Z",
-      "sourceUpdatedAt": "2026-10-02T14:50:48.515Z",
+      "updatedAt": "2026-10-02T18:02:51.597Z",
+      "sourceUpdatedAt": "2026-10-02T18:02:51.597Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -101,8 +95,8 @@
       "lastDrawDate": "2026-09-29",
       "expectedLastDraw": "2026-09-29",
       "nextDrawDate": "2026-10-02",
-      "updatedAt": "2026-10-02T14:50:48.515Z",
-      "sourceUpdatedAt": "2026-10-02T14:50:48.515Z",
+      "updatedAt": "2026-10-02T18:02:51.597Z",
+      "sourceUpdatedAt": "2026-10-02T18:02:51.597Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -118,8 +112,8 @@
       "lastDrawDate": "2026-09-29",
       "expectedLastDraw": "2026-09-29",
       "nextDrawDate": "2026-10-02",
-      "updatedAt": "2026-10-02T14:50:48.515Z",
-      "sourceUpdatedAt": "2026-10-02T14:50:48.515Z",
+      "updatedAt": "2026-10-02T18:02:51.597Z",
+      "sourceUpdatedAt": "2026-10-02T18:02:51.597Z",
       "sourceNextDraw": "2026-10-02",
       "status": "fresh",
       "synced": true,
@@ -129,11 +123,11 @@
       "currency": "EUR",
       "cur": "EUR",
       "lastDrawDate": "2026-10-01",
-      "expectedLastDraw": "2026-10-01",
-      "nextDrawDate": "2026-10-02",
-      "updatedAt": "2026-10-02T14:50:48.515Z",
-      "status": "unavailable",
-      "synced": true,
+      "expectedLastDraw": "2026-10-02",
+      "nextDrawDate": "2026-10-03",
+      "updatedAt": "2026-10-02T18:02:51.597Z",
+      "status": "updating",
+      "synced": false,
       "source": null,
       "sourceAttempts": [
         {
@@ -198,7 +192,7 @@
         {
           "source": "official backend",
           "ok": false,
-          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-10-01&next=2026-10-02"
+          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-10-01&next=2026-10-03"
         }
       ]
     },
@@ -212,8 +206,8 @@
       "lastDrawDate": "2026-09-29",
       "expectedLastDraw": "2026-09-29",
       "nextDrawDate": "2026-10-02",
-      "updatedAt": "2026-10-02T14:50:48.515Z",
-      "sourceUpdatedAt": "2026-10-02T14:50:48.515Z",
+      "updatedAt": "2026-10-02T18:02:51.597Z",
+      "sourceUpdatedAt": "2026-10-02T18:02:51.597Z",
       "sourceNextDraw": "2026-10-02",
       "status": "fresh",
       "synced": true,
@@ -242,8 +236,8 @@
       "lastDrawDate": "2026-10-01",
       "expectedLastDraw": "2026-10-01",
       "nextDrawDate": "2026-10-08",
-      "updatedAt": "2026-10-02T14:50:48.515Z",
-      "sourceUpdatedAt": "2026-10-02T14:50:48.515Z",
+      "updatedAt": "2026-10-02T18:02:51.597Z",
+      "sourceUpdatedAt": "2026-10-02T18:02:51.597Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,

@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-02T14:51:47.705Z",
-    "sourceFetchedAt": "2026-10-02T14:51:47.705Z",
+    "generatedAt": "2026-10-02T18:03:44.028Z",
+    "sourceFetchedAt": "2026-10-02T18:03:44.028Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "dd6d51e40f31255c",
     "updatedAt": "2026-10-02",
@@ -58,7 +58,7 @@
       "eurojackpot": {
         "status": "ok",
         "source": "Euro-Jackpot.net",
-        "fetched": 994,
+        "fetched": 995,
         "merged": 472
       },
       "powerball": {
