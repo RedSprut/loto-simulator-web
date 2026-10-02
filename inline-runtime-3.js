@@ -49,6 +49,9 @@
 
   function openDatePicker(opts){
     calOpts=opts||{};
+    const context=$('cal-context'),description=$('cal-description');
+    context.textContent=appText(calOpts.context||'');context.hidden=!calOpts.context;
+    description.textContent=appText(calOpts.description||'');description.hidden=!calOpts.description;
     const cur=String(calOpts.value||'').slice(0,10);
     calSelIso=ISO_RE.test(cur)?cur:null;
     let baseIso=calSelIso||(ISO_RE.test(calOpts.initial||'')?calOpts.initial:todayIsoLocal());

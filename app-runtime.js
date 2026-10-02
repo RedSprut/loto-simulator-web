@@ -72,6 +72,7 @@ function resolveConfigKey(gameKey){
   return APP_LOTTERY_KEYS[appKey]||null;
 }
 function getCurrentGameKey(){return cur;}
+function getSupportedLotteryKeys(){return Object.keys(LOTS);}
 function getLotteryConfig(gameKey){
   const configKey=resolveConfigKey(gameKey);
   if(LOTTERY_CONFIG[configKey])return LOTTERY_CONFIG[configKey];
@@ -4214,6 +4215,7 @@ function _openLdatePicker(input,event){
   if(event){event.preventDefault();event.stopPropagation();}
   window.LotoDatePicker.open({
     value:input.value,min:input.min,max:input.max,allowFuture:!input.max,clearable:!input.required,
+    context:input.getAttribute('aria-label'),description:input.getAttribute('data-date-help'),
     initial:input.max&&input.max<new Date().toISOString().slice(0,10)?input.max:undefined,
     onPick:iso=>{
       const next=iso||'';
@@ -4221,7 +4223,7 @@ function _openLdatePicker(input,event){
       input.value=next;
       input.dispatchEvent(new Event('input',{bubbles:true}));
       input.dispatchEvent(new Event('change',{bubbles:true}));
-      try{input.focus({preventScroll:true});}catch(_e){}
+      try{(input.hasAttribute('data-custom-date-trigger')?input.parentNode.querySelector('.ldate-ov'):input).focus({preventScroll:true});}catch(_e){}
     }
   });
   return true;
@@ -4231,7 +4233,14 @@ function localizeDateInput(input){
   input.dataset.ldate='1';
   const wrap=document.createElement('span');wrap.className='ldate';
   input.parentNode.insertBefore(wrap,input);wrap.appendChild(input);
-  const ov=document.createElement('span');ov.className='ldate-ov';ov.setAttribute('aria-hidden','true');wrap.appendChild(ov);
+  const customTrigger=input.hasAttribute('data-custom-date-trigger');
+  const ov=document.createElement(customTrigger?'button':'span');ov.className='ldate-ov';
+  if(customTrigger){
+    ov.type='button';ov.setAttribute('aria-labelledby',input.getAttribute('aria-labelledby'));
+    ov.setAttribute('aria-describedby',input.getAttribute('aria-describedby'));
+    input.tabIndex=-1;input.setAttribute('aria-hidden','true');
+  }else ov.setAttribute('aria-hidden','true');
+  wrap.appendChild(ov);
   try{const cs=getComputedStyle(input);ov.style.padding=cs.padding;ov.style.fontSize=cs.fontSize;ov.style.borderWidth=cs.borderWidth;ov.style.borderRadius=cs.borderRadius;
     if(cs.display.startsWith('inline')&&input.style.width!=='100%'&&!input.classList.contains('date-inp')&&!input.classList.contains('num-inp'))wrap.classList.add('ldate-inline');}catch(_e){}
   const upd=()=>_paintLdate(input,ov);
