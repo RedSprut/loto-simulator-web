@@ -62,6 +62,8 @@
   function lang() { var api = i18n(); return api ? api.lang : 'ru'; }
 
   var SECTIONS = [
+    // 2026-10-02: the connected trail of every visitor and every server operation (owner_activity).
+    { id: 'activity', label: 'Активность' },
     { id: 'day', label: 'День' },
     { id: 'journey', label: 'Путь гостя' },
     { id: 'usage', label: 'Лотереи и функции' },
@@ -372,9 +374,14 @@
       '#ow-ov .ow-btn{min-height:34px;padding:6px 12px;border-radius:10px;border:1px solid var(--ow-bd);background:var(--ow-card2);color:inherit;font:inherit;font-weight:700;cursor:pointer}',
       '#ow-ov .ow-btn[disabled]{opacity:.6;cursor:progress}',
       '#ow-ov .ow-btn-primary{background:var(--ow-accent);border-color:var(--ow-accent);color:#fff}',
-      // The panel language switcher: a native select styled as a header button (keyboard, screen
-      // readers and the phone picker come for free); native language names, never translated.
-      '#ow-ov select.ow-lang{min-height:34px;padding:6px 10px;border-radius:10px;border:1px solid var(--ow-bd);background:var(--ow-card2);color:inherit;font:inherit;font-weight:700;cursor:pointer;max-width:100%}',
+      // The panel language switcher: three always-visible flag buttons (a segmented control) in the
+      // header; native language names, never translated. It is never hidden by any panel state.
+      '#ow-ov .ow-lang{display:inline-flex !important;flex:0 0 auto;gap:2px;padding:2px;border-radius:11px;border:1px solid var(--ow-bd);background:var(--ow-card2)}',
+      '#ow-ov .ow-lang button{min-height:30px;padding:4px 8px;border:0;border-radius:8px;background:transparent;color:inherit;font:inherit;font-weight:700;cursor:pointer;white-space:nowrap}',
+      '#ow-ov .ow-lang button[aria-pressed="true"]{background:var(--ow-accent);color:#fff}',
+      '#ow-ov .ow-lang button:focus-visible{outline:2px solid var(--ow-accent);outline-offset:1px}',
+      '#ow-ov .ow-lang .ow-lang-f{font-size:15px;line-height:1}',
+      '@media (max-width:719px){#ow-ov .ow-lang{flex:1 1 100%}#ow-ov .ow-lang button{flex:1 1 0}}',
       // The owner bell inside the panel header (the public header has no owner bell at all).
       '#ow-ov .ow-bell{position:relative;padding:6px 10px;line-height:1}',
       '#ow-ov .ow-bell .ow-bell-ico{font-size:16px}',
@@ -453,8 +460,12 @@
       '#ow-ov .ow-pop{position:relative;box-sizing:border-box;width:100%;max-width:560px;max-height:100%;overflow:auto;overscroll-behavior:contain;margin:0;background:var(--ow-card);border:1px solid var(--ow-bd);border-radius:14px;padding:12px;box-shadow:0 18px 50px rgba(0,0,0,.35)}',
       '#ow-ov .ow-pop h3{margin:0 0 6px;font-size:14px}',
       '#ow-ov .ow-pop p{margin:0;color:var(--ow-sub);font-size:13px}',
-      '#ow-ov .ow-sheet{position:fixed;inset:0;background:rgba(8,4,8,.55);display:flex;align-items:flex-end;justify-content:center;z-index:30}',
-      '#ow-ov .ow-sheet-in{background:var(--ow-card);border-radius:16px 16px 0 0;width:min(760px,100%);max-height:88vh;overflow:auto;padding:14px}',
+      // Sheets (person / country / visitor cards) and the notification centre open BELOW the header
+      // (--ow-top-h is its measured height), so the header — the language buttons above all — stays
+      // visible and usable whatever is open (2026-10-02).
+      '#ow-ov .ow-sheet{position:fixed;inset:var(--ow-top-h,0px) 0 0 0;background:rgba(8,4,8,.55);display:flex;align-items:flex-end;justify-content:center;z-index:30}',
+      '#ow-ov .ow-sheet-in{background:var(--ow-card);border-radius:16px 16px 0 0;width:min(760px,100%);max-height:min(88vh,calc(100vh - var(--ow-top-h,0px) - 8px));overflow:auto;padding:14px}',
+      '#ow-ov #own-center{top:var(--ow-top-h,0px)}',
       '@media (min-width:720px){#ow-ov .ow-sheet{align-items:center}#ow-ov .ow-sheet-in{border-radius:16px}}',
       '#ow-ov .ow-jr{display:grid;grid-template-columns:64px 1fr;gap:8px;padding:5px 0;border-bottom:1px solid var(--ow-bd);font-size:13px}',
       '#ow-ov .ow-jr b{font-variant-numeric:tabular-nums;color:var(--ow-sub);font-weight:700}',
@@ -499,6 +510,54 @@
       '#ow-ov .ow-cmp .up{color:var(--ow-up)}#ow-ov .ow-cmp .down{color:var(--ow-down)}',
       '#ow-ov .ow-block[id^="ow-b-"]{scroll-margin-top:12px}',
       '#ow-ov .ow-block.ow-focus{outline:2px solid var(--ow-accent);outline-offset:2px}',
+      // «Активность» (2026-10-02): event rows with progressive disclosure, actor / status chips, the
+      // «новое» highlight (a calm outline + tag, no flashing), the chart switchers, donut and heatmap.
+      '#ow-ov .ow-act-views{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}',
+      '#ow-ov .ow-act-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 10px;align-items:end;margin-bottom:12px}',
+      '#ow-ov .ow-act-filters>label:not(.ow-toggle){display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--ow-sub);min-width:0}',
+      '#ow-ov .ow-act-filters>label select{width:100%;color:var(--ow-tx);font-size:14px}',
+      '#ow-ov .ow-act-search{display:flex;gap:6px;min-width:0;grid-column:span 2}',
+      '@media (max-width:719px){#ow-ov .ow-act-search{grid-column:1/-1}}',
+      '#ow-ov .ow-act-small{font-size:15px;line-height:1.3;display:block}#ow-ov .ow-sheet-in.ow-act .ow-card-v{font-size:20px;line-height:1.2}',
+      '#ow-ov .ow-act-search input{flex:1;min-width:0;min-height:32px;padding:4px 10px;border-radius:9px;border:1px solid var(--ow-bd);background:var(--ow-card);color:inherit;font:inherit}',
+      '#ow-ov .ow-act-note{padding:10px 12px;margin-bottom:12px;border:1px solid var(--ow-bd);border-left:4px solid var(--ow-accent);border-radius:10px;background:var(--ow-card)}',
+      '#ow-ov .ow-act-chain{display:inline-block;margin-top:6px;color:var(--ow-sub);font-size:13px;line-height:1.7}#ow-ov .ow-act-chain b{color:var(--ow-accent)}',
+      '#ow-ov .ow-act-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}',
+      '#ow-ov .ow-act-cs{display:inline-flex;gap:4px;margin-left:auto;flex-wrap:wrap}#ow-ov .ow-act-cs .ow-chip{padding:2px 9px;font-size:12px}',
+      '#ow-ov .ow-act-ev{border:1px solid var(--ow-bd);border-radius:10px;background:var(--ow-card);margin:6px 0;transition:border-color .6s ease,box-shadow .6s ease}',
+      '#ow-ov .ow-act-ev>summary{display:grid;grid-template-columns:70px 22px 1fr auto;gap:8px;align-items:start;padding:8px 10px;cursor:pointer;list-style:none}',
+      '#ow-ov .ow-act-ev>summary::-webkit-details-marker{display:none}',
+      '#ow-ov .ow-act-ev[open]>summary{border-bottom:1px solid var(--ow-bd)}',
+      '#ow-ov .ow-act-t{font-variant-numeric:tabular-nums;color:var(--ow-sub);font-weight:700;font-size:12px;padding-top:2px}',
+      '#ow-ov .ow-act-i{text-align:center}#ow-ov .ow-act-m{display:flex;flex-direction:column;gap:2px;min-width:0}',
+      '#ow-ov .ow-act-h{font-weight:700}#ow-ov .ow-act-s{font-size:12px;color:var(--ow-sub);overflow-wrap:anywhere}',
+      '#ow-ov .ow-act-src{font-size:11px;color:var(--ow-sub);border:1px solid var(--ow-bd);border-radius:999px;padding:1px 8px;white-space:nowrap}',
+      '#ow-ov .ow-act-operation{border-left:3px solid #7c3aed}#ow-ov .ow-act-action{border-left:3px solid var(--ow-accent)}',
+      '#ow-ov .ow-act-error,#ow-ov .ow-act-fail{border-left:3px solid var(--ow-down)}#ow-ov .ow-act-session .ow-act-ev,#ow-ov .ow-act-view{border-left-width:3px}',
+      '#ow-ov .ow-act-d{padding:8px 12px 10px;font-size:13px}#ow-ov .ow-act-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:4px 14px}',
+      '#ow-ov .ow-act-fact{display:flex;gap:8px;min-width:0}#ow-ov .ow-act-fact span{color:var(--ow-sub);min-width:110px}#ow-ov .ow-act-fact b{font-weight:600;overflow-wrap:anywhere}',
+      '#ow-ov .ow-act-tech,#ow-ov .ow-act-raw{margin-top:8px}#ow-ov .ow-act-tech>summary,#ow-ov .ow-act-raw>summary{cursor:pointer;color:var(--ow-accent);font-weight:700;font-size:12px}',
+      '#ow-ov .ow-act-raw pre{max-height:240px;overflow:auto;background:var(--ow-card2);border-radius:8px;padding:8px;font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere}',
+      '#ow-ov .ow-act-ids div{font-size:12px;overflow-wrap:anywhere}#ow-ov .ow-act-ids span{color:var(--ow-sub);display:inline-block;min-width:64px}',
+      '#ow-ov .ow-act-lin{color:var(--ow-sub);font-size:12px;margin-bottom:6px}#ow-ov .ow-act-link{white-space:nowrap}',
+      '#ow-ov .ow-act-actor{display:inline-block;padding:0 8px;border-radius:999px;font-size:11px;font-weight:800;background:var(--ow-chip)}',
+      '#ow-ov .ow-act-actor-admin{background:rgba(242,193,78,.28);color:#8a5d00}#ow-ov .ow-act-actor-agent{background:rgba(124,58,237,.16);color:#6d28d9}',
+      '#ow-ov[data-ow-theme="dark"] .ow-act-actor-admin{color:#fcd34d}#ow-ov[data-ow-theme="dark"] .ow-act-actor-agent{color:#c4b5fd}',
+      '#ow-ov .ow-act-st{display:inline-block;padding:0 7px;border-radius:999px;font-size:11px;font-weight:800}',
+      '#ow-ov .ow-act-st-ok{background:rgba(15,122,77,.14);color:var(--ow-up)}#ow-ov .ow-act-st-err{background:rgba(198,42,90,.14);color:var(--ow-down)}#ow-ov .ow-act-st-warn{background:rgba(217,119,6,.16);color:#b45309}',
+      '#ow-ov .ow-act-errn{color:var(--ow-down)}',
+      '#ow-ov .ow-new{border-color:var(--ow-accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--ow-accent) 22%,transparent)}',
+      '#ow-ov tr.ow-new td{background:color-mix(in srgb,var(--ow-accent) 8%,transparent)}',
+      '#ow-ov .ow-new-tag{display:inline-block;margin-left:4px;padding:0 6px;border-radius:999px;background:var(--ow-accent);color:#fff;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase}',
+      '#ow-ov .ow-act-session{margin:10px 0}#ow-ov .ow-act-sh{font-size:12px;font-weight:800;color:var(--ow-sub);text-transform:uppercase;letter-spacing:.04em;margin:8px 0 2px}',
+      '#ow-ov .ow-act-donut{display:flex;flex-wrap:wrap;gap:12px;align-items:center}#ow-ov .ow-act-donut svg{width:140px;height:140px;flex:0 0 auto}',
+      '#ow-ov .ow-act-donut-n{font-size:20px;font-weight:800;fill:var(--ow-tx)}#ow-ov .ow-act-legend{display:flex;flex-direction:column;gap:3px;font-size:13px;min-width:0}',
+      '#ow-ov .ow-act-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}#ow-ov .ow-act-legend span{color:var(--ow-sub)}',
+      '#ow-ov .ow-act-heat{display:grid;grid-template-columns:28px repeat(24,minmax(0,1fr));gap:2px;overflow-x:auto}',
+      '#ow-ov .ow-act-hh,#ow-ov .ow-act-hd{font-size:10px;color:var(--ow-sub);text-align:center}#ow-ov .ow-act-hd{text-align:left;line-height:16px}',
+      '#ow-ov .ow-act-hc{height:16px;border-radius:3px;background:var(--ow-accent);opacity:var(--a);min-width:6px}',
+      '@media (max-width:719px){#ow-ov .ow-act-ev>summary{grid-template-columns:58px 18px 1fr}#ow-ov .ow-act-src{display:none}#ow-ov .ow-act-fact{flex-direction:column;gap:0}}',
+      '@media(prefers-reduced-motion:reduce){#ow-ov .ow-act-ev{transition:none}}',
       '#ow-ov .ow-anchors{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}',
       '#ow-ov .ow-anchors a{color:var(--ow-accent);text-decoration:none;font-size:12px;font-weight:700;padding:3px 9px;border:1px solid var(--ow-bd);border-radius:999px;background:var(--ow-card)}',
       '#ow-ov .ow-status-chip{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:800;background:var(--ow-chip);color:var(--ow-sub);white-space:nowrap}',
@@ -561,7 +620,7 @@
           '<span class="ow-bell-ico" aria-hidden="true">🔔</span>' +
           '<span class="ow-bell-badge" id="owner-bell-badge" hidden aria-hidden="true">0</span></button>' +
         '<button class="ow-btn ow-filters-btn" id="ow-filters" type="button" aria-expanded="false" data-owt="Фильтры"></button>' +
-        '<select class="ow-lang" id="ow-lang" data-owt-aria="Язык панели"></select>' +
+        '<span class="ow-lang" id="ow-lang" role="group" data-owt-aria="Язык панели"></span>' +
         '<button class="ow-btn" id="ow-theme" type="button" data-owt="Тема"></button>' +
         '<button class="ow-btn" id="ow-export" type="button" data-owt="Экспорт"></button>' +
         '<button class="ow-btn ow-btn-primary" id="ow-refresh" type="button" data-owt="Обновить"></button>' +
@@ -593,6 +652,12 @@
         '<div id="ow-section"></div>' +
       '</div>';
     D.body.appendChild(ovEl);
+    // Keep --ow-top-h equal to the header's height (it wraps differently per language and width).
+    var topBar = ovEl.querySelector('.ow-top');
+    var syncTop = function () { try { ovEl.style.setProperty('--ow-top-h', Math.round(topBar.getBoundingClientRect().bottom) + 'px'); } catch (e) {} };
+    try { if (W.ResizeObserver) new W.ResizeObserver(syncTop).observe(topBar); } catch (e) {}
+    W.addEventListener('resize', syncTop);
+    ovEl.__syncTop = syncTop;
     // The panel is a body-level "-ov" overlay built lazily, so the shell's modal manager has to be
     // told about it: __lotoClose routes an external close (another modal opening, Escape, native
     // back) through the REAL close(), which releases the scroll lock and stops the live poll, the
@@ -628,14 +693,15 @@
     ovEl.setAttribute('lang', code === 'no' ? 'nb' : code);
     ovEl.querySelectorAll('[data-owt]').forEach(function (el) { el.textContent = t(el.getAttribute('data-owt')); });
     ovEl.querySelectorAll('[data-owt-aria]').forEach(function (el) { el.setAttribute('aria-label', t(el.getAttribute('data-owt-aria'))); });
-    var langs = (i18n() && i18n().LANGS) || ['ru'];
+    // The three panel languages are always offered (the catalog is the panel's own, so even before
+    // owner-i18n.js loads the buttons exist); the pressed one is the language the panel speaks.
+    var langs = (i18n() && i18n().LANGS) || ['ru', 'en', 'no'];
+    var flags = { ru: ['Русский', '🇷🇺'], en: ['English', '🇬🇧'], no: ['Norsk', '🇳🇴'] };
     ovEl.querySelector('#ow-lang').innerHTML = langs.map(function (c) {
-      var n = i18n() ? i18n().languageName(c) : { name: 'Русский', flag: '🇷🇺' };
-      return '<option value="' + c + '" lang="' + (c === 'no' ? 'nb' : c) + '"' + (c === code ? ' selected' : '') + '>' + esc(n.flag + ' ' + n.name) + '</option>';
+      var n = i18n() ? i18n().languageName(c) : { name: flags[c][0], flag: flags[c][1] };
+      return '<button type="button" data-lang="' + c + '" lang="' + (c === 'no' ? 'nb' : c) + '" aria-pressed="' + (c === code) + '" title="' + esc(n.name) + '">' +
+        '<span class="ow-lang-f" aria-hidden="true">' + esc(n.flag) + '</span> <span class="ow-lang-n">' + esc(n.name) + '</span></button>';
     }).join('');
-    // The switcher is the FALLBACK chooser only: when the app runs in one of the panel's three
-    // languages the panel follows it and the switcher is hidden (one source of truth: the app).
-    ovEl.querySelector('#ow-lang').hidden = langs.length < 2 || !!(i18n() && i18n().followsApp && i18n().followsApp());
     ovEl.querySelector('#ow-preset').innerHTML = options(PRESETS, state.preset);
     ovEl.querySelector('#ow-platform').innerHTML = options(PLATFORMS, state.filters.platform);
     ovEl.querySelector('#ow-audience').innerHTML = options(AUDIENCES, state.filters.audience);
@@ -727,10 +793,12 @@
     else if (section === 'map') { await loadMany(['countries'], extra); state.data.map = state.data.countries; }
     // The day report shows the guest journey of the same day as its own block, from its own request.
     else if (section === 'day') await loadMany(['day', 'journey'], extra);
+    else if (section === 'activity') await load('activity', actExtra(extra));
     else await load(section, extra);
     render();
     if (section === 'overview') loadGa4();   // its own request, its own states — never on the overview's path
     if (section === 'live') startLive();
+    if (section === 'activity') startActivityPoll();
     if (section === 'map') {
       mountMap();
       // On a phone the folded filter bar still leaves the tabs above the map: bring the map up.
@@ -2366,8 +2434,505 @@
       '<div class="ow-card-s" style="margin-top:6px">' + esc(tx(data.note || '')) + '</div>';
   }
 
+  // ── activity: the connected trail (migration 202610180067) ─────────────────────────────────
+  // One section answers «who did what, when, what happened next»: the consented client events and
+  // the server's own operations merged per visitor (owner_activity). Four views share one filter
+  // set; switching a view or a chart type never drops a filter.
+  var ACT_VIEWS = [['overview', 'Обзор'], ['timeline', 'Хронология'], ['ai', 'AI и движки'], ['errors', 'Ошибки']];
+  var ACT_ACTORS = [['all', 'Все'], ['user', 'Пользователи'], ['guest', 'Гости'], ['admin', 'Владелец'], ['agent', 'AI-агенты и боты'], ['system', 'Система']];
+  var ACT_SOURCES = [['all', 'Все'], ['client', 'Приложение'], ['server', 'Сервер']];
+  var ACT_STATUSES = [['all', 'Все'], ['ok', 'Успешно'], ['fail', 'С ошибкой или отказом']];
+  var ACT_KINDS = [['all', 'Все'], ['generation', 'Генерация'], ['simulation', 'Симуляция'], ['draw3d', '3D-тираж'], ['court', 'Суд'],
+    ['analysis', 'Анализ'], ['calendar', 'Календарь'], ['combinations', 'Комбинации'], ['pro_models', 'PRO-модели'], ['pro_interest', 'Интерес к PRO'],
+    ['ticket_check', 'Проверка билета'], ['share', 'Поделиться'], ['view', 'Просмотры'], ['account', 'Аккаунт'], ['commerce', 'Оплата'], ['error', 'Ошибки']];
+  var ACT_ACTOR_RU = { user: 'Пользователь', guest: 'Гость', admin: 'Владелец', agent: 'AI-агент / бот', system: 'Система' };
+  var ACT_STATUS_RU = { ok: 'успешно', error: 'ошибка', denied: 'отказ в доступе', limited: 'лимит запросов', invalid: 'неверный запрос', conflict: 'уже выполняется' };
+  var ACT_SRC_RU = { client: 'Приложение', server: 'Сервер', ledger: 'Журнал прогнозов', store: 'Магазин' };
+  var ACT_CATEGORY_ICON = { action: '⚡', view: '👁', session: '◦', error: '⚠', account: '👤', commerce: '💳', settings: '⚙', operation: '🖥' };
+  // Server operations in words: what the backend did for the person.
+  var ACT_OP_RU = {
+    'pro-compute:generate': 'Сервер сгенерировал ряды PRO-моделью', 'pro-compute:wheel': 'Сервер построил колесо (систему рядов)',
+    'pro-compute:judge': 'Верховный судья проверил ряды', 'pro-compute:jury_review': 'Присяжные рассмотрели комбинацию',
+    'pro-compute:jury_generate': 'Присяжные сформировали комбинации', 'pro-compute:defense': 'Защитник разобрал комбинацию',
+    'pro-compute:court_judge': 'Судья вынес решение', 'pro-compute:model_review': 'Разбор моделей',
+    'pro-analysis:analysis': 'PRO-анализ архива тиражей', 'free-analysis:analysis': 'Бесплатный анализ архива',
+    'free-counsel:defense': 'Бесплатный защитник разобрал комбинацию', 'archive:calendar': 'Календарный анализ: чтение архива',
+    'archive:archive': 'Чтение архива тиражей', 'consume-feature:unlock': 'Списание доступа к PRO-функции',
+    'prediction-ledger:record': 'Прогнозы записаны в журнал', 'prediction-ledger:decide': 'Решение по спорному числу',
+    'prediction-ledger:decide_rows': 'Решение по рядам'
+  };
+  var ACT_CHART_RU = { line: 'Линии', bar: 'Столбцы', area: 'Области', donut: 'Кольцо' };
+  var ACT_SEEN_KEY = 'ow_activity_seen';
+  var DOW_RU = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  HOW.activity = 'Хронология всего, что произошло: действия посетителей в приложении (события с согласием на аналитику) и операции, которые сервер выполнил для них (генерация, суд, анализ, календарь, журнал прогнозов). Одна строка — одно событие; события одного человека связаны его псевдонимом, сессией, номером запроса и номером сущности (например, номер 3D-тиража связывает тираж и сохранённую из него комбинацию). Владелец здесь показан и помечен, потому что это консоль наблюдения, а не статистика; переключатель «Показывать владельца» его скрывает, и тогда видно, сколько строк скрыто.';
+  HOW.activityAi = 'Внешние AI-провайдеры (Grok, OpenAI, Anthropic и другие) приложением не вызываются: ни один серверный код не отправляет им запросов. «AI» в продукте — собственные серверные движки Lotto Simulator: PRO-модели генерации, присяжные, защитники, судья, анализ и календарь. Они считают на архиве официальных тиражей (таблица lottery_draws, окно текущих правил) и записывают прогнозы в журнал (prediction_ledger). Внешний AI-агент, управляющий браузером, для приложения — обычный посетитель: его визиты и серверные запросы видны как «AI-агент / бот». Доступа к компьютеру пользователя у приложения нет.';
+  HOW.activityLineage = 'Путь данных одной операции: действие в приложении → событие клиента с номером запроса → запрос к серверной функции (тот же номер, сессия посетителя — только при согласии) → чтение данных (источники ниже) → расчёт движка → запись результата (журнал прогнозов или журнал списаний) → ответ приложению. Совпадающий номер запроса связывает эти шаги в одну цепочку.';
+  HOW.activityErrors = 'Ошибки приложения у посетителей (события с согласием), отказы и сбои серверных операций (с кодом ответа) и отклонённые пакеты приёма аналитики. «Отказ в доступе» и «лимит запросов» — штатные отказы, «ошибка» — сбой на нашей стороне.';
+  HOW.activityHeat = 'Количество действий, просмотров и серверных операций по дням недели и часам (часовой пояс отчёта). Чем темнее клетка, тем больше событий.';
+
+  function actState() {
+    if (!state.act) state.act = { view: 'overview', actor: 'all', source: 'all', status: 'all', kind: 'all', q: '', owner: true, charts: { series: 'line', kinds: 'bar', ops: 'bar' }, prevSeen: null };
+    return state.act;
+  }
+  // The section's own parameters on top of the panel's (period, time zone, lottery, platform).
+  function actExtra(extra) {
+    var a = actState();
+    var mode = a.view === 'ai' ? 'operations' : a.view === 'errors' ? 'errors' : 'feed';
+    return Object.assign({ mode: mode, actor: a.actor, source: a.source, status: a.status, kind: a.kind, q: a.q,
+      include_owner: a.owner, include_bots: true, limit: a.view === 'timeline' ? 100 : 50 }, extra || {});
+  }
+  function actParams(extra) { return params(actExtra(extra)); }
+  // Seen marker: what arrived since the owner last looked at this section is highlighted («новое»).
+  function actSeen() {
+    var a = actState();
+    if (a.prevSeen == null) { try { a.prevSeen = W.localStorage.getItem(ACT_SEEN_KEY) || ''; } catch (e) { a.prevSeen = ''; } }
+    return a.prevSeen;
+  }
+  function actMarkSeen(lastAt) { if (!lastAt) return; try { W.localStorage.setItem(ACT_SEEN_KEY, String(lastAt)); } catch (e) {} }
+  function actIsNew(at) { var seen = actSeen(); return !!(seen && at && String(at) > seen); }
+  function actorChip(actor, owner) {
+    return '<span class="ow-act-actor ow-act-actor-' + esc(actor || 'system') + '">' + esc(label(ACT_ACTOR_RU, actor)) + '</span>' +
+      (owner && actor !== 'admin' ? ' <span class="ow-act-actor ow-act-actor-admin">' + et('владелец') + '</span>' : '');
+  }
+  function actStatusChip(status) {
+    return '<span class="ow-act-st ow-act-st-' + (status === 'ok' ? 'ok' : status === 'error' ? 'err' : 'warn') + '">' + esc(label(ACT_STATUS_RU, status)) + '</span>';
+  }
+  function actMs(ms) {
+    if (ms == null || ms === '') return '';
+    var n = +ms;
+    if (!isFinite(n)) return '';
+    return n < 1000 ? t('{{0}} мс', Math.round(n)) : n < 60000 ? t('{{0}} с', (n / 1000).toLocaleString(intl(), { maximumFractionDigits: 1 })) : dur(n);
+  }
+  // The title of a row in words: a client event by its label, a server operation by what it did.
+  function actTitle(r) {
+    if (r.src === 'server') return ACT_OP_RU[r.type] ? t(ACT_OP_RU[r.type]) : r.type;
+    if (r.src === 'ledger') return t('Прогнозы зафиксированы в журнале: {{0}}', num(r.x && r.x.count));
+    if (r.src === 'store') return label(LIB.EVENT_RU, r.type) !== r.type ? label(LIB.EVENT_RU, r.type) : t('Событие магазина: {{0}}', r.type);
+    return label(LIB.EVENT_RU, r.type);
+  }
+  function actSubline(r) {
+    var parts = [];
+    if (r.lottery) parts.push(esc(lotName(r.lottery)));
+    if (r.model) parts.push(esc(t('модель {{0}}', r.model)));
+    var props = (r.x && r.x.props) || {};
+    if (props.context && r.src === 'client') parts.push(esc(detailName(props.context)));
+    if (props.rows) parts.push(esc(t('{{0}} ряд.', num(props.rows))));
+    if (r.ms != null && r.type !== 'user_engagement') parts.push('⏱ ' + esc(actMs(r.ms)));
+    if (r.type === 'user_engagement' && r.ms) parts.push(esc(t('активно {{0}}', actMs(r.ms))));
+    if (r.status && r.status !== 'ok') parts.push(actStatusChip(r.status));
+    if (r.x && r.x.error) parts.push('<code>' + esc(r.x.error) + '</code>');
+    if (r.etype && r.eid) parts.push('<span class="ow-act-link" title="' + esc(r.eid) + '">🔗 ' + esc(actEntityName(r.etype)) + ' ' + esc(actShort(r.eid)) + '</span>');
+    else if (r.op) parts.push('<span class="ow-act-link" title="' + esc(r.op) + '">🔗 ' + et('запрос') + ' ' + esc(actShort(r.op)) + '</span>');
+    return parts.join(' · ');
+  }
+  // «compute:markov:9f3c…» / «r-9f3c…» → «9f3c…»: the part of an id a person can compare by eye.
+  function actShort(id) { return String(id || '').split(':').pop().replace(/^r-/, '').slice(0, 8); }
+  function actFullTime(value) {
+    try { return new Date(value).toLocaleString(intl(), { timeZone: state.tz, day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { return String(value); }
+  }
+  function actEntityName(type) {
+    return ({ draw3d: t('3D-тираж'), combination: t('комбинация'), prediction: t('прогнозы'), operation: t('операция'), usage: t('списание') })[type] || type;
+  }
+  // Progressive disclosure: the row → plain facts → technical ids → raw metadata.
+  function actDetails(r) {
+    var x = r.x || {};
+    var facts = [
+      [t('Время'), esc(actFullTime(r.at))],
+      [t('Кто'), actorChip(r.actor, r.owner) + (r.who ? ' <code>' + esc(r.who) + '</code>' : '')],
+      [t('Источник'), esc(label(ACT_SRC_RU, r.src))],
+      r.ms != null ? [t('Длительность'), esc(actMs(r.ms))] : null,
+      r.status ? [t('Итог'), actStatusChip(r.status)] : null,
+      r.etype ? [t('Связанная сущность'), esc(actEntityName(r.etype)) + (r.eid ? ' <code>' + esc(r.eid) + '</code>' : '')] : null,
+      r.page ? [t('Экран'), esc(r.page)] : null
+    ].filter(Boolean);
+    var tech = [];
+    if (r.src === 'server') {
+      tech.push([t('Функция'), '<code>' + esc(x.function) + '</code> · <code>' + esc(x.operation) + '</code>']);
+      tech.push([t('Движок и модель'), esc((x.engine || '—') + (x.model ? ' · ' + x.model : ''))]);
+      if (x.sources && x.sources.length) tech.push([t('Данные (откуда)'), x.sources.map(function (s) { return '<code>' + esc(s) + '</code>'; }).join('<br>')]);
+      if (x.input && Object.keys(x.input).length) tech.push([t('Вход (без содержимого)'), actKv(x.input)]);
+      if (x.output && Object.keys(x.output).length) tech.push([t('Результат'), actKv(x.output)]);
+      if (x.http) tech.push([t('Ответ'), 'HTTP ' + esc(x.http) + (x.error ? ' · <code>' + esc(x.error) + '</code>' : '')]);
+      if (x.automation && x.automation !== 'human') tech.push([t('Автоматизация'), esc(x.automation + (x.agent ? ' · ' + x.agent : ''))]);
+    } else if (r.src === 'ledger') {
+      tech.push([t('Таблица'), '<code>prediction_ledger</code>']);
+      tech.push([t('Источник прогноза'), esc((x.source_kind || '') + ' · ' + (x.source_id || '') + ' · ' + (x.operation || ''))]);
+      tech.push([t('Проверено тиражом'), esc(num(x.evaluated)) + (x.best_hits != null ? ' · ' + esc(t('лучшее совпадение {{0}}', x.best_hits)) : '')]);
+    } else if (r.src === 'client') {
+      if (x.access) tech.push([t('Доступ'), esc(String(x.access).toUpperCase())]);
+      if (x.received_at) tech.push([t('Получено сервером'), esc(clockText(x.received_at))]);
+      if (x.app_version) tech.push([t('Версия'), '<code>' + esc(x.app_version) + '</code>']);
+      if (x.browser || x.os) tech.push([t('Браузер'), esc([x.browser, x.os].filter(Boolean).join(' · '))]);
+    }
+    var ids = [['event', r.id], ['session', r.session], ['request', r.op], ['entity', r.eid], ['person', r.person]]
+      .filter(function (p) { return p[1]; }).map(function (p) { return '<div><span>' + esc(p[0]) + '</span> <code>' + esc(p[1]) + '</code></div>'; }).join('');
+    return '<div class="ow-act-facts">' + facts.map(actFact).join('') + '</div>' +
+      (tech.length ? '<details class="ow-act-tech"><summary>' + et('Технические детали') + '</summary><div class="ow-act-facts">' + tech.map(actFact).join('') + '</div>' +
+        '<details class="ow-act-raw"><summary>' + et('Идентификаторы и исходные данные') + '</summary><div class="ow-act-ids">' + ids + '</div>' +
+        '<pre>' + esc(JSON.stringify(x, null, 1)) + '</pre></details></details>'
+        : '<details class="ow-act-raw"><summary>' + et('Идентификаторы и исходные данные') + '</summary><div class="ow-act-ids">' + ids + '</div><pre>' + esc(JSON.stringify(x, null, 1)) + '</pre></details>');
+  }
+  function actFact(pair) { return '<div class="ow-act-fact"><span>' + esc(pair[0]) + '</span><b>' + pair[1] + '</b></div>'; }
+  function actKv(map) { return Object.keys(map).map(function (k) { return '<code>' + esc(k) + '</code> ' + esc(Array.isArray(map[k]) ? map[k].join(', ') : map[k]); }).join('<br>'); }
+  function actRow(r, withWho) {
+    var cat = r.src === 'server' || r.src === 'ledger' ? 'operation' : (r.category || 'view');
+    return '<details class="ow-act-ev ow-act-' + esc(cat) + (r.status && r.status !== 'ok' ? ' ow-act-fail' : '') + (actIsNew(r.at) ? ' ow-new' : '') + '">' +
+      '<summary><span class="ow-act-t">' + esc(clockText(r.at)) + '</span>' +
+      '<span class="ow-act-i" aria-hidden="true">' + (ACT_CATEGORY_ICON[cat] || '·') + '</span>' +
+      '<span class="ow-act-m"><span class="ow-act-h">' + esc(actTitle(r)) + (actIsNew(r.at) ? ' <span class="ow-new-tag">' + et('новое') + '</span>' : '') + '</span>' +
+        '<span class="ow-act-s">' + (withWho ? actorChip(r.actor, r.owner) + (r.who ? ' <code>' + esc(r.who) + '</code>' : '') + (actSubline(r) ? ' · ' : '') : '') + actSubline(r) + '</span></span>' +
+      '<span class="ow-act-src">' + esc(label(ACT_SRC_RU, r.src)) + '</span></summary>' +
+      '<div class="ow-act-d">' + actDetails(r) + '</div></details>';
+  }
+  function actSelect(id, title, list, current) {
+    return '<label><span>' + et(title) + '</span> <select id="' + id + '">' + options(list, current) + '</select></label>';
+  }
+  function actFilters() {
+    var a = actState();
+    return '<div class="ow-act-views" role="tablist">' + ACT_VIEWS.map(function (v) {
+      return '<button type="button" class="ow-chip" role="tab" data-act-view="' + v[0] + '" aria-pressed="' + (a.view === v[0]) + '" aria-selected="' + (a.view === v[0]) + '">' + et(v[1]) + '</button>';
+    }).join('') + '</div>' +
+      '<div class="ow-u-filters ow-act-filters">' +
+        actSelect('ow-a-actor', 'Кто', ACT_ACTORS, a.actor) +
+        actSelect('ow-a-source', 'Источник', ACT_SOURCES, a.source) +
+        actSelect('ow-a-status', 'Итог', ACT_STATUSES, a.status) +
+        actSelect('ow-a-kind', 'Что', ACT_KINDS, a.kind) +
+        '<form class="ow-act-search" id="ow-a-search"><input type="search" id="ow-a-q" maxlength="160" value="' + esc(a.q) + '" placeholder="' + esc(t('Поиск: псевдоним, номер запроса или тиража')) + '" aria-label="' + esc(t('Поиск')) + '"><button class="ow-btn" type="submit">' + et('Найти') + '</button></form>' +
+        '<label class="ow-toggle"><input type="checkbox" id="ow-a-owner"' + (a.owner ? ' checked' : '') + '> <span>' + et('Показывать владельца') + '</span></label>' +
+        '<button class="ow-btn" type="button" id="ow-a-reset">' + et('Сбросить') + '</button>' +
+      '</div>';
+  }
+  function chartSwitch(key, kinds) {
+    var a = actState();
+    return '<span class="ow-act-cs" role="group" aria-label="' + esc(t('Вид графика')) + '">' + kinds.map(function (k) {
+      return '<button type="button" class="ow-chip" data-act-chart="' + key + ':' + k + '" aria-pressed="' + (a.charts[key] === k) + '">' + et(ACT_CHART_RU[k]) + '</button>';
+    }).join('') + '</span>';
+  }
+  function actBucketLabel(value, bucket) {
+    var s = String(value || '');
+    return bucket === 'hour' ? s.slice(8, 10) + ' ' + s.slice(11, 16) : s.slice(5, 10);
+  }
+  // One time-series chart in three forms (lines / bars / areas) over the same points.
+  function actSeriesChart(points, keys, titles, kind, bucket) {
+    if (!points || !points.length) return '<div class="ow-empty">' + et('Нет данных за период') + '</div>';
+    var width = 720, height = 200, padLeft = 42, padBottom = 26, padTop = 12, colors = chartColors().concat(['#e11d48']);
+    var max = 1;
+    points.forEach(function (p) { keys.forEach(function (k) { max = Math.max(max, +p[k] || 0); }); });
+    var plotW = width - padLeft - 10, plotH = height - padTop - padBottom;
+    var n = points.length, slot = plotW / Math.max(1, n), stepX = n > 1 ? plotW / (n - 1) : 0;
+    var y = function (v) { return padTop + plotH * (1 - (+v || 0) / max); };
+    var marks = '';
+    if (kind === 'bar') {
+      var bw = Math.max(1.5, (slot * 0.8) / keys.length);
+      points.forEach(function (p, i) {
+        keys.forEach(function (k, j) {
+          var x = padLeft + i * slot + slot * 0.1 + j * bw, top = y(p[k]);
+          marks += '<rect x="' + x.toFixed(1) + '" y="' + top.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.max(0, padTop + plotH - top).toFixed(1) + '" fill="' + colors[j % colors.length] + '" rx="1.5"><title>' + esc(t(titles[j])) + ': ' + num(p[k]) + '</title></rect>';
+        });
+      });
+    } else {
+      keys.forEach(function (k, j) {
+        var pts = points.map(function (p, i) { return [n > 1 ? padLeft + i * stepX : padLeft + plotW / 2, y(p[k])]; });
+        var d = pts.map(function (pt, i) { return (i ? 'L' : 'M') + pt[0].toFixed(1) + ' ' + pt[1].toFixed(1); }).join(' ');
+        if (kind === 'area') marks += '<path d="' + d + ' L' + pts[pts.length - 1][0].toFixed(1) + ' ' + (padTop + plotH) + ' L' + pts[0][0].toFixed(1) + ' ' + (padTop + plotH) + ' Z" fill="' + colors[j % colors.length] + '" fill-opacity=".18"/>';
+        marks += '<path d="' + d + '" fill="none" stroke="' + colors[j % colors.length] + '" stroke-width="2.2" stroke-linejoin="round"/>';
+        if (n === 1) marks += '<circle cx="' + pts[0][0] + '" cy="' + pts[0][1] + '" r="3.5" fill="' + colors[j % colors.length] + '"/>';
+      });
+    }
+    var ticks = [0, 0.5, 1].map(function (f) {
+      var yy = padTop + plotH * (1 - f);
+      return '<line x1="' + padLeft + '" y1="' + yy + '" x2="' + (width - 10) + '" y2="' + yy + '" class="ow-grid"/><text x="6" y="' + (yy + 4) + '" class="ow-axis">' + num(Math.round(max * f)) + '</text>';
+    }).join('');
+    var every = Math.max(1, Math.ceil(n / 8));
+    var labels = points.map(function (p, i) {
+      if (i % every && i !== n - 1) return '';
+      var x = kind === 'bar' ? padLeft + i * slot + slot / 2 : (n > 1 ? padLeft + i * stepX : padLeft + plotW / 2);
+      var anchor = n > 1 && i === 0 && kind !== 'bar' ? 'start' : n > 1 && i === n - 1 && kind !== 'bar' ? 'end' : 'middle';
+      return '<text x="' + x.toFixed(1) + '" y="' + (height - 8) + '" class="ow-axis" text-anchor="' + anchor + '">' + esc(actBucketLabel(p.t, bucket)) + '</text>';
+    }).join('');
+    var legend = keys.map(function (k, j) { return '<span><i style="background:' + colors[j % colors.length] + '"></i>' + et(titles[j]) + '</span>'; }).join('');
+    return '<div class="ow-chart"><svg viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none" role="img" aria-label="' + esc(t('График')) + '">' + ticks + marks + labels + '</svg><div class="ow-legend">' + legend + '</div></div>';
+  }
+  // Shares of a whole: a donut, or the same numbers as bars.
+  function actShareChart(rows, keyName, valueName, nameOf, kind) {
+    if (!rows || !rows.length) return '<div class="ow-empty">' + et('Нет данных за период') + '</div>';
+    var total = rows.reduce(function (s, r) { return s + (+r[valueName] || 0); }, 0) || 1;
+    var palette = ['#1d4ed8', '#0891b2', '#7c3aed', '#059669', '#d97706', '#db2777', '#4b5563', '#65a30d', '#0ea5e9', '#9333ea'];
+    if (ovEl && ovEl.getAttribute('data-ow-theme') === 'dark') palette = ['#6fb7ff', '#5eead4', '#c4b5fd', '#6ee7b7', '#fcd34d', '#f9a8d4', '#cbd5e1', '#bef264', '#7dd3fc', '#d8b4fe'];
+    if (kind === 'donut') {
+      var r = 54, c = 2 * Math.PI * r, offset = 0;
+      var arcs = rows.slice(0, 10).map(function (row, i) {
+        var part = (+row[valueName] || 0) / total, len = part * c;
+        var arc = '<circle cx="70" cy="70" r="' + r + '" fill="none" stroke="' + palette[i % palette.length] + '" stroke-width="22" stroke-dasharray="' + len.toFixed(2) + ' ' + (c - len).toFixed(2) + '" stroke-dashoffset="' + (-offset).toFixed(2) + '" transform="rotate(-90 70 70)"><title>' + esc(nameOf(row[keyName])) + ': ' + num(row[valueName]) + '</title></circle>';
+        offset += len;
+        return arc;
+      }).join('');
+      return '<div class="ow-act-donut"><svg viewBox="0 0 140 140" role="img" aria-label="' + esc(t('Доли')) + '">' + arcs + '<text x="70" y="76" text-anchor="middle" class="ow-act-donut-n">' + num(total) + '</text></svg>' +
+        '<div class="ow-act-legend">' + rows.slice(0, 10).map(function (row, i) {
+          return '<div><i style="background:' + palette[i % palette.length] + '"></i>' + esc(nameOf(row[keyName])) + ' <b>' + num(row[valueName]) + '</b> <span>' + pctText(+row[valueName] || 0, total) + '</span></div>';
+        }).join('') + '</div></div>';
+    }
+    var entries = {}, names = {};
+    rows.forEach(function (row) { entries[row[keyName]] = +row[valueName] || 0; names[row[keyName]] = nameOf(row[keyName]); });
+    var max = rows.reduce(function (m, row) { return Math.max(m, +row[valueName] || 0); }, 0);
+    return rows.map(function (row) {
+      return '<div class="ow-bar"><span class="ow-bar-l">' + esc(names[row[keyName]]) + '</span><span class="ow-bar-t"><i style="width:' + (max ? Math.max(2, Math.round(((+row[valueName] || 0) / max) * 100)) : 0) + '%"></i></span><span class="ow-bar-v">' + num(row[valueName]) + '</span></div>';
+    }).join('');
+  }
+  function actHeat(cells) {
+    if (!cells || !cells.length) return '<div class="ow-empty">' + et('Нет данных за период') + '</div>';
+    var grid = {}, max = 0;
+    cells.forEach(function (c) { grid[c.dow + ':' + c.hour] = +c.n || 0; max = Math.max(max, +c.n || 0); });
+    var head = '<div class="ow-act-hh"></div>' + Array.from({ length: 24 }, function (_, h) { return '<div class="ow-act-hh">' + (h % 3 ? '' : h) + '</div>'; }).join('');
+    var body = [1, 2, 3, 4, 5, 6, 7].map(function (dow) {
+      return '<div class="ow-act-hd">' + et(DOW_RU[dow - 1]) + '</div>' + Array.from({ length: 24 }, function (_, h) {
+        var n = grid[dow + ':' + h] || 0;
+        return '<div class="ow-act-hc" style="--a:' + (max ? (0.08 + 0.92 * n / max).toFixed(2) : 0) + '" title="' + esc(t(DOW_RU[dow - 1]) + ' ' + h + ':00 — ' + num(n)) + '"></div>';
+      }).join('');
+    }).join('');
+    return '<div class="ow-act-heat">' + head + body + '</div>';
+  }
+  function actKindName(k) { return k === 'view' ? t('Просмотры') : featName(k); }
+  function renderActivityOverview(d) {
+    var s = d.summary || {};
+    var a = actState();
+    var hidden = d.hidden_owner ? '<div class="ow-act-note">' + et('Скрыто строк владельца: {{0}}. Включите «Показывать владельца», чтобы увидеть их.', num(d.hidden_owner)) + '</div>' : '';
+    return hidden +
+      '<div class="ow-cards">' +
+        card('Посетители', num(s.visitors), et('активны сейчас: {{0}}', num(s.active_now)), 'activity') +
+        card('Сессии', num(s.sessions)) +
+        card('Действия', num(s.actions), et('просмотров: {{0}}', num(s.views))) +
+        card('3D-тиражи', num(s.draws), et('сохранено комбинаций: {{0}}', num(s.saves))) +
+        card('Генерации', num(s.generations)) +
+        card('Операции сервера', num(s.operations), et('с ошибкой или отказом: {{0}}', num(s.operations_failed)), 'activityAi') +
+        card('Время операции', s.avg_op_ms != null ? esc(actMs(s.avg_op_ms)) : none(), s.p95_op_ms != null ? et('95% быстрее {{0}}', actMs(s.p95_op_ms)) : '') +
+        card('Ошибки в приложении', num(s.client_errors), '', 'activityErrors') +
+      '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Как менялась активность') + ' ' + chartSwitch('series', ['line', 'bar', 'area']) + '</div>' +
+        actSeriesChart(d.series, ['actions', 'operations', 'errors', 'visitors'], ['Действия', 'Операции сервера', 'Ошибки', 'Посетители'], a.charts.series, d.bucket) + '</div>' +
+      '<div class="ow-act-grid">' +
+        '<div class="ow-block"><div class="ow-block-h">' + et('Что делали') + ' ' + chartSwitch('kinds', ['bar', 'donut']) + '</div>' +
+          actShareChart(d.kinds, 'kind', 'n', actKindName, a.charts.kinds) + '</div>' +
+        '<div class="ow-block"><div class="ow-block-h">' + et('Лотереи') + '</div>' + actShareChart(d.lotteries, 'lottery', 'n', lotName, 'bar') + '</div>' +
+      '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Когда активны') + how('activityHeat') + '</div>' + actHeat(d.heat) + '</div>' +
+      '<div class="ow-block"><div class="ow-block-h"><span class="ow-live-dot" aria-hidden="true"></span>' + et('Последние события') + '</div>' +
+        ((d.recent || []).length ? (d.recent || []).slice(0, 25).map(function (r) { return actRow(r, true); }).join('') : '<div class="ow-empty">' + et('Нет событий') + '</div>') + '</div>';
+  }
+  function renderActivityTimeline(d) {
+    var a = actState();
+    var hidden = d.hidden_owner ? '<div class="ow-act-note">' + et('Скрыто строк владельца: {{0}}. Включите «Показывать владельца», чтобы увидеть их.', num(d.hidden_owner)) + '</div>' : '';
+    var rows = (d.visitors || []).map(function (v) { return Object.assign({ __click: true, __class: actIsNew(v.last_at) ? 'ow-new' : '' }, v); });
+    return hidden + '<div class="ow-block"><div class="ow-block-h">' + et('Посетители') + ' · ' + num(d.visitors_total) + how('activity') + '</div>' +
+      '<div class="ow-card-s">' + et('Нажмите на посетителя, чтобы открыть его полную хронологию.') + '</div>' +
+      table([
+        { title: 'Кто', key: 'who', html: function (v) { return actorChip(v.actor, v.owner) + ' <code>' + esc(v.who) + '</code>' + (actIsNew(v.last_at) ? ' <span class="ow-new-tag">' + et('новое') + '</span>' : ''); } },
+        { title: 'Последнее', key: 'last_at', html: function (v) { return esc(timeText(v.last_at)) + '<br><span class="ow-card-s">' + esc(label(LIB.EVENT_RU, v.last_type)) + (v.lottery ? ' · ' + esc(lotName(v.lottery)) : '') + '</span>'; } },
+        { title: 'Место', key: 'country', html: function (v) { return esc([v.country ? flagName(v.country) : '', v.platform, v.device].filter(Boolean).join(' · ') || '—'); } },
+        { title: 'Сессии', key: 'sessions', numeric: true },
+        { title: 'Действия', key: 'actions', numeric: true },
+        { title: '3D', key: 'draws', numeric: true },
+        { title: 'Генерации', key: 'generations', numeric: true },
+        { title: 'Сервер', key: 'operations', numeric: true },
+        { title: 'Ошибки', key: 'errors', numeric: true, html: function (v) { return v.errors ? '<b class="ow-act-errn">' + num(v.errors) + '</b>' : '0'; } }
+      ], rows, 'Нет посетителей за период') + '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Все события подряд') + '</div>' +
+        ((d.recent || []).length ? (d.recent || []).map(function (r) { return actRow(r, true); }).join('') : '<div class="ow-empty">' + et('Нет событий') + '</div>') + '</div>';
+  }
+  function renderActivityAi(d) {
+    var s = d.summary || {};
+    var a = actState();
+    var ag = d.agents || {};
+    var opRows = (d.by_operation || []).map(function (o) { return { name: ACT_OP_RU[o.operation] ? t(ACT_OP_RU[o.operation]) : o.operation, n: o.n, avg: o.avg_ms || 0, p95: o.p95_ms || 0, failed: o.failed, people: o.people, last_at: o.last_at, operation: o.operation }; });
+    return '<div class="ow-act-note ow-act-arch">' + et('Как это устроено') + how('activityAi') + '<br>' +
+        '<span class="ow-act-chain">' + [t('Действие в приложении'), t('Событие клиента'), t('Серверная функция'), t('Архив тиражей'), t('Движок Lotto Simulator'), t('Журнал прогнозов'), t('Ответ на экране')].map(esc).join(' <b>→</b> ') + '</span>' + how('activityLineage') + '</div>' +
+      '<div class="ow-cards">' +
+        card('Операции сервера', num(s.operations), et('посетителей: {{0}}', num(s.people))) +
+        card('С ошибкой или отказом', num(s.failed)) +
+        card('Медиана времени', s.p50_ms != null ? esc(actMs(s.p50_ms)) : none(), s.p95_ms != null ? et('95% быстрее {{0}}', actMs(s.p95_ms)) : '') +
+        card('Самая долгая', s.max_ms != null ? esc(actMs(s.max_ms)) : none()) +
+        card('Запросы AI-агентов', num(ag.requests), et('серверных операций агентов: {{0}}', num(s.agents))) +
+      '</div>' +
+      '<div class="ow-act-grid">' +
+        '<div class="ow-block"><div class="ow-block-h">' + et('Какие операции') + ' ' + chartSwitch('ops', ['bar', 'donut']) + '</div>' + actShareChart(opRows, 'name', 'n', function (x) { return x; }, a.charts.ops) + '</div>' +
+        '<div class="ow-block"><div class="ow-block-h">' + et('Сколько времени занимают') + '</div>' +
+          table([
+            { title: 'Операция', key: 'name' },
+            { title: 'Раз', key: 'n', numeric: true },
+            { title: 'Среднее', key: 'avg', numeric: true, html: function (o) { return esc(actMs(o.avg)); } },
+            { title: '95%', key: 'p95', numeric: true, html: function (o) { return esc(actMs(o.p95)); } },
+            { title: 'Ошибки', key: 'failed', numeric: true }
+          ], opRows, 'Нет операций за период') + '</div>' +
+      '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Операции во времени') + ' ' + chartSwitch('series', ['line', 'bar', 'area']) + '</div>' +
+        actSeriesChart(d.series, ['n', 'failed'], ['Операции сервера', 'С ошибкой или отказом'], a.charts.series, d.bucket) + '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Журнал операций') + ' · ' + num(d.total) + '</div>' +
+        ((d.rows || []).length ? (d.rows || []).map(function (r) {
+          var row = Object.assign({ src: 'server' }, r);
+          var lineage = r.client ? '<div class="ow-act-lin">↳ ' + et('запрошено событием «{{0}}» в {{1}}', label(LIB.EVENT_RU, r.client.type), clockText(r.client.at)) + '</div>' : '';
+          var ledger = r.ledger ? '<div class="ow-act-lin">↳ ' + et('записано прогнозов: {{0}}', num(r.ledger)) + '</div>' : '';
+          return actRow(row, true).replace('<div class="ow-act-d">', '<div class="ow-act-d">' + lineage + ledger);
+        }).join('') : '<div class="ow-empty">' + et('Нет операций за период') + '</div>') + '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('AI-агенты и автоматизация (счётчики по часам)') + '</div>' +
+        table([
+          { title: 'Оператор', key: 'operator' },
+          { title: 'Класс', key: 'class', html: function (o) { return esc(o.class) + (o.verified ? ' ✓' : ''); } },
+          { title: 'Запросы', key: 'requests', numeric: true },
+          { title: 'Симуляции', key: 'simulations', numeric: true },
+          { title: 'Аккаунты', key: 'accounts', numeric: true },
+          { title: 'Последний', key: 'last_seen', html: function (o) { return esc(timeText(o.last_seen)); } }
+        ], ag.operators || [], 'AI-агентов за период не было') +
+        '<div class="ow-card-s">' + et('Браузер агента не отправляет событий приложения (автоматизация не даёт согласия на аналитику), поэтому его действия видны только как визиты и серверные операции.') + '</div></div>';
+  }
+  function renderActivityErrors(d) {
+    var s = d.summary || {};
+    return '<div class="ow-cards">' +
+        card('Ошибки в приложении', num(s.client), '', 'activityErrors') +
+        card('Отказы и сбои сервера', num(s.server), et('сбоев на нашей стороне: {{0}}', num(s.server_error))) +
+        card('Отклонено при приёме', num(s.ingest_rejected)) +
+      '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Какие ошибки чаще всего') + '</div>' +
+        table([
+          { title: 'Где', key: 'src', html: function (r) { return esc(label(ACT_SRC_RU, r.src)); } },
+          { title: 'Что', key: 'type', html: function (r) { return esc(r.src === 'server' ? (ACT_OP_RU[r.type] ? t(ACT_OP_RU[r.type]) : r.type) : label(LIB.EVENT_RU, r.type)); } },
+          { title: 'Код', key: 'code', html: function (r) { return '<code>' + esc(r.code) + '</code> ' + actStatusChip(r.status); } },
+          { title: 'Раз', key: 'n', numeric: true },
+          { title: 'Людей', key: 'people', numeric: true },
+          { title: 'Последний', key: 'last_at', html: function (r) { return esc(timeText(r.last_at)); } }
+        ], d.by_code || [], 'Ошибок за период нет') + '</div>' +
+      ((d.ingest || []).length ? '<div class="ow-block"><div class="ow-block-h">' + et('Приём аналитики: отклонённые пакеты') + '</div>' +
+        table([{ title: 'Итог', key: 'outcome' }, { title: 'Причина', key: 'reason', html: function (r) { return '<code>' + esc(r.reason) + '</code>'; } }, { title: 'Событий', key: 'n', numeric: true },
+          { title: 'Последний', key: 'last_at', html: function (r) { return esc(timeText(r.last_at)); } }], d.ingest) + '</div>' : '') +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Хронология ошибок') + '</div>' +
+        ((d.rows || []).length ? d.rows.map(function (r) { return actRow(r, true); }).join('') : '<div class="ow-empty">' + et('Ошибок за период нет') + '</div>') + '</div>';
+  }
+  function renderActivity(data) {
+    var a = actState();
+    var body = data.mode === 'operations' ? renderActivityAi(data) : data.mode === 'errors' ? renderActivityErrors(data)
+      : a.view === 'timeline' ? renderActivityTimeline(data) : renderActivityOverview(data);
+    var lastAt = data.summary && data.summary.last_at || (data.rows && data.rows[0] && data.rows[0].at);
+    if (lastAt) actMarkSeen(lastAt);
+    return '<div class="ow-act">' + actFilters() + body + '</div>';
+  }
+  // Re-asks the server for the current view (filters kept), quietly while the owner is looking at
+  // a period that is still running; anything newer than the last look is highlighted.
+  async function reloadActivity(quiet) {
+    if (quiet) {
+      if (state.busy || state.section !== 'activity' || ovEl.querySelector('#ow-sheet')) return;
+      try {
+        var response = await api({ section: 'activity', params: actParams() });
+        if (state.section !== 'activity') return;
+        state.data.activity = response; state.error = null;
+        // what the owner had unfolded stays unfolded across the quiet refresh
+        var key = function (el) { var sum = el.querySelector('summary'); return sum ? sum.textContent : ''; };
+        var open = Array.prototype.map.call(ovEl.querySelectorAll('#ow-section details[open]'), key);
+        render();
+        if (open.length) Array.prototype.forEach.call(ovEl.querySelectorAll('#ow-section details'), function (el) { if (open.indexOf(key(el)) >= 0) el.open = true; });
+      } catch (e) { /* the next tick tries again */ }
+      return;
+    }
+    state.data.activity = null;
+    await load('activity', actExtra());
+    render();
+  }
+  function startActivityPoll() {
+    stopLive();
+    var range = currentRange();
+    if (new Date(range.to).getTime() < Date.now() - 60000) return;   // a closed period does not change
+    livePoll = setInterval(function () { reloadActivity(true); }, 20000);
+  }
+  // The visitor card: who, how much, and the full chronological story, page after page.
+  async function openVisitor(person) {
+    setHourglass(true, function () { return t('Загрузка хронологии…'); });
+    var rows = [], visitor = null, next = null, more = false;
+    async function fetchPage(after) {
+      var response = await api({ section: 'activity', params: actParams({ mode: 'timeline', person: person, limit: 300, after: after || '' }) });
+      var d = response.data || {};
+      rows = rows.concat(d.rows || []);
+      rows.sort(function (x, y) { return String(x.at).localeCompare(String(y.at)); });
+      if (d.visitor && !visitor) visitor = d.visitor;
+      next = d.next_after; more = !!d.has_more;
+    }
+    try { await fetchPage(null); }
+    catch (error) { setHourglass(false); openPopup('Ошибка', function () { return esc(error.message ? tx(error.message) : t('не удалось загрузить')); }); return; }
+    setHourglass(false);
+    var sheet = openSheet(function () { return visitorSheetHtml(visitor || {}, rows, more); }, function () { return t('Хронология посетителя'); });
+    sheet.addEventListener('click', async function (event) {
+      if (event.target === sheet || event.target.id === 'ow-sheet-close') { sheet.remove(); return; }
+      if (event.target.id === 'ow-v-more' && more) {
+        event.target.disabled = true;
+        try { await fetchPage(next); } catch (e) { /* the button stays for another try */ }
+        sheet.__render();
+      }
+    });
+  }
+  function visitorSheetHtml(v, rows, more) {
+    var life = v.lifetime || {};
+    var sessions = [], bySession = {};
+    rows.forEach(function (r) {
+      var key = r.session || (r.src === 'server' ? 'server' : r.src);
+      if (!bySession[key]) { bySession[key] = []; sessions.push(key); }
+      bySession[key].push(r);
+    });
+    return '<div class="ow-sheet-in ow-act">' +
+      '<div class="ow-block-h">' + actorChip(v.actor, v.owner) + ' <code>' + esc(v.who) + '</code>' +
+        (v.country ? ' · ' + esc(flagName(v.country)) : '') + (v.platform ? ' · ' + esc(v.platform) : '') + (v.device ? ' · ' + esc(v.device) : '') + (v.locale ? ' · ' + esc(v.locale) : '') + '</div>' +
+      '<div class="ow-cards">' +
+        card('Первый визит', esc(timeText(life.first_at || v.first_at)), et('в периоде: {{0}}', timeText(v.first_at))) +
+        card('Последний визит', esc(timeText(life.last_at || v.last_at))) +
+        card('Сессии', num(v.sessions), et('за всё время: {{0}}', num(life.sessions))) +
+        card('Активное время', esc(dur(v.engaged_ms))) +
+        card('События', num(v.events), et('действий: {{0}} · просмотров: {{1}}', num(v.actions), num(v.views))) +
+        card('3D-тиражи', num(v.draws), et('сохранено: {{0}}', num(v.saves))) +
+        card('Генерации', num(v.generations)) +
+        card('Операции сервера', num(v.operations)) +
+        card('Ошибки', num(v.errors)) +
+        card('Лотереи', '<span class="ow-act-small">' + esc((v.lotteries || []).map(lotName).join(', ') || '—') + '</span>', et('экраны: {{0}}', (v.pages || []).join(', ') || '—')) +
+      '</div>' +
+      '<div class="ow-block"><div class="ow-block-h">' + et('Хронология') + ' · ' + num(rows.length) + how('activity') + '</div>' +
+        (rows.length ? sessions.map(function (key) {
+          var list = bySession[key];
+          var head = key === 'server' ? t('Серверные операции без сессии приложения') : key === 'ledger' ? t('Журнал прогнозов') : key === 'store' ? t('Магазин') : t('Сессия {{0}}', String(key).slice(0, 8));
+          return '<div class="ow-act-session"><div class="ow-act-sh">' + esc(head) + ' · ' + esc(timeText(list[0].at)) + '</div>' + list.map(function (r) { return actRow(r, false); }).join('') + '</div>';
+        }).join('') : '<div class="ow-empty">' + et('Нет событий') + '</div>') +
+        (more ? '<button class="ow-btn" id="ow-v-more" type="button" style="margin-top:8px">' + et('Показать ещё') + '</button>' : '') +
+      '</div>' +
+      '<button class="ow-btn ow-btn-primary" id="ow-sheet-close" type="button" style="margin-top:10px">' + et('Закрыть') + '</button></div>';
+  }
+  function wireActivity() {
+    var content = ovEl.querySelector('#ow-content');
+    content.addEventListener('click', function (event) {
+      if (state.section !== 'activity') return;
+      var a = actState();
+      var view = event.target.closest('[data-act-view]');
+      if (view) { a.view = view.getAttribute('data-act-view'); reloadActivity(false); return; }
+      var chart = event.target.closest('[data-act-chart]');
+      if (chart) { var p = chart.getAttribute('data-act-chart').split(':'); a.charts[p[0]] = p[1]; render(); return; }
+      if (event.target.closest('#ow-a-reset')) { Object.assign(a, { actor: 'all', source: 'all', status: 'all', kind: 'all', q: '', owner: true }); reloadActivity(false); return; }
+      var row = event.target.closest('tr.ow-click');
+      if (row) {
+        var response = state.data.activity;
+        var visitor = response && response.data && response.data.visitors && response.data.visitors[+row.getAttribute('data-row')];
+        if (visitor) openVisitor(visitor.person);
+      }
+    });
+    content.addEventListener('change', function (event) {
+      if (state.section !== 'activity') return;
+      var a = actState();
+      var map = { 'ow-a-actor': 'actor', 'ow-a-source': 'source', 'ow-a-status': 'status', 'ow-a-kind': 'kind' };
+      if (map[event.target.id]) { a[map[event.target.id]] = event.target.value; reloadActivity(false); }
+      else if (event.target.id === 'ow-a-owner') { a.owner = event.target.checked; reloadActivity(false); }
+    });
+    content.addEventListener('submit', function (event) {
+      if (event.target.id !== 'ow-a-search') return;
+      event.preventDefault();
+      actState().q = String(ovEl.querySelector('#ow-a-q').value || '').trim().slice(0, 160);
+      reloadActivity(false);
+    });
+  }
+
   var RENDERERS = {
-    day: renderDay, journey: renderJourney, usage: renderUsage, overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
+    activity: renderActivity, day: renderDay, journey: renderJourney, usage: renderUsage, overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
     devices: renderDevices, sessions: renderSessions, acquisition: renderAcquisition, geography: renderGeography,
     map: renderMap, games: renderGames, features: renderFeatures, funnels: renderFunnels,
     retention: renderRetention, bots: renderBots, agents: renderAgents, consent: renderConsent, quality: renderQuality
@@ -2425,7 +2990,12 @@
   // ── wiring ─────────────────────────────────────────────────────────────────────────────────
   function wire() {
     ovEl.querySelector('#ow-back').addEventListener('click', close);
-    ovEl.querySelector('#ow-lang').addEventListener('change', function (event) { if (i18n()) i18n().setLang(event.target.value); });
+    ovEl.querySelector('#ow-lang').addEventListener('click', function (event) {
+      var b = event.target.closest('button[data-lang]');
+      if (!b || !i18n()) return;
+      // The same language again changes nothing visible, but the press is still the newest choice.
+      if (!i18n().setLang(b.getAttribute('data-lang'))) relabel();
+    });
     // ⓘ buttons live in the sections AND in the country / person sheets (appended to the panel, not
     // to #ow-content), so the one «Как считается» handler listens on the whole panel.
     ovEl.addEventListener('click', function (event) {
@@ -2512,6 +3082,7 @@
         if (person) openPerson(person.person);
       }
     });
+    wireActivity();
     ovEl.querySelector('#ow-content').addEventListener('change', function (event) {
       if (event.target.id === 'ow-kind') {
         state.peopleKind = event.target.value;
@@ -2604,6 +3175,7 @@
     syncControls();
     ovEl.classList.add('show');
     D.documentElement.style.overflow = 'hidden';
+    if (ovEl.__syncTop) ovEl.__syncTop();
     var owner = await isOwner();
     state.denied = !owner;
     if (!owner) { renderDenied(); return; }

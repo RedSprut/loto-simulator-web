@@ -171,6 +171,11 @@ async function main() {
   let pausedAt = 0;
   let pausedAutomatically = false;
   let acc = 0;
+  // One identity per draw (activity trail, migration 202610180067): minted when a draw leaves IDLE /
+  // COMPLETE, reported with DRUM_DRAW_COMPLETE together with its measured duration, and reused as the
+  // saved combination's resultId — so the owner sees which draw a save came from and how long it ran.
+  let drawRun = null;      // { id, startedAt } of the draw in progress
+  let lastDrawId = null;   // the id of the last completed draw (what the save prompt offers)
   const draw = new DrawController({ balls, drum, rotor, exit, camera: engine.camera }, {
     onLayout: (profile) => {
       // URL theme params describe ONLY the game the app embedded with; after a live
@@ -184,6 +189,8 @@ async function main() {
       audio.setGame(profile.id); // assign this game's acoustic profile (data-driven)
     },
     onState: (s, w) => {
+      if (!drawRun && s !== State.IDLE && s !== State.COMPLETE) drawRun = { id: newResultId(), startedAt: performance.now() };
+      if (s === State.IDLE) drawRun = null;
       hud?.setPhase(s, w); savePrompt?.onDrawState(s);
       if (s === State.COMPLETE) clearUnfinished();
     },
@@ -192,7 +199,10 @@ async function main() {
     },
     onDone: () => {
       setTimeout(() => hud?.sortResults(true), 350); // pause, then sort ascending
-      postToHost('DRUM_DRAW_COMPLETE'); // the host counts a finished 3D draw (not merely opening the drum)
+      // the host counts a finished 3D draw (not merely opening the drum)
+      const run = drawRun || { id: newResultId(), startedAt: performance.now() };
+      lastDrawId = run.id; drawRun = null;
+      postToHost('DRUM_DRAW_COMPLETE', { drawId: run.id, ms: Math.max(0, Math.round(performance.now() - run.startedAt)), game: draw.profile?.id || '' });
     },
   });
   draw._debug = debug; // RESULT_REVEAL diagnostics in the headless harness
@@ -335,7 +345,7 @@ async function main() {
         additional,
         date: new Date().toISOString(),
         source: SOURCE_DRUM,
-        resultId: newResultId(),
+        resultId: lastDrawId || newResultId(),
       };
     },
   });

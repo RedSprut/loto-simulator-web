@@ -6,13 +6,16 @@
  * the catalog is separate, because it is owner-only: it loads lazily with the panel, so neither its
  * size nor its keys ever reach the public startup payload or the public 17-locale catalog.
  *
- * The panel language FOLLOWS the app language (2026-09-27): Русский, Norsk or English in the app is
- * the same language in the panel, at once (`loto:languagechange` → `loto:ownerlanguagechange`, every
- * panel module re-renders from the data it already holds) and on the next open — the one persisted
- * source of truth is the app's own `loto_lang`. When the app runs in one of the other 14 locales the
- * panel falls back to the owner's remembered panel choice (`loto_owner_lang`, set by the header
- * switcher that only appears in that case) and, without one, to Russian — the panel's language
- * before any switcher existed. No second persisted state competes with the app's language.
+ * The panel language (2026-10-02): the header always shows the three buttons — 🇷🇺 Русский,
+ * 🇬🇧 English, 🇳🇴 Norsk — and the LATEST explicit choice wins. A button press applies at once and
+ * is remembered (`loto_owner_lang`, together with the app language at that moment in
+ * `loto_owner_lang_app`); it survives a reload. When the app language is changed to Русский, Norsk
+ * or English AFTER that press, the app change is the newer choice and the panel follows it
+ * (`loto:languagechange` → `loto:ownerlanguagechange`, every panel module re-renders from the data
+ * it already holds). Without any press the panel follows the app when the app speaks one of the
+ * three, otherwise it speaks Russian — the panel's language before any switcher existed.
+ * (Before 2026-10-02 the switcher was hidden whenever the app spoke ru/no/en, so it appeared and
+ * disappeared with the app language — the regression this replaces.)
  *
  *   t(source, ...args)  a panel string: `source` is the Russian text, `{{0}}`… are filled with args.
  *   tx(text)            a Russian text composed by the SERVER (owner notification titles/bodies,
@@ -31,6 +34,7 @@
 
   var LANGS = ['ru', 'en', 'no'];
   var STORE_KEY = 'loto_owner_lang';
+  var STORE_APP_KEY = 'loto_owner_lang_app';  // the app language at the moment of the panel choice
   var EVENT = 'loto:ownerlanguagechange';
   var CYRILLIC = /[А-Яа-яЁё]/;
   var NAMES = { ru: ['Русский', '🇷🇺'], en: ['English', '🇬🇧'], no: ['Norsk', '🇳🇴'] };
@@ -1227,7 +1231,158 @@
     ["Выбор лотереи", "Lottery choice", "Valg av lotteri"],
     ["Результаты", "Results", "Resultater"],
     ["открыл", "opened", "åpnet"],
-    ["Считаются только события с согласием на аналитику. Человек — аккаунт (если на установке был вход) или установка; сессии и действия — отдельные числа, популярность сортируется по людям. Обновление страницы, открытие приложения, язык и тема — не использование функции; одинаковое событие в пределах секунды считается одним.", "Only events with analytics consent are counted. A person is the account (if the installation was signed in) or the installation; sessions and actions are separate numbers, popularity is sorted by people. A page refresh, opening the app, language and theme are not use of a feature; an identical event within one second counts once.", "Bare hendelser med samtykke til analyse telles. En person er kontoen (hvis installasjonen var logget inn) eller installasjonen; økter og handlinger er egne tall, popularitet sorteres etter personer. Oppdatering av siden, åpning av appen, språk og tema er ikke bruk av en funksjon; en identisk hendelse innen ett sekund telles én gang."]
+    ["Считаются только события с согласием на аналитику. Человек — аккаунт (если на установке был вход) или установка; сессии и действия — отдельные числа, популярность сортируется по людям. Обновление страницы, открытие приложения, язык и тема — не использование функции; одинаковое событие в пределах секунды считается одним.", "Only events with analytics consent are counted. A person is the account (if the installation was signed in) or the installation; sessions and actions are separate numbers, popularity is sorted by people. A page refresh, opening the app, language and theme are not use of a feature; an identical event within one second counts once.", "Bare hendelser med samtykke til analyse telles. En person er kontoen (hvis installasjonen var logget inn) eller installasjonen; økter og handlinger er egne tall, popularitet sorteres etter personer. Oppdatering av siden, åpning av appen, språk og tema er ikke bruk av en funksjon; en identisk hendelse innen ett sekund telles én gang."],
+    // 2026-10-02 «Активность»: the connected trail of visitors and server operations
+    ["Хронология", "Timeline", "Tidslinje"],
+    ["AI и движки", "AI & engines", "AI og motorer"],
+    ["Ошибки", "Errors", "Feil"],
+    ["Пользователи", "Users", "Brukere"],
+    ["AI-агенты и боты", "AI agents & bots", "AI-agenter og boter"],
+    ["Система", "System", "System"],
+    ["Приложение", "App", "Appen"],
+    ["Сервер", "Server", "Server"],
+    ["Успешно", "Succeeded", "Vellykket"],
+    ["С ошибкой или отказом", "Failed or refused", "Feilet eller avvist"],
+    ["Просмотры", "Views", "Visninger"],
+    ["Оплата", "Payment", "Betaling"],
+    ["Пользователь", "User", "Bruker"],
+    ["AI-агент / бот", "AI agent / bot", "AI-agent / bot"],
+    ["успешно", "succeeded", "vellykket"],
+    ["отказ в доступе", "access refused", "tilgang avvist"],
+    ["лимит запросов", "rate limited", "forespørselsgrense"],
+    ["неверный запрос", "invalid request", "ugyldig forespørsel"],
+    ["уже выполняется", "already running", "kjører allerede"],
+    ["Журнал прогнозов", "Prediction ledger", "Prognoseloggen"],
+    ["Сервер сгенерировал ряды PRO-моделью", "The server generated rows with a PRO model", "Serveren genererte rekker med en PRO-modell"],
+    ["Сервер построил колесо (систему рядов)", "The server built a wheel (row system)", "Serveren bygde et hjul (rekkesystem)"],
+    ["Верховный судья проверил ряды", "The Supreme Judge checked the rows", "Høyesterettsdommeren sjekket rekkene"],
+    ["Присяжные рассмотрели комбинацию", "The jury reviewed a combination", "Juryen vurderte en kombinasjon"],
+    ["Присяжные сформировали комбинации", "The jury formed combinations", "Juryen dannet kombinasjoner"],
+    ["Защитник разобрал комбинацию", "The defence counsel examined a combination", "Forsvareren gjennomgikk en kombinasjon"],
+    ["Судья вынес решение", "The judge delivered a ruling", "Dommeren avsa en kjennelse"],
+    ["Разбор моделей", "Model review", "Modellgjennomgang"],
+    ["PRO-анализ архива тиражей", "PRO analysis of the draw archive", "PRO-analyse av trekningsarkivet"],
+    ["Бесплатный анализ архива", "Free archive analysis", "Gratis arkivanalyse"],
+    ["Бесплатный защитник разобрал комбинацию", "The free counsel examined a combination", "Gratisforsvareren gjennomgikk en kombinasjon"],
+    ["Календарный анализ: чтение архива", "Calendar analysis: archive read", "Kalenderanalyse: lesing av arkivet"],
+    ["Чтение архива тиражей", "Draw archive read", "Lesing av trekningsarkivet"],
+    ["Списание доступа к PRO-функции", "PRO feature use charged", "Bruk av PRO-funksjon belastet"],
+    ["Прогнозы записаны в журнал", "Predictions written to the ledger", "Prognoser skrevet til loggen"],
+    ["Решение по спорному числу", "Decision on a disputed number", "Avgjørelse om et omstridt tall"],
+    ["Решение по рядам", "Decision on the rows", "Avgjørelse om rekkene"],
+    ["Линии", "Lines", "Linjer"],
+    ["Столбцы", "Bars", "Stolper"],
+    ["Области", "Areas", "Flater"],
+    ["Кольцо", "Donut", "Smultring"],
+    ["Пн", "Mon", "Man"],
+    ["Вт", "Tue", "Tir"],
+    ["Ср", "Wed", "Ons"],
+    ["Чт", "Thu", "Tor"],
+    ["Пт", "Fri", "Fre"],
+    ["Сб", "Sat", "Lør"],
+    ["Вс", "Sun", "Søn"],
+    ["Хронология всего, что произошло: действия посетителей в приложении (события с согласием на аналитику) и операции, которые сервер выполнил для них (генерация, суд, анализ, календарь, журнал прогнозов). Одна строка — одно событие; события одного человека связаны его псевдонимом, сессией, номером запроса и номером сущности (например, номер 3D-тиража связывает тираж и сохранённую из него комбинацию). Владелец здесь показан и помечен, потому что это консоль наблюдения, а не статистика; переключатель «Показывать владельца» его скрывает, и тогда видно, сколько строк скрыто.", "A timeline of everything that happened: what visitors did in the app (events with analytics consent) and the operations the server ran for them (generation, court, analysis, calendar, prediction ledger). One row is one event; one person's events are linked by their pseudonym, session, request number and entity number (for example, a 3D draw's number links the draw and the combination saved from it). The owner is shown here and marked, because this is an observation console, not statistics; the «Show the owner» switch hides those rows, and the panel then says how many it hid.", "En tidslinje over alt som skjedde: hva besøkende gjorde i appen (hendelser med samtykke til analyse) og operasjonene serveren kjørte for dem (generering, rettssak, analyse, kalender, prognoselogg). Én rad er én hendelse; én persons hendelser er koblet sammen med pseudonymet, økten, forespørselsnummeret og enhetsnummeret (for eksempel kobler nummeret på en 3D-trekning trekningen og kombinasjonen som ble lagret fra den). Eieren vises her og er merket, fordi dette er en observasjonskonsoll, ikke statistikk; bryteren «Vis eieren» skjuler disse radene, og panelet sier da hvor mange som ble skjult."],
+    ["Внешние AI-провайдеры (Grok, OpenAI, Anthropic и другие) приложением не вызываются: ни один серверный код не отправляет им запросов. «AI» в продукте — собственные серверные движки Lotto Simulator: PRO-модели генерации, присяжные, защитники, судья, анализ и календарь. Они считают на архиве официальных тиражей (таблица lottery_draws, окно текущих правил) и записывают прогнозы в журнал (prediction_ledger). Внешний AI-агент, управляющий браузером, для приложения — обычный посетитель: его визиты и серверные запросы видны как «AI-агент / бот». Доступа к компьютеру пользователя у приложения нет.", "The app calls no external AI provider (Grok, OpenAI, Anthropic or any other): no server code sends them a request. «AI» in the product means Lotto Simulator's own server engines: the PRO generation models, the jury, the defence counsel, the judge, analysis and the calendar. They compute on the archive of official draws (the lottery_draws table, the current-rules window) and write their predictions to the ledger (prediction_ledger). An external AI agent driving a browser is an ordinary visitor to the app: its visits and server requests show up as «AI agent / bot». The app has no access to the user's computer.", "Appen kaller ingen ekstern AI-leverandør (Grok, OpenAI, Anthropic eller andre): ingen serverkode sender dem en forespørsel. «AI» i produktet betyr Lotto Simulators egne servermotorer: PRO-genereringsmodellene, juryen, forsvarerne, dommeren, analysen og kalenderen. De regner på arkivet over offisielle trekninger (tabellen lottery_draws, vinduet med gjeldende regler) og skriver prognosene sine til loggen (prediction_ledger). En ekstern AI-agent som styrer en nettleser, er en vanlig besøkende for appen: besøkene og serverforespørslene dens vises som «AI-agent / bot». Appen har ingen tilgang til brukerens datamaskin."],
+    ["Путь данных одной операции: действие в приложении → событие клиента с номером запроса → запрос к серверной функции (тот же номер, сессия посетителя — только при согласии) → чтение данных (источники ниже) → расчёт движка → запись результата (журнал прогнозов или журнал списаний) → ответ приложению. Совпадающий номер запроса связывает эти шаги в одну цепочку.", "The data path of one operation: an action in the app → a client event with a request number → a request to a server function (the same number; the visitor's session only with consent) → reading the data (sources below) → the engine's computation → the result is written (prediction ledger or usage ledger) → the answer to the app. The matching request number links these steps into one chain.", "Dataveien for én operasjon: en handling i appen → en klienthendelse med et forespørselsnummer → en forespørsel til en serverfunksjon (samme nummer; den besøkendes økt bare med samtykke) → lesing av dataene (kildene nedenfor) → motorens beregning → resultatet skrives (prognoseloggen eller forbruksloggen) → svaret til appen. Det samme forespørselsnummeret kobler disse stegene til én kjede."],
+    ["Ошибки приложения у посетителей (события с согласием), отказы и сбои серверных операций (с кодом ответа) и отклонённые пакеты приёма аналитики. «Отказ в доступе» и «лимит запросов» — штатные отказы, «ошибка» — сбой на нашей стороне.", "App errors on visitors' devices (events with consent), refusals and failures of server operations (with their response code) and rejected analytics batches. «Access refused» and «rate limited» are expected refusals; «error» is a failure on our side.", "Appfeil hos besøkende (hendelser med samtykke), avvisninger og feil i serveroperasjoner (med svarkode) og avviste analysepakker. «Tilgang avvist» og «forespørselsgrense» er forventede avvisninger; «feil» er en svikt hos oss."],
+    ["Количество действий, просмотров и серверных операций по дням недели и часам (часовой пояс отчёта). Чем темнее клетка, тем больше событий.", "The number of actions, views and server operations by weekday and hour (the report's time zone). The darker the cell, the more events.", "Antall handlinger, visninger og serveroperasjoner per ukedag og time (rapportens tidssone). Jo mørkere cellen er, desto flere hendelser."],
+    ["владелец", "owner", "eier"],
+    ["Прогнозы зафиксированы в журнале: {{0}}", "Predictions fixed in the ledger: {{0}}", "Prognoser låst i loggen: {{0}}"],
+    ["Событие магазина: {{0}}", "Store event: {{0}}", "Butikkhendelse: {{0}}"],
+    ["активно {{0}}", "active {{0}}", "aktiv {{0}}"],
+    ["запрос", "request", "forespørsel"],
+    ["комбинация", "combination", "kombinasjon"],
+    ["прогнозы", "predictions", "prognoser"],
+    ["операция", "operation", "operasjon"],
+    ["списание", "charge", "belastning"],
+    ["Длительность", "Duration", "Varighet"],
+    ["Итог", "Outcome", "Utfall"],
+    ["Связанная сущность", "Linked entity", "Koblet enhet"],
+    ["Экран", "Screen", "Skjerm"],
+    ["Движок и модель", "Engine and model", "Motor og modell"],
+    ["Данные (откуда)", "Data (where from)", "Data (hvor fra)"],
+    ["Вход (без содержимого)", "Input (without contents)", "Inndata (uten innhold)"],
+    ["Результат", "Result", "Resultat"],
+    ["Ответ", "Response", "Svar"],
+    ["Автоматизация", "Automation", "Automatisering"],
+    ["Таблица", "Table", "Tabell"],
+    ["Источник прогноза", "Prediction source", "Prognosekilde"],
+    ["Проверено тиражом", "Checked against a draw", "Kontrollert mot en trekning"],
+    ["лучшее совпадение {{0}}", "best match {{0}}", "beste treff {{0}}"],
+    ["Доступ", "Access", "Tilgang"],
+    ["Получено сервером", "Received by the server", "Mottatt av serveren"],
+    ["Версия", "Version", "Versjon"],
+    ["Технические детали", "Technical details", "Tekniske detaljer"],
+    ["Идентификаторы и исходные данные", "Identifiers and raw data", "Identifikatorer og rådata"],
+    ["новое", "new", "ny"],
+    ["Поиск: псевдоним, номер запроса или тиража", "Search: pseudonym, request or draw number", "Søk: pseudonym, forespørsels- eller trekningsnummer"],
+    ["Найти", "Find", "Finn"],
+    ["Показывать владельца", "Show the owner", "Vis eieren"],
+    ["Сбросить", "Reset", "Tilbakestill"],
+    ["Вид графика", "Chart type", "Diagramtype"],
+    ["Доли", "Shares", "Andeler"],
+    ["Скрыто строк владельца: {{0}}. Включите «Показывать владельца», чтобы увидеть их.", "Owner rows hidden: {{0}}. Turn on «Show the owner» to see them.", "Eierrader skjult: {{0}}. Slå på «Vis eieren» for å se dem."],
+    ["Посетители", "Visitors", "Besøkende"],
+    ["активны сейчас: {{0}}", "active now: {{0}}", "aktive nå: {{0}}"],
+    ["просмотров: {{0}}", "views: {{0}}", "visninger: {{0}}"],
+    ["3D-тиражи", "3D draws", "3D-trekninger"],
+    ["сохранено комбинаций: {{0}}", "combinations saved: {{0}}", "kombinasjoner lagret: {{0}}"],
+    ["Генерации", "Generations", "Genereringer"],
+    ["Операции сервера", "Server operations", "Serveroperasjoner"],
+    ["с ошибкой или отказом: {{0}}", "failed or refused: {{0}}", "feilet eller avvist: {{0}}"],
+    ["Время операции", "Operation time", "Operasjonstid"],
+    ["95% быстрее {{0}}", "95% faster than {{0}}", "95 % raskere enn {{0}}"],
+    ["Как менялась активность", "How activity changed", "Hvordan aktiviteten endret seg"],
+    ["Что делали", "What was done", "Hva som ble gjort"],
+    ["Когда активны", "When people are active", "Når folk er aktive"],
+    ["Последние события", "Latest events", "Siste hendelser"],
+    ["Нажмите на посетителя, чтобы открыть его полную хронологию.", "Tap a visitor to open their full timeline.", "Trykk på en besøkende for å åpne hele tidslinjen."],
+    ["Последнее", "Latest", "Siste"],
+    ["Нет посетителей за период", "No visitors in the period", "Ingen besøkende i perioden"],
+    ["Все события подряд", "All events in order", "Alle hendelser i rekkefølge"],
+    ["Как это устроено", "How it works", "Slik fungerer det"],
+    ["Действие в приложении", "Action in the app", "Handling i appen"],
+    ["Событие клиента", "Client event", "Klienthendelse"],
+    ["Серверная функция", "Server function", "Serverfunksjon"],
+    ["Архив тиражей", "Draw archive", "Trekningsarkiv"],
+    ["Движок Lotto Simulator", "Lotto Simulator engine", "Lotto Simulator-motoren"],
+    ["Ответ на экране", "Answer on screen", "Svar på skjermen"],
+    ["посетителей: {{0}}", "visitors: {{0}}", "besøkende: {{0}}"],
+    ["Медиана времени", "Median time", "Mediantid"],
+    ["Самая долгая", "Longest", "Lengste"],
+    ["Запросы AI-агентов", "AI agent requests", "Forespørsler fra AI-agenter"],
+    ["серверных операций агентов: {{0}}", "agents' server operations: {{0}}", "agenters serveroperasjoner: {{0}}"],
+    ["Какие операции", "Which operations", "Hvilke operasjoner"],
+    ["Сколько времени занимают", "How long they take", "Hvor lang tid de tar"],
+    ["Операция", "Operation", "Operasjon"],
+    ["Раз", "Times", "Ganger"],
+    ["Среднее", "Average", "Gjennomsnitt"],
+    ["Нет операций за период", "No operations in the period", "Ingen operasjoner i perioden"],
+    ["Операции во времени", "Operations over time", "Operasjoner over tid"],
+    ["Журнал операций", "Operations log", "Operasjonslogg"],
+    ["запрошено событием «{{0}}» в {{1}}", "requested by the event «{{0}}» at {{1}}", "forespurt av hendelsen «{{0}}» kl. {{1}}"],
+    ["записано прогнозов: {{0}}", "predictions recorded: {{0}}", "prognoser registrert: {{0}}"],
+    ["AI-агенты и автоматизация (счётчики по часам)", "AI agents and automation (hourly counters)", "AI-agenter og automatisering (tellere per time)"],
+    ["AI-агентов за период не было", "No AI agents in the period", "Ingen AI-agenter i perioden"],
+    ["Браузер агента не отправляет событий приложения (автоматизация не даёт согласия на аналитику), поэтому его действия видны только как визиты и серверные операции.", "An agent's browser sends no app events (automation gives no analytics consent), so its actions are visible only as visits and server operations.", "En agents nettleser sender ingen apphendelser (automatisering gir ikke samtykke til analyse), så handlingene vises bare som besøk og serveroperasjoner."],
+    ["Отказы и сбои сервера", "Server refusals and failures", "Serveravvisninger og -feil"],
+    ["сбоев на нашей стороне: {{0}}", "failures on our side: {{0}}", "feil hos oss: {{0}}"],
+    ["Отклонено при приёме", "Rejected at intake", "Avvist ved mottak"],
+    ["Какие ошибки чаще всего", "The most frequent errors", "De vanligste feilene"],
+    ["Где", "Where", "Hvor"],
+    ["Код", "Code", "Kode"],
+    ["Ошибок за период нет", "No errors in the period", "Ingen feil i perioden"],
+    ["Приём аналитики: отклонённые пакеты", "Analytics intake: rejected batches", "Analysemottak: avviste pakker"],
+    ["Хронология ошибок", "Error timeline", "Feiltidslinje"],
+    ["Загрузка хронологии…", "Loading the timeline…", "Laster tidslinjen …"],
+    ["Хронология посетителя", "Visitor timeline", "Den besøkendes tidslinje"],
+    ["в периоде: {{0}}", "in the period: {{0}}", "i perioden: {{0}}"],
+    ["за всё время: {{0}}", "all time: {{0}}", "totalt: {{0}}"],
+    ["действий: {{0}} · просмотров: {{1}}", "actions: {{0}} · views: {{1}}", "handlinger: {{0}} · visninger: {{1}}"],
+    ["сохранено: {{0}}", "saved: {{0}}", "lagret: {{0}}"],
+    ["экраны: {{0}}", "screens: {{0}}", "skjermer: {{0}}"],
+    ["Серверные операции без сессии приложения", "Server operations without an app session", "Serveroperasjoner uten appøkt"],
+    ["Сессия {{0}}", "Session {{0}}", "Økt {{0}}"],
   ];
 
   var normalize = function (value) { return String(value == null ? '' : value).replace(/[ \s]+/g, ' ').trim(); };
@@ -1248,11 +1403,23 @@
     try { var d = W.LotoLang && W.LotoLang.detect && W.LotoLang.detect(); if (d) return String(d).toLowerCase(); } catch (e) {}
     try { return String(W.localStorage.getItem('loto_lang') || '').trim().toLowerCase(); } catch (e) { return ''; }
   }
-  function followsApp() { return LANGS.indexOf(appLanguage()) >= 0; }
   function savedChoice() {
     try { var saved = String(W.localStorage.getItem(STORE_KEY) || ''); return LANGS.indexOf(saved) >= 0 ? saved : ''; } catch (e) { return ''; }
   }
-  function resolve() { var app = appLanguage(); return LANGS.indexOf(app) >= 0 ? app : (savedChoice() || 'ru'); }
+  function savedAppAtChoice() {
+    try { return String(W.localStorage.getItem(STORE_APP_KEY) || '').toLowerCase(); } catch (e) { return ''; }
+  }
+  // The latest explicit choice wins: the panel button, unless the app language was switched to one
+  // of the three after it (the app language then differs from the one recorded with the press).
+  function resolve() {
+    var app = appLanguage();
+    var saved = savedChoice();
+    var appSpeaks = LANGS.indexOf(app) >= 0;
+    if (saved && (!appSpeaks || app === savedAppAtChoice())) return saved;
+    return appSpeaks ? app : (saved || 'ru');
+  }
+  // True while the panel speaks the app's own language (no newer panel choice overrides it).
+  function followsApp() { var app = appLanguage(); return LANGS.indexOf(app) >= 0 && resolve() === app; }
   var lang = resolve();
 
   function fill(text, args) {
@@ -1307,15 +1474,21 @@
     try { W.dispatchEvent(new CustomEvent(EVENT, { detail: { language: code } })); } catch (e) {}
     return true;
   }
-  // The fallback chooser: remembered for the locales the panel does not speak, applied only while
-  // the app is in one of them. While the app speaks ru / no / en the app is the single source.
+  // A header button: applied at once, remembered with the app language of this moment.
   function setLang(code) {
     if (LANGS.indexOf(code) < 0) return false;
-    try { W.localStorage.setItem(STORE_KEY, code); } catch (e) {}
-    if (followsApp()) return false;
+    try { W.localStorage.setItem(STORE_KEY, code); W.localStorage.setItem(STORE_APP_KEY, appLanguage()); } catch (e) {}
     return apply(code);
   }
-  try { W.addEventListener('loto:languagechange', function () { apply(resolve()); }); } catch (e) {}
+  // An app language switch seen live is newer than any earlier panel press: the press stays only as
+  // the choice for the locales the panel does not speak.
+  try {
+    W.addEventListener('loto:languagechange', function () {
+      var app = appLanguage();
+      if (LANGS.indexOf(app) >= 0 && app !== savedAppAtChoice()) { try { W.localStorage.removeItem(STORE_APP_KEY); } catch (e) {} }
+      apply(resolve());
+    });
+  } catch (e) {}
 
   W.LotoOwnerI18n = {
     LANGS: LANGS.slice(),

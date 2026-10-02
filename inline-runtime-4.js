@@ -120,7 +120,7 @@
     favs.unshift(drumComboToFav(combo));
     try { await saveFavs(drumIsPro() ? favs : favs.slice(0, 10)); } catch (e) {}
     try { await renderFavs(); } catch (e) {}
-    appUsage('combination_saved', 'drum', { rows: 1 });
+    appUsage('combination_saved', 'drum', { rows: 1, ref: combo.resultId });
     postToDrum({ type: 'APP_SAVE_RESULT', status: 'saved' }); pushDrumFavorites();
     try { drumApplyToTopRows(combo); } catch (e) {}  
   }
@@ -131,7 +131,7 @@
     favs.unshift(drumComboToFav(combo));
     try { await saveFavs(drumIsPro() ? favs : favs.slice(0, 10)); } catch (e) {}
     try { await renderFavs(); } catch (e) {}
-    appUsage('combination_saved', 'drum_replace', { rows: 1 });
+    appUsage('combination_saved', 'drum_replace', { rows: 1, ref: combo.resultId });
     postToDrum({ type: 'APP_SAVE_RESULT', status: 'saved' }); pushDrumFavorites();
     try { drumApplyToTopRows(combo); } catch (e) {}  
   }
@@ -269,7 +269,7 @@
         try { pushDrumFavorites(); } catch (err3) {}  
       }
       else if (d.type === 'DRUM_REQUEST_FAVORITES') { pushDrumFavorites(); }
-      else if (d.type === 'DRUM_DRAW_COMPLETE') { try { if (window.LotoTelemetry) window.LotoTelemetry.track('draw3d_complete', {}); } catch (err4) {} }
+      else if (d.type === 'DRUM_DRAW_COMPLETE') { try { if (window.LotoTelemetry) window.LotoTelemetry.track('draw3d_complete', { props: { ref: d.drawId, ms: d.ms } }); } catch (err4) {} }
       else if (d.type === 'DRUM_SAVE_COMBINATION') { handleDrumSave(d.combo || {}); }
       else if (d.type === 'DRUM_REPLACE_COMBINATION') { handleDrumReplace(d.oldId, d.combo || {}); }
       else if (d.type === 'DRUM_REMOVE_COMBINATION') { handleDrumRemove(d.id); }
