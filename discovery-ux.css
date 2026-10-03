@@ -36,8 +36,9 @@
 .onboarding-discovery-header .onboarding-close:focus-visible,.modal-static-close:focus-visible,.ct-x:focus-visible,.ct-back:focus-visible,.calan-x:focus-visible,.about-x:focus-visible,.life-close:focus-visible,.lnc-close:focus-visible{outline:none!important;border-color:var(--gold)!important;box-shadow:0 0 0 2px var(--gold)!important}
 
 /* The guided next step: the existing gold light; with keyboard focus its ring turns solid (one frame, no outline). */
-.guide-next:focus-visible{outline:none!important}
-.guide-next:focus-visible::before{inset:-3px;padding:4px;animation:none;background:linear-gradient(135deg,#FFC62E,#D68A00 50%,#FFC62E)}
+/* «Ряды готовы» lights every tool button the same way; keyboard focus uses the same solid ring. */
+.guide-next:focus-visible,.onboarding-tool-cta.pro-next-glow:focus-visible{outline:none!important}
+.guide-next:focus-visible::before,.onboarding-tool-cta.pro-next-glow:focus-visible::before{inset:-3px;padding:4px;animation:none;background:linear-gradient(135deg,#FFC62E,#D68A00 50%,#FFC62E)}
 
 /* Models: the launch button stays in reach below the model list. */
 #court-body .ct-actions-dock{position:sticky;bottom:0;z-index:4;margin:12px calc(-1*var(--ct-gutter,16px)) 0;padding:12px var(--ct-gutter,16px);border-top:1px solid var(--border);background:var(--modal-bg,var(--bg2));box-shadow:0 -10px 18px -12px rgba(0,0,0,.35)}
