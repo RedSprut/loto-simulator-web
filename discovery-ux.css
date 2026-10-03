@@ -1,0 +1,62 @@
+/* Isolated onboarding presentation. Per-lottery ball tokens come from the existing game palette. */
+.onboarding-game{flex-direction:column;gap:6px;line-height:1.25;overflow-wrap:anywhere;text-align:center}
+.onboarding-game-icon{font-size:25px;line-height:1.1;flex:none}
+.onboarding-back{display:flex;align-items:center;gap:6px;min-height:44px;margin:0 44px 10px 0;padding:8px 10px;border:1px solid rgba(255,255,255,.55);border-radius:12px;background:rgba(0,0,0,.16);color:#fff;font:700 13px/1.3 'Manrope',sans-serif;cursor:pointer;text-align:left}
+.onboarding-back:focus-visible{outline:3px solid #fff1b8;outline-offset:3px}
+.onboarding-ball-legend{margin:0 0 3px;font-size:11px;line-height:1.3;color:#fff}
+.onboarding-unknown-ball{background:radial-gradient(circle at 32% 25%,var(--gm-hi),var(--gm) 55%,var(--gm-lo));color:var(--gm-txt);border-color:var(--gm-hi)}
+.onboarding-unknown-ball.bonus{background:radial-gradient(circle at 32% 25%,var(--gb-hi),var(--gb) 55%,var(--gb-lo));color:var(--gb-txt);border:3px double var(--gb-hi);margin-left:3px}
+.rb-extra-placeholder{border:3px double var(--gb-hi)!important;background:var(--gb)!important;color:var(--gb-txt)!important}
+.onboarding-discovery-header{background:linear-gradient(145deg,var(--bg2),var(--bg3));color:var(--fg);border-bottom-color:var(--border)}
+.onboarding-discovery-heading p{color:var(--sub2)}
+.onboarding-discovery-header .onboarding-close{background:var(--bg3);color:var(--fg);border-color:var(--border);width:44px;height:44px}
+.onboarding-tool-cta{min-height:44px;white-space:normal;text-align:left;line-height:1.35}
+.onboarding-scroll-cue{position:static;background:none;margin-bottom:0;padding-top:10px;padding-bottom:0}
+.tool-first-use{margin:10px 0 14px;padding:14px;border:1px solid var(--gold);border-radius:14px;background:var(--bg3);color:var(--fg);scroll-margin-block:60px}
+.tool-first-use strong{font-size:14px}.tool-first-use p{font-size:13px;line-height:1.5;margin:5px 0;color:var(--sub2)}
+.tool-first-use .tool-first-use-row{color:var(--fg);font-weight:800}.tool-first-use .tool-first-use-gate{font-size:12px}
+.tool-first-use>div{margin-top:10px}
+.tool-first-use .tool-first-use-next{min-width:132px;border-color:rgba(255,240,191,.64);background:linear-gradient(150deg,#FFE49A,#E9B44C 58%,#B8860B);color:#28180A;font-weight:900}
+.tool-first-use>div{display:flex;flex-wrap:wrap;gap:8px}
+.tool-first-use button{min-height:44px;padding:9px 14px;border:1px solid var(--gold);border-radius:11px;background:var(--bg2);color:var(--fg);font:700 13px 'Manrope',sans-serif;cursor:pointer}
+.tool-first-use button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+@media(max-width:400px){.onboarding-game-icon{font-size:23px}.onboarding-games{grid-template-columns:repeat(3,minmax(0,1fr))}.onboarding-game{padding:9px 5px;min-height:74px}}
+
+
+/* The chosen lottery heads «Начните здесь» with the same icon as its picker button. */
+.onboarding-selected-game{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;width:fit-content;max-width:100%;box-sizing:border-box;margin:0 auto 6px;padding:7px 18px;border:1px solid rgba(255,255,255,.55);border-radius:999px;background:rgba(7,18,20,.3);color:#fff;font:900 clamp(17px,4.8vw,22px)/1.2 'Manrope',sans-serif;overflow-wrap:anywhere}
+.onboarding-selected-icon{font-size:clamp(24px,7vw,30px);line-height:1;flex:none}
+.onboarding-welcome .onboarding-sheet:focus,.onboarding-sheet:focus{outline:none}
+.onboarding-discovery-heading .onboarding-discovery-row{margin:0 0 3px;color:var(--fg);font-size:13px;font-weight:700;line-height:1.4}
+.onboarding-discovery-row b{display:block;color:var(--gold-ink);font-weight:900}
+@media(min-width:521px){.onboarding-discovery-row b{display:inline}}
+
+/* ONE contour on every ✕: keyboard focus thickens its own border instead of drawing a second, offset frame. */
+.onboarding-close:focus-visible{outline:none!important;border-color:#fff1b8!important;box-shadow:0 0 0 2px #fff1b8!important}
+.onboarding-discovery-header .onboarding-close:focus-visible,.modal-static-close:focus-visible,.ct-x:focus-visible,.ct-back:focus-visible,.calan-x:focus-visible,.about-x:focus-visible,.life-close:focus-visible,.lnc-close:focus-visible{outline:none!important;border-color:var(--gold)!important;box-shadow:0 0 0 2px var(--gold)!important}
+
+/* The guided next step: the existing gold light; with keyboard focus its ring turns solid (one frame, no outline). */
+.guide-next:focus-visible{outline:none!important}
+.guide-next:focus-visible::before{inset:-3px;padding:4px;animation:none;background:linear-gradient(135deg,#FFC62E,#D68A00 50%,#FFC62E)}
+
+/* Models: the launch button stays in reach below the model list. */
+#court-body .ct-actions-dock{position:sticky;bottom:0;z-index:4;margin:12px calc(-1*var(--ct-gutter,16px)) 0;padding:12px var(--ct-gutter,16px);border-top:1px solid var(--border);background:var(--modal-bg,var(--bg2));box-shadow:0 -10px 18px -12px rgba(0,0,0,.35)}
+.guide-note{margin:0;color:var(--fg);font-size:12.5px;font-weight:800;line-height:1.4;text-align:center}
+
+/* «Как это работает?» — replays the walkthrough (Home + About). */
+.mine-tall{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px}
+.guide-replay,#about-ov .about-guide{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:8px 14px;border:1px solid color-mix(in srgb,var(--gold) 65%,var(--border));border-radius:999px;background:var(--bg2);color:var(--fg);font:800 13px/1.2 'Manrope',sans-serif;cursor:pointer;white-space:normal;text-align:center}
+.guide-replay:before,#about-ov .about-guide:before{content:"?";display:inline-grid;place-items:center;flex:none;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#28180A;font:900 13px/1 'Manrope',sans-serif}
+#about-ov .about-guide{width:100%;margin:6px 0 8px;min-height:48px;border-radius:14px}
+.guide-replay:focus-visible,#about-ov .about-guide:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media(max-width:360px){.guide-replay{padding:8px 10px;font-size:12px}}
+
+/* Court actions without a lottery colour fell back to the platform button (iOS: system-blue text,
+   dark theme: a light-grey slab). Give them the app's own surface so the guided light reads on it. */
+#court-ov .btn-draw:not(.lotto):not(.viking):not(.euro){background:var(--bg3);color:var(--fg);border:1px solid var(--border);-webkit-appearance:none;appearance:none}
+#court-ov .btn-draw:not(.lotto):not(.viking):not(.euro):disabled{opacity:.55;cursor:default}
+
+/* While a walkthrough dialog is open the busy layer (z 700) sits UNDER it (z 850) and is never seen,
+   yet its full-screen backdrop blur stacked on the dialog's own cost WebKit one ~1 s frame on large
+   viewports during «Создать первые 5 рядов». The dialog's disabled, aria-busy CTA is the indicator. */
+body.loto-onboarding-open .busy-ov{-webkit-backdrop-filter:none;backdrop-filter:none}

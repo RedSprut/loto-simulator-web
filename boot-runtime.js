@@ -14,10 +14,13 @@ document.documentElement.classList.add('loto-booting');
 (function(){var clr=function(){document.body&&document.body.classList.remove('access-pending');window.__lotoTierResolved=true;};
   window.addEventListener('loto:accesschange',function h(){clr();window.removeEventListener('loto:accesschange',h);});
   setTimeout(clr,6000);})();
-window.__bootErrors=[];
+window.__bootErrors=[];window.__bootErrorDetails=[];
+window.__lotoRoutePopInstalled=true;
+window.addEventListener('popstate',function(event){window.LotoNavigation?.onPopState?.(event);});
 window.onerror=function(msg,src,line,col,err){
   try{
     window.__bootErrors.push(msg+' @'+line+':'+col);
+    window.__bootErrorDetails.push({message:String(msg),source:src||'',line:line||0,column:col||0,stack:err&&err.stack||'',time:Date.now()});
     var b=document.getElementById('boot-err');
     if(!b){
       b=document.createElement('div');
@@ -32,7 +35,7 @@ window.onerror=function(msg,src,line,col,err){
 window.addEventListener('unhandledrejection',function(e){
   var r=e&&e.reason;
   if(r&&(r.name==='AuthCallbackError'||r.__isAuthCallbackError)){try{e.preventDefault();}catch(_e){}return;}
-  window.onerror(String(r&&r.message||r||'promise rejection'),'',0,0);
+  window.onerror(String(r&&r.message||r||'promise rejection'),'',0,0,r);
 });
 (function(){
   var d=document.documentElement;

@@ -23,16 +23,12 @@
       select.value=event.detail?.language||i18n.language;
     });
   }
-  // «Поддержка» + the address itself (language-neutral, never a catalog key): one contact everywhere.
   const support=document.getElementById('legal-support');
-  const supportEmail=String(config.supportEmail||'').trim();
-  const supportUrl=String(config.supportUrl||'').trim()||(supportEmail?`mailto:${supportEmail}`:'');
-  if(support&&supportUrl){
-    support.href=supportUrl;support.hidden=false;
-    if(supportEmail&&!support.querySelector('.support-addr')){
-      const addr=document.createElement('span');
-      addr.className='support-addr';addr.setAttribute('data-i18n-ignore','');addr.textContent=` · ${supportEmail}`;
-      support.append(addr);
-    }
+  const email=String(config.supportEmail||'').trim();
+  const href=email?`mailto:${email}`:String(config.supportUrl||'').trim();
+  if(support&&href){
+    support.href=href;support.hidden=false;support.dataset.i18nIgnore='';
+    const updateLabel=()=>{support.textContent=i18n?.translate('Служба поддержки')||'Служба поддержки';};
+    updateLabel();window.addEventListener('loto:languagechange',updateLabel);
   }
 })();

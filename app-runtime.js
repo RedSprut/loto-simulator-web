@@ -73,6 +73,8 @@ function resolveConfigKey(gameKey){
 }
 function getCurrentGameKey(){return cur;}
 function getSupportedLotteryKeys(){return Object.keys(LOTS);}
+function getLotteryPresentation(game){const l=LOTS[resolveGameKey(game)];return l?{flag:l.flag,mainCount:l.pM,bonusCount:l.pBo||0,bonusName:l.bonusName}:null;}
+function getAppNavigationState(){return{page:curPage,tab:curAT};}
 function getLotteryConfig(gameKey){
   const configKey=resolveConfigKey(gameKey);
   if(LOTTERY_CONFIG[configKey])return LOTTERY_CONFIG[configKey];
@@ -938,8 +940,8 @@ function bottomNavRoute(p){
 function logoHome(){if(curPage==='ana')handleBack();}
 async function handleBack(){
   if(window.LotoAnalyticsGate?.blocking)return;
+  if(window.LotoNavigation?.back())return;
   if(curPage==='ana')selPage('sim');
-  else if(await customConfirm('Сбросить ряды?')){initRows();renderSim();resetBanner();}
 }
 
 function formatPrice(l){
@@ -1284,15 +1286,8 @@ function renderRows(){
   rows.forEach((row,i)=>{
     const div=document.createElement('div');
     const has=row.m.length>0||row.b.length>0;
-    const locked=groupAnalysisState.active&&i>=groupAnalysisState.limit&&has;
-    div.className='ticket-row'+(i===act?' on-'+l.cls:'')+(locked?' analysis-locked':'');
-    if(!locked)div.onclick=()=>{act=i;renderSim();};
-    if(locked){
-      const label=appText('Доступно в PRO');
-      div.innerHTML=`<div class="rn">${i+1}</div><div class="analysis-pro-cover" aria-label="${escapeHtml(label)}"><span class="analysis-pro-cover-icon" aria-hidden="true">🔒</span><span>${escapeHtml(label)}</span></div>`;
-      c.appendChild(div);
-      return;
-    }
+    div.className='ticket-row'+(i===act?' on-'+l.cls:'');
+    div.onclick=()=>{act=i;renderSim();};
     ensureManualProvenance(row,l);
     const court=window.LotoCourtUI,complete=row.m.length===l.pM;
     const prov=court&&complete?court.provenanceOf(row,cur):null;
@@ -1307,7 +1302,7 @@ function renderRows(){
     }
     if(dBo>0){
       h+=l.cls==='euro'?'<div class="rstar">★</div>':'<div class="rpipe"></div>';
-      for(let j=0;j<dBo;j++){const n=row.b[j];h+=n!==undefined?`<div class="rb rb-b-${l.cls}">${n}</div>`:`<div class="rb rb-e-${l.cls}">·</div>`;}
+      for(let j=0;j<dBo;j++){const n=row.b[j];h+=n!==undefined?`<div class="rb rb-b-${l.cls}">${n}</div>`:`<div class="rb rb-e-${l.cls} rb-extra-placeholder" aria-label="${escapeHtml(appText('Дополнительные числа'))}">·</div>`;}
     }
     h+='</div>';
     if(i===act&&has)h+=`<button class="ract back-${l.cls}" data-loto-event-click="event.stopPropagation();undo(${i})">←</button>`;
@@ -2774,20 +2769,19 @@ async function checkAgainstSavedDraw(){
 }
 
 function applySupportContact(){
-  try{
-    const c=window.LOTO_COMMERCIAL_CONFIG||{};
-    const email=String(c.supportEmail||'').trim();
-    const href=String(c.supportUrl||'').trim()||(email?`mailto:${email}`:'');
-    if(!href)return;
-    document.querySelectorAll('[data-support-link]').forEach(a=>{
-      a.href=href;a.hidden=false;a.removeAttribute('target');
-      if(a.getAttribute('data-support-link')==='address')a.textContent=email;
-      else if(email&&!a.querySelector('.support-addr')){const s=document.createElement('span');s.className='support-addr';s.setAttribute('data-i18n-ignore','');s.textContent=` · ${email}`;a.append(s);}
-    });
-    ['about-support-h','about-support'].forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=false;});
-  }catch(_e){}
+  const c=window.LOTO_COMMERCIAL_CONFIG||{};
+  const email=String(c.supportEmail||'').trim();
+  const href=email?`mailto:${email}`:String(c.supportUrl||'').trim();
+  if(!href)return;
+  document.querySelectorAll('[data-support-link]').forEach(a=>{
+    a.href=href;a.hidden=false;a.removeAttribute('target');
+    a.dataset.i18nIgnore='';
+    a.textContent=appText('Служба поддержки');
+  });
+  ['about-support-h','about-support'].forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=false;});
 }
 applySupportContact();
+window.addEventListener('loto:languagechange',applySupportContact);
 function appUsage(type,context,extra){try{if(window.LotoTelemetry)window.LotoTelemetry.track(type,{props:Object.assign({context:context},extra||{})});}catch(_e){}}
 async function saveFav(){
   const l=L();
@@ -7213,13 +7207,23 @@ async function JC_continue(){
     var el=document.getElementById(activeModal);
     if(e.target===el){e.preventDefault();e.stopImmediatePropagation();}
   },true);
+  var lastBackEvent=null,lastBackAccepted=true,lastBackType='',lastBackAt=-Infinity;
+  function acceptBackEvent(e){
+    if(!window.Capacitor?.isNativePlatform?.())return true;
+    if(e===lastBackEvent)return lastBackAccepted;
+    var now=performance.now();
+    lastBackEvent=e;
+    if(e.type!==lastBackType&&now-lastBackAt<1000){lastBackAccepted=false;e.preventDefault();return false;}
+    lastBackAccepted=true;lastBackType=e.type;lastBackAt=now;return true;
+  }
   function nativeBack(e){
-    if(!activeModal)return;
+    if(!acceptBackEvent(e)||e.defaultPrevented||!activeModal)return;
     e.preventDefault();var el=document.getElementById(activeModal);closeOverlay(el,'back');recomputeActive(el.id);
   }
   window.addEventListener('loto:nativeback',nativeBack);
   document.addEventListener('backbutton',nativeBack,false);
   window.LotoModals={
+    acceptBackEvent:acceptBackEvent,
     openModal:function(id){var el=document.getElementById(id);if(!el)return;el.classList.add('show');activate(el);},
     closeModal:function(id){var el=document.getElementById(id);if(!el)return;closeOverlay(el,'close');recomputeActive(id);},
     closeActiveModal:function(){if(activeModal)this.closeModal(activeModal);},
@@ -7232,6 +7236,7 @@ async function JC_continue(){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach,{once:true});else attach();
 })();
 window.addEventListener('loto:nativeback',function(e){
-  if(e.defaultPrevented||window.LotoModals?.active||document.body.classList.contains('drum3d-open'))return;
-  if(typeof curPage!=='undefined'&&curPage!=='sim'&&typeof selPage==='function'){e.preventDefault();selPage('sim');}
+  if(e.defaultPrevented||window.LotoModals?.active||document.querySelector('.onboarding-overlay')||document.body.classList.contains('drum3d-open'))return;
+  if(window.LotoNavigation?.canBack){e.preventDefault();window.LotoNavigation.back(true);}
+  else if(typeof curPage!=='undefined'&&curPage!=='sim'&&typeof selPage==='function'){e.preventDefault();selPage('sim');}
 });
