@@ -407,7 +407,7 @@ function clearGroupAnalysisState(){
   groupAnalysisState={active:false,limit:0,total:0};
 }
 function prepareRowsForGroupAnalysis(sourceRows,feature){
-  const all=(sourceRows||[]).map(row=>({m:[...(row.m||row.main||[])],b:[...(row.b||row.bonus||[])]}));
+  const all=(sourceRows||[]).map(row=>({...row,m:[...(row.m||row.main||[])],b:[...(row.b||row.bonus||[])]}));
   const limit=groupAnalysisFreeLimit();
   if(hasConfirmedPro()||all.length<=limit){groupAnalysisState={active:false,limit,total:all.length};return all;}
   groupAnalysisState={active:true,limit,total:all.length};
@@ -432,7 +432,7 @@ function getBackendActionContext(){
   return{
     gameId:resolveConfigKey(cur)||cur,
     count:Math.max(1,Math.min(MAX_ROWS,Number(getGenCount?.()||5))),
-    rows:rows.filter(row=>Array.isArray(row.m)&&row.m.length===l.pM).map(row=>({main:[...row.m],bonus:[...(row.b||[])]})),
+    rows:(window.LotoWorkingSet?.current()||[]).map(row=>({main:[...row.m],bonus:[...(row.b||[])]})),
     pool:pool.slice(0,WHEEL_POOL_MAX),
     analysisWindow:{scope:IF_getScope(),count:IF_getWin(),range:IF_getRange()},
   };
@@ -455,10 +455,11 @@ function renderBackendJudge(result,mountId,target,handlers){
   const l=L(),inputRows=Array.isArray(target?.inputRows)?target.inputRows:[];
   const plan=(Array.isArray(result)?result:[]).map((item,pos)=>{
     const index=Number.isFinite(Number(item?.index))?Number(item.index):pos;
+    const ref=target?.sourceRows?.[index]||target?.sourceRows?.[pos]||{};
     const source=item?.row||inputRows[index]||inputRows[pos]||{};
     const row=normalizeGeneratedRow({m:source.main||source.m,b:source.bonus||source.b},l);
     return{
-      index,
+      index,sourceRowId:ref.rowId,lotteryId:ref.lotteryId,sourceIndex:ref.index,sourceProv:ref.prov,
       orig:[...row.m],
       b:[...row.b],
       swaps:(Array.isArray(item?.swaps)?item.swaps:[]).map(swap=>({
@@ -721,7 +722,7 @@ function courtSessionsTrim(store,forget){
   return store;
 }
 function ticketRowSnapshot(row){
-  const out={m:[...(row.m||[])],b:[...(row.b||[])]};
+  const out={m:[...(row.m||[])],b:[...(row.b||[])],rowId:row.rowId,lotteryId:row.lotteryId,createdAt:row.createdAt,sourceRowId:row.sourceRowId};
   if(row.prov)out.prov=row.prov;
   if(row.manual)out.manual=1;
   if(row.provParent)out.provParent=row.provParent;
@@ -790,7 +791,7 @@ function restoreTicketRows(stored,l){
   const out=[];
   for(const raw of (Array.isArray(stored)?stored:[]).slice(0,MAX_ROWS)){
     if(!raw||typeof raw!=='object')continue;
-    const row={m:normalizeNumberList(raw.m,l.mB,l.pM),b:normalizeNumberList(raw.b,l.bB,drawBonusCount(l))};
+    const row={m:normalizeNumberList(raw.m,l.mB,l.pM),b:normalizeNumberList(raw.b,l.bB,drawBonusCount(l)),rowId:raw.rowId,lotteryId:cur,createdAt:raw.createdAt,sourceRowId:raw.sourceRowId};
     const prov=raw.prov?validRowProv({m:row.m,prov:raw.prov},l):null;
     if(prov)row.prov=prov;
     if(raw.manual)row.manual=true;
@@ -1256,7 +1257,7 @@ function drawnBonusCount(l){return l.offBo||l.pBo||0;}
 function drawBonusFromMainPool(l){return !drawBonusCount(l)&&drawnBonusCount(l)>0;}
 function drawDrawnBonus(l,dM){return drawnBonusCount(l)>0?rnd(l.bB,drawnBonusCount(l),drawBonusFromMainPool(l)?dM:[]):[];}
 
-function renderSim(){updatePickLabels();renderRows();renderMainGrid();renderBonusCol();renderSimBtns();updateHdr();scheduleTicketSave();}
+function renderSim(){rows.forEach(row=>window.LotoWorkingSet?.identify(row,cur));updatePickLabels();renderRows();renderMainGrid();renderBonusCol();renderSimBtns();updateHdr();scheduleTicketSave();}
 
 function updatePickLabels(){
   const l=L();
@@ -1963,6 +1964,7 @@ function wmProvenanceHtml(match,fallbackLabel){
 }
 function normalizeGeneratedRow(row,l=L()){
   const out={
+    rowId:row?.rowId,lotteryId:row?.lotteryId,createdAt:row?.createdAt,sourceRowId:row?.sourceRowId,
     m:normalizeNumberList(row&&row.m,l.mB,l.pM),
     b:completeBonusList(row&&row.b,l)
   };
@@ -4138,7 +4140,8 @@ function nextDraw(lotId,at){
   return{date:nd,dateStr,countdown:'⏳ До дедлайна: '+left.trim(),timeLabel:scheduleTime(l)};
 }
 
-async function openSG(){
+async function openSG(options){
+  if(options?.working)return window.LotoWorkingSet.open('models');
   const l=L();
   document.getElementById('sg-icon').textContent=l.flag||'🎯';
   document.getElementById('sg-name').textContent=l.name;
@@ -5160,8 +5163,9 @@ function TK_close(){document.getElementById('ticket-ov').classList.remove('show'
 var SUP_state=null;
 function supExistingRows(src){
   const l=L();
-  const list=src==='sim'?rows:((CONS_state&&CONS_state.matrix)||[]);
-  return list.filter(r=>r&&Array.isArray(r.m)&&r.m.length===l.pM).map(r=>({m:[...r.m],b:[...(r.b||[])]}));
+  if(src==='sim')return window.LotoWorkingSet.current();
+  const list=(CONS_state&&CONS_state.matrix)||[];
+  return list.filter(r=>r&&Array.isArray(r.m)&&r.m.length===l.pM).map((r,index)=>({...r,rowId:r.rowId||`matrix-${cur}-${index}`,index,m:[...r.m],b:[...(r.b||[])]}));
 }
 function supRecommendMax(){
   if(hasConfirmedPro())return MAX_ROWS;
@@ -5173,15 +5177,18 @@ function supDraftRows(count){
   for(let i=0;i<count;i++)out.push({m:rnd(l.mB,l.pM),b:dBo>0?rnd(l.bB,dBo):[]});
   return out;
 }
-function SUP_open(src){
+function SUP_open(src,options){
   const l=L(),game=l.short||l.name;
   supRecRows=[];supRecMeta={drawsN:0};    
   const existing=supExistingRows(src);
   if(existing.length){
-    const processingRows=prepareRowsForGroupAnalysis(existing,'judge');
-    const total=processingRows.length;
-    SUP_state={src,mode:'analyze',srcRows:processingRows,total,n:Math.min(total>10?10:3,total),
+    const total=existing.length;
+    const preferred=window.LotoWorkingSet.preferred();
+    const initial=preferred?existing.filter(r=>r.rowId===preferred):existing.slice(0,Math.min(3,total));
+    SUP_state={src,mode:'analyze',srcRows:existing,selectedIds:initial.map(r=>r.rowId),working:!!options?.working,total,n:initial.length,
       label:`Для анализа доступно: ${total} ${rowWord(total)} · ${game}`};
+  }else if(options?.working){
+    SUP_state={src,mode:'empty',srcRows:[],working:true,total:0,n:0,label:appText('Сначала создайте ряды')};
   }else{
     const total=supRecommendMax();
     SUP_state={src,mode:'recommend',srcRows:[],total,n:Math.max(1,Math.min(total,getGenCount())),
@@ -5190,34 +5197,63 @@ function SUP_open(src){
   SUP_renderSelection();
   document.getElementById('sup-result').innerHTML='';
   document.getElementById('sup-go').style.display='';
+  document.getElementById('sup-ov').__lotoClose=options?.working?(reason=>{if(reason==='replace'){document.getElementById('sup-ov').classList.remove('show');return;}SUP_close();}):null;
   document.getElementById('sup-ov').classList.add('show');
 }
 const SUP_HOW={
-  analyze:'Как работает судья: каждое число получает «голоса» из твоих рядов (55% веса) и структурный балл по истории выбранного периода (частота, пары и интервалы — 45%). Затем судья собирает разные строки; уже использованные числа временно теряют вес. Это анализ структуры, а не прогноз.',
+  analyze:'Судья проверяет каждое число выбранных исходных рядов по истории выбранного периода и предлагает замены. Ряды изменятся только после вашего решения.',
   recommend:'Готовых рядов нет, анализировать пока нечего. Верховный судья может подобрать рекомендации сам: он составит черновые варианты и взвесит каждое число по структуре поля за выбранный период. Комбинации появятся только после нажатия кнопки. Это анализ структуры, а не прогноз.',
 };
 function SUP_renderSelection(){
   const st=SUP_state;if(!st)return;
-  const recommend=st.mode==='recommend';
-  const how=document.getElementById('sup-how');if(how)how.textContent=SUP_HOW[recommend?'recommend':'analyze'];
+  const recommend=st.mode==='recommend',empty=st.mode==='empty';
+  const picker=document.getElementById('sup-source-picker');
+  picker.replaceChildren();
+  if(empty){
+    const button=document.createElement('button');button.type='button';button.className='btn-draw';button.textContent=appText('Создать ряды');button.addEventListener('click',()=>window.LotoWorkingSet.create());picker.append(button);
+  }else if(!recommend){SUP_renderSources(picker);}
+  const how=document.getElementById('sup-how');if(how){how.hidden=empty;how.textContent=SUP_HOW[recommend?'recommend':'analyze'];}
   const countLabel=document.getElementById('sup-count-label');
-  if(countLabel)countLabel.textContent=recommend?'Сколько рядов подобрать':'Сколько строк собрать';
+  if(countLabel){countLabel.hidden=empty;countLabel.textContent=recommend?'Сколько рядов подобрать':'Первые N исходных рядов';}
   const go=document.getElementById('sup-go');
-  if(go)go.textContent=recommend?'Получить рекомендации судьи':'Собрать вердикт';
+  if(go){go.disabled=empty||(!recommend&&!st.n);go.textContent=recommend?'Получить рекомендации судьи':'Проверить выбранные ряды';}
   document.getElementById('sup-src').textContent=st.label;
   SUP_renderPick();
   const counts=document.getElementById('sup-counts');
+  if(empty){counts.replaceChildren();return;}
   if(st.total<=10){
     counts.style.display='grid';counts.style.gridTemplateColumns='repeat(5,1fr)';
     counts.innerHTML=Array.from({length:st.total},(_,i)=>i+1).map(n=>'<button class="pick-cnt'+(n===st.n?' on':'')+'" data-loto-event-click="SUP_setN('+n+',this)">'+n+'</button>').join('');
   }else{
     counts.style.display='block';
-    const label=recommend?'Сколько рядов подобрать':'Сколько строк собрать';
+    const label=recommend?'Сколько рядов подобрать':'Первые N исходных рядов';
     const last=recommend?String(st.total):escapeHtml(appText('Все строки'))+' ('+st.total+')';
     counts.innerHTML='<select class="gen-select" id="sup-count-select" aria-label="'+escapeHtml(appText(label))+'" data-loto-event-change="SUP_setN(this.value,this)">'+
       Array.from({length:st.total-1},(_,i)=>i+1).map(n=>'<option value="'+n+'"'+(n===st.n?' selected':'')+'>'+n+'</option>').join('')+
       '<option value="'+st.total+'"'+(st.n===st.total?' selected':'')+'>'+last+'</option></select>';
   }
+}
+function SUP_renderSources(picker){
+  const st=SUP_state;
+  const title=document.createElement('div');title.className='if-seclbl';title.textContent=appText('Какие ряды анализировать?');
+  const all=document.createElement('button');all.type='button';all.className='pick-cnt';all.textContent=historyText('Все {{0}}',st.total);
+  all.addEventListener('click',()=>SUP_setN(st.total));
+  const list=document.createElement('div');list.className='ct-picker-list';
+  for(const row of st.srcRows){
+    const label=document.createElement('label');label.className='ct-pick';label.style.cssText='display:flex;align-items:center;gap:8px;flex-shrink:0';
+    const check=document.createElement('input');check.type='checkbox';check.dataset.sourceRowId=row.rowId;check.checked=st.selectedIds.includes(row.rowId);
+    check.addEventListener('change',()=>{
+      const ids=new Set(st.selectedIds);if(check.checked)ids.add(row.rowId);else ids.delete(row.rowId);
+      st.selectedIds=[...ids];st.n=ids.size;
+      if(check.checked&&st.src==='sim')window.LotoWorkingSet.choose(row.rowId);
+      SUP_renderPick();document.getElementById('sup-go').disabled=!st.n;
+      document.querySelectorAll('#sup-counts .pick-cnt').forEach(button=>button.classList.remove('on'));
+    });
+    const text=document.createElement('span');text.textContent=historyText('Ряд {{0}}',row.index+1);text.style.whiteSpace='nowrap';
+    const numbers=document.createElement('span');numbers.className='if-rowballs';numbers.dataset.i18nIgnore='';numbers.innerHTML=ADV_ballsHtml(row,L());
+    label.append(check,text,numbers);list.append(label);
+  }
+  picker.append(title,all,list);
 }
 function SUP_renderPick(){
   const st=SUP_state,el=document.getElementById('sup-sel');if(!st||!el)return;
@@ -5226,14 +5262,23 @@ function SUP_renderPick(){
 function SUP_setN(n,el){
   const st=SUP_state;if(!st)return;
   st.n=Math.max(1,Math.min(st.total,parseInt(n,10)||1));
+  if(st.mode==='analyze')st.selectedIds=st.srcRows.slice(0,st.n).map(r=>r.rowId);
+  if(st.mode==='analyze'){SUP_renderSelection();return;}
   document.querySelectorAll('#sup-counts .pick-cnt').forEach(b=>b.classList.toggle('on',+b.textContent===st.n));
   SUP_renderPick();
 }
 function getSupSelectedRows(){
   const st=SUP_state;if(!st)return[];
   const n=Math.max(1,Math.min(Math.max(1,st.total),parseInt(st.n,10)||1));
-  const srcRows=st.mode==='recommend'?supDraftRows(n):(Array.isArray(st.srcRows)?st.srcRows:[]);
-  return srcRows.slice(0,n);
+  if(st.mode==='empty')return[];
+  if(st.mode==='recommend')return supDraftRows(n);
+  const selected=st.srcRows.filter(r=>st.selectedIds.includes(r.rowId));
+  if(st.src==='sim'){
+    const live=window.LotoWorkingSet.resolve(st.selectedIds);
+    if(live.length!==selected.length||live.some(r=>{const old=selected.find(s=>s.rowId===r.rowId);return !old||r.m.join(',')!==old.m.join(',')||r.b.join(',')!==old.b.join(',');}))return[];
+    return live;
+  }
+  return selected;
 }
 window.getSupSelectedRows=getSupSelectedRows;
 function supRowSource(){return{sourceType:SUP_state&&SUP_state.mode==='recommend'?'JUDGE_RECOMMENDATION':'JUDGE'};}
@@ -5242,8 +5287,23 @@ function supStatusText(count){
     ?`Готово: ${count} ${rowWord(count)} · Верховный судья · Рекомендация.`
     :`Готово: ${count} ${rowWord(count)} · Верховный судья.`;
 }
+function supApplyReview(finalRows){
+  const st=SUP_state;
+  if(!st||st.src!=='sim')return setGeneratedRows(finalRows,supStatusText(finalRows.length),false,undefined,{sourceType:'JUDGE'});
+  const targets=finalRows.map(result=>({result,live:window.LotoWorkingSet.find(result.sourceRowId),original:st.srcRows.find(r=>r.rowId===result.sourceRowId)}));
+  if(targets.some(({live,original})=>!live||!original||live.m.join(',')!==original.m.join(',')||live.b.join(',')!==original.b.join(','))){
+    showFeedback('Верховный судья','Комбинация изменилась — решение не применено.','⚖️',3200);return false;
+  }
+  for(const {result,live} of targets){
+    const row=rows.find(r=>r.rowId===live.rowId);
+    row.m=[...result.m];row.b=[...(result.b||[])];if(result.prov)row.prov=result.prov;
+  }
+  clearGroupAnalysisState();renderSim();return true;
+}
 window.supJudgeOptions=function(){
-  if(!SUP_state||SUP_state.mode!=='recommend')return{};
+  if(!SUP_state)return{};
+  if(SUP_state.mode==='analyze')return{onApply:supApplyReview};
+  if(SUP_state.mode!=='recommend')return{};
   return{finalize:true,onApply:(finalRows)=>{
     SUP_close();
     setGeneratedRows(finalRows,supStatusText(finalRows.length),false,undefined,{sourceType:'JUDGE_RECOMMENDATION'});
@@ -5305,9 +5365,15 @@ async function SUP_accept(){
   });
   goToRows({immediate:true});
 }
-function SUP_close(){document.getElementById('sup-ov').classList.remove('show');}
+function SUP_close(){const wasOpen=document.getElementById('sup-ov').classList.contains('show');document.getElementById('sup-ov').classList.remove('show');if(wasOpen&&SUP_state?.working)window.LotoWorkingSet.finish();}
 async function SUP_go(){
   const st=SUP_state;if(!st)return;
+  if(st.mode==='empty')return false;
+  if(st.mode==='analyze'){
+    const selected=prepareRowsForGroupAnalysis(getSupSelectedRows(),'judge');
+    if(!selected.length){showFeedback('Нет рядов','Сначала создайте или введите комбинацию для проверки.','⚠️',3200);return false;}
+    return JUDGE_open('sup',selected,'sup-result',supApplyReview);
+  }
   return withModelBusy('Генерирую математическую модель…',async()=>{
   const l=L(),res=document.getElementById('sup-result'),selectedRows=getSupSelectedRows();
   res.innerHTML='<div class="if-empty" style="padding:20px">⚖️ Судья взвешивает голоса рядов и структуру поля…</div>';
@@ -6744,7 +6810,7 @@ function JUDGE_render(ns){
     '<div class="if-seclbl">⚖️ Разбор Верховного судьи</div>'+
     '<div class="if-note" style="margin:0 0 12px">'+judgeNote+'</div>';
   st.plan.forEach((p,ri)=>{
-    html+='<div class="pdx-jrow"><div class="pdx-jhead">Ряд '+(ri+1)+'</div>'+JUDGE_ballsHtml(p,l);
+    html+='<div class="pdx-jrow" data-source-row-id="'+escapeHtml(p.sourceRowId||'')+'"><div class="pdx-jhead">'+appText('Исходный ряд')+' '+((p.sourceIndex??ri)+1)+'</div>'+JUDGE_ballsHtml(p,l);
     if(p.swaps.length){
       html+='<div class="pdx-swaps">'+p.swaps.map((s,si)=>'<button class="pdx-swap'+(s.apply?' on':'')+'" aria-pressed="'+(s.apply?'true':'false')+'" data-loto-event-click="JUDGE_toggle(\''+ns+'\','+ri+','+si+')">'+(s.apply?'✓ ':'')+s.from+' → '+s.to+'<span class="pdx-sd">балл '+s.sf+'→'+s.st+'</span></button>').join('')+'</div>';
     }else{
@@ -6790,7 +6856,18 @@ function JUDGE_rerender(ns,change){
 }
 function JUDGE_toggle(ns,ri,si){const s=JUDGE_state[ns]?.plan?.[ri]?.swaps?.[si];if(!s)return;JUDGE_rerender(ns,()=>{s.apply=!s.apply;});}
 function JUDGE_setAll(ns,val){const st=JUDGE_state[ns];if(!st)return;JUDGE_rerender(ns,()=>{st.plan.forEach(p=>p.swaps.forEach(s=>s.apply=val));});}
-function JUDGE_finalRows(ns){return JUDGE_state[ns].plan.map(p=>{const e=JUDGE_effective(p);return{m:e.m,b:p.b};});}
+function JUDGE_finalRows(ns){return JUDGE_state[ns].plan.map(p=>{
+  const e=JUDGE_effective(p),row={m:e.m,b:[...p.b],sourceRowId:p.sourceRowId,lotteryId:p.lotteryId};
+  let prov=p.sourceProv;
+  if(prov&&!prov.unavailable)try{
+    for(const swap of p.swaps.filter(s=>s.apply)){
+      prov=LotoCourtCore.appendEvent(prov,{type:'judge_review',verdict:{type:'alternative',from:swap.from,to:swap.to}},courtRulesFor(p.lotteryId||cur));
+      prov=LotoCourtCore.applyDecision(prov,{choice:'accept_judge',from:swap.from,to:swap.to},courtRulesFor(p.lotteryId||cur)).prov;
+    }
+    row.prov=prov;
+  }catch(_error){}
+  return row;
+});}
 function JUDGE_choiceText(meta){
   if(!meta||!meta.proposed)return'Твой выбор: исходные числа; судья не предложил замен';
   if(!meta.active)return'Твой выбор: оставить исходные числа без судейских замен';
