@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the 2b5f510 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the cd75c98 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-v2b5f510';
+const CACHE_VERSION='loto-shell-vcd75c98';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
