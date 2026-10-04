@@ -3212,7 +3212,7 @@ async function updateOfficialAll(quiet){
     const okList=out.filter(r=>!r.error),addedTotal=okList.reduce((s,r)=>s+(r.added||0),0);
     if(!quiet){
       showFeedback('Все источники проверены',`Обновлено игр: ${okList.length} из ${out.length}.\nНовых тиражей всего: ${addedTotal}.\nВсе последние розыгрыши предоставлены.`,'✅',3400);
-    }else if(addedTotal>0&&typeof showCopyToast==='function'){
+    }else if(addedTotal>0&&typeof showCopyToast==='function'&&/^(idle|tool|)$/.test(document.documentElement.dataset.onboarding||'')){
       showCopyToast(`🔄 Тиражи обновлены автоматически: +${addedTotal}`);
     }
     return{ok:okList.length,added:addedTotal};
