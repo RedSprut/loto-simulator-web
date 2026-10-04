@@ -61,6 +61,68 @@
    yet its full-screen backdrop blur stacked on the dialog's own cost WebKit one ~1 s frame on large
    viewports during «Создать первые 5 рядов». The dialog's disabled, aria-busy CTA is the indicator. */
 body.loto-onboarding-open .busy-ov{-webkit-backdrop-filter:none;backdrop-filter:none}
+/* «Ряды готовы» — the action centre over the generated rows (action-center.js). One selector
+   for any row count: a row of chips up to ten rows, a bounded checklist beyond that. */
+.onboarding-discovery-heading .ac-question{margin:3px 0 0;color:var(--fg);font-size:14px;font-weight:800;line-height:1.35}
+.onboarding-discovery-heading .ac-count{margin:2px 0 0;color:var(--gold-ink);font-size:13px;font-weight:800}
+.ac-select{margin:0 0 14px;padding:12px;border:1px solid var(--border);border-radius:17px;background:var(--bg3)}
+.ac-explain{margin:0 0 10px;color:var(--sub2);font-size:12.5px;line-height:1.45}
+.ac-chips{display:flex;flex-wrap:wrap;gap:8px}
+.ac-chip{min-width:52px;min-height:44px;padding:8px 14px;border:1.5px solid var(--border);border-radius:999px;background:var(--bg2);color:var(--fg);font:800 13.5px 'Manrope',sans-serif;cursor:pointer;touch-action:manipulation}
+.ac-chip[aria-pressed="true"],.ac-chip-more.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 20%,var(--bg2));box-shadow:0 0 0 1px var(--gold)}
+.ac-chip-more[aria-expanded="true"]{border-color:var(--gold)}
+.ac-chip:focus-visible,.ac-link:focus-visible,.ac-save:focus-visible,.ac-x:focus-visible,.rows-ready:focus-visible,.ct-cta:focus-visible{outline:3px solid var(--gold-ink);outline-offset:3px}
+.ac-status{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px;margin-top:6px;min-height:8px}
+.ac-single{margin:0;color:var(--gold-ink);font-size:13px;font-weight:900;overflow-wrap:anywhere}
+.ac-link{min-height:44px;padding:6px 4px;border:0;background:none;color:var(--gold-ink);font:800 13px 'Manrope',sans-serif;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ac-list{margin-top:10px;border:1px solid var(--border);border-radius:14px;background:var(--bg2)}
+.ac-list[hidden]{display:none}
+.ac-list-tools{display:flex;flex-wrap:wrap;gap:4px 18px;padding:2px 12px;border-bottom:1px solid var(--border)}
+.ac-list-rows{max-height:min(42vh,330px);overflow-y:auto;overscroll-behavior:contain;padding:4px}
+.ac-list-row{display:flex;align-items:center;gap:10px;min-height:44px;padding:5px 8px;border-radius:10px;cursor:pointer}
+.ac-list-row:hover{background:var(--bg3)}
+.ac-list-row input{flex:none;width:22px;height:22px;margin:0;accent-color:var(--gold)}
+.ac-list-n{flex:none;min-width:42px;color:var(--fg);font-size:13px;font-weight:800}
+.ac-list-balls{min-width:0;flex-wrap:nowrap;overflow:hidden}
+.ac-list-balls .if-rball,.ac-myrow .if-rball{width:28px;height:28px;font-size:11.5px}
+.ac-gap{display:inline-block;flex:none;width:6px}
+.onboarding-tool-cta:disabled{opacity:.5;cursor:not-allowed}
+.onboarding-tool-cta:disabled::before,.onboarding-tool-cta:disabled::after{display:none}
+.ac-after{display:flex;flex-direction:column;gap:4px;margin-top:14px}
+.ac-save{min-height:48px;padding:10px 14px;border:1.5px solid var(--border);border-radius:14px;background:var(--bg3);color:var(--fg);font:800 14px 'Manrope',sans-serif;cursor:pointer}
+.ac-save:disabled{opacity:.5;cursor:not-allowed}
+.ac-note{margin:4px 0;color:var(--sub2);font-size:12px;line-height:1.45}
+/* Rows against real draws: Calendar sample and Analytics history share this block. */
+.ac-myrows{display:flex;flex-direction:column;gap:8px;margin:8px 0;padding:0;list-style:none}
+.ac-myrow{padding:10px;border:1px solid var(--border);border-radius:14px;background:var(--bg2)}
+.ac-myrow-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:6px}
+.ac-myrow-head b{color:var(--fg);font-size:13px}
+.ac-myrow-head .if-rowballs{flex-wrap:wrap}
+.ac-myrow-stats{display:flex;flex-direction:column;gap:3px;color:var(--sub2);font-size:12.5px;line-height:1.4;overflow-wrap:anywhere}
+.ac-dim{opacity:.8}
+.ac-history-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ac-history-head .card-t{margin:0}
+.ac-x{flex:none;width:44px;height:44px;border:1px solid var(--border);border-radius:12px;background:var(--bg3);color:var(--fg);font-size:22px;line-height:1;cursor:pointer}
+.fav-just-saved{border-radius:14px;box-shadow:0 0 0 2px var(--gold),0 0 0 6px color-mix(in srgb,var(--gold) 28%,transparent);transition:box-shadow .3s}
+/* «Ряды готовы» under the ticket: the entry to the same centre after any generation. */
+.rows-ready{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;margin:10px 0 6px;padding:10px 14px;border:1.5px solid color-mix(in srgb,var(--gold) 70%,var(--border));border-radius:16px;background:linear-gradient(150deg,var(--bg2),var(--bg3));color:var(--fg);font:inherit;text-align:left;cursor:pointer;touch-action:manipulation}
+.rows-ready[hidden]{display:none}
+.rows-ready-n{flex:none;display:grid;place-items:center;min-width:38px;height:38px;padding:0 6px;border-radius:12px;background:var(--gold);color:#201506;font:900 15px 'Unbounded',sans-serif}
+.rows-ready-t{display:flex;flex:1;flex-direction:column;gap:2px;min-width:0}
+.rows-ready-t b{font:800 14px 'Manrope',sans-serif}
+.rows-ready-t span{color:var(--sub2);font-size:12.5px;line-height:1.35}
+.rows-ready-go{flex:none;color:var(--gold-ink);font-size:20px;font-weight:900}
+/* The court's bulk actions are real calls to action, in both themes and every state. */
+.ct-cta{min-height:48px;padding:11px 16px;border:2px solid var(--gold);border-radius:14px;background:color-mix(in srgb,var(--gold) 16%,var(--bg2));color:var(--fg);font:800 14px/1.3 'Manrope',sans-serif;cursor:pointer;box-shadow:0 3px 12px color-mix(in srgb,var(--gold) 22%,transparent);transition:background-color .15s,box-shadow .15s,transform .1s;touch-action:manipulation}
+.ct-cta:hover{background:color-mix(in srgb,var(--gold) 27%,var(--bg2));box-shadow:0 4px 16px color-mix(in srgb,var(--gold) 32%,transparent)}
+.ct-cta:active{transform:translateY(1px);background:color-mix(in srgb,var(--gold) 36%,var(--bg2));box-shadow:none}
+.ct-cta:disabled{border-style:dashed;background:var(--bg3);color:var(--sub2);box-shadow:none;cursor:not-allowed;transform:none}
+.ct-selection-run .ct-actions{margin:10px 0 0}
+.ct-selection-run .ct-summary{margin-top:8px}
+@media (prefers-reduced-motion:reduce){.ct-cta{transition:none}.ct-cta:active{transform:none}}
+.ac-myrow .if-rowballs{justify-content:flex-start;margin:0}
+.ac-history{scroll-margin-top:84px}
+@media (max-width:420px){.ac-list-row{gap:8px;padding:5px 4px}.ac-list-n{min-width:36px;font-size:12px}.ac-list-balls .if-rball{width:23px;height:23px;font-size:10px}}
 
 /* Models: FREE / PRO is stated on every card before any action; the run area repeats it for the
    current selection (never shown to PRO/Owner). Text stays --fg so it reads in both themes. */

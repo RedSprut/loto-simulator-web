@@ -1259,7 +1259,7 @@ function drawnBonusCount(l){return l.offBo||l.pBo||0;}
 function drawBonusFromMainPool(l){return !drawBonusCount(l)&&drawnBonusCount(l)>0;}
 function drawDrawnBonus(l,dM){return drawnBonusCount(l)>0?rnd(l.bB,drawnBonusCount(l),drawBonusFromMainPool(l)?dM:[]):[];}
 
-function renderSim(){rows.forEach(row=>window.LotoWorkingSet?.identify(row,cur));updatePickLabels();renderRows();renderMainGrid();renderBonusCol();renderSimBtns();updateHdr();scheduleTicketSave();}
+function renderSim(){rows.forEach(row=>window.LotoWorkingSet?.identify(row,cur));updatePickLabels();renderRows();renderMainGrid();renderBonusCol();renderSimBtns();updateHdr();scheduleTicketSave();window.LotoWorkingSet?.sync();}
 
 function updatePickLabels(){
   const l=L();
@@ -1835,10 +1835,10 @@ function loadCalendarApp(){
 }
 window.LotoCalendar=Object.freeze({
   load:loadCalendarApp,
-  open:async function(){
+  open:async function(options){
     try{
       const app=await loadCalendarApp();
-      const result=await app.open();
+      const result=await app.open(options);
       refreshCalendarTrialBadge();
       return result;
     }
@@ -1975,6 +1975,7 @@ function setGeneratedRows(gen,status,unique=false,origin,source){
   rows=unique&&!alreadyIssued?ensureUniqueGeneratedRows(gen,L()):normalizeGeneratedRows(gen,L());
   if(!rows.length)rows=[nr()];
   attachRowProvenance(rows,source||provSourceFromOrigin(origin));
+  window.LotoWorkingSet?.fresh();
   act=0;
   renderSim();
   resetBanner();
@@ -2783,19 +2784,22 @@ function applySupportContact(){
 applySupportContact();
 window.addEventListener('loto:languagechange',applySupportContact);
 function appUsage(type,context,extra){try{if(window.LotoTelemetry)window.LotoTelemetry.track(type,{props:Object.assign({context:context},extra||{})});}catch(_e){}}
-async function saveFav(){
+async function saveFav(options){
   const l=L();
   fillAll();
   const favs=await loadFav();
   const name=`${l.name} · ${new Date().toLocaleDateString(appLocale())}`;
-  rows.forEach(r=>ensureManualProvenance(r,l));
-  favs.unshift({name,rows:normalizeGeneratedRows(rows,l).map(r=>r.prov?{m:[...r.m],b:[...r.b],prov:r.prov}:{m:[...r.m],b:[...r.b]}),lot:cur});
+  const ids=Array.isArray(options?.rowIds)?options.rowIds:null,list=ids?rows.filter(r=>ids.includes(r.rowId)):rows;
+  if(!list.length)return false;
+  list.forEach(r=>ensureManualProvenance(r,l));
+  favs.unshift({name,rows:normalizeGeneratedRows(list,l).map(r=>r.prov?{m:[...r.m],b:[...r.b],prov:r.prov}:{m:[...r.m],b:[...r.b]}),lot:cur});
   await saveFavs(favs.slice(0,10));
-  appUsage('combination_saved','ticket',{rows:rows.length});
-  try{if(window.LotoWinMatch&&LotoWinMatch.ready)normalizeGeneratedRows(rows,l).forEach(r=>LotoWinMatch.markSavedPlayed(cur,r.m,r.b,false));}catch(_e){}
+  appUsage('combination_saved','ticket',{rows:list.length});
+  try{if(window.LotoWinMatch&&LotoWinMatch.ready)normalizeGeneratedRows(list,l).forEach(r=>LotoWinMatch.markSavedPlayed(cur,r.m,r.b,false));}catch(_e){}
   await renderFavs();
   try{const st=window.LotoNotifications&&window.LotoNotifications.getState();if(st&&st.prefs.enabled&&st.prefs.saved_ticket_results)NOTIF_syncWatches(true);}catch(e){}
   showFeedback('Сохранено','Комбинации добавлены в Избранное и видны по этой ссылке.','⭐');
+  return true;
 }
 
 async function renderFavs(){
@@ -5177,8 +5181,8 @@ function SUP_open(src,options){
   const existing=supExistingRows(src);
   if(existing.length){
     const total=existing.length;
-    const preferred=window.LotoWorkingSet.preferred();
-    const initial=preferred?existing.filter(r=>r.rowId===preferred):existing.slice(0,Math.min(3,total));
+    const preferred=window.LotoWorkingSet.preferred(),chosen=options?.working&&window.LotoWorkingSet.selectedIds();
+    const initial=chosen?existing.filter(r=>chosen.includes(r.rowId)):preferred?existing.filter(r=>r.rowId===preferred):existing.slice(0,Math.min(3,total));
     SUP_state={src,mode:'analyze',srcRows:existing,selectedIds:initial.map(r=>r.rowId),working:!!options?.working,total,n:initial.length,
       label:`Для анализа доступно: ${total} ${rowWord(total)} · ${game}`};
   }else if(options?.working){
@@ -6854,9 +6858,9 @@ function JUDGE_finalRows(ns){return JUDGE_state[ns].plan.map(p=>{
   const e=JUDGE_effective(p),row={m:e.m,b:[...p.b],sourceRowId:p.sourceRowId,lotteryId:p.lotteryId};
   let prov=p.sourceProv;
   if(prov&&!prov.unavailable)try{
-    for(const swap of p.swaps.filter(s=>s.apply)){
+    for(const swap of p.swaps){
       prov=LotoCourtCore.appendEvent(prov,{type:'judge_review',verdict:{type:'alternative',from:swap.from,to:swap.to}},courtRulesFor(p.lotteryId||cur));
-      prov=LotoCourtCore.applyDecision(prov,{choice:'accept_judge',from:swap.from,to:swap.to},courtRulesFor(p.lotteryId||cur)).prov;
+      prov=LotoCourtCore.applyDecision(prov,swap.apply?{choice:'accept_judge',from:swap.from,to:swap.to}:{choice:'keep_original',kept:swap.from,challenged:swap.to},courtRulesFor(p.lotteryId||cur)).prov;
     }
     row.prov=prov;
   }catch(_error){}

@@ -25,6 +25,54 @@
     const wanted = new Set(ids);
     return current().filter(r => wanted.has(r.rowId));
   }
+  // Which of the complete rows every action works on. Only row ids are kept (per lottery, on this
+  // device); the rows themselves are always read from the live ticket. No entry = ALL rows, so a
+  // new generation, whatever its size, starts with every generated row selected.
+  const SEL_KEY = 'loto_row_selection_v1';
+  let marks = {};
+  try { marks = JSON.parse(localStorage.getItem(SEL_KEY) || '{}') || {}; } catch (_e) { marks = {}; }
+  function selectedIds() {
+    const list = current(), ids = marks[getCurrentGameKey()];
+    if (!Array.isArray(ids)) return list.map(r => r.rowId);
+    const wanted = new Set(ids), kept = list.filter(r => wanted.has(r.rowId)).map(r => r.rowId);
+    return kept.length ? kept : list.map(r => r.rowId);
+  }
+  function select(ids) {
+    const game = getCurrentGameKey(), list = current();
+    const wanted = new Set(Array.isArray(ids) ? ids : []);
+    const kept = list.filter(r => wanted.has(r.rowId)).map(r => r.rowId);
+    if (!Array.isArray(ids) || !kept.length || kept.length === list.length) delete marks[game]; else marks[game] = kept;
+    try { localStorage.setItem(SEL_KEY, JSON.stringify(marks)); } catch (_e) {}
+    window.dispatchEvent(new CustomEvent('loto:rowselection'));
+    return selectedIds();
+  }
+  // «Ряды готовы» on the main screen: the entry to the action centre while the ticket has rows.
+  function sync() {
+    const bar = document.getElementById('rows-ready');
+    if (!bar) return;
+    const count = current().length;
+    bar.hidden = !count;
+    const n = bar.querySelector('.rows-ready-n');
+    if (n && n.textContent !== String(count)) n.textContent = String(count);
+  }
+  // A new generation: every generated row is selected again, and the entry is lit until opened.
+  function fresh() {
+    delete marks[getCurrentGameKey()];
+    try { localStorage.setItem(SEL_KEY, JSON.stringify(marks)); } catch (_e) {}
+    document.getElementById('rows-ready')?.classList.add('pro-next-glow');
+  }
+  let actionsPromise = null;
+  function actions() {
+    if (window.LotoActionCenter) return Promise.resolve(window.LotoActionCenter);
+    if (!actionsPromise) {
+      const copy = Promise.resolve(window.LotoI18n?.loadPart?.('court')).catch(() => null);
+      actionsPromise = Promise.all([copy, window.loadRuntimeScript('action-center.js')]).then(() => {
+        if (!window.LotoActionCenter) throw new Error('action_center_missing');
+        return window.LotoActionCenter;
+      }).catch(error => { actionsPromise = null; throw error; });
+    }
+    return actionsPromise;
+  }
   function finish() { window.dispatchEvent(new CustomEvent('loto:workingtoolclosed')); }
   function create() {
     window.dispatchEvent(new CustomEvent('loto:workingtoolcreate'));
@@ -40,10 +88,16 @@
     }));
   }
   window.LotoWorkingSet = Object.freeze({ identify, current, choose, find, resolve, finish, create,
+    selectedIds, select, sync, fresh, actions,
+    selected: () => resolve(selectedIds()),
     preferred: () => {
       const id=selected.get(getCurrentGameKey());
       return id&&find(id)?id:null;
     },
-    open: kind => kind === 'judge' ? window.SUP_open?.('sim', { working: true }) : window.LotoCourtUI?.openHome(kind, { kind: 'working' }),
+    open: kind => kind === 'judge' ? window.SUP_open?.('sim', { working: true })
+      : kind === 'calendar' || kind === 'history' ? actions().then(ac => ac.open(kind))
+      : window.LotoCourtUI?.openHome(kind, { kind: 'working' }),
   });
+  // The ticket may already be rendered (and restored) before this file runs.
+  try { sync(); } catch (_e) {}
 })();
