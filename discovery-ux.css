@@ -61,3 +61,18 @@
    yet its full-screen backdrop blur stacked on the dialog's own cost WebKit one ~1 s frame on large
    viewports during «Создать первые 5 рядов». The dialog's disabled, aria-busy CTA is the indicator. */
 body.loto-onboarding-open .busy-ov{-webkit-backdrop-filter:none;backdrop-filter:none}
+
+/* Models: FREE / PRO is stated on every card before any action; the run area repeats it for the
+   current selection (never shown to PRO/Owner). Text stays --fg so it reads in both themes. */
+#court-body .ct-model-tier{display:flex;align-items:baseline;gap:6px;font-size:12px;font-weight:800;line-height:1.4;color:var(--fg)}
+#court-body .ct-model-tier:before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:#2FBF6B;transform:translateY(-1px)}
+#court-body .ct-model-tier-pro:before{background:#7B7BFF}
+#court-body .ct-model-gate{margin:0;font-size:12.5px;font-weight:800;line-height:1.4;text-align:center;color:var(--fg)}
+
+/* Models walkthrough: «can be chosen» ≠ «chosen». Every selectable card carries the running gold
+   light and a dashed gold empty box; a chosen card has NO light, its solid gold frame and the
+   filled ✓ box. The blurred halo is dropped here: one light per card, not two layers × 19. */
+#court-body .ct-model-card.guide-selectable{box-shadow:0 0 10px rgba(240,166,20,.18)}
+#court-body .ct-model-card.guide-selectable::before{border-radius:15.5px}
+#court-body .ct-model-card.guide-selectable::after{display:none}
+#court-body .ct-model-card.guide-selectable .ct-model-box{border-style:dashed;border-color:var(--gold)}
