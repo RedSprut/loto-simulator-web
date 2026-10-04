@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-10-03",
+  "updatedAt": "2026-10-04",
   "generatedBy": "Lotto Simulator secure public bundle",
   "rulesMode": "recent-free-only",
   "freeRecentDrawsByGame": {
@@ -15,11 +15,11 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-03T23:55:43.487Z",
-    "sourceFetchedAt": "2026-10-03T23:55:43.487Z",
+    "generatedAt": "2026-10-04T07:11:16.893Z",
+    "sourceFetchedAt": "2026-10-04T07:11:16.893Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "ff0c459248998acd",
-    "updatedAt": "2026-10-03",
+    "snapshotVersion": "ac07bc1831d0baf8",
+    "updatedAt": "2026-10-04",
     "latestDrawByGame": {
       "lotto": "2026-10-03",
       "vikinglotto": "2026-09-30",
