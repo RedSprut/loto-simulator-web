@@ -307,12 +307,16 @@
     if(!confirmed){setAvatar(null);const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}}
   }
 
+  const BILLING_PROGRESS={restorePurchase:'Восстанавливаем покупки…'};
   async function billingAction(name){
+    const C=window.LotoCommercial;
+    if(BILLING_PROGRESS[name]&&!C.billingBusy)msg('acc-billing-msg',BILLING_PROGRESS[name],'info');
     let result;
-    try{result=await window.LotoCommercial[name]();}
+    try{result=await C[name]();}
     catch(_e){result={ok:false,message:'Что-то пошло не так. Попробуйте ещё раз.'};}
-    msg('acc-billing-msg',result.message,result.ok?'success':'error');
+    msg('acc-billing-msg',result.message,result.tone||(result.ok?'success':'error'));
     render();
+    if(result.reason==='account'&&!accountState().confirmed)msg('acc-auth-msg',result.message,'info');
     return result;
   }
 
