@@ -85,7 +85,7 @@
       default:return 'Не определён';
     }
   }
-  const isNative=()=>!!(window.LotoNativeBilling&&window.LotoNativeBilling.isNative);
+  const PAID_SOURCES=/^(apple|google|stripe|rc_billing|paddle|revenuecat)$/;
 
   function setAvatar(url){
     const img=$('acc-avatar-img'),fb=$('acc-avatar-fallback');
@@ -277,27 +277,43 @@
         $('acc-r-end').textContent=(lifetime||!sub||!sub.expiresAt)?'Без срока':fmtDate(sub.expiresAt);
       }else endRow.hidden=true;
     }
+    const lapsed=confirmed&&!isPro&&sub&&PAID_SOURCES.test(sub.source)&&(sub.revokedAt||Date.parse(sub.expiresAt)<=Date.now());
     const renewRow=$('acc-row-renew');
     if(renewRow){
       if(lifetime){renewRow.hidden=false;const rd=$('acc-r-renew');rd.textContent='Не требуется — доступ навсегда';rd.className='ok';}
       else if(isPro&&sub){renewRow.hidden=false;const rd=$('acc-r-renew');
         if(sub.willRenew){rd.textContent='Автопродление включено';rd.className='ok';}
         else{rd.textContent='Продление отключено — доступ до даты окончания';rd.className='warn';}
-      }else renewRow.hidden=true;
+      }else if(lapsed){renewRow.hidden=false;const rd=$('acc-r-renew');rd.textContent='Истёк';rd.className='warn';}
+      else renewRow.hidden=true;
     }
+    if(lapsed){$('acc-row-end').hidden=false;$('acc-r-end').textContent=fmtDate(sub.revokedAt||sub.expiresAt);}
     const srcRow=$('acc-row-source');
     if(srcRow){
-      if(isPro){srcRow.hidden=false;$('acc-r-source').textContent=sourceLabel(sub&&sub.source);}
+      if(isPro||lapsed){srcRow.hidden=false;$('acc-r-source').textContent=sourceLabel(sub&&sub.source);}
       else srcRow.hidden=true;
     }
 
-    if($('acc-manage-btn'))$('acc-manage-btn').hidden=!(confirmed&&isPro&&!lifetime);
-    if($('acc-restore-btn'))$('acc-restore-btn').hidden=!(confirmed&&isNative());
+    const C=window.LotoCommercial||{},mg=C.subscriptionManagement?C.subscriptionManagement():{kind:'none'};
+    for(const [id,show] of [['acc-manage-btn',mg.kind==='manage'],['acc-restore-btn',C.restoreAvailable&&C.restoreAvailable()]]){
+      const b=$(id);if(b){b.hidden=!(confirmed&&show);b.disabled=!!C.billingBusy;b.setAttribute('aria-busy',String(!!C.billingBusy));}
+    }
+    msg('acc-manage-note',confirmed&&mg.kind==='elsewhere'?mg.note:'','info');
+    if(!confirmed)msg('acc-billing-msg','','');
     if($('acc-signout-btn'))$('acc-signout-btn').hidden=!confirmed;
     if($('acc-delete-btn'))$('acc-delete-btn').hidden=!confirmed;
     if($('acc-avatar-actions'))$('acc-avatar-actions').hidden=!confirmed;
     if($('acc-mydata'))$('acc-mydata').hidden=!confirmed;
     if(!confirmed){setAvatar(null);const n=$('acc-name');if(n){n.hidden=true;n.textContent='';}}
+  }
+
+  async function billingAction(name){
+    let result;
+    try{result=await window.LotoCommercial[name]();}
+    catch(_e){result={ok:false,message:'Что-то пошло не так. Попробуйте ещё раз.'};}
+    msg('acc-billing-msg',result.message,result.ok?'success':'error');
+    render();
+    return result;
   }
 
   function avatarError(err){
@@ -448,8 +464,8 @@
       catch(_err){msg('acc-auth-msg','Не удалось отправить ссылку. Проверьте адрес и попробуйте ещё раз.','error');}
       finally{magicSending=false;if(rb)rb.disabled=false;if(lb)lb.disabled=false;hideAuthCaptcha();}
     },
-    async manage(){try{await window.LotoCommercial.accountPortal();}catch(_e){}},
-    async restore(){try{await window.LotoCommercial.restorePurchase();}catch(_e){}},
+    manage(){return billingAction('accountPortal');},
+    restore(){return billingAction('restorePurchase');},
     openCalendar(){
       openDatePicker({value:(($('acc-birthday')||{}).value||'').slice(0,10),initial:'1990-01-01',clearable:true,onPick:setBirthdayValue});
     },
@@ -586,6 +602,7 @@
     const f=$('acc-avatar-file');if(f&&!f.__wired){f.__wired=1;f.addEventListener('change',e=>AccountUI.onFile(e));}
     const nameInput=$('acc-displayname');
     if(nameInput&&!nameInput.__wired){nameInput.__wired=1;nameInput.addEventListener('input',()=>renderProfileCard());}
+    for(const name of ['loto:webbillingready','loto:nativebillingready','loto:billingaction'])window.addEventListener(name,()=>render());
     window.addEventListener('loto:accesschange',()=>{
       render();loadAvatar();
       try{
