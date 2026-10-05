@@ -3384,7 +3384,7 @@ async function renderHistory(){
         balls+=(group.numbers||[]).map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');
       });
     }else if(d.bonus&&d.bonus.length){histSepCount=1;histBallCount+=d.bonus.length;balls+=`<div class="hist-sep">|</div>`;balls+=d.bonus.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}
-    if(d.superStar!=null){histSepCount++;histBallCount++;balls+=`<span class="hist-ss"><div class="hist-sep" role="separator" aria-label="SuperStar">★</div><div class="hball superstar" title="SuperStar">${escapeHtml(String(d.superStar))}</div></span>`;}
+    if(d.superStar!=null){div.classList.add('hist-has-ss');histSepCount++;histBallCount++;balls+=`<span class="hist-ss"><div class="hist-sep" role="separator" aria-label="SuperStar">★</div><div class="hball superstar" title="SuperStar">${escapeHtml(String(d.superStar))}</div></span>`;}
     const src=` · ${escapeHtml(drawLotteryName(d,cur))}`;
     const era=ruleEraForDraw(d,eras),isCurrent=era?.current??d.ruleEra!=='legacy';
     div.dataset.ruleEra=era?HIST_eraToken(era.id):'';    

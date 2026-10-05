@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="bd14030" data-build-ts="2026-10-05T06:38:49.917Z">
+<html lang="en" data-build="ad804af" data-build-ts="2026-10-05T11:53:04.759Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=bd14030"></script>
+<script src="./boot-runtime.js?v=ad804af"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,14 +33,14 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=bd14030">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=ad804af">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=bd14030">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=ad804af">
 <meta name="twitter:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
@@ -586,7 +586,9 @@ body.dark input[type="number"]::-webkit-inner-spin-button,body.dark input[type="
 .hball.euro-m{--ball:#7ecfc0;--ball-hi:#b2ece2;--ball-lo:#3f9184;color:#123230}
 .hball.euro-b{--ball:#f4a0b0;--ball-hi:#ffd0da;--ball-lo:#c86a80;color:#4a1220}
 .fc-note{font-size:11px;color:var(--sub2);margin:-4px 0 8px}
-.hist-ss{display:inline-flex;align-items:center;gap:var(--hist-gap);flex:0 0 auto}
+.hist-ss{display:inline-flex;align-items:center;gap:var(--hist-gap);flex:0 0 auto;width:calc(var(--hist-sep-slot) + var(--hist-gap) + var(--hist-ball-size))}
+.hist-ss>.hball{flex:1 1 0;min-width:0;width:auto!important}
+.hist-ss>.hist-sep{min-width:0;display:flex;justify-content:center}
 .hball.superstar{--ball:#E8B923;--ball-hi:#FFE680;--ball-lo:#A67C0A;color:#3a2600;font-weight:800}
 .btn-del{position:absolute;top:7px;right:0;width:34px;height:34px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:#e8556a;font-size:17px;cursor:pointer;padding:0;display:grid;place-items:center}
 
@@ -1062,11 +1064,13 @@ button:focus-visible,.nb:focus-visible,.wheel-num:focus-visible{outline:2px soli
   #pg-ana #at-freq>.ana-column{height:100%}
   #pg-ana #at-freq>.card,#pg-ana #at-chi>.card,#pg-ana #at-cmp>.card,#pg-ana #at-prize>.card,#pg-ana #at-man>.card{height:100%}
   #pg-ana #at-man>.card:first-child{grid-row:1 / span 2}
-  #pg-ana #at-inp .hist-item{display:grid;grid-template-columns:minmax(170px,.65fr) minmax(0,1.35fr) 38px;align-items:center;gap:16px;padding:14px 0}
+  #pg-ana #at-inp .hist-item{display:grid;grid-template-columns:minmax(170px,.65fr) minmax(0,1.35fr) 38px;align-items:center;gap:16px;padding:14px 0;--hist-ball-pref:clamp(54px,4.2vw,66px);--hist-gap-many:clamp(7px,.8vw,14px)}
   #pg-ana #at-inp .hist-main{display:contents}
   #pg-ana #at-inp .hist-date{margin:0;padding:0;font-weight:700}
-  #pg-ana #at-inp .hist-balls{min-width:0;padding:4px var(--hist-row-pad);--hist-row-pad:10px;--hist-gap:clamp(10px,1.1vw,18px);--hist-ball-size:min(clamp(54px,4.2vw,66px),max(24px,var(--hist-fit)));max-width:none;flex-wrap:nowrap}
-  #pg-ana #at-inp .hist-balls.hist-many{--hist-gap:clamp(7px,.8vw,14px)}
+  #pg-ana #at-inp .hist-balls{min-width:0;padding:4px var(--hist-row-pad);--hist-row-pad:10px;--hist-gap:clamp(10px,1.1vw,18px);--hist-ball-size:min(var(--hist-ball-pref),max(24px,var(--hist-fit)));max-width:none;flex-wrap:nowrap}
+  #pg-ana #at-inp .hist-balls.hist-many{--hist-gap:var(--hist-gap-many)}
+  #pg-ana #at-inp .hist-item.hist-has-ss{--hist-ss-need:calc(8 * (var(--hist-ball-pref) + 1px) + 16px + 9 * var(--hist-gap-many) + 20px);grid-template-columns:minmax(170px,13fr) minmax(min(var(--hist-ss-need),100% - 170px - 38px - 32px),27fr) 38px}
+  #pg-ana #at-inp .hist-item.hist-has-ss.no-action{grid-template-columns:minmax(170px,13fr) minmax(min(var(--hist-ss-need),100% - 170px - 16px),27fr)}
   #pg-ana #at-inp .btn-del{position:static;justify-self:end}
   #pg-ana #at-inp .hist-item.no-action{grid-template-columns:minmax(170px,.65fr) minmax(0,1.35fr)}
   #pg-ana #at-inp .hist-item.no-action>span:last-child{display:none}
@@ -3664,27 +3668,27 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
 
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=bd14030"></script>
-<script src="./commercial-config.js?v=bd14030"></script>
-<script src="./event-runtime.js?v=bd14030"></script>
-<script src="./external-link-runtime.js?v=bd14030"></script>
-<script src="./auth-client.js?v=bd14030"></script>
-<script src="./native-loader.js?v=bd14030"></script>
-<script src="./billing-web.js?v=bd14030"></script>
-<script src="./i18n-catalog.js?v=bd14030"></script>
-<script src="./lang-detect.js?v=bd14030"></script>
-<script src="./i18n-runtime.js?v=bd14030"></script>
-<script src="./consent-runtime.js?v=bd14030"></script>
-<script src="./analytics-telemetry.js?v=bd14030"></script>
-<script src="./ga4-runtime.js?v=bd14030"></script>
-<script src="./win-match-core.js?v=bd14030"></script>
-<script src="./court-core.js?v=bd14030"></script>
-<script src="./smart-start.js?v=bd14030"></script>
-<script src="./app-runtime.js?v=bd14030"></script>
-<script src="./inline-runtime-2.js?v=bd14030"></script>
+<script src="./version.js?v=ad804af"></script>
+<script src="./commercial-config.js?v=ad804af"></script>
+<script src="./event-runtime.js?v=ad804af"></script>
+<script src="./external-link-runtime.js?v=ad804af"></script>
+<script src="./auth-client.js?v=ad804af"></script>
+<script src="./native-loader.js?v=ad804af"></script>
+<script src="./billing-web.js?v=ad804af"></script>
+<script src="./i18n-catalog.js?v=ad804af"></script>
+<script src="./lang-detect.js?v=ad804af"></script>
+<script src="./i18n-runtime.js?v=ad804af"></script>
+<script src="./consent-runtime.js?v=ad804af"></script>
+<script src="./analytics-telemetry.js?v=ad804af"></script>
+<script src="./ga4-runtime.js?v=ad804af"></script>
+<script src="./win-match-core.js?v=ad804af"></script>
+<script src="./court-core.js?v=ad804af"></script>
+<script src="./smart-start.js?v=ad804af"></script>
+<script src="./app-runtime.js?v=ad804af"></script>
+<script src="./inline-runtime-2.js?v=ad804af"></script>
 <script src="./working-set.js"></script>
-<script src="./commercial-runtime.js?v=bd14030"></script>
-<script src="./inline-runtime-3.js?v=bd14030"></script>
+<script src="./commercial-runtime.js?v=ad804af"></script>
+<script src="./inline-runtime-3.js?v=ad804af"></script>
 <style id="lnc-styles">
 html.on-sim:not(.has-internal-back) #main-hdr .hdr-back{display:none}
 html.on-ana #main-hdr #bell-btn{display:none!important}
@@ -3830,16 +3834,16 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=bd14030"></script>
-<script src="./notifications-runtime.js?v=bd14030"></script>
-<script src="./pwa-runtime.js?v=bd14030"></script>
+<script src="./notification-center.js?v=ad804af"></script>
+<script src="./notifications-runtime.js?v=ad804af"></script>
+<script src="./pwa-runtime.js?v=ad804af"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
 
-<script src="./inline-runtime-4.js?v=bd14030"></script>
-<script src="./inline-runtime-5.js?v=bd14030"></script>
-<script src="./inline-runtime-6.js?v=bd14030"></script>
-<script src="./discovery-ux.js?v=bd14030"></script>
+<script src="./inline-runtime-4.js?v=ad804af"></script>
+<script src="./inline-runtime-5.js?v=ad804af"></script>
+<script src="./inline-runtime-6.js?v=ad804af"></script>
+<script src="./discovery-ux.js?v=ad804af"></script>
 </body>
 </html>
