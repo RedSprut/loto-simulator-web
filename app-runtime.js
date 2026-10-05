@@ -101,7 +101,7 @@ function normalizeResultDraw(draw){
     main:uniqValid(draw.main||draw.numbers||draw.mainNumbers||[],Number.MAX_SAFE_INTEGER),
     bonus:uniqValid(draw.bonus||draw.extra||draw.extraBall||draw.extraNumbers||[],Number.MAX_SAFE_INTEGER),
     jackpot:draw.jackpot??null,
-    superStar:Number.isFinite(Number(draw.superStar))?Number(draw.superStar):null,
+    superStar:draw.superStar!=null&&draw.superStar!==''&&Number.isInteger(Number(draw.superStar))?Number(draw.superStar):null,
     payoutTiers:draw.payoutTiers||null,
     lotteryId:draw.lotteryId||'',
     lotteryName:draw.lotteryName||'',
@@ -273,6 +273,9 @@ function analyzeData(gameKey,historicalData=[]){
   if(!cfg)throw new Error(`Unknown lottery: ${gameKey}`);
   const mainFrequency=new Map();
   const extraFrequency=new Map();
+  const superStarFrequency=resolveConfigKey(gameKey)==='superEnalotto'?new Map():null;
+  let superStarDraws=0;
+  if(superStarFrequency)for(let n=1;n<=90;n++)superStarFrequency.set(n,0);
   for(let n=cfg.range.min;n<=cfg.range.max;n++)mainFrequency.set(n,0);
   if(cfg.extraBall?.count){
     for(let n=cfg.extraBall.range.min;n<=cfg.extraBall.range.max;n++)extraFrequency.set(n,0);
@@ -287,6 +290,7 @@ function analyzeData(gameKey,historicalData=[]){
       const n=draw.bonus[j];
       if(extraFrequency.has(n))extraFrequency.set(n,extraFrequency.get(n)+1);
     }
+    if(superStarFrequency&&superStarFrequency.has(draw.superStar)){superStarFrequency.set(draw.superStar,superStarFrequency.get(draw.superStar)+1);superStarDraws++;}
   }
   const byHot=(a,b)=>b[1]-a[1]||a[0]-b[0];
   const byCold=(a,b)=>a[1]-b[1]||a[0]-b[0];
@@ -295,6 +299,8 @@ function analyzeData(gameKey,historicalData=[]){
     totalDraws:historicalData.length,
     mainFrequency,
     extraFrequency,
+    superStarFrequency,
+    superStarDraws,
     hotNumbers:[...mainFrequency.entries()].sort(byHot),
     coldNumbers:[...mainFrequency.entries()].sort(byCold),
     hotExtraNumbers:[...extraFrequency.entries()].sort(byHot)
@@ -688,7 +694,8 @@ function mergeDrawLists(oldArr,newArr){
     if(!prev)added++;
     else if(sameDrawCore(prev,d))unchanged++;
     else updated++;
-    byDate.set(d.date,{...prev,...d});
+    const nums=x=>[...(x?.main||[])].sort((a,b)=>a-b)+'|'+[...(x?.bonus||[])].sort((a,b)=>a-b);
+    byDate.set(d.date,d.superStar==null&&prev?.superStar!=null&&nums(prev)===nums(d)?{...prev,...d,superStar:prev.superStar}:{...prev,...d});
   });
   const incomingDates=new Set((newArr||[]).filter(d=>d&&d.date).map(d=>d.date));
   const preserved=(oldArr||[]).filter(d=>d&&d.date&&!incomingDates.has(d.date)).length;
@@ -3377,7 +3384,7 @@ async function renderHistory(){
         balls+=(group.numbers||[]).map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');
       });
     }else if(d.bonus&&d.bonus.length){histSepCount=1;histBallCount+=d.bonus.length;balls+=`<div class="hist-sep">|</div>`;balls+=d.bonus.map(n=>`<div class="hball ${l.cls}-b">${n}</div>`).join('');}
-    if(d.superStar!=null){histSepCount++;histBallCount++;balls+=`<div class="hist-sep" role="separator" aria-label="SuperStar">★</div>`;balls+=`<div class="hball superstar" title="SuperStar">${escapeHtml(String(d.superStar))}</div>`;}
+    if(d.superStar!=null){histSepCount++;histBallCount++;balls+=`<span class="hist-ss"><div class="hist-sep" role="separator" aria-label="SuperStar">★</div><div class="hball superstar" title="SuperStar">${escapeHtml(String(d.superStar))}</div></span>`;}
     const src=` · ${escapeHtml(drawLotteryName(d,cur))}`;
     const era=ruleEraForDraw(d,eras),isCurrent=era?.current??d.ruleEra!=='legacy';
     div.dataset.ruleEra=era?HIST_eraToken(era.id):'';    
@@ -3483,6 +3490,8 @@ async function renderFreq(){
   renderFChart('fc-main',mf,l.mB,draws.length*l.pM,l.cls);
   if(dBo>0){document.getElementById('fc-bc').style.display='';document.getElementById('fc-bt').textContent='Частота '+bonusLabel(l);renderFChart('fc-bonus',analysis.extraFrequency,l.bB,draws.reduce((s,d)=>s+((d.bonus||[]).length),0),l.cls+'-b');}
   else document.getElementById('fc-bc').style.display='none';
+  const ssCard=document.getElementById('fc-sc');
+  if(ssCard){ssCard.style.display=analysis.superStarDraws>0?'':'none';if(analysis.superStarDraws>0)renderFChart('fc-superstar',analysis.superStarFrequency,90,analysis.superStarDraws,'superstar');}
   const hc=document.getElementById('hc-grid');
   if(draws.length<5){hc.innerHTML='<div class="empty" style="width:100%">Нужно мин. 5 тиражей</div>';return;}
   const sorted=[...mf.entries()].sort((a,b)=>b[1]-a[1]);
@@ -3532,7 +3541,7 @@ function renderFChart(elId,freq,maxN,total,cls){
   const el=document.getElementById(elId);el.innerHTML='';
   if(!total){el.innerHTML='<div class="empty">Нет данных</div>';return;}
   const mx=Math.max(...freq.values())||1;
-  const mc=cls.includes('b')?'#f4a0b0':mColor(cls);
+  const mc=cls==='superstar'?'#E8B923':cls.includes('b')?'#f4a0b0':mColor(cls);
   freq.forEach((cnt,n)=>{
     const pct=(cnt/mx)*100;
     const color=cnt/total>1.3/maxN?'#ff3b30':cnt/total<0.7/maxN?'#4a7cf7':mc;

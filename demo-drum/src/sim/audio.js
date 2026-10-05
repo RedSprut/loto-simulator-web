@@ -185,7 +185,10 @@ export class AudioManager {
       for (const c of candidates) {
         try {
           const r = await fetch(AUDIO_BASE + c, { cache: 'force-cache' });
-          if (!r.ok) continue;
+          // Capacitor iOS answers media extensions (.wav) with a bare URLResponse, not an
+          // HTTP one, so WKWebView reports status 0 / ok=false for a body that is really
+          // there. Only a real HTTP error status skips the candidate.
+          if (!r.ok && r.status !== 0) continue;
           const buf = await this.ctx.decodeAudioData(await r.arrayBuffer());
           if (buf) return buf;
         } catch (e) { this._decodeErrors = (this._decodeErrors || 0) + 1; /* unsupported format → try the next candidate */ }

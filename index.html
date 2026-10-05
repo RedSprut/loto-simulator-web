@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="2b98a4c" data-build-ts="2026-10-05T03:17:15.791Z">
+<html lang="en" data-build="bd14030" data-build-ts="2026-10-05T06:37:12.715Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=2b98a4c"></script>
+<script src="./boot-runtime.js?v=bd14030"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,14 +33,14 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=2b98a4c">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=bd14030">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=2b98a4c">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=bd14030">
 <meta name="twitter:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
@@ -585,6 +585,8 @@ body.dark input[type="number"]::-webkit-inner-spin-button,body.dark input[type="
 .hball.viking-b{--ball:#10183a;--ball-hi:#3a4570;--ball-lo:#05081a;color:#fff}
 .hball.euro-m{--ball:#7ecfc0;--ball-hi:#b2ece2;--ball-lo:#3f9184;color:#123230}
 .hball.euro-b{--ball:#f4a0b0;--ball-hi:#ffd0da;--ball-lo:#c86a80;color:#4a1220}
+.fc-note{font-size:11px;color:var(--sub2);margin:-4px 0 8px}
+.hist-ss{display:inline-flex;align-items:center;gap:var(--hist-gap);flex:0 0 auto}
 .hball.superstar{--ball:#E8B923;--ball-hi:#FFE680;--ball-lo:#A67C0A;color:#3a2600;font-weight:800}
 .btn-del{position:absolute;top:7px;right:0;width:34px;height:34px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);color:#e8556a;font-size:17px;cursor:pointer;padding:0;display:grid;place-items:center}
 
@@ -1992,7 +1994,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="db-loading-ico" aria-hidden="true">⏳</div>
     <div class="db-loading-title" id="db-loading-title">Loading the full draws database</div>
     <div class="db-loading-msg" id="db-loading-msg">Please wait. The full draws database is loading.</div>
-    <button type="button" class="db-loading-retry" id="db-loading-retry" hidden data-i18n-entry="1532">Retry</button>
+    <button type="button" class="db-loading-retry" id="db-loading-retry" hidden data-i18n-entry="1533">Retry</button>
   </div>
 </div>
 
@@ -2109,7 +2111,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
         </div>
       </div>
       <div class="gen-actions">
-        <button class="btn-exp" id="generate-selected-rows" data-loto-event-click="generateSelectedRows()" style="margin-top:0" data-i18n-entry="1864">Generate</button>
+        <button class="btn-exp" id="generate-selected-rows" data-loto-event-click="generateSelectedRows()" style="margin-top:0" data-i18n-entry="1865">Generate</button>
         <button class="btn-exp" data-loto-event-click="WORLD_open()" style="margin-top:0">Lotto analysis around the world</button>
       </div>
       <div class="filter-grid">
@@ -2123,7 +2125,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       </div>
       <button class="btn-exp" id="copy-rows-btn" data-loto-event-click="copyRowsForNorsk(this)" style="margin-top:10px">📋 Copy rows</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="shareRows()" data-i18n-entry="1550">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
+        <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="shareRows()" data-i18n-entry="1551">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
         <button class="btn-exp" style="margin:0" data-loto-event-click="SUP_open('sim')">⚖️ Supreme Judge</button>
       </div>
       <div id="world-analysis-out" class="warn-note" style="display:none"></div>
@@ -2261,7 +2263,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
   <section class="app-share" id="home-share" aria-labelledby="home-share-title">
     <h2 class="acc-stores-title app-share-title" id="home-share-title">Share Lotto Simulator</h2>
     <div class="app-share-body">
-    <button type="button" class="app-share-main" data-share="system" data-loto-event-click="shareAppTo('system')"><svg class="share-glyph-nodes" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg><svg class="share-glyph-apple" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 15V4M8 8l4-4 4 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 11H5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span data-i18n-entry="1550">Share</span></button>
+    <button type="button" class="app-share-main" data-share="system" data-loto-event-click="shareAppTo('system')"><svg class="share-glyph-nodes" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg><svg class="share-glyph-apple" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M12 15V4M8 8l4-4 4 4" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 11H5a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7a1 1 0 0 0-1-1h-1" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg><span data-i18n-entry="1551">Share</span></button>
     <div class="app-share-list" role="group" aria-labelledby="home-share-title">
       <button type="button" class="app-share-btn" data-share="facebook" aria-label="Share on Facebook" title="Share on Facebook" data-loto-event-click="shareAppTo('facebook')"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9.1 23.69v-7.98H6.63v-3.67h2.47v-1.58c0-4.08 1.85-5.98 5.86-5.98.4 0 .96.04 1.47.1a8.68 8.68 0 0 1 1.14.2v3.33a8.62 8.62 0 0 0-.65-.04 26.81 26.81 0 0 0-.73-.01c-.71 0-1.26.1-1.67.31a1.69 1.69 0 0 0-.68.62c-.26.42-.37 1-.37 1.75v1.3h3.92l-.39 2.1-.29 1.56h-3.25v8.24C19.4 23.24 24 18.18 24 12.04c0-6.63-5.37-12-12-12s-12 5.37-12 12c0 5.63 3.87 10.35 9.1 11.65Z"/></svg></button>
       <button type="button" class="app-share-btn" data-share="x" aria-label="Share on X" title="Share on X" data-loto-event-click="shareAppTo('x')"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M14.23 10.16 22.98 0h-2.07l-7.59 8.82L7.25 0H.26l9.17 13.34L.26 24H2.33l8.02-9.32L16.75 24h6.99zm-2.84 3.3-.93-1.33L3.08 1.56h3.18l5.97 8.53.93 1.33 7.75 11.09h-3.18z"/></svg></button>
@@ -2407,6 +2409,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="card"><div class="card-t">🔥 Hot and ❄️ Cold</div><div class="hc-grid" id="hc-grid"><div class="empty" style="width:100%">Min. required. 5 lottery draws</div></div></div>
     <div class="card"><div class="card-t">Main number frequency</div><div class="freq-wrap"><div class="freq-chart" id="fc-main"></div></div></div>
     <div class="card" id="fc-bc" style="display:none"><div class="card-t" id="fc-bt" data-i18n-entry="506">Bonus numbers</div><div class="freq-wrap"><div class="freq-chart" id="fc-bonus"></div></div></div>
+    <div class="card" id="fc-sc" style="display:none"><div class="card-t">SuperStar frequency</div><div class="fc-note">Separate 1–90 drum · in draws since 2006</div><div class="freq-wrap"><div class="freq-chart" id="fc-superstar"></div></div></div>
     </div>
     
     <div class="card">
@@ -2520,7 +2523,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <div class="if-note" style="margin:0 0 10px">Each model has its own way of reading the history of lottery draws for a selected period: some look for frequency, others for pair connections, others for omissions and cycles. None of them predict the future - they show the structure of the past from which you assemble your strategy.</div>
       <div class="sg-algo" id="al-freq" data-loto-event-click="selAlgo('freq')"><div class="sg-algo-icon">🔥</div><div><div class="sg-algo-name">Frequency analysis</div><div class="sg-algo-desc">The weight of a number is proportional to its observed frequency: pₙ = cₙ / Σc</div></div></div>
       <div class="sg-algo" id="al-bal" data-loto-event-click="selAlgo('bal')"><div class="sg-algo-icon">⚖️</div><div><div class="sg-algo-name">Balanced</div><div class="sg-algo-desc">About 40% hot + 30% medium + 30% cold; rounding alternates between lines</div></div></div>
-      <div class="sg-algo" id="al-rnd" data-loto-event-click="selAlgo('rnd')"><div class="sg-algo-icon">🎲</div><div><div class="sg-algo-name" data-i18n-entry="1765">Pure random</div><div class="sg-algo-desc">Uniform selection of k different numbers without returning with a cryptographic seed device</div></div></div>
+      <div class="sg-algo" id="al-rnd" data-loto-event-click="selAlgo('rnd')"><div class="sg-algo-icon">🎲</div><div><div class="sg-algo-name" data-i18n-entry="1766">Pure random</div><div class="sg-algo-desc">Uniform selection of k different numbers without returning with a cryptographic seed device</div></div></div>
       <div class="sg-algo" id="al-man" data-loto-event-click="selAlgo('man')"><div class="sg-algo-icon">📐</div><div><div class="sg-algo-name">Segment coverage</div><div class="sg-algo-desc">Uniform range coverage - numbers are selected from different segments</div></div></div>
       <div class="sg-algo" id="al-world-hot" data-loto-event-click="selAlgo('world-hot')"><div class="sg-algo-icon">🌍</div><div><div class="sg-algo-name">World Hot</div><div class="sg-algo-desc">Profile of all saved games, normalized for the current lottery</div></div></div>
       <div class="sg-algo" id="al-world-mix" data-loto-event-click="selAlgo('world-mix')"><div class="sg-algo-icon">🌐</div><div><div class="sg-algo-name">World Combined</div><div class="sg-algo-desc">Hot + medium + cold zones for each row</div></div></div>
@@ -2585,7 +2588,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <button class="btn-draw euro" style="margin-top:12px" data-loto-event-click="WC_check()">🔍 Check my ticket</button>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
       <button class="btn-exp" style="margin:0" data-loto-event-click="WC_fav()">⭐ Add to favorites</button>
-      <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="WC_share()" data-i18n-entry="1550">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
+      <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="WC_share()" data-i18n-entry="1551">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
     </div>
     <button class="btn-close2" data-loto-event-click="WC_close()">Close</button>
   </div>
@@ -2599,7 +2602,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     </div>
     <div id="tk-body" style="margin-top:12px"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
-      <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="shareRows()" data-i18n-entry="1550">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
+      <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="shareRows()" data-i18n-entry="1551">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
       <button class="btn-exp" style="margin:0" data-loto-event-click="TK_close()">Close</button>
     </div>
   </div>
@@ -2611,7 +2614,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <div><div class="if-title">🔮 Quantum-astral generator</div><div class="if-sub" id="qa-ctx">Quantum flow · sign · Moon · natal chart</div></div>
       <button class="btn-close2" data-loto-event-click="QA_close()" style="width:auto;padding:8px 14px;margin:0">✕</button>
     </div>
-    <div class="if-seclbl" data-i18n-entry="2163">Your zodiac sign</div>
+    <div class="if-seclbl" data-i18n-entry="2164">Your zodiac sign</div>
     <div class="qa-signs" id="qa-signs"></div>
     <div class="qa-birthline" id="qa-birthline" data-loto-event-click="QAB_open()">🎂 Date of birth: <b id="qa-birthval">not specified</b> · configure</div>
     <div class="qa-moon" id="qa-moon"></div>
@@ -2827,7 +2830,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
         </div>
         <div class="pro-selected-plan" id="pro-selected-plan">Plan unavailable</div>
         <div class="pro-fine" id="pro-price-note">Plans are currently unavailable. Purchasing is disabled until a valid Offering is received.</div>
-        <button type="button" class="btn-exp pro-offering-retry" id="pro-offering-retry" data-loto-event-click="LotoCommercial.retryOffering()" hidden data-i18n-entry="1535">Retry</button>
+        <button type="button" class="btn-exp pro-offering-retry" id="pro-offering-retry" data-loto-event-click="LotoCommercial.retryOffering()" hidden data-i18n-entry="1536">Retry</button>
         <div class="pro-fine" id="pro-provider-trial" hidden></div>
         <div class="pro-signin-prompt" id="pro-signin-prompt" role="alert" hidden>
           <div>To pay for the selected subscription, sign in or create an account</div>
@@ -2880,7 +2883,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
         <a class="btn-exp" id="pro-terms-link" href="#" target="_blank" rel="noopener" hidden>Terms of Use</a>
         <a class="btn-exp" id="pro-subscription-terms-link" href="#" target="_blank" rel="noopener" hidden>Subscription Terms</a>
         <a class="btn-exp" id="pro-safe-payment-link" href="./safe-payment.html" target="_blank" rel="noopener">Safe payment</a>
-        <a class="btn-exp" id="pro-support-link" data-support-link="label" href="#" hidden data-i18n-entry="1915">Support</a>
+        <a class="btn-exp" id="pro-support-link" data-support-link="label" href="#" hidden data-i18n-entry="1916">Support</a>
       </div>
     </div>
   </div>
@@ -2967,7 +2970,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
       <input type="number" class="num-inp" id="genn-custom" min="1" max="50" placeholder="or yours: 1–50" style="flex:1">
       <button class="btn-exp" style="margin:0;width:auto;padding:0 16px" data-loto-event-click="GENN_custom()" data-i18n-entry="1395">OK</button>
     </div>
-    <button class="btn-draw euro" style="margin-top:12px" id="genn-go" data-loto-event-click="GENN_go()" data-i18n-entry="2138">Generate</button>
+    <button class="btn-draw euro" style="margin-top:12px" id="genn-go" data-loto-event-click="GENN_go()" data-i18n-entry="2139">Generate</button>
     <button class="btn-close2" data-loto-event-click="GENN_close()">Close</button>
   </div>
 </div>
@@ -3034,7 +3037,7 @@ body:not(.light) .ct-decided.is-applied{color:#6fe3a2}
     <div class="matrix-actions">
       <button class="btn-draw euro" data-loto-event-click="MATRIX_use()">Use in simulator</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="shareMatrix()" data-i18n-entry="1550">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
+        <button class="btn-exp share-action-button" style="margin:0" data-loto-event-click="shareMatrix()" data-i18n-entry="1551">Share<svg class="share-action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#share-nodes-icon"></use></svg></button>
         <button class="btn-exp" style="margin:0" data-loto-event-click="MATRIX_judge()">⚖️ Check the matrix with a judge</button>
       </div>
       <button class="btn-exp matrix-copy" id="matrix-copy-btn" data-loto-event-click="MATRIX_copy(this)">📋 Copy</button>
@@ -3599,8 +3602,8 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
     <div class="about-sh">Privacy</div>
     <p class="about-p">Lotto Simulator treats your data with care. Saved combinations and settings are stored on your device. To operate advanced functions, an anonymous account is used without mandatory registration.</p>
     <button class="btn-exp about-consent-btn" id="about-privacy-settings" type="button" data-i18n-ignore hidden></button>
-    <div class="about-sh" id="about-support-h" hidden data-i18n-entry="1546">Support</div>
-    <p class="about-p" id="about-support" hidden><a id="about-support-link" data-support-link="label" href="#" data-i18n-entry="1915">Support</a></p>
+    <div class="about-sh" id="about-support-h" hidden data-i18n-entry="1547">Support</div>
+    <p class="about-p" id="about-support" hidden><a id="about-support-link" data-support-link="label" href="#" data-i18n-entry="1916">Support</a></p>
     <div class="about-sh">Data sources</div>
     <p class="about-p">The application uses publicly available historical information about lottery results. Sources and update dates are available in the app. External data may be changed by third party operators.</p>
     <div class="about-sh">Trademarks</div>
@@ -3661,27 +3664,27 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
 
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=2b98a4c"></script>
-<script src="./commercial-config.js?v=2b98a4c"></script>
-<script src="./event-runtime.js?v=2b98a4c"></script>
-<script src="./external-link-runtime.js?v=2b98a4c"></script>
-<script src="./auth-client.js?v=2b98a4c"></script>
-<script src="./native-loader.js?v=2b98a4c"></script>
-<script src="./billing-web.js?v=2b98a4c"></script>
-<script src="./i18n-catalog.js?v=2b98a4c"></script>
-<script src="./lang-detect.js?v=2b98a4c"></script>
-<script src="./i18n-runtime.js?v=2b98a4c"></script>
-<script src="./consent-runtime.js?v=2b98a4c"></script>
-<script src="./analytics-telemetry.js?v=2b98a4c"></script>
-<script src="./ga4-runtime.js?v=2b98a4c"></script>
-<script src="./win-match-core.js?v=2b98a4c"></script>
-<script src="./court-core.js?v=2b98a4c"></script>
-<script src="./smart-start.js?v=2b98a4c"></script>
-<script src="./app-runtime.js?v=2b98a4c"></script>
-<script src="./inline-runtime-2.js?v=2b98a4c"></script>
+<script src="./version.js?v=bd14030"></script>
+<script src="./commercial-config.js?v=bd14030"></script>
+<script src="./event-runtime.js?v=bd14030"></script>
+<script src="./external-link-runtime.js?v=bd14030"></script>
+<script src="./auth-client.js?v=bd14030"></script>
+<script src="./native-loader.js?v=bd14030"></script>
+<script src="./billing-web.js?v=bd14030"></script>
+<script src="./i18n-catalog.js?v=bd14030"></script>
+<script src="./lang-detect.js?v=bd14030"></script>
+<script src="./i18n-runtime.js?v=bd14030"></script>
+<script src="./consent-runtime.js?v=bd14030"></script>
+<script src="./analytics-telemetry.js?v=bd14030"></script>
+<script src="./ga4-runtime.js?v=bd14030"></script>
+<script src="./win-match-core.js?v=bd14030"></script>
+<script src="./court-core.js?v=bd14030"></script>
+<script src="./smart-start.js?v=bd14030"></script>
+<script src="./app-runtime.js?v=bd14030"></script>
+<script src="./inline-runtime-2.js?v=bd14030"></script>
 <script src="./working-set.js"></script>
-<script src="./commercial-runtime.js?v=2b98a4c"></script>
-<script src="./inline-runtime-3.js?v=2b98a4c"></script>
+<script src="./commercial-runtime.js?v=bd14030"></script>
+<script src="./inline-runtime-3.js?v=bd14030"></script>
 <style id="lnc-styles">
 html.on-sim:not(.has-internal-back) #main-hdr .hdr-back{display:none}
 html.on-ana #main-hdr #bell-btn{display:none!important}
@@ -3827,16 +3830,16 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=2b98a4c"></script>
-<script src="./notifications-runtime.js?v=2b98a4c"></script>
-<script src="./pwa-runtime.js?v=2b98a4c"></script>
+<script src="./notification-center.js?v=bd14030"></script>
+<script src="./notifications-runtime.js?v=bd14030"></script>
+<script src="./pwa-runtime.js?v=bd14030"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
 
-<script src="./inline-runtime-4.js?v=2b98a4c"></script>
-<script src="./inline-runtime-5.js?v=2b98a4c"></script>
-<script src="./inline-runtime-6.js?v=2b98a4c"></script>
-<script src="./discovery-ux.js?v=2b98a4c"></script>
+<script src="./inline-runtime-4.js?v=bd14030"></script>
+<script src="./inline-runtime-5.js?v=bd14030"></script>
+<script src="./inline-runtime-6.js?v=bd14030"></script>
+<script src="./discovery-ux.js?v=bd14030"></script>
 </body>
 </html>
