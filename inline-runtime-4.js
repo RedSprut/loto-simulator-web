@@ -122,7 +122,14 @@
     try { await renderFavs(); } catch (e) {}
     appUsage('combination_saved', 'drum', { rows: 1, ref: combo.resultId });
     postToDrum({ type: 'APP_SAVE_RESULT', status: 'saved' }); pushDrumFavorites();
-    try { drumApplyToTopRows(combo); } catch (e) {}  
+    try { drumSaveToWorkset(combo); } catch (e) {}  
+  }
+  function drumSaveToWorkset(combo) {
+    var appLot = DRUM_TO_APP[combo.lotteryId] || combo.lotteryId;
+    if (appLot !== currentAppId()) return drumApplyToTopRows(combo);
+    return loadWorksets().then(function (ws) {
+      return ws.save3D(drumRowWithProvenance(combo, appLot), function () { return drumApplyToTopRows(combo); });
+    }, function () { return rows.some(rowHasWork) ? 'skip' : drumApplyToTopRows(combo); });
   }
   async function handleDrumReplace(oldId, combo) {
     var favs = []; try { favs = (await loadFav()) || []; } catch (e) { favs = []; }
@@ -133,7 +140,7 @@
     try { await renderFavs(); } catch (e) {}
     appUsage('combination_saved', 'drum_replace', { rows: 1, ref: combo.resultId });
     postToDrum({ type: 'APP_SAVE_RESULT', status: 'saved' }); pushDrumFavorites();
-    try { drumApplyToTopRows(combo); } catch (e) {}  
+    try { drumSaveToWorkset(combo); } catch (e) {}  
   }
   async function handleDrumRemove(id) {
     try {
@@ -194,11 +201,12 @@
       return 'added';
     } catch (e) { try { console.warn('drumApplyToTopRows failed', e); } catch (_e) {} return 'skip'; }
   }
-  function drumBulkApply(lotteryId, combos, labels) {
+  async function drumBulkApply(lotteryId, combos, labels) {
     labels = labels || {};
     var appLot = DRUM_TO_APP[lotteryId] || lotteryId;
     try { var prevLot = currentAppId(); if (appLot && appLot !== prevLot) selLot(appLot); smartStartRecord(appLot, prevLot); } catch (e) {}
     closeDrum3D();                                           
+    try { await window.LotoTicket.ready(); await (await loadWorksets()).open3D(); } catch (e) {}
     try { clearGroupAnalysisState(); } catch (e) {}
     var applied = 0, already = 0, capped = false;
     for (var i = 0; i < (combos || []).length; i++) {

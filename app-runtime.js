@@ -446,6 +446,12 @@ function getBackendActionContext(){
   };
 }
 function applyBackendRows(result,label){
+  return guardTicketReplace({rows:backendTicketRows(result)},()=>putBackendRows(result,label));
+}
+function backendTicketRows(result){
+  return (Array.isArray(result)?result:[]).map(row=>({m:[...(row.main||row.m||[])],b:[...(row.bonus||row.b||[])],prov:row.prov}));
+}
+function putBackendRows(result,label){
   const next=(Array.isArray(result)?result:[]).map(row=>{
     const item={m:[...(row.main||[])],b:[...(row.bonus||[])]};
     const prov=validRowProv({m:item.m,prov:row.prov});
@@ -589,13 +595,13 @@ function renderModelResultRows(){
 window.renderModelResultRows=renderModelResultRows;
 function bindModelResultActions(model){
   const useBtn=document.querySelector('[data-mres-use]');
-  if(useBtn)useBtn.onclick=async()=>{
+  if(useBtn)useBtn.onclick=()=>guardTicketReplace({rows:backendTicketRows(mresRows)},async()=>{
     await withTransferBusy(async()=>{
       window.LotoModals?window.LotoModals.closeModal('mres-ov'):document.getElementById('mres-ov')?.classList.remove('show');
-      applyBackendRows(mresRows,'🎯 '+modelLabel(model));
+      putBackendRows(mresRows,'🎯 '+modelLabel(model));
     });
     goToRows({immediate:true});
-  };
+  });
   const judgeBtn=document.querySelector('[data-mres-judge]');
   if(judgeBtn)judgeBtn.onclick=()=>{window.judgeGeneratedRows?.(mresRows.map(r=>({main:[...r.main],bonus:[...r.bonus]})));};
   const closeBtn=document.querySelector('[data-mres-close]');
@@ -721,7 +727,7 @@ const COURT_RECORD_KEY=(game,key)=>'court1_'+(game||cur)+'_'+encodeURIComponent(
 const COURT_RECORD_MAX_CHARS=200000;
 const COURT_SESSION_MAX=MAX_ROWS;
 let courtSessions=Object.create(null);
-let ticketGeneration=0,ticketSaveTimer=0,ticketSaveReady=false;
+let ticketGeneration=0,ticketSaveTimer=0,ticketSaveReady=false,ticketRestoring=Promise.resolve();
 let courtDirty=new Set(),courtRemoved=new Set(),courtSaveTimer=0;
 function courtSessionsTrim(store,forget){
   const keys=Object.keys(store);
@@ -848,6 +854,9 @@ async function restoreTicket(game){
     if(record.sessions&&typeof record.sessions==='object')for(const key of Object.keys(courtSessions))courtDirty.add(key);
     renderSim();
     try{focusFirstUntouchedRow();}catch(_e){}
+  }else if(record&&record.v===1&&Array.isArray(record.rows)&&record.rows.some(rowHasWork)){
+    try{await (await loadWorksets()).keepAside(game,record);}catch(_e){}
+    if(generation!==ticketGeneration||game!==cur)return;
   }
   ticketSaveReady=true;
   if(courtDirty.size)writeCourtRecords(game);
@@ -877,6 +886,75 @@ function flushTicketNow(){
   return true;
 }
 window.addEventListener('pagehide',()=>{flushTicketNow();});
+function rowHasWork(row){
+  if(!row)return false;
+  if(row.manual&&((row.m||[]).length||(row.b||[]).length))return true;
+  if(Array.isArray(row.provPrev)&&row.provPrev.length)return true;
+  const events=row.prov&&row.prov.events;
+  return Array.isArray(events)&&events.length>0;
+}
+async function loadTicketRecord(record){
+  clearTimeout(ticketSaveTimer);clearTimeout(courtSaveTimer);
+  ticketSaveReady=false;
+  const game=cur;
+  const data=record&&record.v===1?record:{v:1,at:Date.now(),act:0,rows:[],sessionKeys:[]};
+  try{await storageSet(TICKET_KEY(game),JSON.stringify({...data,at:Date.now()}),true);}catch(_e){}
+  if(game!==cur)return false;
+  try{clearGroupAnalysisState();}catch(_e){}
+  initRows();
+  const restoring=restoreTicket(game);
+  renderSim();
+  await restoring;
+  if(game!==cur)return false;
+  renderSim();
+  try{resetBanner();}catch(_e){}
+  return true;
+}
+window.LotoTicket=Object.freeze({
+  game:()=>cur,
+  rows:()=>rows,
+  rowHasWork,
+  hasWork:()=>rows.some(rowHasWork),
+  snapshot:()=>{try{if(window.LotoCourtApp&&typeof window.LotoCourtApp.flushSession==='function')window.LotoCourtApp.flushSession();}catch(_e){}flushCourtRecords();return JSON.parse(ticketPayload());},
+  load:loadTicketRecord,
+  ready:()=>ticketRestoring.catch(()=>{}),
+  detachSessions:()=>{flushCourtRecords();clearTimeout(courtSaveTimer);courtSessions=Object.create(null);courtDirty=new Set();courtRemoved=new Set();},
+  dropSessions:(game,keys)=>{for(const key of keys||[])try{storageDrop(COURT_RECORD_KEY(game,key));}catch(_e){}},
+  ticketRecord:async game=>{try{const stored=await withTimeout(storageGet(TICKET_KEY(game),true));const record=stored?JSON.parse(stored.value):null;return record&&record.v===1?record:null;}catch(_e){return null;}},
+  get:async key=>{try{const stored=await withTimeout(storageGet(key,true));return stored?stored.value:null;}catch(_e){return null;}},
+  set:(key,value)=>{try{return storageSet(key,value,true).catch(()=>{});}catch(_e){return Promise.resolve();}},
+  rowSnapshot:ticketRowSnapshot,
+  createProv:(row,source,game)=>{try{return createRowProv(row,source,game);}catch(_e){return null;}},
+  maxRows:MAX_ROWS,
+});
+let worksetsLoading=null;
+function loadWorksets(){
+  if(window.LotoWorksets)return Promise.resolve(window.LotoWorksets);
+  if(!worksetsLoading){
+    const copy=Promise.resolve(window.LotoI18n?.loadPart?.('court')).catch(()=>null);
+    worksetsLoading=Promise.all([copy,loadRuntimeScript('worksets.js')]).then(()=>{
+      if(!window.LotoWorksets)throw new Error('worksets_missing');
+      return window.LotoWorksets;
+    }).catch(error=>{worksetsLoading=null;throw error;});
+  }
+  return worksetsLoading;
+}
+async function worksetsForGame(game){
+  if(window.LotoWorksets){window.LotoWorksets.onGame(game);return;}
+  try{
+    const stored=await withTimeout(storageGet('worksets_'+game,true));
+    const record=stored&&stored.value?JSON.parse(stored.value):null;
+    if(game===cur&&record&&Array.isArray(record.tabs)&&record.tabs.length>1)await loadWorksets();
+  }catch(_e){}
+}
+function guardTicketReplace(source,apply,options){
+  if(window.LotoWorksets)return window.LotoWorksets.incoming(source,apply,options);
+  if(!rows.some(rowHasWork))return apply();
+  return loadWorksets().then(ws=>ws.incoming(source,apply,options),()=>{
+    return customConfirm('Ряды на экране и история их проверок будут удалены. Это действие нельзя отменить.','Заменить текущие ряды',{title:'На экране ваша работа'}).then(ok=>ok?apply():false);
+  });
+}
+window.guardTicketReplace=guardTicketReplace;
 
 const loadROI=()=>{try{return JSON.parse(localStorage.getItem(ROI_KEY()))||{spent:0,won:0}}catch{return{spent:0,won:0}}};
 const saveROI=o=>localStorage.setItem(ROI_KEY(),JSON.stringify(o));
@@ -1233,6 +1311,7 @@ function updateThemeColor(){
 window.updateThemeColor=updateThemeColor;
 function selLot(id){
   if(!LOTS[id])return;
+  if(id!==cur){try{flushTicketNow();}catch(_e){}}
   syncRulesFromConfig(id);
   cur=id;lastDraw=null;CROWD_cache=null;const _wc=document.getElementById('wb-crowd');if(_wc)_wc.innerHTML='';
   document.body.setAttribute('data-game',id);
@@ -1242,7 +1321,8 @@ function selLot(id){
   renderLotteryNav();
   renderHero();
   initRows();renderSim();resetBanner();buildCheckFields();renderFavs();renderWheelBuilder();renderSavedDrawOptions();updateFilterDefaults();
-  restoreTicket(id);
+  ticketRestoring=restoreTicket(id);
+  worksetsForGame(id);
   const nd=nextDraw(id);
   document.getElementById('ndb-sub').textContent=nd.dateStr+' · '+nd.timeLabel;
   document.getElementById('ndb').className='ndb '+L().cls;
@@ -1266,7 +1346,7 @@ function drawnBonusCount(l){return l.offBo||l.pBo||0;}
 function drawBonusFromMainPool(l){return !drawBonusCount(l)&&drawnBonusCount(l)>0;}
 function drawDrawnBonus(l,dM){return drawnBonusCount(l)>0?rnd(l.bB,drawnBonusCount(l),drawBonusFromMainPool(l)?dM:[]):[];}
 
-function renderSim(){rows.forEach(row=>window.LotoWorkingSet?.identify(row,cur));updatePickLabels();renderRows();renderMainGrid();renderBonusCol();renderSimBtns();updateHdr();scheduleTicketSave();window.LotoWorkingSet?.sync();}
+function renderSim(){rows.forEach(row=>window.LotoWorkingSet?.identify(row,cur));updatePickLabels();renderRows();renderMainGrid();renderBonusCol();renderSimBtns();updateHdr();scheduleTicketSave();window.LotoWorkingSet?.sync();window.dispatchEvent(new Event('loto:rowsrendered'));}
 
 function updatePickLabels(){
   const l=L();
@@ -1491,9 +1571,11 @@ function ensureUniqueGeneratedRows(gen,l=L()){
   saveModelHistory(l,[...history,...added]);
   return out;
 }
-function fillOne(){
+async function fillOne(){
+  if(rowHasWork(rows[act])&&!(await customConfirm('У этого ряда есть история проверок и решений. Новые случайные числа заменят его числа.','Заменить',{title:'Заменить числа ряда?'})))return;
   clearWheelStatus();
   const l=L(),row=rows[act];
+  if(!row)return;
   const dBo=drawBonusCount(l);
   row.m=rnd(l.mB,l.pM);if(dBo>0)row.b=rnd(l.bB,dBo);
   setRowProvenance(row,{sourceType:'HOME_GENERATOR',modelId:'rnd'});
@@ -1936,19 +2018,34 @@ function renderRowProvenance(){
   box.replaceChildren();
   if(!ui||!row){box.hidden=true;return;}
   ensureManualProvenance(row,l);
-  const button=(text,kind)=>{const b=document.createElement('button');b.type='button';b.className='row-prov-btn';b.setAttribute('data-court-open',kind);b.setAttribute('data-row',String(act));b.textContent=text;return b;};
-  const label=document.createElement('span');label.className='row-prov-label';
+  const button=(icon,text,kind,context='')=>{
+    const b=document.createElement('button');b.type='button';b.className='row-prov-btn';b.setAttribute('data-court-open',kind);b.setAttribute('data-row',String(act));
+    const i=document.createElement('span');i.className='row-prov-ico';i.setAttribute('aria-hidden','true');i.textContent=icon;
+    const t=document.createElement('span');t.className='row-prov-text';t.textContent=text;
+    b.append(i,t);
+    if(context){b.setAttribute('aria-label',`${text} · ${context}`);b.title=context;}
+    return b;
+  };
+  const label=document.createElement('span');
   if(row.m.length===l.pM){
     const prov=ui.provenanceOf(row,cur),badge=ui.defenseBadge(prov);
     const review=ui.reviewStatus?ui.reviewStatus(row):null;
     const status=review&&review.state==='done'?appText('Разобран')
       :review&&review.state==='in_progress'?appText(`Разбирается · нерешённых: ${review.pending}`):'';
-    label.textContent=appText(`Ряд ${act+1}`)+(status?' · '+status:'')+(badge?' · '+badge:'');
-    box.append(label,button('🔍 '+appText(review&&review.reviewed?'Рассмотреть снова':'Анализ'),'row'),button('🕘 '+appText('История'),'row-history'),button('🗑 '+appText('Очистить'),'clear-ticket'));
+    const context=appText(`Ряд ${act+1}`)+(status?' · '+status:'')+(badge?' · '+badge:'');
+    label.className='row-prov-label row-prov-sr';label.textContent=context;
+    const analyze=button('🔍',appText('Анализ'),'row',context);
+    if(review&&review.reviewed)analyze.setAttribute('aria-label',`${appText('Рассмотреть снова')} · ${context}`);
+    if(review&&review.state==='done'||review&&review.state==='in_progress'&&review.pending>0){
+      const mark=document.createElement('span');mark.className='row-prov-mark'+(review.state==='done'?' is-done':'');mark.setAttribute('aria-hidden','true');
+      mark.textContent=review.state==='done'?'✓':String(review.pending);analyze.append(mark);
+    }
+    box.append(label,analyze,button('🕘',appText('История'),'row-history',appText(`Ряд ${act+1}`)),button('🗑',appText('Очистить'),'clear-ticket'));
   }else{
-    label.textContent=`${act+1} · ${appText('Ряд не заполнен')}`;
-    box.append(label,button('👥 '+appText('Ряды от присяжных'),'generate'));
-    if(rows.some(r=>(r.m||[]).length||(r.b||[]).length))box.append(button('🗑 '+appText('Очистить'),'clear-ticket'));
+    const context=`${appText(`Ряд ${act+1}`)} · ${appText('Ряд не заполнен')}`;
+    label.className='row-prov-label row-prov-sr';label.textContent=context;
+    box.append(label,button('👥',appText('Ряды от присяжных'),'generate',context));
+    if(rows.some(r=>(r.m||[]).length||(r.b||[]).length))box.append(button('🗑',appText('Очистить'),'clear-ticket'));
   }
   box.hidden=false;
 }
@@ -1977,6 +2074,9 @@ function normalizeGeneratedRows(gen,l=L()){
   return (Array.isArray(gen)?gen:[]).slice(0,MAX_ROWS).map(r=>normalizeGeneratedRow(r,l));
 }
 function setGeneratedRows(gen,status,unique=false,origin,source){
+  return guardTicketReplace(source||provSourceFromOrigin(origin)||{rows:gen},()=>putGeneratedRows(gen,status,unique,origin,source));
+}
+function putGeneratedRows(gen,status,unique=false,origin,source){
   clearGroupAnalysisState();
   const alreadyIssued=Array.isArray(gen)&&gen.length>0&&gen.every(r=>r&&r._uniqueIssued);
   rows=unique&&!alreadyIssued?ensureUniqueGeneratedRows(gen,L()):normalizeGeneratedRows(gen,L());
@@ -2404,6 +2504,7 @@ async function applyWheelBuilder(){
   if(pool.length<l.pM){showFeedback('Недостаточно чисел',`Выберите минимум ${l.pM} главных чисел для ${lotteryName(cur)}.`,'⚠️',3200);return;}
   const built=buildGuaranteedWheel(pool,l.pM,t,MAX_ROWS);
   const draws=await loadD(cur);
+  if(!(await guardTicketReplace({kind:'model',modelId:'wheel'},()=>true)))return;
   rows=built.rows.map(m=>({m,b:genBonus(l,draws,'freq')}));
   if(!rows.length)rows=[randomFilteredRow(l,draws)];
   act=0;renderSim();resetBanner();
@@ -2434,6 +2535,7 @@ async function applyWheelMatrix(){
     return {...matrix,draws};
   });
   if(!built)return;
+  if(!(await guardTicketReplace({kind:'model',modelId:'wheel'},()=>true)))return;
   rows=filterGeneratedRows(built.rows,count,l,built.draws);
   if(!rows.length)rows=[nr()];
   attachRowProvenance(rows,{sourceType:'WHEEL_MATRIX'});
@@ -2842,6 +2944,12 @@ async function renderFavs(){
 }
 
 async function useFav(i){
+  let fav=null;
+  try{fav=(await loadFav())[i]||null;}catch(_e){fav=null;}
+  if(!fav)return;
+  return guardTicketReplace({kind:'fav',rows:fav.rows,name:fav.name},()=>putFavRows(i));
+}
+async function putFavRows(i){
   const loaded=await withBusy('Загрузка сохранённых комбинаций…',async()=>{
     const favs=await loadFav();
     if(!favs[i])return false;
@@ -4421,6 +4529,9 @@ function renderGen(){
 }
 
 function useGen(){
+  return guardTicketReplace({sourceType:'HOME_GENERATOR',modelId:sgAlgo},putSgRows);
+}
+function putSgRows(){
   rows=ensureUniqueGeneratedRows(sgGen.map(g=>({m:[...g.m],b:[...g.b]})),L());
   if(!rows.length)rows=[nr()];
   attachRowProvenance(rows,{sourceType:'HOME_GENERATOR',modelId:sgAlgo});
@@ -4492,7 +4603,7 @@ function customConfirm(msg,okLabel,options={}){
     if(closeBtn)closeBtn.setAttribute('aria-label',appText('Закрыть'));
     ov.__lotoClose=()=>ccAnswer(false);
     let ccTopZ=0;
-    document.querySelectorAll('[id$="-ov"].show').forEach(o=>{if(o===ov)return;const z=parseInt(getComputedStyle(o).zIndex,10);if(Number.isFinite(z)&&z>ccTopZ)ccTopZ=z;});
+    document.querySelectorAll('[id$="-ov"].show,.onboarding-overlay').forEach(o=>{if(o===ov)return;const z=parseInt(getComputedStyle(o).zIndex,10);if(Number.isFinite(z)&&z>ccTopZ)ccTopZ=z;});
     ov.style.zIndex=String(Math.max(500,ccTopZ+10));
     if(window.LotoModals)window.LotoModals.openModal('cc-ov');else ov.classList.add('show');
   });
@@ -7054,7 +7165,7 @@ async function JC_continue(){
 }
 (function(){
   var TRANSIENT={'busy-ov':1,'aved-ov':1};
-  var NESTED={'qab-ov':1,'cc-ov':1,'period-ov':1,'court-layer-ov':1,'accq-ov':1,'cal-ov':1};
+  var NESTED={'qab-ov':1,'cc-ov':1,'period-ov':1,'court-layer-ov':1,'accq-ov':1,'cal-ov':1,'ws-ov':1};
   var CRITICAL={
     'cc-ov':1,'fb-ov':1,'prev-ov':1,'pro-ov':1,'mres-ov':1,'jc-ov':1,'court-ov':1,
     'cons-ov':1,'qa-ov':1,'adv-ov':1,'sup-ov':1,'pdx-ov':1,'matrix-ov':1,
