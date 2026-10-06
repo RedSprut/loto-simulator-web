@@ -1808,6 +1808,8 @@ async function probeOwnerDashboard(){
     });
     const body=await response.json().catch(()=>null);
     ownerProbedUser=user.id;
+    window.__lotoOwnerProbe={owner:response.status===200&&!!body&&body.owner===true};
+    try{window.dispatchEvent(new CustomEvent('loto:ownerprobe',{detail:window.__lotoOwnerProbe}));}catch(_e){}
     if(response.status===200&&body&&body.owner===true)await loadOwnerDashboard();
   }catch(_error){ }
 }
