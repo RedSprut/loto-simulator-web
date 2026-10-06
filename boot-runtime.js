@@ -16,7 +16,32 @@ document.documentElement.classList.add('loto-booting');
   setTimeout(clr,6000);})();
 window.__bootErrors=[];window.__bootErrorDetails=[];
 window.__lotoRoutePopInstalled=true;
-window.addEventListener('popstate',function(event){window.LotoNavigation?.onPopState?.(event);});
+(function(){
+  var inFlight=false,queue=[],timer=0;
+  function settled(lost){
+    window.LotoNavigation?.onTraversalsSettled?.(!!lost);
+    try{window.dispatchEvent(new CustomEvent('loto:traversalssettled',{detail:{lost:!!lost}}));}catch(_){}
+  }
+  function start(fn,args){inFlight=true;clearTimeout(timer);timer=setTimeout(lose,1000);fn.apply(history,args);}
+  function landed(){clearTimeout(timer);inFlight=false;if(queue.length){var next=queue.shift();start(next[0],next[1]);}else settled(false);}
+  function lose(){clearTimeout(timer);inFlight=false;queue=[];settled(true);}
+  ['back','forward','go'].forEach(function(name){
+    var fn=history[name];if(typeof fn!=='function')return;
+    try{history[name]=function(delta){
+      if(name==='go'&&!delta)return fn.apply(history,arguments);
+      if(inFlight){queue.push([fn,arguments]);return;}
+      start(fn,arguments);
+    };}catch(_){}
+  });
+  Object.defineProperty(window,'__lotoPendingTraversals',{get:function(){return (inFlight?1:0)+queue.length;}});
+  window.addEventListener('popstate',function(event){
+    var programmatic=inFlight;
+    try{event.lotoProgrammatic=programmatic;}catch(_){}    
+    window.LotoNavigation?.onPopState?.(event,programmatic);
+    if(programmatic)landed();
+  });
+  window.addEventListener('pageshow',function(event){if(event.persisted&&(inFlight||queue.length))lose();});
+})();
 window.onerror=function(msg,src,line,col,err){
   try{
     window.__bootErrors.push(msg+' @'+line+':'+col);
