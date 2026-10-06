@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-10-06T18:37:48.574Z",
+  "updated": "2026-10-06T21:54:36.666Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-10-03",
       "expectedLastDraw": "2026-10-03",
       "nextDrawDate": "2026-10-10",
-      "updatedAt": "2026-10-06T18:37:48.574Z",
-      "sourceUpdatedAt": "2026-10-06T18:37:48.574Z",
+      "updatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceUpdatedAt": "2026-10-06T21:54:36.666Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -36,8 +36,8 @@
       "lastDrawDate": "2026-09-30",
       "expectedLastDraw": "2026-09-30",
       "nextDrawDate": "2026-10-07",
-      "updatedAt": "2026-10-06T18:37:48.574Z",
-      "sourceUpdatedAt": "2026-10-06T18:37:48.574Z",
+      "updatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceUpdatedAt": "2026-10-06T21:54:36.666Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -51,19 +51,25 @@
       ]
     },
     "euro": {
-      "currency": "NOK",
+      "amount": "1300",
+      "prefix": "Ca. ",
+      "sub": "MILLIONER NOK",
       "cur": "NOK",
-      "lastDrawDate": "2026-10-02",
-      "expectedLastDraw": "2026-10-02",
-      "nextDrawDate": "2026-10-06",
-      "updatedAt": "2026-10-06T18:37:48.574Z",
-      "status": "unavailable",
+      "currency": "NOK",
+      "display": "Ca. 1300 MILLIONER NOK",
+      "lastDrawDate": "2026-10-06",
+      "expectedLastDraw": "2026-10-06",
+      "nextDrawDate": "2026-10-09",
+      "updatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceUpdatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceNextDraw": null,
+      "status": "fresh",
       "synced": true,
-      "source": null,
+      "source": "norsk-tipping.no",
       "sourceAttempts": [
         {
           "source": "norsk-tipping.no",
-          "ok": false,
+          "ok": true,
           "sourceUrl": "https://www.norsk-tipping.no/lotteri/eurojackpot"
         }
       ]
@@ -78,8 +84,8 @@
       "lastDrawDate": "2026-10-05",
       "expectedLastDraw": "2026-10-05",
       "nextDrawDate": "2026-10-07",
-      "updatedAt": "2026-10-06T18:37:48.574Z",
-      "sourceUpdatedAt": "2026-10-06T18:37:48.574Z",
+      "updatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceUpdatedAt": "2026-10-06T21:54:36.666Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -95,47 +101,53 @@
       "lastDrawDate": "2026-10-02",
       "expectedLastDraw": "2026-10-02",
       "nextDrawDate": "2026-10-06",
-      "updatedAt": "2026-10-06T18:37:48.574Z",
-      "sourceUpdatedAt": "2026-10-06T18:37:48.574Z",
+      "updatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceUpdatedAt": "2026-10-06T21:54:36.666Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "megamillions.com"
     },
     "euromillions": {
-      "currency": "EUR",
+      "amount": "28",
+      "prefix": "€",
+      "sub": "MILLION",
       "cur": "EUR",
-      "lastDrawDate": "2026-10-02",
-      "expectedLastDraw": "2026-10-02",
-      "nextDrawDate": "2026-10-06",
-      "updatedAt": "2026-10-06T18:37:48.574Z",
-      "status": "unavailable",
+      "currency": "EUR",
+      "display": "€28 MILLION",
+      "lastDrawDate": "2026-10-06",
+      "expectedLastDraw": "2026-10-06",
+      "nextDrawDate": "2026-10-09",
+      "updatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceUpdatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceNextDraw": "2026-10-09",
+      "status": "fresh",
       "synced": true,
-      "source": null,
-      "error": "stale amount rejected: source next-draw 2026-10-09 != computed 2026-10-06",
-      "sourceAttempts": [
-        {
-          "source": "euromillions",
-          "ok": false,
-          "error": "stale amount rejected: source next-draw 2026-10-09 != computed 2026-10-06"
-        }
-      ]
+      "source": "fdj.fr"
     },
     "superenalotto": {
-      "currency": "EUR",
+      "amount": "37.4",
+      "prefix": "€",
+      "sub": "MILLION",
       "cur": "EUR",
-      "lastDrawDate": "2026-10-03",
+      "currency": "EUR",
+      "display": "€37.4 MILLION",
+      "lastDrawDate": "2026-10-06",
       "expectedLastDraw": "2026-10-06",
       "nextDrawDate": "2026-10-08",
-      "updatedAt": "2026-10-06T18:37:48.574Z",
-      "status": "updating",
-      "synced": false,
-      "source": null,
+      "updatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceUpdatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceNextDraw": "2026-10-08",
+      "status": "fresh",
+      "synced": true,
+      "source": "superenalotto.net",
+      "sourceUrl": "https://www.superenalotto.net/",
+      "extractedText": "jackpot di giovedì vale circa 37,4 milioni di Euro",
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
           "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-3-ottobre-2026",
+          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-6-ottobre-2026",
           "error": "HTTP 403"
         },
         {
@@ -170,31 +182,8 @@
         },
         {
           "source": "superenalotto.net",
-          "ok": false,
+          "ok": true,
           "sourceUrl": "https://www.superenalotto.net/"
-        },
-        {
-          "source": "sisal.it ultima estrazione",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/superenalotto/ultima-estrazione",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it estrazioni",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/estrazioni/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it news",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/news/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "official backend",
-          "ok": false,
-          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-10-03&next=2026-10-08"
         }
       ]
     },
@@ -208,8 +197,8 @@
       "lastDrawDate": "2026-10-02",
       "expectedLastDraw": "2026-10-02",
       "nextDrawDate": "2026-10-06",
-      "updatedAt": "2026-10-06T18:37:48.574Z",
-      "sourceUpdatedAt": "2026-10-06T18:37:48.574Z",
+      "updatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceUpdatedAt": "2026-10-06T21:54:36.666Z",
       "sourceNextDraw": "2026-10-06",
       "status": "fresh",
       "synced": true,
@@ -238,8 +227,8 @@
       "lastDrawDate": "2026-10-01",
       "expectedLastDraw": "2026-10-01",
       "nextDrawDate": "2026-10-08",
-      "updatedAt": "2026-10-06T18:37:48.574Z",
-      "sourceUpdatedAt": "2026-10-06T18:37:48.574Z",
+      "updatedAt": "2026-10-06T21:54:36.666Z",
+      "sourceUpdatedAt": "2026-10-06T21:54:36.666Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
