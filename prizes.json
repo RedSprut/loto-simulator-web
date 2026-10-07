@@ -103830,6 +103830,70 @@
     ],
     "lottoMax": [
       {
+        "date": "2026-10-06",
+        "lotteryId": "lottoMax",
+        "currency": "CAD",
+        "jackpot": 75,
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 of 7",
+            "prizeAmount": null,
+            "winners": 0
+          },
+          {
+            "match": "6+1",
+            "label": "6 of 7 + Bonus",
+            "prizeAmount": 305126.3,
+            "winners": 1
+          },
+          {
+            "match": "6+0",
+            "label": "6 of 7",
+            "prizeAmount": 4640.3,
+            "winners": 67
+          },
+          {
+            "match": "5+1",
+            "label": "5 of 7 + Bonus",
+            "prizeAmount": 1036.1,
+            "winners": 195
+          },
+          {
+            "match": "5+0",
+            "label": "5 of 7",
+            "prizeAmount": 110.5,
+            "winners": 4103
+          },
+          {
+            "match": "4+1",
+            "label": "4 of 7 + Bonus",
+            "prizeAmount": 53.4,
+            "winners": 7070
+          },
+          {
+            "match": "4+0",
+            "label": "4 of 7",
+            "prizeAmount": 20,
+            "winners": 95574
+          },
+          {
+            "match": "3+1",
+            "label": "3 of 7 + Bonus",
+            "prizeAmount": 20,
+            "winners": 101781
+          },
+          {
+            "match": "3+0",
+            "label": "3 of 7",
+            "prizeAmount": null,
+            "winners": 992212
+          }
+        ],
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1276"
+      },
+      {
         "date": "2026-10-02",
         "lotteryId": "lottoMax",
         "currency": "CAD",
@@ -104729,7 +104793,7 @@
         "date": "2026-08-14",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 40,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -104787,7 +104851,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1261"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
       },
       {
         "date": "2026-08-11",
