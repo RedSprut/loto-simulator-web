@@ -206,7 +206,9 @@
     var appLot = DRUM_TO_APP[lotteryId] || lotteryId;
     try { var prevLot = currentAppId(); if (appLot && appLot !== prevLot) selLot(appLot); smartStartRecord(appLot, prevLot); } catch (e) {}
     closeDrum3D();                                           
-    try { await window.LotoTicket.ready(); await (await loadWorksets()).open3D(); } catch (e) {}
+    var room = '';
+    try { await window.LotoTicket.ready(); room = await (await loadWorksets()).open3D(); } catch (e) {}
+    if (room === 'full') return;  
     try { clearGroupAnalysisState(); } catch (e) {}
     var applied = 0, already = 0, capped = false;
     for (var i = 0; i < (combos || []).length; i++) {

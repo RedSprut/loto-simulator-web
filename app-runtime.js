@@ -445,6 +445,14 @@ function getBackendActionContext(){
     analysisWindow:{scope:IF_getScope(),count:IF_getWin(),range:IF_getRange()},
   };
 }
+function wheelPoolAllows(context){
+  const l=L(),pool=(context&&context.pool)||[],count=Number(context&&context.count)||getGenCount();
+  const most=pool.length>=l.pM?comb(pool.length,l.pM):0;
+  if(most>=count)return true;
+  showFeedback('Пул слишком мал',`Из ${pool.length} выбранных чисел можно составить только ${most} разных рядов, а запрошено ${count}. Добавьте числа в пул или выберите меньше рядов.`,'⚠️',6400);
+  return false;
+}
+window.wheelPoolAllows=wheelPoolAllows;
 function applyBackendRows(result,label){
   return guardTicketReplace({rows:backendTicketRows(result)},()=>putBackendRows(result,label));
 }
@@ -886,6 +894,7 @@ function flushTicketNow(){
   return true;
 }
 window.addEventListener('pagehide',()=>{flushTicketNow();});
+function rowHasContent(row){return !!row&&(((row.m||[]).length>0)||((row.b||[]).length>0));}
 function rowHasWork(row){
   if(!row)return false;
   if(row.manual&&((row.m||[]).length||(row.b||[]).length))return true;
@@ -915,6 +924,7 @@ window.LotoTicket=Object.freeze({
   rows:()=>rows,
   rowHasWork,
   hasWork:()=>rows.some(rowHasWork),
+  hasContent:()=>rows.some(rowHasContent),
   snapshot:()=>{try{if(window.LotoCourtApp&&typeof window.LotoCourtApp.flushSession==='function')window.LotoCourtApp.flushSession();}catch(_e){}flushCourtRecords();return JSON.parse(ticketPayload());},
   load:loadTicketRecord,
   ready:()=>ticketRestoring.catch(()=>{}),
@@ -949,9 +959,9 @@ async function worksetsForGame(game){
 }
 function guardTicketReplace(source,apply,options){
   if(window.LotoWorksets)return window.LotoWorksets.incoming(source,apply,options);
-  if(!rows.some(rowHasWork))return apply();
+  if(!rows.some(rowHasContent))return apply();
   return loadWorksets().then(ws=>ws.incoming(source,apply,options),()=>{
-    return customConfirm('Ряды на экране и история их проверок будут удалены. Это действие нельзя отменить.','Заменить текущие ряды',{title:'На экране ваша работа'}).then(ok=>ok?apply():false);
+    return customConfirm('Ряды на экране и история их проверок будут удалены. Это действие нельзя отменить.','Заменить текущие ряды',{title:'На экране ваша работа'}).then(ok=>ok?apply():(options&&typeof options.onCancel==='function'&&options.onCancel(),false));
   });
 }
 window.guardTicketReplace=guardTicketReplace;
@@ -1309,8 +1319,10 @@ function updateThemeColor(){
   }catch(e){}
 }
 window.updateThemeColor=updateThemeColor;
+let ticketOpenGame='';
 function selLot(id){
   if(!LOTS[id])return;
+  const same=id===cur&&ticketOpenGame===id;
   if(id!==cur){try{flushTicketNow();}catch(_e){}}
   syncRulesFromConfig(id);
   cur=id;lastDraw=null;CROWD_cache=null;const _wc=document.getElementById('wb-crowd');if(_wc)_wc.innerHTML='';
@@ -1320,9 +1332,9 @@ function selLot(id){
   IF_reset();CONS_reset();
   renderLotteryNav();
   renderHero();
-  initRows();renderSim();resetBanner();buildCheckFields();renderFavs();renderWheelBuilder();renderSavedDrawOptions();updateFilterDefaults();
-  ticketRestoring=restoreTicket(id);
-  worksetsForGame(id);
+  if(!same)initRows();
+  renderSim();resetBanner();buildCheckFields();renderFavs();renderWheelBuilder();renderSavedDrawOptions();updateFilterDefaults();
+  if(!same){ticketOpenGame=id;ticketRestoring=restoreTicket(id);worksetsForGame(id);}
   const nd=nextDraw(id);
   document.getElementById('ndb-sub').textContent=nd.dateStr+' · '+nd.timeLabel;
   document.getElementById('ndb').className='ndb '+L().cls;
