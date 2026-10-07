@@ -15,17 +15,17 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-07T07:33:57.527Z",
-    "sourceFetchedAt": "2026-10-07T07:33:57.527Z",
+    "generatedAt": "2026-10-07T07:37:10.828Z",
+    "sourceFetchedAt": "2026-10-07T07:37:10.828Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "47a27536f392ab03",
+    "snapshotVersion": "b60569b2dc10a004",
     "updatedAt": "2026-10-07",
     "latestDrawByGame": {
       "lotto": "2026-10-03",
       "vikinglotto": "2026-09-30",
       "eurojackpot": "2026-10-06",
       "powerball": "2026-10-05",
-      "megaMillions": "2026-10-02",
+      "megaMillions": "2026-10-06",
       "euroMillions": "2026-10-06",
       "superEnalotto": "2026-10-06",
       "lottoMax": "2026-10-06",
@@ -36,7 +36,7 @@
       "vikinglotto": 278,
       "eurojackpot": 474,
       "powerball": 1416,
-      "megaMillions": 156,
+      "megaMillions": 157,
       "euroMillions": 1047,
       "superEnalotto": 4279,
       "lottoMax": 51,
@@ -70,8 +70,8 @@
       "megaMillions": {
         "status": "ok",
         "source": "NY Open Data / Mega Millions",
-        "fetched": 2545,
-        "merged": 156
+        "fetched": 2546,
+        "merged": 157
       },
       "euroMillions": {
         "status": "ok",
@@ -7929,6 +7929,83 @@
     ],
     "megaMillions": [
       {
+        "date": "2026-10-06",
+        "main": [
+          26,
+          32,
+          42,
+          51,
+          54
+        ],
+        "bonus": [
+          22
+        ],
+        "jackpot": 345,
+        "lotteryId": "megaMillions",
+        "source": "Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-10-06",
+        "drawId": "2026-10-06T00:00:00.000",
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 345000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 2000000,
+            "winners": 2
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 20000,
+            "winners": 3
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 1000,
+            "winners": 112
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 400,
+            "winners": 298
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 20,
+            "winners": 8075
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 20,
+            "winners": 7464
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 14,
+            "winners": 57544
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 10,
+            "winners": 147915
+          }
+        ],
+        "currency": "USD",
+        "ruleVersion": "mega-70-24",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-10-02",
         "main": [
           6,
@@ -8769,83 +8846,6 @@
             "label": "0+1",
             "prizeAmount": 10,
             "winners": 134722
-          }
-        ],
-        "currency": "USD",
-        "ruleVersion": "mega-70-24",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-08-25",
-        "main": [
-          7,
-          10,
-          47,
-          48,
-          50
-        ],
-        "bonus": [
-          14
-        ],
-        "jackpot": 130,
-        "lotteryId": "megaMillions",
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-08-25",
-        "drawId": "2026-08-25T00:00:00.000",
-        "payoutTiers": [
-          {
-            "match": "5+1",
-            "label": "5+1",
-            "prizeAmount": 130000000,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "5+0",
-            "prizeAmount": 2000000,
-            "winners": 1
-          },
-          {
-            "match": "4+1",
-            "label": "4+1",
-            "prizeAmount": 20000,
-            "winners": 4
-          },
-          {
-            "match": "4+0",
-            "label": "4+0",
-            "prizeAmount": 1000,
-            "winners": 142
-          },
-          {
-            "match": "3+1",
-            "label": "3+1",
-            "prizeAmount": 400,
-            "winners": 344
-          },
-          {
-            "match": "3+0",
-            "label": "3+0",
-            "prizeAmount": 20,
-            "winners": 8320
-          },
-          {
-            "match": "2+1",
-            "label": "2+1",
-            "prizeAmount": 20,
-            "winners": 7473
-          },
-          {
-            "match": "1+1",
-            "label": "1+1",
-            "prizeAmount": 14,
-            "winners": 58051
-          },
-          {
-            "match": "0+1",
-            "label": "0+1",
-            "prizeAmount": 10,
-            "winners": 134582
           }
         ],
         "currency": "USD",
