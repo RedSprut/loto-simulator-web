@@ -961,7 +961,7 @@ function guardTicketReplace(source,apply,options){
   if(window.LotoWorksets)return window.LotoWorksets.incoming(source,apply,options);
   if(!rows.some(rowHasContent))return apply();
   return loadWorksets().then(ws=>ws.incoming(source,apply,options),()=>{
-    return customConfirm('Ряды на экране и история их проверок будут удалены. Это действие нельзя отменить.','Заменить текущие ряды',{title:'На экране ваша работа'}).then(ok=>ok?apply():(options&&typeof options.onCancel==='function'&&options.onCancel(),false));
+    return customConfirm('Ряды на экране и история их проверок будут удалены. Это действие нельзя отменить.','Заменить текущие ряды',{title:'На экране ваша работа'}).then(ok=>ok?(LotoWinMatch.removed(cur,rows,'rows'),apply()):(options&&typeof options.onCancel==='function'&&options.onCancel(),false));
   });
 }
 window.guardTicketReplace=guardTicketReplace;
@@ -1891,6 +1891,7 @@ function clearTicketNow(){
   clearTimeout(ticketSaveTimer);clearTimeout(courtSaveTimer);
   for(const key of Object.keys(courtSessions)){try{storageDrop(COURT_RECORD_KEY(game,key));}catch(_e){}}
   courtSessions=Object.create(null);courtDirty=new Set();courtRemoved=new Set();
+  if(window.LotoWinMatch)LotoWinMatch.removed(game,rows,'rows');
   initRows();
   try{if(typeof clearGroupAnalysisState==='function')clearGroupAnalysisState();}catch(_e){}
   renderSim();
@@ -2010,6 +2011,7 @@ function provSourceFromOrigin(origin){
 function markRowManual(row){
   if(!row)return;
   if(row.prov&&row.prov.id){
+    if(window.LotoWinMatch)LotoWinMatch.edited(row.prov.id);
     row.provParent=row.prov.id;
     row.provPrev=[...(Array.isArray(row.provPrev)?row.provPrev:[]),row.prov].slice(-PROV_CHAIN_MAX);
   }
@@ -2024,6 +2026,7 @@ function ensureManualProvenance(row,l=L()){
   if(!row||!row.manual||row.prov||row.m.length!==l.pM||row.b.length!==drawBonusCount(l))return;
   const prov=createRowProv(row,{sourceType:'MANUAL_ENTRY',parentId:row.provParent});
   if(prov)row.prov=prov;
+  if(prov&&window.LotoWinMatch&&LotoWinMatch.ready)LotoWinMatch.record(cur,[row],{source:'manual'});
 }
 function clearProvChain(row){if(row){delete row.provParent;delete row.provPrev;}}
 function renderRowProvenance(){
@@ -2064,17 +2067,6 @@ function renderRowProvenance(){
   box.hidden=false;
 }
 window.addEventListener('loto:languagechange',()=>{try{renderRowProvenance();}catch(_e){}});
-function wmProvenanceHtml(match,fallbackLabel){
-  const ui=window.LotoCourtUI;
-  let label=fallbackLabel,lines=[];
-  if(ui&&match&&match.prov){
-    const prov=ui.provenanceOf({m:match.userMain,prov:match.prov},match.gameId);
-    if(!prov.unavailable){label=ui.sourceLabel(prov);lines=ui.attributionLines(match.prov,match.userMain,match.drawMain,match.gameId);}
-  }
-  let html=`<div style="margin-top:4px;font-size:12.5px;opacity:.8">${escapeHtml(appText('Источник'))}: <span data-i18n-ignore>${escapeHtml(label)}</span></div>`;
-  if(lines.length)html+=`<div style="margin-top:8px;font-size:12.5px;opacity:.85">${escapeHtml(appText('Происхождение совпавших чисел'))}</div><ul class="wm-attr" data-i18n-ignore>${lines.map(line=>`<li>${escapeHtml(line)}</li>`).join('')}</ul><div style="font-size:12px;opacity:.7">${escapeHtml(appText('Это описание происхождения чисел, а не доказательство предсказания.'))}</div>`;
-  return html;
-}
 function normalizeGeneratedRow(row,l=L()){
   const out={
     rowId:row?.rowId,lotteryId:row?.lotteryId,createdAt:row?.createdAt,sourceRowId:row?.sourceRowId,
@@ -2920,6 +2912,7 @@ async function saveFav(options){
   list.forEach(r=>ensureManualProvenance(r,l));
   favs.unshift({name,rows:normalizeGeneratedRows(list,l).map(r=>r.prov?{m:[...r.m],b:[...r.b],prov:r.prov}:{m:[...r.m],b:[...r.b]}),lot:cur});
   await saveFavs(favs.slice(0,10));
+  if(window.LotoWinMatch)favs.slice(10).forEach(f=>LotoWinMatch.removed(f.lot,f.rows,'saved'));
   appUsage('combination_saved','ticket',{rows:list.length});
   try{if(window.LotoWinMatch&&LotoWinMatch.ready)normalizeGeneratedRows(list,l).forEach(r=>LotoWinMatch.markSavedPlayed(cur,r.m,r.b,false));}catch(_e){}
   await renderFavs();
@@ -3003,7 +2996,9 @@ async function copyFav(i,btn){
 
 async function delFav(i){
   if(!(await customConfirm('Удалить из избранного?','Удалить',{title:'Удалить комбинацию?'})))return;
-  const favs=await loadFav();favs.splice(i,1);await saveFavs(favs);await renderFavs();
+  const favs=await loadFav();const gone=favs.splice(i,1)[0];await saveFavs(favs);
+  if(gone&&window.LotoWinMatch)LotoWinMatch.removed(gone.lot,gone.rows,'saved');
+  await renderFavs();
 }
 
 async function selAT(id){
@@ -5826,18 +5821,13 @@ const LotoWinMatch=(function(){
   const NKEY='loto_match_notified_v2',MIGK='loto_rowhist_migrated_v2';
   const T=s=>{try{return (window.LotoI18n&&window.LotoI18n.translate)?window.LotoI18n.translate(s):s;}catch(_e){return s;}};
   const jget=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(_e){return d;}};
-  const jset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(_e){}};
+  const jset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(_e){return false;}};
   const loadHist=()=>ON?jget(CORE.HISTORY_KEY,[]):[];
-  const saveHist=a=>{if(ON)jset(CORE.HISTORY_KEY,CORE.retentionCleanup(a,Date.now()));};
-  const loadMatches=()=>jget(CORE.MATCH_KEY,[]);
-  const saveMatches=a=>jset(CORE.MATCH_KEY,(a||[]).slice(0,200));
-  let shown=null;
-  const gname=id=>{try{const l=LOTS[id];return l&&(l.short||l.name)||id;}catch(_e){return id;}};
-  const SRC={drum3d:'3D-симулятор',model:'Математическая модель',freq:'Модель частоты',bal:'Комбинированная модель',rnd:'Случайный генератор',man:'Сегментный охват',wheel:'Колёсная система',smartgen:'Генератор комбинаций',markov:'Модель Маркова',gauss:'Модель Гаусса',delta:'Интервальная модель',bayes:'Модель Байеса',overdue:'Gap-анализ',phys:'Физическая модель',chaos:'Модель хаоса',quantum:'Квантовая модель',paradox:'Система парадоксов','world-hot':'Мировой профиль','world-mix':'Мировой микс',manual:'Ручной ввод',saved:'Сохранённая комбинация',legacy:'Сохранённая комбинация',ticket:'Сыгранный билет',consensus:'Консенсус моделей',judge:'Верховный судья',generator:'Генератор'};
-  const srcLabel=e=>e.played?'Сыгранный билет':(SRC[e.modelId]||SRC[e.source]||'Сохранённая комбинация');
+  const saveHist=a=>ON&&jset(CORE.HISTORY_KEY,CORE.retentionCleanup(a,Date.now()));
+  const loadMatches=()=>{const v=jget(CORE.MATCH_KEY,[]);return Array.isArray(v)?v:[];};
+  const saveMatches=a=>{const ok=jset(CORE.MATCH_KEY,ON?CORE.compactArchive(a):(a||[]));sync();return ok;};
   function sched(id){const l=LOTS[id];if(!l)return null;return{days:l.drawDays||[],tz:l.timeZone||'UTC',time:l.dl||'23:59'};}
   function targetDraw(id){try{const s=sched(id);return s?CORE.nextDrawDate(s,new Date()):null;}catch(_e){return null;}}
-  function fmtMoney(amount,cur){try{return new Intl.NumberFormat(appLocale?appLocale():'en').format(amount)+(cur?(' '+cur):'');}catch(_e){return String(amount)+(cur?(' '+cur):'');}}
   function record(id,rowList,origin){ if(!ON)return; try{
     id=id||cur; if(!Array.isArray(rowList)||!rowList.length)return; const l=LOTS[id]; if(!l)return;
     const clean=rowList.map(r=>({m:(r&&(r.m||r.main))||[],b:(r&&(r.b||r.bonus))||[],prov:(r&&r.prov)||null})).filter(r=>Array.isArray(r.m)&&r.m.length===l.pM);
@@ -5845,12 +5835,16 @@ const LotoWinMatch=(function(){
     let h=loadHist(); h=CORE.recordRows(h,id,clean,origin||{source:'generator'},{now:Date.now(),targetDrawDate:targetDraw(id)}); saveHist(h);
   }catch(_e){} }
   function markSavedPlayed(id,m,b,played){ if(!ON)return; try{
-    const l=LOTS[id]; if(!l)return; const mm=CORE.sortNums(m),bb=CORE.sortNums(b);
+    const l=LOTS[id]; if(!l)return; const mm=CORE.sortNums(m),bb=CORE.sortNums(b),now=Date.now();
     let h=loadHist(); let hit=h.find(e=>e.gameId===id&&CORE.sortNums(e.main).join('-')===mm.join('-')&&CORE.sortNums(e.bonus).join('-')===bb.join('-'));
-    if(!hit){h=CORE.recordRows(h,id,[{m:mm,b:bb}],{source:'saved',saved:true,played:!!played},{now:Date.now(),targetDrawDate:targetDraw(id)});}
-    else{hit.saved=true;hit.played=!!played;}
+    if(!hit){h=CORE.recordRows(h,id,[{m:mm,b:bb}],{source:'saved',saved:true,played:!!played},{now,targetDrawDate:targetDraw(id)});}
+    else{if(!hit.saved)CORE.pushLife(hit,'s',now);if(played&&!hit.played)CORE.pushLife(hit,'p',now);hit.saved=true;hit.played=!!played;}
     saveHist(h);
   }catch(_e){} }
+  function removed(id,rowList,where){ if(!ON)return; try{
+    const h=loadHist(); if(CORE.markLife(h,id||cur,(rowList||[]).map(r=>({m:r&&(r.m||r.main),b:r&&(r.b||r.bonus)})),where==='saved'?'f':'x',Date.now()))saveHist(h);
+  }catch(_e){} }
+  function edited(provId){ if(!ON||!provId)return; try{ const h=loadHist(); if(CORE.markEdited(h,provId,Date.now()))saveHist(h); }catch(_e){} }
   async function migrateFavorites(){ if(!ON)return; try{
     if(localStorage.getItem(MIGK))return;
     let favs=[]; try{favs=await loadFav();}catch(_e){favs=[];}
@@ -5870,13 +5864,13 @@ const LotoWinMatch=(function(){
   function resolvePending(store,drawsByGame){ try{
     for(const m of store){ if(m.payoutState==='available')continue;
       const draws=drawsByGame[m.gameId]; if(!draws)continue; const d=draws.find(x=>x&&x.date===m.drawDate); if(!d)continue;
-      const po=payoutFor(d,m); if(po&&po.amount!=null){m.payout=po.amount;m.payoutState='available';m.winners=po.winners;}
-      else m.payoutState=prizeTableUnavailable(d,draws)?'unavailable':'pending';
+      const po=payoutFor(d,m); if(po&&po.amount>0){m.payout=po.amount;m.payoutState='available';m.winners=po.winners;}
+      else m.payoutState=(po&&po.amount===0)||prizeTableUnavailable(d,draws)?'unavailable':'pending';
     }
   }catch(_e){} }
   async function scan(){ if(!ON)return; try{
     await migrateFavorites();
-    let h=loadHist(); const store=loadMatches(); const notified=jget(NKEY,[]); const drawsByGame={};
+    let h=loadHist(); const notified=jget(NKEY,[]); const drawsByGame={}; const marks={};
     const fresh=[]; let changed=false;
     for(const id of Object.keys(LOTS)){ const l=LOTS[id]; let draws; try{draws=await loadD(id);}catch(_e){continue;}
       if(!draws||!draws.length)continue; drawsByGame[id]=draws;
@@ -5886,74 +5880,71 @@ const LotoWinMatch=(function(){
         const settled=[];
         const ms=CORE.scanDrawAgainstHistory(h,drawObj,l,checkPrize,sched(id),e=>settled.push(e)); changed=true;
         if(settled.length)LotoPersonaLedger.record(settled,drawObj);
-        for(const m of ms){ const po=payoutFor(d,m); if(po&&po.amount!=null){m.payout=po.amount;m.payoutState='available';m.winners=po.winners;} fresh.push(m); }
+        for(const m of ms){ const po=payoutFor(d,m); if(po&&po.amount>0){m.payout=po.amount;m.payoutState='available';m.winners=po.winners;} m.foundAt=Date.now(); fresh.push(m); }
       }
-      if(draws[0]&&draws[0].date)localStorage.setItem(lk,draws[0].date);
+      if(draws[0]&&draws[0].date)marks[lk]=draws[0].date;
     }
     LotoPersonaLedger.backfill(h,drawsByGame);
+    const merged=CORE.mergeArchive(loadMatches(),fresh);
+    CORE.refreshArchive(merged.store,h);
+    resolvePending(merged.store,drawsByGame);
+    if(!saveMatches(merged.store))return;  
     if(changed)saveHist(h);
-    for(const m of fresh){ if(!store.find(x=>x.id===m.id))store.unshift(m); }
-    resolvePending(store,drawsByGame); saveMatches(store);
-    const toNotify=fresh.filter(m=>notified.indexOf(CORE.notificationKey(m))<0);
-    if(toNotify.length)present(toNotify,notified);
+    for(const k of Object.keys(marks))try{localStorage.setItem(k,marks[k]);}catch(_e){}
+    const toNotify=merged.store.filter(m=>m.unread===true&&notified.indexOf(CORE.notificationKey(m))<0);
+    if(toNotify.length)await present(toNotify,notified);
   }catch(e){ try{window.LotoTelemetry&&typeof window.LotoTelemetry.captureException==='function'&&window.LotoTelemetry.captureException(e,'winmatch-scan');}catch(_e){} } }
-  function present(matches,notified){ try{
+  async function present(matches,notified){ try{
     const s=CORE.summarize(matches);
     for(const m of matches)notified.push(CORE.notificationKey(m));
     jset(NKEY,notified.slice(-500));
+    const gname=id=>{try{const l=LOTS[id];return l&&(l.short||l.name)||id;}catch(_e){return id;}};
     const title=s.playedWins?T('У вас выигрыш'):T('Есть призовое совпадение');
     const body=title+' · '+gname(matches[0].gameId)+(matches.length>1?(' · '+matches.length):'');
     try{if(window.LotoNotifCenter&&LotoNotifCenter.add){const first=matches[0];LotoNotifCenter.add({id:'wm:'+CORE.notificationKey(first),lotteryId:first.gameId,eventType:'saved_ticket_results',drawId:first.drawId!=null?first.drawId:first.drawDate,title,body,createdAt:new Date().toISOString(),payload:{winMatch:true,played:s.playedWins>0,title,body,matchId:matches.length===1?first.id:null,matchIds:matches.map(m=>m.id),drawDate:first.drawDate}});}}catch(_e){}
     if(notifyAllowed())try{ new Notification('🎰 Lotto Simulator',{body}); }catch(_e){}
-    if(matches.length===1)openDetail(matches[0].id); else renderSummary(matches);
+    try{await ui();}catch(_e){}
+    if(matches.length===1)openDetail(matches[0].id); else openArchive({fresh:matches.map(m=>m.id)});
   }catch(_e){} }
-  function ballRow(nums,hitSet,cls,bcls,bonus,bhit){ let h=(nums||[]).map(n=>`<div class="hball ${cls}" style="${hitSet.has(n)?'outline:3px solid #37d67a;outline-offset:1px;font-weight:900':'opacity:.55'}">${n}</div>`).join('');
-    if(bonus&&bonus.length){h+=`<div class="fav-sep" aria-hidden="true">|</div>`+bonus.map(n=>`<div class="hball ${bcls}" style="${bhit.has(n)?'outline:3px solid #37d67a;outline-offset:1px;font-weight:900':'opacity:.55'}">${n}</div>`).join('');}
-    return `<div class="fav-rowballs" style="flex-wrap:wrap">${h}</div>`; }
-  function detailHtml(m){ const l=LOTS[m.gameId]||{}; const cls=(l.cls||'lotto')+'-m',bcls=(l.cls||'lotto')+'-b';
-    const dMain=new Set(m.drawMain||[]),dBon=new Set(m.drawBonus||[]);
-    const created=new Date(m.createdAt); const cdate=isNaN(created)?'':created.toLocaleDateString(appLocale?appLocale():'en')+' '+created.toLocaleTimeString(appLocale?appLocale():'en',{hour:'2-digit',minute:'2-digit'});
-    const bonusGame=(l.pBo||l.offBo||0)>0;
-    const extraFromMain=drawBonusFromMainPool(l);
-    const bonusHit=extraFromMain?(m.userMain||[]).filter(n=>dBon.has(n)).length:m.bonusHit;
-    const title=m.played?('🎉 '+T('У вас выигрыш!')):('🎯 '+T('Есть призовое совпадение'));
-    const matchLine=T('Совпало')+': <b data-i18n-ignore>'+m.mainHit+(bonusGame?(' + '+bonusHit):'')+'</b>';
-    let payoutLine;
-    if(m.payoutState==='available'&&m.payout!=null){ payoutLine=(m.played?T('Выигрыш'):T('Приз этой категории в тираже'))+': <b data-i18n-ignore>'+fmtMoney(m.payout,l.currency)+'</b>'; }
-    else if(m.payoutState==='unavailable'){ payoutLine='<span style="opacity:.85">'+T('Данные недоступны')+'</span>'; }
-    else { payoutLine='<span style="opacity:.85">'+T('Совпадение подтверждено. Размер приза этой категории ещё не опубликован.')+'</span>'; }
-    const statusLine=(m.played?('✅ '+T('Отмечено как сыгранный билет')):('ℹ️ '+T('Эта комбинация не была отмечена как сыгранный билет.')));
-    return `<div class="cele-title" style="font-size:20px">${title}</div>`+
-      `<div style="margin-top:12px;font-size:14px;line-height:1.7">`+
-      `<div><b data-i18n-ignore>${escapeHtml(gname(m.gameId))}</b> · ${T('Тираж')} <span data-i18n-ignore>${escapeHtml(m.drawDate)}${m.drawId!=null?(' · #'+m.drawId):''}</span></div>`+
-      `<div style="margin-top:10px;opacity:.85">${T('Ваша комбинация')}${m.played?'':(' · '+T(srcLabel(m)))}${cdate?(' · <span data-i18n-ignore>'+escapeHtml(cdate)+'</span>'):''}</div>`+
-      ballRow(m.userMain,extraFromMain?new Set([...dMain,...dBon]):dMain,cls,bcls,bonusGame?m.userBonus:null,dBon)+
-      `<div style="margin-top:8px;opacity:.85">${T('Выигрышные числа')}</div>`+
-      ballRow(m.drawMain,new Set(m.userMain),cls,bcls,bonusGame?m.drawBonus:null,new Set(extraFromMain?m.userMain:m.userBonus))+
-      `<div style="margin-top:10px">${matchLine}</div>`+
-      `<div>${T('Призовая категория')}: <b>${escapeHtml(T(m.tier||''))}</b></div>`+
-      `<div style="margin-top:6px">${payoutLine}</div>`+
-      `<div style="margin-top:10px;font-size:12.5px;opacity:.8">${statusLine}</div>`+
-      wmProvenanceHtml(m,T(srcLabel(m)))+
-      `</div>`; }
-  function renderSummary(matches){ const s=CORE.summarize(matches);
-    const head=`<div class="cele-title" style="font-size:20px">🎯 ${T('Найдено призовых совпадений')}: <span data-i18n-ignore>${s.total}</span></div>`+
-      `<div style="margin-top:8px;font-size:13.5px;opacity:.9">`+
-      (s.playedWins?('🎉 <b data-i18n-ignore>'+s.playedWins+'</b> '+T('по сыгранным билетам')+'<br>'):'')+
-      (s.generatedMatches?('🎯 <b data-i18n-ignore>'+s.generatedMatches+'</b> '+T('среди созданных/сохранённых комбинаций')):'')+`</div>`;
-    const list=matches.map(m=>`<button class="acc-btn acc-btn-soft wide" style="margin-top:8px;text-align:left;display:block;width:100%" data-loto-event-click="LotoWinMatch.openDetail('${m.id}')"><b data-i18n-ignore>${escapeHtml(gname(m.gameId))}</b> · <span data-i18n-ignore>${escapeHtml(m.drawDate)}</span> · ${m.played?('🎉 '+T('выигрыш')):('🎯 '+T('совпадение'))} · <span data-i18n-ignore>${m.mainHit}</span></button>`).join('');
-    const el=document.getElementById('wm-body'); if(el){el.innerHTML=head+list; if(window.LotoI18n)try{window.LotoI18n.localizeTree(el,true);}catch(_e){}}
-    shown=null; showWm(); }
-  function openDetail(id){ try{ const store=loadMatches(); const m=store.find(x=>x.id===id); if(!m)return false; const el=document.getElementById('wm-body'); if(!el)return false; el.innerHTML=detailHtml(m); if(window.LotoI18n)try{window.LotoI18n.localizeTree(el,true);}catch(_e){} shown=m; showWm(); return true; }catch(_e){return false;} }
-  function showWm(){const o=document.getElementById('wm-ov');if(o)o.classList.add('show');}
-  function closeDetail(){const o=document.getElementById('wm-ov');if(o)o.classList.remove('show');}
-  function openPrizeStats(){ const m=shown; closeDetail();
-    try{ if(m&&typeof revealPrizeDraw==='function'){revealPrizeDraw(m.gameId,m.drawId,m.drawDate);return;} }catch(_e){}
-    try{ if(curPage!=='ana')selPage('ana'); }catch(_e){}
-    try{ selAT('prize'); }catch(_e){} }
-  function openHistory(){ const store=loadMatches(); if(!store.length){showCopyToast(T('Пока нет призовых совпадений'));return;} if(store.length===1)openDetail(store[0].id); else renderSummary(store); }
-  return { record, scan, markSavedPlayed, openDetail, closeDetail, openPrizeStats, openHistory, ready:ON };
+  function sync(){ try{
+    const btn=document.getElementById('pm-entry'); if(!btn)return;
+    const n=ON?CORE.unreadCount(loadMatches()):0, badge=document.getElementById('pm-entry-n');
+    btn.classList.toggle('pro-next-glow',n>0); btn.classList.toggle('is-new',n>0);
+    if(badge){badge.hidden=!n;badge.textContent=n>99?'99+':String(n);}
+    btn.setAttribute('aria-label',T('Призовые совпадения')+(n?' · '+T(`Новых: ${n}`):''));
+  }catch(_e){} }
+  function markViewed(ids){ try{
+    const list=[].concat(ids||[]); if(!list.length)return; const store=loadMatches(); let n=0;
+    for(const m of store)if(list.indexOf(m.id)>=0&&m.unread){delete m.unread;m.viewedAt=Date.now();n++;
+      try{if(window.LotoNotifCenter&&LotoNotifCenter.markRead)LotoNotifCenter.markRead(['wm:'+CORE.notificationKey(m)],true);}catch(_e){}}
+    if(n)saveMatches(store);
+  }catch(_e){} }
+  function forget(id){ try{ const store=loadMatches(); const next=store.filter(m=>m.id!==id); if(next.length!==store.length)saveMatches(next); }catch(_e){} }
+  let uiLoading=null;
+  function ui(){
+    if(window.LotoPrizeArchive)return Promise.resolve(window.LotoPrizeArchive);
+    if(!uiLoading){
+      const copy=Promise.resolve(window.LotoI18n&&window.LotoI18n.loadPart?window.LotoI18n.loadPart('court'):null).catch(()=>null);
+      uiLoading=Promise.all([copy,loadRuntimeScript('prize-archive.js')]).then(()=>{
+        if(!window.LotoPrizeArchive)throw new Error('prize_archive_missing');
+        return window.LotoPrizeArchive;
+      }).catch(error=>{uiLoading=null;throw error;});
+    }
+    return uiLoading;
+  }
+  const failed=()=>{try{showFeedback(T('Призовые совпадения'),T('Не удалось загрузить экран. Проверьте подключение и попробуйте ещё раз.'),'⚠️',0);}catch(_e){}};
+  const show=o=>{if(window.LotoPrizeArchive)window.LotoPrizeArchive.open(o);else ui().then(a=>a.open(o),failed);};
+  function openArchive(opts){ show(Object.assign({view:'archive'},opts||{})); }
+  function openDetail(id){ if(!loadMatches().some(m=>m.id===id))return false; show({view:'detail',id}); return true; }
+  function closeDetail(){ if(window.LotoPrizeArchive)window.LotoPrizeArchive.close(); else {const o=document.getElementById('wm-ov');if(o)o.classList.remove('show');} }
+  function openPrizeStats(){ if(window.LotoPrizeArchive)window.LotoPrizeArchive.prizeStats(); }
+  function openHistory(){ openArchive(); }
+  window.addEventListener('storage',e=>{if(!e.key||e.key===(CORE&&CORE.MATCH_KEY))sync();});
+  window.addEventListener('loto:languagechange',sync);
+  return { record, scan, markSavedPlayed, removed, edited, openDetail, closeDetail, openPrizeStats, openHistory, openArchive,
+    markViewed, forget, sync, loadMatches, loadHist, sched, loadUi:ui, ready:ON };
 })();
+LotoWinMatch.sync();
 window.LotoWinMatch=LotoWinMatch;
 async function autoCheckFavorites(){ try{ await LotoWinMatch.scan(); }catch(_e){} }
 const _origShowBanner=showBanner;
