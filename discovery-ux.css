@@ -138,3 +138,5 @@ body.loto-onboarding-open .busy-ov{-webkit-backdrop-filter:none;backdrop-filter:
 #court-body .ct-model-card.guide-selectable::before{border-radius:15.5px}
 #court-body .ct-model-card.guide-selectable::after{display:none}
 #court-body .ct-model-card.guide-selectable .ct-model-box{border-style:dashed;border-color:var(--gold)}
+/* «Как это работает?» over rows already on screen: the tabs' overwrite question answers above the walkthrough. */
+body.loto-onboarding-open .ws-ov{z-index:860}

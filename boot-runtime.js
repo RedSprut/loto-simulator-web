@@ -44,6 +44,7 @@ window.__lotoRoutePopInstalled=true;
 })();
 window.onerror=function(msg,src,line,col,err){
   try{
+    if(!err&&!src&&!line&&!col&&/^Script error\.?$/.test(String(msg))){window.__bootErrorDetails.push({message:String(msg),source:'',line:0,column:0,stack:'',opaque:true,time:Date.now()});return false;}
     window.__bootErrors.push(msg+' @'+line+':'+col);
     window.__bootErrorDetails.push({message:String(msg),source:src||'',line:line||0,column:col||0,stack:err&&err.stack||'',time:Date.now()});
     var b=document.getElementById('boot-err');

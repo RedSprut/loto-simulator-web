@@ -2104,7 +2104,9 @@ function putGeneratedRows(gen,status,unique=false,origin,source){
   goToRows();
   try{if(window.LotoWinMatch&&LotoWinMatch.ready)LotoWinMatch.record(cur,rows,origin||{source:'generator'});}catch(_e){}
   try{LotoPredictionClient.record(cur,rows,origin,source);}catch(_e){}
-  return revealResult(document.getElementById('rows-c'),'start');
+  const roll=revealResult(document.getElementById('rows-c'),'start');
+  window.LotoWorkingSet?.guide(roll+400);
+  return roll;
 }
 const LotoPredictionClient=(function(){
   const FREE_MODELS=new Set(['freq','bal','man']);
@@ -2318,7 +2320,8 @@ async function generateSelectedRows(options={}){
     return;
   }
   const labels={freq:'горячие числа',bal:'комбинированный анализ',rnd:'pure random',man:'сегментный охват',wheel:'колесная матрица','world-hot':'мировой горячий профиль','world-mix':'мировой комбинированный профиль',markov:'цепи Маркова',gauss:'Гаусс · ЦПТ',delta:'интервальная модель Δ',bayes:'Байес · Дирихле',overdue:'gap-анализ',phys:'физическая модель лототрона',chaos:'детерминированный хаос',quantum:'квантовый коллапс',paradox:'система парадоксов'};
-  setGeneratedRows(gen,`Готово: ${count} ${rowWord(count)} · ${labels[algo]||algo} · база сохранённых тиражей не очищается при обновлении.`,true,{source:(algo==='rnd'?'rnd':(algo==='man'?'man':'model')),modelId:algo},{sourceType:'HOME_GENERATOR',modelId:algo});
+  const put=setGeneratedRows(gen,`Готово: ${count} ${rowWord(count)} · ${labels[algo]||algo} · база сохранённых тиражей не очищается при обновлении.`,true,{source:(algo==='rnd'?'rnd':(algo==='man'?'man':'model')),modelId:algo},{sourceType:'HOME_GENERATOR',modelId:algo});
+  if(options.settle&&await put===false)return false;
   window.dispatchEvent(new CustomEvent('loto:first-generation-success'));
 }
 function rowsToNorskText(){
