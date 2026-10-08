@@ -107,7 +107,11 @@ window.addEventListener('unhandledrejection',function(e){
       setTimeout(hide,Math.max(0,minMs-(Date.now()-anchor)));
     });
   }
-  window.__lotoMarkAppReady=function(){appReady=true;requestHide();};
+  window.__lotoMarkAppReady=function(){
+    appReady=true;requestHide();
+    var s=document.getElementById('boot-err');
+    if(s&&s.hasAttribute('data-slow')&&!(window.__bootErrors||[]).length&&s.parentNode)s.parentNode.removeChild(s);
+  };
   function arm(){
     anchor=anchor||Date.now();
     requestAnimationFrame(function(){requestAnimationFrame(hideNativeLaunchSplash);});
@@ -129,6 +133,7 @@ window.addEventListener('unhandledrejection',function(e){
       }
       var msg='Приложение загружается дольше обычного. Проверьте соединение или перезапустите приложение.';
       try{b.textContent=(window.LotoI18n&&window.LotoI18n.translate)?window.LotoI18n.translate(msg):msg;}catch(_e){b.textContent=msg;}
+      b.setAttribute('data-slow','');
       hide();
     }
   },6500);
