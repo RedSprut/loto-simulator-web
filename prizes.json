@@ -101380,6 +101380,52 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-10-08",
+        "lotteryId": "superEnalotto",
+        "currency": "EUR",
+        "jackpot": 37.4,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 37370726,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 518173.27,
+            "winners": 1
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 55803.28,
+            "winners": 3
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 402.88,
+            "winners": 425
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 32.98,
+            "winners": 15584
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 6.28,
+            "winners": 253874
+          }
+        ],
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/08-10-2026"
+      },
+      {
         "date": "2026-10-06",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
@@ -102027,7 +102073,7 @@
         "date": "2026-09-11",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 223.2,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "6",
@@ -102066,8 +102112,8 @@
             "winners": 317536
           }
         ],
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/11-09-2026"
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive"
       },
       {
         "date": "2026-09-10",
