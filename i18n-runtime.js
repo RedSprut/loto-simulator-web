@@ -18,17 +18,11 @@
 
   const patternBuckets=new Map(),patternFallback=[];
   const phraseBuckets=new Map();
-  // The lookup index of the app catalog. A scoped catalog (LotoI18n.createTranslator — the Owner
-  // Panel's ru/en/no rows, loaded with the panel) gets its own index of the same shape and is
-  // matched by the same addEntry / translateCore.
   const appIndex={localeIndex,entries,aliases,patternBuckets,patternFallback,phraseBuckets,translationCaches};
   const addBucket=(buckets,key,item)=>{
     if(!buckets.has(key))buckets.set(key,[]);
     buckets.get(key).push(item);
   };
-  // One entry into the lookup: exact map, reverse aliases, and the template / phrase indexes. Used
-  // for the startup catalog and, later, for a lazily loaded catalog part (see loadPart). Candidates
-  // are ranked at lookup time, so the order entries arrive in does not matter.
   function addEntry(source,sourceLocale,translations,idx=appIndex){
     const normalized=normalize(source);
     if(idx.entries.has(normalized))return idx.entries.get(normalized);
@@ -61,9 +55,6 @@
   for(const [source,sourceLocale,translations] of catalog.entries)addEntry(source,sourceLocale,translations);
   if(!catalog.chunksBase)localeCodes.forEach(code=>loadedLocales.add(code));
 
-  // Определение языка живёт в ОДНОМ месте — lang-detect.js (LotoLang): сохранённый выбор →
-  // exact locale → base language → English, одинаково на Web, iOS и Android. Здесь остаётся
-  // только аварийный путь на случай, если lang-detect.js не загрузился.
   function initialLanguage(){
     const detected=globalThis.LotoLang?.detect?.();
     if(detected&&localeIndex.has(detected))return detected;
@@ -154,11 +145,6 @@
     return !parent||/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA|CODE|PRE)$/.test(parent.tagName)||parent.closest('[data-i18n-ignore]');
   }
 
-  // The web build (scripts/prerender-en-shell.mjs) ships the static pages in English. Where one
-  // English word belongs to entries with different translations («Retry» = «Повторить» and
-  // «Повторить загрузку»), the element names its entry: data-i18n-entry="<catalog index>" for its
-  // first text node, data-i18n-entry-<attribute> for an attribute. Read once, for the English the
-  // build wrote; text a script puts there later is its own source. Native bundles never carry it.
   function hintedEntry(element,name,current){
     const hint=element&&typeof element.getAttribute==='function'?element.getAttribute(name):null;
     if(hint===null||hint===undefined||!normalize(current))return null;
@@ -249,11 +235,6 @@
     return pending;
   }
 
-  // ── Catalog parts ──
-  // Copy that only a lazily loaded screen shows (the analytical court) is not in the startup
-  // catalog at all: the build moves it into i18n/<part>-<code>.json, `{sources, values}` for one
-  // locale. The screen asks for its part before it renders; once asked for, a part follows every
-  // later language switch, so the screen never shows another language's copy.
   const parts=catalog.parts||{};
   const requestedParts=new Set();
   const loadedParts=new Set(),loadingParts=new Map();
@@ -310,44 +291,92 @@
     observer.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:translatedAttrs});
     try{await setLanguage(language);}
     finally{
-      // Сигнал для splash-прелоадера (boot-runtime): интерфейс уже переведён на выбранный язык,
-      // приложение можно показывать. Без этого пользователь с польским браузером мог на миг
-      // увидеть исходный русский текст, если чанк локали приехал позже конца splash-анимации.
-      // Ставится и при ошибке загрузки чанка — иначе splash завис бы навсегда.
       window.__lotoI18nApplied=true;
       resolveReady();
     }
   }
 
-  // ── Jackpot amounts ──
-  // Every jackpot the app holds (jackpots.json `amount`, a draw's `payload.jackpot`, the
-  // notification payloads built from them) is a number of MILLIONS in the operator's currency.
-  // Formatting that number as a plain currency amount showed «298,00 $» for a $298 million
-  // Powerball jackpot. This is the single formatter for a jackpot amount everywhere (hero,
-  // notification centre, analysis modals): the value is untouched, the unit is spelled out in
-  // the requested language (the catalog's own translation of «млн»), the currency stays the
-  // source's — a symbol before the number for $/€/£, the ISO code after it otherwise.
-  //   ru: $298 млн · €29,6 млн · 23,5 млн NOK · 55 млн CAD
-  //   en: $298 million · €29.6 million · 23.5 million NOK · 55 million CAD
-  // A value in currency units (≥ 100 000, e.g. 55000000) is converted to millions first.
+  const APP_LOCALES={ru:'ru-RU',en:'en-GB',no:'nb-NO',sv:'sv-SE',da:'da-DK',fi:'fi-FI',de:'de-DE',fr:'fr-FR',es:'es-ES',it:'it-IT',pt:'pt-PT',pl:'pl-PL',nl:'nl-NL',et:'et-EE',lv:'lv-LV',lt:'lt-LT',uk:'uk-UA'};
+  const intlLocale=code=>APP_LOCALES[code]||code;
+  const SCALE_WORDS={
+    ru:['млн','млрд','трлн'],
+    uk:['млн','млрд','трлн'],
+    en:['million','billion','trillion'],
+    no:[['million','millioner'],['milliard','milliarder'],['billion','billioner']],
+    sv:[['miljon','miljoner'],['miljard','miljarder'],['biljon','biljoner']],
+    da:['mio.','mia.','bio.'],
+    fi:[['miljoona','miljoonaa'],['miljardi','miljardia'],['biljoona','biljoonaa']],
+    de:[['Million','Millionen'],['Milliarde','Milliarden'],['Billion','Billionen']],
+    fr:[['million','millions'],['milliard','milliards'],['billion','billions']],
+    es:[['millón','millones'],'mil millones',['billón','billones']],
+    it:[['milione','milioni'],['miliardo','miliardi'],['mille miliardi','mila miliardi']],
+    pt:[['milhão','milhões'],'mil milhões',['bilião','biliões']],
+    pl:['mln','mld','bln'],
+    nl:['miljoen','miljard','biljoen'],
+    et:[['miljon','miljonit'],['miljard','miljardit'],['triljon','triljonit']],
+    lv:['milj.','mljrd.','trilj.'],
+    lt:['mln.','mlrd.','trln.'],
+  };
   const CURRENCY_SYMBOL={USD:'$',EUR:'€',GBP:'£'};
-  const intlLocale=code=>code==='no'?'nb-NO':code==='en'?'en-GB':code;
-  function formatJackpot(value,currency,code=language,numberLocale=''){
+  const NBSP=' ';
+  const moneyLanguage=code=>{
+    const base=String(code||language).toLowerCase().split(/[-_]/)[0];
+    const mapped=base==='nb'||base==='nn'?'no':base;
+    return SCALE_WORDS[mapped]?mapped:'en';
+  };
+  const numberText=(n,locale,min,max)=>{
+    try{return new Intl.NumberFormat(locale,{minimumFractionDigits:min,maximumFractionDigits:max}).format(n);}
+    catch(_e){return n.toFixed(min);}
+  };
+  function scaleWord(forms,n,code,min){
+    if(typeof forms==='string')return forms;
+    let one=n===1;
+    try{one=new Intl.PluralRules(intlLocale(code),{minimumFractionDigits:min,maximumFractionDigits:2}).select(n)==='one';}catch(_e){}
+    return one?forms[0]:forms[1];
+  }
+  function withCurrency(amount,cur,code){
+    if(!cur)return amount;
+    const symbol=CURRENCY_SYMBOL[cur];
+    const token=code==='no'&&cur==='NOK'?'kr':(symbol||cur);
+    if(symbol&&code==='en')return symbol+amount;
+    if(symbol&&code==='nl')return symbol+NBSP+amount;
+    return amount+NBSP+token;
+  }
+  function formatAmount(units,opts={}){
+    const n=typeof units==='number'?units:Number(String(units??'').replace(',','.').trim());
+    if(String(units??'').trim()===''||!Number.isFinite(n)||n<0)return '';
+    const code=moneyLanguage(opts.code);
+    const locale=opts.numberLocale||intlLocale(code);
+    const cur=String(opts.currency||'').toUpperCase().trim();
+    const round2=v=>Math.round(v*100)/100;
+    let text,approx=Boolean(opts.approx);
+    if(opts.exact||n<1e6){
+      const fraction=Math.abs(n-Math.round(n))>=0.005;
+      text=numberText(fraction?round2(n):Math.round(n),locale,fraction?2:0,2);
+      if(Math.abs((fraction?round2(n):Math.round(n))-n)>1e-6)approx=true;
+    }else{
+      let step=n>=1e12?2:n>=1e9?1:0;
+      let value=round2(n/Math.pow(1000,step+2));
+      if(value>=1000&&step<2){step++;value=round2(n/Math.pow(1000,step+2));}
+      const scale=Math.pow(1000,step+2);
+      if(Math.abs(value*scale-n)>Math.max(1e-6,n*1e-12))approx=true;
+      const min=code==='no'&&step>0&&value%1?2:0;
+      text=numberText(value,locale,min,2)+NBSP+scaleWord(SCALE_WORDS[code][step],value,code,min);
+    }
+    const out=withCurrency(text,cur,code);
+    return approx?(code==='no'?'Ca.':'≈')+NBSP+out:out;
+  }
+  function formatJackpot(value,currency,code=language,numberLocale='',opts={}){
     const raw=String(value??'').replace(',','.').trim();
     if(raw==='')return '';
-    let n=typeof value==='number'?value:Number(raw);
+    const n=typeof value==='number'?value:Number(raw);
     if(!Number.isFinite(n)||n<0)return '';
-    if(n>=1e5)n=n/1e6;
-    const cur=String(currency||'').toUpperCase().trim();
-    let num;
-    try{num=new Intl.NumberFormat(numberLocale||intlLocale(code),{maximumFractionDigits:2}).format(n);}
-    catch(_e){num=String(n);}
-    const unit=translateCore('млн',code);
-    return CURRENCY_SYMBOL[cur]?`${CURRENCY_SYMBOL[cur]}${num} ${unit}`:`${num} ${unit}${cur?' '+cur:''}`;
+    return formatAmount(n>=1e5?n:n*1e6,{...opts,currency,code,numberLocale});
+  }
+  function formatMoney(value,currency,code=language,numberLocale=''){
+    return formatAmount(value,{currency,code,numberLocale,exact:true});
   }
 
-  // A translator over a separate catalog of the same format ({locales, entries}) — for copy that
-  // must not live in the startup catalog and follows its own language (the Owner Panel).
   function createTranslator(scoped){
     const codes=Object.keys(scoped.locales);
     const idx={localeIndex:new Map(codes.map((code,index)=>[code,index])),entries:new Map(),aliases:new Map(),
@@ -359,7 +388,9 @@
   window.LotoI18n={
     catalog,
     createTranslator,
+    formatAmount,
     formatJackpot,
+    formatMoney,
     intlLocale,
     get language(){return language;},
     ready,

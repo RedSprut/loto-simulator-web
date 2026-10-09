@@ -1041,7 +1041,7 @@ async function handleBack(){
 
 function formatPrice(l){
   if(!l.price)return '—';
-  return `${l.price} ${l.currency||'NOK'}`;
+  return fmtMoney(l.price,l.currency||'NOK');
 }
 function centerNavItem(scroller,item){
   if(!scroller||!item||scroller.scrollWidth<=scroller.clientWidth+2)return;
@@ -1221,7 +1221,7 @@ async function getJackpot(id){
   const j=await fetchJackpots();
   const e=j&&j.values&&j.values[id];
   if(!e)return{status:'unavailable',validForNext:false};
-  let validForNext=false,updatedAfterNext=false;
+  let validForNext=false,updatedAfterNext=false,belongsToLastDraw=false;
   try{
     const l=LOTS[id];
     if(l&&e.nextDrawDate&&e.lastDrawDate){
@@ -1236,19 +1236,20 @@ async function getJackpot(id){
       if(Number.isFinite(fetchT)){
         validForNext=(e.nextDrawDate===computedNext)&&(fetchT>lastInstant)&&(e.status==='fresh'||e.status==='updating');
         updatedAfterNext=fetchT>nextInstant;
+        belongsToLastDraw=nextInstant<=Date.now()&&+nextDraw(id,new Date(nextInstant)).date===+nextDraw(id).date;
       }
     }
   }catch(_){}
   let status=e.status||'unavailable';
-  if(!validForNext)status=e.amount?(updatedAfterNext?'rollover-confirmed':'last-confirmed'):'unavailable';
+  if(!validForNext)status=e.amount&&belongsToLastDraw?(updatedAfterNext?'rollover-confirmed':'last-confirmed'):'unavailable';
   const currency=e.cur||e.currency||'';
-  const prefix=/^[$€£]\s*$/.test(String(e.prefix||''))?'':String(e.prefix||'');
+  const approx=/^\s*(?:ca\.?|cirka)\s*$/i.test(String(e.prefix||''));
   let qualifier=String(e.sub||'').replace(/\bMILLION(?:ER|S)?\b/gi,'');
   if(currency)qualifier=qualifier.replace(new RegExp('\\b'+currency+'\\b','g'),'');
   qualifier=qualifier.split('·').map(s=>s.trim()).filter(Boolean).map(s=>/^ESTIMATED$/i.test(s)?appText('Оценка'):s).join(' · ');
   return{
     status,validForNext,amount:e.amount||null,
-    txt:e.amount?prefix+fmtJackpot(e.amount,currency):'',
+    txt:e.amount?fmtJackpot(e.amount,currency,{approx}):'',
     sub:[qualifier,e.source].filter(Boolean).join(' · '),
     nextDrawDate:e.nextDrawDate,lastDrawDate:e.lastDrawDate,updated:j.updated,offline:j.offline===true,
   };
@@ -1273,7 +1274,7 @@ async function renderHero(){
   document.getElementById('hero-region').textContent=l.flag+' '+l.region;
   const nd=nextDraw(cur);
   {const _hd=document.getElementById('hero-deadline');_hd.textContent='🗓 ';const _hday=document.createElement('span');_hday.textContent=l.day;_hd.appendChild(_hday);_hd.appendChild(document.createTextNode(' · до '+scheduleTime(l)));}
-  document.getElementById('hero-price').textContent='🎫 '+l.price+' '+l.currency+'/ряд';
+  document.getElementById('hero-price').textContent='🎫 '+formatPrice(l)+'/ряд';
   document.getElementById('hero-count').textContent=nd.countdown+' · '+nd.dateStr;
   document.getElementById('hero-pot-lbl').textContent='Джекпот следующего тиража';
   document.getElementById('hero-pot').textContent='…';
@@ -1372,7 +1373,7 @@ function updateHdr(){
   const l=L();
   const dBo=drawBonusCount(l);
   const f=rows.filter(r=>r.m.length===l.pM&&(dBo===0||r.b.length===dBo)).length;
-  document.getElementById('hdr-title').textContent=f>0?`${f} ${rowWord(f)}, ${fmtInt(f*l.price)} ${l.currency||'NOK'}`:lotteryName(cur);
+  document.getElementById('hdr-title').textContent=f>0?`${f} ${rowWord(f)}, ${fmtMoney(f*l.price,'')} ${l.currency||'NOK'}`:lotteryName(cur);
 }
 function updateAnaHdr(){
   const title=document.getElementById('hdr-title');
@@ -3594,11 +3595,26 @@ function tierProbability(l,match){
   return pMain;
 }
 function fmtInt(n){return Math.round(n).toLocaleString(appLocale());}
-function fmtChance(n){return n>=1000000?(n/1000000).toFixed(n>=10000000?0:1).replace('.',',')+' млн':fmtInt(n);}
-function fmtJackpot(v,currency,lang='ru'){
+function fmtChance(n){
+  if(n<1000000)return fmtInt(n);
+  const digits=n>=10000000?0:1;
+  return new Intl.NumberFormat(appLocale(),{minimumFractionDigits:digits,maximumFractionDigits:digits}).format(n/1000000)+' млн';
+}
+const moneyLang=()=>(window.LotoI18n&&window.LotoI18n.language)||curLang;
+const moneyHtml=text=>`<span data-i18n-ignore>${text}</span>`;
+function fmtJackpot(v,currency,opts={}){
   const c=currency||L().currency||'NOK';
-  try{if(window.LotoI18n&&typeof window.LotoI18n.formatJackpot==='function'){const s=window.LotoI18n.formatJackpot(v,c,lang,appLocale());if(s)return s;}}catch(_e){}
+  try{if(window.LotoI18n&&typeof window.LotoI18n.formatJackpot==='function'){const s=window.LotoI18n.formatJackpot(v,c,moneyLang(),appLocale(),opts);if(s)return s;}}catch(_e){}
   const n=Number(v);return Number.isFinite(n)?(n>=1e5?n/1e6:n)+' млн '+c:'—';
+}
+function fmtMoney(v,currency){
+  if(v===null||v===undefined||v==='')return '—';
+  try{if(window.LotoI18n&&typeof window.LotoI18n.formatMoney==='function'){const s=window.LotoI18n.formatMoney(v,currency||'',moneyLang(),appLocale());if(s)return s;}}catch(_e){}
+  return String(v)+(currency?' '+currency:'');
+}
+function fmtAmount(v,currency){
+  try{if(window.LotoI18n&&typeof window.LotoI18n.formatAmount==='function'){const s=window.LotoI18n.formatAmount(v,{currency,code:moneyLang(),numberLocale:appLocale()});if(s)return s;}}catch(_e){}
+  return '~'+fmtInt(v/1e6)+' млн '+currency;
 }
 
 async function renderFreq(){
@@ -3755,13 +3771,13 @@ function renderComparison(){
   const rows2=[
     ['Название',...ids.map(id=>LOTS[id].name)],
     ['Формула',...ids.map(id=>formula(LOTS[id]))],
-    ['Цена 1 ряда',...ids.map(id=>formatPrice(LOTS[id]))],
+    ['Цена 1 ряда',...ids.map(id=>moneyHtml(formatPrice(LOTS[id])))],
     ['Комбинаций',...ids.map(id=>fmtInt(jackpotCombos(LOTS[id])))],
     ['Шанс джекпота',...ids.map(id=>'1 : '+fmtChance(jackpotCombos(LOTS[id])))],
     ['День',...ids.map(id=>LOTS[id].day)],
     ['Дедлайн',...ids.map(id=>LOTS[id].dl)],
-    ['Стоимость всех комбинаций',...ids.map(id=>'~'+fmtInt(allCost(LOTS[id])/1000000)+' млн '+(LOTS[id].currency||'NOK'))],
-    ['Консервативный ориентир ×3',...ids.map(id=>'~'+fmtInt(allCost(LOTS[id])*3/1000000)+' млн '+(LOTS[id].currency||'NOK'))],
+    ['Стоимость всех комбинаций',...ids.map(id=>moneyHtml(fmtAmount(allCost(LOTS[id]),LOTS[id].currency||'NOK')))],
+    ['Консервативный ориентир ×3',...ids.map(id=>moneyHtml(fmtAmount(allCost(LOTS[id])*3,LOTS[id].currency||'NOK')))],
     ['Математика',...ids.map(id=>LOTS[id].combos===jackpotCombos(LOTS[id])?'✅ формула OK':'⚠️ проверить')],
   ];
   let html='<thead><tr>'+rows2[0].map((h,i)=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
@@ -3827,7 +3843,6 @@ async function renderPrizes(){
     bonus:drawByDate.get(prize.date)?.bonus||[]
   }));
   const fmtDate=s=>new Intl.DateTimeFormat(appLocale(),{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}).format(new Date(`${s}T00:00:00Z`));
-  const fmtMoney=(v,currency=l.currency||'NOK')=>v===null||v===undefined?'—':new Intl.NumberFormat(appLocale(),{style:'currency',currency,maximumFractionDigits:Number(v)%1?2:0}).format(v);
 
   if(!withPayouts.length){
     outEl.innerHTML='<div class="empty">Официальная призовая таблица пока не опубликована источником<br><small style="font-size:11px;color:var(--sub)">Обновление выполняется автоматически после каждого тиража</small></div>';
@@ -3846,7 +3861,7 @@ async function renderPrizes(){
     else d.payoutTiers.forEach(t=>{
       const known=getPrizeTiers(l).find(item=>item.match===t.match);
       const label=known?.label||t.label||t.match;
-      const amount=prizeTierAmount(t);
+      const amount=prizeTierAmount(t)||null;
       const isJackpot=t===d.payoutTiers[0];
       const isJackpotWon=isJackpot&&t.winners>0;
       rowsH+=`<div class="prize-tier-row">
@@ -3854,7 +3869,7 @@ async function renderPrizes(){
           <div class="prize-tier-name">${escapePrizeHtml(label)}${isJackpotWon?'<span class="prize-jackpot-badge">ДЖЕКПОТ</span>':''}</div>
           <div class="prize-tier-stat">${t.winners!==null?t.winners.toLocaleString(appLocale())+' побед.':'—'}</div>
         </div>
-        <div class="prize-tier-amt">${fmtMoney(amount,currency)}${isJackpot&&t.winners===0?'<div style="font-size:9px;color:var(--sub)">не разыгран</div>':''}</div>
+        <div class="prize-tier-amt">${moneyHtml(fmtMoney(amount,currency))}${isJackpot&&t.winners===0?'<div style="font-size:9px;color:var(--sub)">не разыгран</div>':''}</div>
       </div>`;
     });
     html+=`<div class="prize-draw-card" data-draw-date="${escapePrizeHtml(d.date)}" data-draw-id="${escapePrizeHtml(d.drawId||d.date)}">
@@ -3877,7 +3892,7 @@ async function renderPrizes(){
     d.payoutTiers.forEach(t=>{
       if(tierAgg[t.match]){
         const amount=prizeTierAmount(t);
-        if(amount!==null&&amount!==undefined)tierAgg[t.match].prizes.push(amount);
+        if(amount>0)tierAgg[t.match].prizes.push(amount);    
         if(t.winners!==null&&t.winners!==undefined)tierAgg[t.match].winners.push(t.winners);
       }
     });
@@ -3888,7 +3903,7 @@ async function renderPrizes(){
     if(!agg.prizes.length&&!agg.winners.length)return;
     const avgPrize=agg.prizes.length?Math.round(agg.prizes.reduce((s,v)=>s+v,0)/agg.prizes.length):null;
     const avgWin=agg.winners.length?Math.round(agg.winners.reduce((s,v)=>s+v,0)/agg.winners.length):null;
-    avgHtml+=`<div class="srow"><span>${t.label}:</span><span>${avgPrize!==null?fmtMoney(avgPrize,l.currency||'NOK'):'—'} · ~${avgWin??'—'} побед.</span></div>`;
+    avgHtml+=`<div class="srow"><span>${t.label}:</span><span>${avgPrize!==null?moneyHtml(fmtMoney(avgPrize,l.currency||'NOK')):'—'} · ~${avgWin!==null?fmtInt(avgWin):'—'} побед.</span></div>`;
   });
   avgEl.innerHTML=avgHtml||'<div class="empty">Нет данных</div>';
 }
@@ -3983,31 +3998,30 @@ async function renderJackpotChart(){
   draws.slice(-60).forEach(d=>{
     const pct=(d.jackpot/max)*100;
     const[y,mo,dy]=d.date.split('-');
-    html+=`<div class="fbw" style="width:34px"><div class="fbar" style="height:${Math.max(pct,3)}px;width:26px;background:#f0a500" data-tip="${fmtJackpot(d.jackpot,d.currency||L().currency||'NOK',window.LotoI18n?.language)} · ${dy}.${mo}"></div><div class="fn">${dy}/${mo}</div></div>`;
+    html+=`<div class="fbw" style="width:34px"><div class="fbar" style="height:${Math.max(pct,3)}px;width:26px;background:#f0a500" data-tip="${fmtJackpot(d.jackpot,d.currency||L().currency||'NOK')} · ${dy}.${mo}"></div><div class="fn">${dy}/${mo}</div></div>`;
   });
   html+='</div></div>';
-  html+=`<div class="srow" style="margin-top:8px"><span>Максимальный джекпот:</span><span>${fmtJackpot(max,L().currency||'NOK')}</span></div>`;
+  html+=`<div class="srow" style="margin-top:8px"><span>Максимальный джекпот:</span><span>${moneyHtml(fmtJackpot(max,L().currency||'NOK'))}</span></div>`;
   html+=`<div class="srow"><span>Записей:</span><span>${draws.length}</span></div>`;
   c.innerHTML=html;
 }
 
 function renderCombinationAnalysis(){
   const l=L();
-  const currency=l.currency||'NOK',combos=jackpotCombos(l),totalCost=combos*l.price,totalCostM=(totalCost/1e6).toFixed(1);
-  const conservativeTarget=(totalCost*3/1e6).toFixed(1);
+  const currency=l.currency||'NOK',combos=jackpotCombos(l),totalCost=combos*l.price;
   const jv=parseFloat(document.getElementById('jackpot-inp').value)||0;
-  const ratioNum=jv>0?jv/(totalCost/1e6):null,ratio=ratioNum?ratioNum.toFixed(2):null;
+  const ratioNum=jv>0?jv/(totalCost/1e6):null,ratio=ratioNum?new Intl.NumberFormat(appLocale(),{minimumFractionDigits:2,maximumFractionDigits:2}).format(ratioNum):null;
   const conservative=ratioNum!==null&&ratioNum>=3,breakEven=ratioNum!==null&&ratioNum>=1;
   const verdict=conservative?'📊 Джекпот покрывает ориентир ×3':breakEven?'⚠️ Джекпот покрывает цену комбинаций, но не гарантирует прибыль':'⏳ Джекпот ниже стоимости всех комбинаций';
   const jl=document.getElementById('jackpot-currency-label');if(jl)jl.textContent='Текущий джекпот (млн '+currency+')';
   document.getElementById('man-out').innerHTML=`<div class="mbox">
     <div class="mbox-t">📐 ${l.name} · Комбинаторный анализ</div>
     <div class="mrow"><span>Комбинаций:</span><span>${fmtInt(combos)}</span></div>
-    <div class="mrow"><span>Цена 1 ряда:</span><span>${l.price} ${currency}</span></div>
-    <div class="mrow"><span>Мин. покупка:</span><span>${l.minR} ряд(а) = ${l.minR*l.price} ${currency}</span></div>
-    <div class="mrow"><span>Стоимость ВСЕХ комбинаций:</span><span>~${totalCostM} млн ${currency}</span></div>
-    <div class="mrow"><span>Консервативный ориентир ×3:</span><span style="color:#ff9f0a">~${conservativeTarget} млн ${currency}</span></div>
-    <div class="mrow"><span>Текущий джекпот:</span><span>${jv?fmtJackpot(jv,currency):'—'}</span></div>
+    <div class="mrow"><span>Цена 1 ряда:</span><span>${moneyHtml(fmtMoney(l.price,currency))}</span></div>
+    <div class="mrow"><span>Мин. покупка:</span><span>${l.minR} ряд(а) = ${fmtMoney(l.minR*l.price,'')} ${currency}</span></div>
+    <div class="mrow"><span>Стоимость ВСЕХ комбинаций:</span><span>${moneyHtml(fmtAmount(totalCost,currency))}</span></div>
+    <div class="mrow"><span>Консервативный ориентир ×3:</span><span style="color:#ff9f0a">${moneyHtml(fmtAmount(totalCost*3,currency))}</span></div>
+    <div class="mrow"><span>Текущий джекпот:</span><span>${jv?moneyHtml(fmtJackpot(jv,currency)):'—'}</span></div>
     <div class="mrow"><span>Джекпот / стоимость:</span><span style="color:#ff9f0a">${ratio?ratio+'×':'введи джекпот'}</span></div>
     <div class="mverdict wait">${verdict}</div>
     <div class="warn-note">Без учёта налогов, деления приза между победителями, лимитов продаж и стоимости организации покупки. Расчёт не является гарантией дохода.</div>
@@ -4017,7 +4031,7 @@ function renderCombinationAnalysis(){
     <div class="info-row"><span>📅 Дни:</span><span>${l.day}</span></div>
     <div class="info-row"><span>⏰ Дедлайн:</span><span>до ${scheduleTime(l)}</span></div>
     <div class="info-row"><span>🎰 Trekning:</span><span>${l.res}</span></div>
-    <div class="info-row"><span>💰 Цена ряда:</span><span>${l.price} ${currency}</span></div>
+    <div class="info-row"><span>💰 Цена ряда:</span><span>${moneyHtml(fmtMoney(l.price,currency))}</span></div>
   </div>`;
 }
 
@@ -5247,7 +5261,7 @@ async function WC_open(){
   let info='Официально опубликованные числа последнего тиража.';
   if(d.prizes&&d.prizes.length){
     const top=d.prizes.find(x=>x&&(x.winners>0)&&x.prizeNOK)||d.prizes[0];
-    if(top&&top.prizeNOK)info+=' Лучший выплаченный приз: '+Number(top.prizeNOK).toLocaleString(appLocale())+' '+l.currency+'.';
+    if(top&&top.prizeNOK)info+=' Лучший выплаченный приз: '+fmtMoney(Number(top.prizeNOK),l.currency)+'.';
   }
   document.getElementById('wc-info').textContent=info;
   document.getElementById('wc-ov').classList.add('show');
