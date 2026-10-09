@@ -102027,7 +102027,7 @@
         "date": "2026-09-12",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 26.4,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "6",
@@ -102066,8 +102066,8 @@
             "winners": 423731
           }
         ],
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/12-09-2026"
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive"
       },
       {
         "date": "2026-09-11",
