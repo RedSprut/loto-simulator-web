@@ -67,3 +67,6 @@ html.nf-page body{min-height:100vh;min-height:100dvh;display:grid;place-items:ce
 .nf-text{margin:12px 0 0;color:var(--nf-sub);font-size:15px;line-height:1.6}
 .nf-action{display:flex;align-items:center;justify-content:center;min-height:48px;margin-top:22px;padding:12px 18px;border-radius:14px;background:linear-gradient(135deg,#B81B44,#7A0E2B);color:#fff;font-weight:850;font-size:15.5px;text-decoration:none;box-shadow:0 8px 22px rgba(184,27,68,.3)}
 .nf-action:focus-visible,.nf-brand:focus-visible{outline:3px solid var(--nf-gold);outline-offset:3px}
+/* Touch screens (a finger is the primary pointer, whatever the width): no visible scrollbar, same
+   rule as the app's index.html. Hides only — overflow and scrolling are untouched; desktops keep theirs. */
+@media (hover:none) and (pointer:coarse){html,html *{scrollbar-width:none!important}html::-webkit-scrollbar,html *::-webkit-scrollbar{display:none!important;width:0!important;height:0!important;background:transparent!important}}

@@ -523,3 +523,11 @@ html, body {
   /* No slide — fade only (keeps the desktop -50% centering transform intact). */
   .dd-save, .dd-toast, .dd-soundhint { transition: opacity .2s ease; }
 }
+
+/* Touch screens (a finger is the primary pointer, whatever the width): no visible scrollbar in the
+   drum's panels and lists, same rule as the host app's index.html. Hides only — overflow, momentum
+   and programmatic scrolling are untouched; a desktop mouse keeps its bars. */
+@media (hover: none) and (pointer: coarse) {
+  html, html * { scrollbar-width: none !important; }
+  html::-webkit-scrollbar, html *::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; background: transparent !important; }
+}
