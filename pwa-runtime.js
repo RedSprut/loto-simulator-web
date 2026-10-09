@@ -7,6 +7,11 @@
   navigator.serviceWorker.addEventListener('controllerchange',()=>{
     if(!hadController||reloading)return;
     reloading=true;
+    // A new version activating during the startup preloader must not replay it: Lottery Whirl finishes
+    // its flight, keeps the composition for the reloaded page (which continues it) and reloads then;
+    // after it has finished, the reloaded page skips it.
+    const whirl=window.LotoWhirl;
+    if(whirl&&typeof whirl.handOver==='function'&&whirl.handOver(()=>location.reload()))return;
     location.reload();
   });
   window.addEventListener('load',async()=>{

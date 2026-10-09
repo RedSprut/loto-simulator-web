@@ -71,22 +71,30 @@ window.addEventListener('unhandledrejection',function(e){
     try{return !!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());}
     catch(_e){return false;}
   }
+  var nativeSplashHiding=null;
   function hideNativeLaunchSplash(){
-    if(nativeSplashHidden||!isNativeCapacitor())return;
+    if(nativeSplashHidden||!isNativeCapacitor())return nativeSplashHiding;
     nativeSplashHidden=true;
     var splash=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.SplashScreen;
-    if(!splash||typeof splash.hide!=='function')return;
-    try{splash.hide({fadeOutDuration:160});}catch(_e){}
+    if(!splash||typeof splash.hide!=='function')return null;
+    try{nativeSplashHiding=splash.hide({fadeOutDuration:160});}catch(_e){}
+    return nativeSplashHiding;
   }
+  window.__lotoHideLaunchSplash=hideNativeLaunchSplash;
   function reveal(){d.classList.remove('loto-booting');}
   function basicUiReady(){
     return !!(document.body&&document.getElementById('rows-c')&&document.querySelector('.page.show')&&document.getElementById('bn-sim'));
   }
-  function hide(){
+  function hide(force){
     if(done)return;done=true;
     var s=document.getElementById('loto-splash');
     hideNativeLaunchSplash();
     if(!s){reveal();return;}
+    var whirl=window.LotoWhirl;
+    if(whirl&&whirl.active&&whirl.finish({force:!!force,onReveal:reveal,onDone:function(){if(s.parentNode)s.parentNode.removeChild(s);reveal();}})){
+      setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s);reveal();},force?4500:12000);
+      return;
+    }
     s.classList.add('ls-hide');
     setTimeout(function(){if(s&&s.parentNode)s.parentNode.removeChild(s);reveal();},520);
   }
@@ -104,7 +112,8 @@ window.addEventListener('unhandledrejection',function(e){
     if(done)return;
     whenLanguageApplied(function(){
       if(done)return;
-      setTimeout(hide,Math.max(0,minMs-(Date.now()-anchor)));
+      var whirl=window.LotoWhirl;
+      setTimeout(hide,whirl&&(whirl.active||whirl.skipped)?0:Math.max(0,minMs-(Date.now()-anchor)));
     });
   }
   window.__lotoMarkAppReady=function(){
@@ -134,7 +143,7 @@ window.addEventListener('unhandledrejection',function(e){
       var msg='Приложение загружается дольше обычного. Проверьте соединение или перезапустите приложение.';
       try{b.textContent=(window.LotoI18n&&window.LotoI18n.translate)?window.LotoI18n.translate(msg):msg;}catch(_e){b.textContent=msg;}
       b.setAttribute('data-slow','');
-      hide();
+      hide(true);
     }
   },6500);
 })();
