@@ -1134,11 +1134,11 @@ function updateOfficialControls(){
   if(desc){
     desc.textContent=provider
       ? `Источник: ${source}. Обновляет последние тиражи и сразу пересчитывает историю, частоты, призы и статистику.`
-      : `Источник: ${source}. Прямой браузерный импорт без backend пока не подключён; статистика берётся из общей базы results.json и ручного ввода.`;
+      : `Источник: ${source}. Обновляет последние тиражи и сразу пересчитывает историю, частоты, призы и статистику.`;
   }
   if(btn){
     btn.disabled=false;
-    btn.textContent=provider?'↻ Обновить текущую лотерею':'↻ Проверить results.json';
+    btn.textContent='↻ Обновить текущую лотерею';
     btn.style.opacity='1';
   }
   if(all)all.textContent=`↻ Все источники (${OFFICIAL_LOTS.length})`;
@@ -1445,7 +1445,7 @@ function renderSimBtns(){
   const mk=(lbl,fn)=>{const b=document.createElement('button');b.className='btn-s '+l.cls;b.innerHTML=lbl;b.onclick=fn;c.appendChild(b);};
   mk('🔀 Fyll ut rekken',()=>{fillOne();quickRoll();});
   mk('⠿ Fyll ut resten',()=>{fillAll();quickRoll();});
-  mk('🗑 Tøm',async()=>{if(await customConfirm('Вы действительно хотите очистить все ряды?','Удалить',{title:'Очистить ряды?'})){initRows();renderSim();resetBanner();}});
+  mk('🗑 <span>Очистить</span>',async()=>{if(await customConfirm('Вы действительно хотите очистить все ряды?','Удалить',{title:'Очистить ряды?'})){initRows();renderSim();resetBanner();}});
 }
 function quickRoll(){
   const c=document.getElementById('rows-c');
@@ -2522,8 +2522,8 @@ async function applyWheelBuilder(){
   const el=document.getElementById('wheel-status');
   el.style.display='';
   el.textContent=built.full
-    ? `Wheel готов: ${rows.length} ${rowWord(rows.length)} · полная гарантия ${t} из ${t} для пула ${pool.length} чисел. Нижняя граница: ${built.lowerBound}.`
-    : `Wheel готов: ${rows.length} ${rowWord(rows.length)} · покрытие ${built.covered}/${built.total} (${pct}%). Полная гарантия ${t} из ${t} не поместилась в лимит ${MAX_ROWS} рядов.`;
+    ? `Wheel готов: ${rows.length} ${rowWord(rows.length)} · полное покрытие ${t} из ${t} для пула ${pool.length} чисел. Нижняя граница: ${built.lowerBound}.`
+    : `Wheel готов: ${rows.length} ${rowWord(rows.length)} · покрытие ${built.covered}/${built.total} (${pct}%). Полное покрытие ${t} из ${t} не поместилось в лимит ${MAX_ROWS} рядов.`;
   if(built.usedUnfiltered)el.textContent+=' Фильтры были слишком строгими для пула, часть wheel построена без них.';
 }
 
@@ -3308,13 +3308,13 @@ async function updateOfficialCurrent(){
   try{
     const provider=getOfficialProvider(cur),source=officialSourceName(L());
     const allowLive=window.LOTO_COMMERCIAL_CONFIG?.allowClientNetworkUpdates!==false;
-    showOfficialStatus(provider&&allowLive?`Проверяю ${source} для ${L().name}…`:`Проверяю защищённую results.json для ${L().name}…`);
+    showOfficialStatus(`Проверяю ${source} для ${L().name}…`);
     const r=provider&&allowLive?await importOfficial(cur):await importResultsJson(cur);
     await renderHistory();
     renderHero();
     await renderSavedDrawOptions();
     if(curPage==='ana')await renderAna();
-    const empty=r.total===0?' В results.json пока нет сохранённых тиражей для этой игры.':'';
+    const empty=r.total===0?' Для этой игры пока нет сохранённых тиражей.':'';
     showOfficialStatus(`${L().name}: добавлено ${r.added}, обновлено ${r.updated}, без изменений ${r.unchanged}, архив сохранён ${r.preserved}. В базе всего ${r.totalStored}. Последний тираж: ${r.latest}.${r.invalid?` Отклонено некорректных: ${r.invalid}.`:''}${empty}`);
     showFeedback('Результаты обновлены',`${L().name}: все последние розыгрыши предоставлены.\nНовых: ${r.added} · обновлено: ${r.updated}\nПоследний тираж: ${r.latest}\nВ базе: ${r.totalStored}`,'✅',3200);
   }catch(e){
@@ -3324,7 +3324,7 @@ async function updateOfficialCurrent(){
 }
 async function updateOfficialAll(quiet){
   try{
-    if(!quiet)showOfficialStatus('Проверяю все источники: live-API и results.json…');
+    if(!quiet)showOfficialStatus('Проверяю все источники…');
     const out=[];
     const allowLive=window.LOTO_COMMERCIAL_CONFIG?.allowClientNetworkUpdates!==false;
     for(const id of OFFICIAL_LOTS){
@@ -3366,7 +3366,7 @@ async function openSourceInfo(){
   try{const d=await loadD(cur);cnt=(d||[]).length;if(d&&d[0]&&d[0].date)last=d[0].date;}catch(e){}
   const archive=await loadArchivePackage(cur).catch(()=>({draws:[],eras:[],updatedAt:''}));
   const provider=getOfficialProvider(cur);
-  const status=historyText(provider?'Живое обновление подключено':'Локальная база (results.json)');
+  const status=historyText(provider?'Живое обновление подключено':'Архив приложения');
   const rows=[
     [historyText('Оператор'),l.officialSourceName||'—'],
     [historyText('Лотерея'),l.short||l.name],
@@ -3452,7 +3452,7 @@ function renderRuleSummary(draws,eras,currentCount){
     const count=draws.filter(draw=>ruleEraForDraw(draw,eras)?.id===era.id).length;
     const range=`${formatHistoryDate(era.from)} — ${era.to?formatHistoryDate(era.to):historyText('сейчас')}`;
     const status=historyText(era.current?'Текущие правила':'Старые правила');
-    return ruleEraPick(era.id,`${status} · ${era.id}`,`${range} · ${ruleParameters(era)}`,count);
+    return ruleEraPick(era.id,status,`${range} · ${ruleParameters(era)}`,count);
   }).join('');
   const summary=historyText('Показано {{0}} тиражей. Модели текущего формата используют {{1}} совместимых тиражей; статистика старых эпох рассчитывается отдельно.',draws.length,currentCount);
   const allRange=draws.length?`${formatHistoryDate(draws[draws.length-1].date)} — ${formatHistoryDate(draws[0].date)}`:'';
@@ -3998,7 +3998,7 @@ function renderCombinationAnalysis(){
   const jv=parseFloat(document.getElementById('jackpot-inp').value)||0;
   const ratioNum=jv>0?jv/(totalCost/1e6):null,ratio=ratioNum?ratioNum.toFixed(2):null;
   const conservative=ratioNum!==null&&ratioNum>=3,breakEven=ratioNum!==null&&ratioNum>=1;
-  const verdict=conservative?'✅ Джекпот покрывает ориентир ×3':breakEven?'⚠️ Джекпот покрывает цену комбинаций, но не гарантирует прибыль':'⏳ Джекпот ниже стоимости всех комбинаций';
+  const verdict=conservative?'📊 Джекпот покрывает ориентир ×3':breakEven?'⚠️ Джекпот покрывает цену комбинаций, но не гарантирует прибыль':'⏳ Джекпот ниже стоимости всех комбинаций';
   const jl=document.getElementById('jackpot-currency-label');if(jl)jl.textContent='Текущий джекпот (млн '+currency+')';
   document.getElementById('man-out').innerHTML=`<div class="mbox">
     <div class="mbox-t">📐 ${l.name} · Комбинаторный анализ</div>
@@ -4008,8 +4008,8 @@ function renderCombinationAnalysis(){
     <div class="mrow"><span>Стоимость ВСЕХ комбинаций:</span><span>~${totalCostM} млн ${currency}</span></div>
     <div class="mrow"><span>Консервативный ориентир ×3:</span><span style="color:#ff9f0a">~${conservativeTarget} млн ${currency}</span></div>
     <div class="mrow"><span>Текущий джекпот:</span><span>${jv?fmtJackpot(jv,currency):'—'}</span></div>
-    <div class="mrow"><span>Джекпот / стоимость:</span><span style="color:${conservative?'#34c759':'#ff9f0a'}">${ratio?ratio+'×':'введи джекпот'}</span></div>
-    <div class="mverdict ${conservative?'go':'wait'}">${verdict}</div>
+    <div class="mrow"><span>Джекпот / стоимость:</span><span style="color:#ff9f0a">${ratio?ratio+'×':'введи джекпот'}</span></div>
+    <div class="mverdict wait">${verdict}</div>
     <div class="warn-note">Без учёта налогов, деления приза между победителями, лимитов продаж и стоимости организации покупки. Расчёт не является гарантией дохода.</div>
   </div>
   <div style="background:var(--bg2);border-radius:14px;padding:14px;border:1.5px solid var(--border);margin-top:12px">
@@ -4071,7 +4071,7 @@ async function renderStats(){
     const hot=[...freq.entries()].sort((a,b)=>b[1]-a[1]||a[0]-b[0]).slice(0,3).map(([n,v])=>`№${n} (${v}×)`).join(', ');
     const status=historyText(era.current?'Текущие правила':'Старые правила');
     const range=`${formatHistoryDate(era.from)} — ${era.to?formatHistoryDate(era.to):historyText('сейчас')}`;
-    return`<div class="rule-era"><b>${escapeHtml(status)} · ${escapeHtml(era.id)}</b>${escapeHtml(range)} · ${escapeHtml(historyText('{{0}} тиражей',rows.length))}<br>${escapeHtml(historyText('Чаще в этой эпохе: {{0}}',hot))}</div>`;
+    return`<div class="rule-era"><b>${escapeHtml(status)}</b>${escapeHtml(range)} · ${escapeHtml(historyText('{{0}} тиражей',rows.length))}<br>${escapeHtml(historyText('Чаще в этой эпохе: {{0}}',hot))}</div>`;
   }).join('');
   c.innerHTML=`<div class="srow"><span>Тиражей текущих правил:</span><span>${draws.length}</span></div>
   <div class="srow"><span>Полный архив:</span><span>${pack.draws.length}</span></div>
@@ -4437,7 +4437,8 @@ try{
 }catch(_e){}
 window.addEventListener('loto:languagechange',e=>{
   const code=e&&e.detail&&e.detail.language;
-  if(!code||!LOCALE_CATALOG[code]||code===curLang)return;
+  if(!code||!LOCALE_CATALOG[code])return;
+  if(code===curLang){try{renderRows();}catch(_e){}return;}
   curLang=code;
   try{const _nd=nextDraw(cur);const _s=document.getElementById('ndb-sub');if(_s)_s.textContent=_nd.dateStr+' · '+_nd.timeLabel;const _sg=document.getElementById('sg-date');if(_sg&&_sg.textContent!=='—')_sg.textContent=_nd.dateStr;}catch(_e){}
   try{refreshLocalizedDates();}catch(_e){}
