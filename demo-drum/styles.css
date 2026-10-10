@@ -9,7 +9,7 @@
   --gold-2: #f5cf7b;
   --text: #f4f1ea;
   --sub: #9aa2bd;
-  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-t: var(--loto-safe-top,env(safe-area-inset-top,0px));
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);

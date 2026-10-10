@@ -43,7 +43,7 @@
   // dirty; the actual request is coalesced into one call per REFRESH_DEBOUNCE_MS window.
   var REFRESH_DEBOUNCE_MS = 4000;
 
-  var state = { unread: 0, rows: [], prefs: null, open: false, filter: 'all', unreadOnly: false, view: 'list', busy: false, error: null, lastSync: null, more: true,
+  var state = { unread: 0, rows: [], prefs: null, open: false, filter: 'all', unreadOnly: false, view: 'list', busy: false, error: null, lastSync: null, more: true, expanded: {},
     ownerTest: null, ownerTestLink: '', ownerTestNote: '' };
   var panel = null, pollTimer = null, wired = false;
   var running = false, refreshTimer = null, refreshPending = false, refreshInFlight = false;
@@ -117,6 +117,42 @@
     return parts.join(' · ');
   }
 
+  // «Ошибка в приложении» (migration 070): what failed, where and in which build — the scrubbed
+  // diagnostics the client sent with the client_error. Owner-only (this centre reads through
+  // owner-analytics with the owner's session); the app never shows any of it to its users.
+  function errorFacts(row) {
+    var e = (row.data || {}).error;
+    if (!e) return null;
+    var facts = [];
+    var add = function (label, value) { if (value != null && value !== '') facts.push([label, String(value)]); };
+    add(t('Сообщение'), [e.name, e.message].filter(Boolean).join(': '));
+    add(t('Источник'), e.source);
+    add(t('Обработчик'), e.handler);
+    add(t('Контекст'), e.context);
+    add(t('Время'), e.at ? when(e.at) + ' · Europe/Oslo' : '');
+    add(t('Версия приложения'), e.appVersion);
+    add(t('Сборка'), e.appBuild);
+    add(t('Сессия'), e.session);
+    add(t('Экран'), e.page);
+    add(t('Среда'), [e.engine, e.os, e.device, e.automation ? tx(e.automation === 'google_play_prelaunch' ? 'тестовое устройство Google Play' : 'автоматизация') : ''].filter(Boolean).join(' · '));
+    return { facts: facts, stack: e.stack || '', bare: !e.message && !e.source && !e.stack, count: +(row.data || {}).errorCount || 1 };
+  }
+  function errorText(row) {
+    var f = errorFacts(row);
+    if (!f) return '';
+    return f.facts.map(function (x) { return x[0] + ': ' + x[1]; }).join('\n') + (f.stack ? '\n' + t('Стек вызовов') + ':\n' + f.stack : '');
+  }
+  function errorDetails(row) {
+    var f = errorFacts(row);
+    if (!f || !state.expanded[row.id]) return '';
+    return '<div class="own-errd" data-err-for="' + esc(row.id) + '">' +
+      (f.count > 1 ? '<p class="own-note">' + esc(t('Повторов за час: {{0}}', num(f.count))) + '</p>' : '') +
+      '<dl>' + f.facts.map(function (x) { return '<dt>' + esc(x[0]) + '</dt><dd>' + esc(x[1]) + '</dd>'; }).join('') + '</dl>' +
+      (f.stack ? '<p class="own-errh">' + esc(t('Стек вызовов')) + '</p><pre>' + esc(f.stack) + '</pre>' : '') +
+      (f.bare ? '<p class="own-note">' + esc(t('Эту ошибку прислала версия приложения без диагностики: известен только контекст.')) + '</p>' : '') +
+      '<button class="own-btn" type="button" data-err-copy="' + esc(row.id) + '" data-done="' + esc(t('Скопировано')) + '">' + esc(t('Копировать')) + '</button></div>';
+  }
+
   // ── styles ─────────────────────────────────────────────────────────────────────────────────
   function ensureStyles() {
     if (D.getElementById('own-style')) return;
@@ -125,7 +161,7 @@
       '#own-center.show{display:flex;align-items:flex-start;justify-content:flex-end}',
       '#own-center .own-panel{width:min(520px,100%);height:100%;max-height:100dvh;display:flex;flex-direction:column;background:#e8f2fc;color:#0d2540;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;box-shadow:-18px 0 50px rgba(0,0,0,.35)}',
       '#ow-ov[data-ow-theme="dark"] #own-center .own-panel{background:#0b1624;color:#e6f0fb}',
-      '#own-center .own-top{display:flex;align-items:center;gap:8px;padding:calc(10px + env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid rgba(29,78,216,.18);background:#fff}',
+      '#own-center .own-top{display:flex;align-items:center;gap:8px;padding:calc(10px + var(--loto-safe-top,env(safe-area-inset-top,0px))) 14px 10px;border-bottom:1px solid rgba(29,78,216,.18);background:#fff}',
       '#ow-ov[data-ow-theme="dark"] #own-center .own-top{background:#12223a;border-color:#22405f}',
       '#own-center .own-title{font-weight:800;font-size:16px;margin-right:auto}',
       '#own-center .own-btn{min-height:34px;padding:6px 12px;border-radius:10px;border:1px solid #bcd7f2;background:#d7e9fb;color:inherit;font:inherit;font-weight:700;cursor:pointer}',
@@ -176,6 +212,13 @@
       '#own-center table.own-t th{font-size:11px;text-transform:uppercase;color:#3f6690;letter-spacing:.03em}',
       '#own-center table.own-t td.c{text-align:center}',
       '#own-center .own-note{color:#3f6690;font-size:12px;margin-top:6px}',
+      '#own-center .own-errbtn{display:inline-block;margin-top:6px;padding:2px 10px;border-radius:999px;border:1px solid #bcd7f2;font-size:12px;font-weight:700;cursor:pointer}',
+      '#own-center .own-errd{margin:-4px 0 8px;padding:10px 12px;border-radius:0 0 14px 14px;border:1px solid #bcd7f2;border-top:0;background:#f5f9fe;font-size:12px;overflow-wrap:anywhere}',
+      '#ow-ov[data-ow-theme="dark"] #own-center .own-errd{background:#0f1c30;border-color:#22405f}',
+      '#own-center .own-errd dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:2px 10px;margin:0 0 6px}',
+      '#own-center .own-errd dt{font-weight:700}#own-center .own-errd dd{margin:0}',
+      '#own-center .own-errd .own-errh{font-weight:700;margin:6px 0 2px}',
+      '#own-center .own-errd pre{margin:0 0 8px;padding:8px;border-radius:8px;background:rgba(29,78,216,.08);white-space:pre-wrap;font:11px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace}',
       '#ow-ov[data-ow-theme="dark"] #own-center .own-note{color:#8fb0d6}',
       '#own-center .own-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0}',
       '#own-center .own-panel{max-width:100vw;overflow-x:hidden}',
@@ -345,6 +388,22 @@
       if (t.closest('#own-view')) { state.view = state.view === 'list' ? 'settings' : 'list'; if (state.view === 'settings') { if (!state.prefs) loadPrefs(); if (!state.ownerTest) loadOwnerTest(); } render(); return; }
       var chip = t.closest('.own-chip[data-filter]');
       if (chip) { var f = chip.getAttribute('data-filter'); if (f === '__unread') state.unreadOnly = !state.unreadOnly; else state.filter = f; loadList(false); return; }
+      var toggle = t.closest('[data-err-toggle]');
+      if (toggle) {
+        event.stopPropagation();
+        var eid = toggle.getAttribute('data-err-toggle');
+        state.expanded[eid] = !state.expanded[eid];
+        var erow = state.rows.filter(function (r) { return r.id === eid; })[0];
+        if (erow && !erow.read) markRead([eid], true);
+        render(); return;
+      }
+      var copy = t.closest('[data-err-copy]');
+      if (copy) {
+        var crow2 = state.rows.filter(function (r) { return r.id === copy.getAttribute('data-err-copy'); })[0];
+        try { if (navigator.clipboard && crow2) navigator.clipboard.writeText(errorText(crow2)).then(function () { copy.textContent = copy.getAttribute('data-done'); }, function () {}); } catch (e) {}
+        return;
+      }
+      if (t.closest('.own-errd')) return;
       var mark = t.closest('.own-mark[data-id]');
       if (mark) { event.stopPropagation(); var id = mark.getAttribute('data-id'); var row = state.rows.filter(function (r) { return r.id === id; })[0]; markRead([id], !(row && row.read)); return; }
       var more = t.closest('#own-more');
@@ -380,6 +439,11 @@
       else if (t.id === 'own-inapp-master') savePrefs({ in_app_enabled: t.checked });
       else if (t.id === 'own-digest-hour') savePrefs({ digest_hour: +t.value });
     });
+    // The details toggle is a span inside the card's button (a button cannot hold a button): keyboard too.
+    panel.addEventListener('keydown', function (event) {
+      var toggle = event.target.closest && event.target.closest('[data-err-toggle]');
+      if (toggle && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.stopPropagation(); toggle.click(); }
+    });
     D.addEventListener('keydown', function (event) { if (event.key === 'Escape' && state.open) close(); });
     return panel;
   }
@@ -412,8 +476,11 @@
         '<span class="own-ico" aria-hidden="true">' + esc(catIcon(row.category)) + '</span>' +
         '<span class="own-main"><h4>' + esc(row.title ? tx(row.title) : catLabel(row.category)) + '</h4><p>' + esc(prettyBody(row)) + '</p>' +
           (journeyLine(row) ? '<p class="own-journey">' + esc(journeyLine(row)) + '</p>' : '') +
-          '<span class="own-meta">' + meta.map(esc).join(' · ') + ' <span class="own-sev own-sev-' + esc(row.severity) + '">' + esc(sevLabel(row.severity)) + '</span>' + (row.day ? ' · ' + esc(row.day) : '') + '</span></span>' +
-        '<span class="own-mark" role="button" tabindex="0" data-id="' + esc(row.id) + '" aria-label="' + esc(row.read ? t('Отметить непрочитанным') : t('Отметить прочитанным')) + '">' + (row.read ? '↺' : '✓') + '</span></button>';
+          '<span class="own-meta">' + meta.map(esc).join(' · ') + ' <span class="own-sev own-sev-' + esc(row.severity) + '">' + esc(sevLabel(row.severity)) + '</span>' + (row.day ? ' · ' + esc(row.day) : '') + '</span>' +
+          (data.error ? '<span class="own-errbtn" role="button" tabindex="0" data-err-toggle="' + esc(row.id) + '" aria-expanded="' + !!state.expanded[row.id] + '">' +
+            esc(state.expanded[row.id] ? t('Скрыть подробности') : t('Подробности ошибки') + (+data.errorCount > 1 ? ' ×' + num(data.errorCount) : '')) + '</span>' : '') + '</span>' +
+        '<span class="own-mark" role="button" tabindex="0" data-id="' + esc(row.id) + '" aria-label="' + esc(row.read ? t('Отметить непрочитанным') : t('Отметить прочитанным')) + '">' + (row.read ? '↺' : '✓') + '</span></button>' +
+        errorDetails(row);
     }).join('');
     if (state.busy) html += '<div class="own-empty">' + esc(t('Загрузка…')) + '</div>';
     else if (state.rows.length && state.more) html += '<button class="own-btn" type="button" id="own-more" style="width:100%">' + esc(t('Показать ещё')) + '</button>';

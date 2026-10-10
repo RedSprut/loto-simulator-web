@@ -10,7 +10,7 @@
   <link rel="icon" href="./favicon-64.png?v=20260901b">
   <style>
     :root{font-family:Manrope,system-ui,sans-serif;color:#28170f;background:#fffaf2}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;padding:calc(24px + env(safe-area-inset-top)) 18px calc(32px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#fffaf2,#f8eddc)}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;padding:calc(24px + var(--loto-safe-top,env(safe-area-inset-top,0px))) 18px calc(32px + env(safe-area-inset-bottom));background:linear-gradient(180deg,#fffaf2,#f8eddc)}
     main{width:min(720px,100%);margin:auto}header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}
     h1{font-size:clamp(25px,5vw,38px);line-height:1.08;margin:0}h2{font-size:18px;margin:28px 0 8px}p,li{font-size:15px;line-height:1.58}ul{padding-left:22px}
     select,a{font:700 14px inherit}select{max-width:190px;padding:10px;border:1px solid #b5894c;background:#fff;border-radius:7px}
@@ -26,14 +26,14 @@
   <main>
     <header>
       <h1>Safe payment</h1>
-      <label><span data-i18n-entry="2428">Language</span><br><select data-i18n-entry-aria-label="2428" id="safe-language" aria-label="Language"></select></label>
+      <label><span data-i18n-entry="2442">Language</span><br><select data-i18n-entry-aria-label="2442" id="safe-language" aria-label="Language"></select></label>
     </header>
     <p class="domain" id="safe-domain">The commercial domain is not active yet. Payment is disabled at this address.</p>
     <h2>How payment works</h2>
     <ul>
       <li>On iPhone and iPad, subscriptions are available only through Apple’s system screen.</li>
       <li>On Android, subscriptions are available only through Google Play.</li>
-      <li>In a browser, secure checkout will open through RevenueCat and Paddle only after written compliance approval.</li>
+      <li id="safe-web-checkout">In a browser, secure checkout will open through RevenueCat and Paddle only after written compliance approval.</li>
     </ul>
     <h2>Phishing protection</h2>
     <p>Lotto Simulator never asks you to send your card number, CVV, password, or verification code by email, chat, SMS, or push notification.</p>
@@ -42,7 +42,7 @@
     <p>PRO pays only for additional software features of the simulator and analytics tool. The app does not sell tickets, accept bets, or guarantee winnings.</p>
     <div class="actions">
       <a class="button" href="./">Return to the app</a>
-      <a class="button secondary" id="safe-support" href="#" hidden data-i18n-entry="1548">Support</a>
+      <a class="button secondary" id="safe-support" href="#" hidden data-i18n-entry="1559">Support</a>
       <a class="button secondary" id="safe-app-store" href="#" hidden>App Store</a>
       <a class="button secondary" id="safe-play-store" href="#" hidden>Google Play</a>
     </div>

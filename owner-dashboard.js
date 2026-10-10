@@ -456,7 +456,7 @@
       // backdrop that flex-centres the card in the viewport — horizontally and vertically, whatever
       // the section's scroll position — above the country / person sheets (z 30), with the safe-area
       // insets kept free and a long note scrolling inside the card instead of leaving the screen.
-      '#ow-ov .ow-pop-back{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:12px;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:rgba(8,14,26,.35)}',
+      '#ow-ov .ow-pop-back{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:12px;padding:max(12px,var(--loto-safe-top,env(safe-area-inset-top,0px))) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:rgba(8,14,26,.35)}',
       '#ow-ov .ow-pop{position:relative;box-sizing:border-box;width:100%;max-width:560px;max-height:100%;overflow:auto;overscroll-behavior:contain;margin:0;background:var(--ow-card);border:1px solid var(--ow-bd);border-radius:14px;padding:12px;box-shadow:0 18px 50px rgba(0,0,0,.35)}',
       '#ow-ov .ow-pop h3{margin:0 0 6px;font-size:14px}',
       '#ow-ov .ow-pop p{margin:0;color:var(--ow-sub);font-size:13px}',

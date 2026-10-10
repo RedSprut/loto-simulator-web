@@ -15,6 +15,8 @@
     const updateLabel=()=>{safeSupport.textContent=window.LotoI18n?.translate('Служба поддержки')||'Служба поддержки';};
     updateLabel();window.addEventListener('loto:languagechange',updateLabel);
   }
+  // A store app sells PRO only through Apple / Google Play: it never describes the web checkout.
+  if(window.Capacitor?.isNativePlatform?.())document.getElementById('safe-web-checkout')?.setAttribute('hidden','');
   setLink('safe-app-store',config.appStoreUrl);
   setLink('safe-play-store',config.googlePlayUrl);
 

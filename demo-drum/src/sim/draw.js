@@ -373,7 +373,7 @@ export class DrawController {
     const poolId = w.resultPool;
     this.resultsByPool[poolId].push(w.value);          // ← the ONLY place a result is published
     if (this.resultsByPool[poolId][this.resultsByPool[poolId].length - 1] !== w.value) {
-      throw new Error(`UI/physical ball mismatch: pushed ${this.resultsByPool[poolId].at(-1)} ≠ ball ${w.value}`);
+      throw new Error(`UI/physical ball mismatch: pushed ${this.resultsByPool[poolId][this.resultsByPool[poolId].length - 1]} ≠ ball ${w.value}`);
     }
     this._lastWinnerValue = w.value;
     this._revealed = true;
