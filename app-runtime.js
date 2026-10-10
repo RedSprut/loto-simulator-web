@@ -5941,7 +5941,20 @@ const n=ON?CORE.unreadCount(loadMatches(),owner()):0, badge=document.getElementB
 btn.classList.toggle('pro-next-glow',n>0); btn.classList.toggle('is-new',n>0);
 if(badge){badge.hidden=!n;badge.textContent=n>99?'99+':String(n);}
 btn.setAttribute('aria-label',T('Призовые совпадения')+(n?' · '+T(`Новых: ${n}`):''));
+fitEntry(); requestAnimationFrame(fitEntry);
 }catch(_e){} }
+function fitEntry(){ try{
+const btn=document.getElementById('pm-entry'),t=btn&&btn.querySelector('.pm-entry-t'); if(!t)return;
+btn.classList.remove('is-tight'); if(!btn.classList.contains('is-new'))return;
+const cs=getComputedStyle(btn),room=btn.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+const walk=document.createTreeWalker(t,NodeFilter.SHOW_TEXT); let node,widest=0;
+while((node=walk.nextNode())){const re=/[^\s\-\u2010\u2011\u2013]+/g;let m;
+while((m=re.exec(node.textContent))){const r=document.createRange();r.setStart(node,m.index);r.setEnd(node,m.index+m[0].length);let w=0;for(const x of r.getClientRects())w+=x.width;if(w>widest)widest=w;}}
+if(widest>room-1)btn.classList.add('is-tight');
+}catch(_e){} }
+let fitFrame=0;
+window.addEventListener('resize',()=>{cancelAnimationFrame(fitFrame);fitFrame=requestAnimationFrame(fitEntry);},{passive:true});
+try{window.LotoI18n&&window.LotoI18n.ready&&Promise.resolve(window.LotoI18n.ready).then(fitEntry,()=>{});}catch(_e){}
 function markViewed(ids){ try{
 const list=[].concat(ids||[]); if(!list.length)return; const store=loadMatches(); let n=0;
 for(const m of store)if(list.indexOf(m.id)>=0&&m.unread){delete m.unread;m.viewedAt=Date.now();n++;
