@@ -167,6 +167,9 @@ async function main() {
   let hud;
   let savePrompt = null; // assigned below; the onState hook only fires it after that
   const DRAW_STORAGE_KEY = 'loto:drum:unfinished:v1';
+  // Finished draws waiting for the host (index.html drains it into LotoWinMatch). Bounded.
+  const COMPLETED_OUTBOX_KEY = 'loto_drum_completed_v1';
+  const COMPLETED_OUTBOX_MAX = 200;
   let paused = false;
   let pausedAt = 0;
   let pausedAutomatically = false;
@@ -202,11 +205,46 @@ async function main() {
       // the host counts a finished 3D draw (not merely opening the drum)
       const run = drawRun || { id: newResultId(), startedAt: performance.now() };
       lastDrawId = run.id; drawRun = null;
-      postToHost('DRUM_DRAW_COMPLETE', { drawId: run.id, ms: Math.max(0, Math.round(performance.now() - run.startedAt)), game: draw.profile?.id || '' });
+      // Every finished draw goes to the host's prize-match history, saved or not. It is written to
+      // the shared outbox FIRST (same origin as the host), so a host that never received the message
+      // — the app closed in that instant — still records it on its next start.
+      const combo = finishedCombination();
+      if (combo) queueCompleted(combo);
+      postToHost('DRUM_DRAW_COMPLETE', { drawId: run.id, ms: Math.max(0, Math.round(performance.now() - run.startedAt)), game: draw.profile?.id || '', combo });
     },
   });
   draw._debug = debug; // RESULT_REVEAL diagnostics in the headless harness
 
+  // The finalized combination of the last draw, from the real draw result, keeping main and
+  // additional numbers separated per the lottery's own rules (never merged).
+  function finishedCombination() {
+    const p = draw.profile;
+    if (!p) return null;
+    const groups = p.resultLayout.groups;
+    const mainId = groups[0]?.pool;
+    const main = [...(draw.resultsByPool[mainId] || [])].sort((a, b) => a - b);
+    const additional = groups.slice(1)
+      .flatMap((g) => [...(draw.resultsByPool[g.pool] || [])])
+      .sort((a, b) => a - b);
+    if (!main.length) return null;
+    return {
+      lotteryId: p.id,
+      lotteryName: p.name || p.label,
+      main,
+      additional,
+      date: new Date().toISOString(),
+      source: SOURCE_DRUM,
+      resultId: lastDrawId || newResultId(),
+    };
+  }
+  function queueCompleted(combo) {
+    try {
+      const list = JSON.parse(localStorage.getItem(COMPLETED_OUTBOX_KEY) || '[]');
+      const next = (Array.isArray(list) ? list : []).filter((c) => c && c.resultId !== combo.resultId);
+      next.push(combo);
+      localStorage.setItem(COMPLETED_OUTBOX_KEY, JSON.stringify(next.slice(-COMPLETED_OUTBOX_MAX)));
+    } catch (e) { console.warn('[drum] finished draw could not be queued', e); }
+  }
   const isActiveDraw = () => draw.state !== State.IDLE && draw.state !== State.COMPLETE;
   const drawnCount = () => Object.values(draw.resultsByPool || {}).reduce((sum, values) => sum + values.length, 0);
   function saveUnfinished() {
@@ -326,28 +364,7 @@ async function main() {
     onBulkApply: (lotteryId, combos, labels) => store.bulkApply(lotteryId, combos, labels),
   });
   savePrompt = new SavePrompt(document.getElementById('hud'), store, {
-    // Build the finalized combination from the real draw result, keeping main and
-    // additional numbers separated per the lottery's own rules (never merged).
-    getResult: () => {
-      const p = draw.profile;
-      if (!p) return null;
-      const groups = p.resultLayout.groups;
-      const mainId = groups[0]?.pool;
-      const main = [...(draw.resultsByPool[mainId] || [])].sort((a, b) => a - b);
-      const additional = groups.slice(1)
-        .flatMap((g) => [...(draw.resultsByPool[g.pool] || [])])
-        .sort((a, b) => a - b);
-      if (!main.length) return null;
-      return {
-        lotteryId: p.id,
-        lotteryName: p.name || p.label,
-        main,
-        additional,
-        date: new Date().toISOString(),
-        source: SOURCE_DRUM,
-        resultId: lastDrawId || newResultId(),
-      };
-    },
+    getResult: finishedCombination,
   });
 
   draw.loadProfile(GAME_PROFILES[profileKey]);
