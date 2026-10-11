@@ -377,6 +377,10 @@ async function main() {
       draw.loadProfile(entry[1]);
       draw.restore(pending);
       hud.panel.querySelector('[data-profile]').value = entry[0];
+      // The restored draw's game is now the one on screen: tell the host exactly as the settings
+      // switcher does, so its header / navigation / ticket take this game's colours at once. A restore
+      // is not the user's pick, so the host must not teach Smart Start from it.
+      postToHost('DRUM_GAME_CHANGED', { game: entry[1].id, key: entry[0], restored: true });
       hud.setResults(draw.resultsByPool);
       paused = true; pausedAutomatically = true; pausedAt = performance.now(); acc = 0;
       hud.setPaused(true);
