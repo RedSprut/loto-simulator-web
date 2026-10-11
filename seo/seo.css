@@ -74,7 +74,8 @@ thead th{font-size:12.5px;color:var(--sub);font-weight:700}
 .cell.h5{background:rgba(184,40,40,.8);color:#fff}
 .gen-controls{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px}
 .gen-controls label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--sub)}
-.gen-controls label[hidden]{display:none}
+.gen-controls label[hidden],.gen-saved[hidden]{display:none}
+.gen-saved{color:var(--fg)}
 .gen-controls select{min-height:44px;min-width:120px;padding:0 10px;border-radius:12px;border:1px solid var(--border);background:var(--bg3);color:var(--fg);font:inherit;font-size:16px}
 .gen-out{min-height:10px;margin-top:8px}
 .tools{padding-left:20px}
