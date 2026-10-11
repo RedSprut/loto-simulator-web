@@ -1432,7 +1432,7 @@
   // person's page load is also a counter visit.
   function humanCards(h) {
     h = h || {};
-    return card('Человек ✓', num(h.human_confirmed), et('вошёл в аккаунт или действовал в приложении · новых: {{0}}', num(h.new_human_confirmed)), 'human') +
+    return card('Человек ✓', num(h.human_confirmed), et('вошёл в аккаунт или нажимал в приложении · новых: {{0}}', num(h.new_human_confirmed)), 'human') +
       card('Вероятно человек', num(h.human_likely), et('согласие на аналитику без действий · новых: {{0}}', num(h.new_human_likely)), 'human') +
       card('Визиты людей', num(h.visits_people), et('решение по согласию или вход в аккаунт · это визиты, не люди'), 'human') +
       card('Не определено', num(h.visits_unknown), et('визиты без решения по согласию и без входа — ни в людей, ни в страны не входят'), 'human') +
@@ -1850,7 +1850,7 @@
         { title: 'Длит.', key: 'duration_ms', html: function (r) { return esc(dur(r.duration_ms)); }, numeric: true },
         { title: 'Активно', key: 'active_ms', html: function (r) { return esc(dur(r.active_ms)) + (r.active_source === 'estimated' ? ' ' + et('оц.') : ''); }, numeric: true },
         { title: 'События', key: 'events', numeric: true },
-        { title: 'Действия', key: 'interactions', numeric: true },
+        { title: 'Нажатия', key: 'interactions', numeric: true },
         { title: 'Вход', key: 'entry' },
         { title: 'Выход', key: 'exit' },
         { title: 'Источник', key: 'channel', html: function (r) { return esc(label(LIB.CHANNEL_RU, r.channel)); } },
@@ -2024,7 +2024,7 @@
         { title: 'Оценка', key: 'bot_score', numeric: true },
         { title: 'Признаки', key: 'evidence', html: function (r) { return esc((r.evidence || []).map(function (e) { return LIB.evidenceRu ? LIB.evidenceRu(e) : e; }).join(' · ')); } },
         { title: 'Сессий', key: 'sessions', numeric: true }, { title: 'События', key: 'events', numeric: true },
-        { title: 'Действия', key: 'interactions', numeric: true },
+        { title: 'Нажатия', key: 'interactions', numeric: true },
         { title: 'Страна', key: 'country', html: function (r) { return esc(r.country ? countryName(r.country) : '—'); } },
         { title: 'Браузер', key: 'browser' }, { title: 'Первый', key: 'first_seen', html: function (r) { return esc(timeText(r.first_seen)); } }
       ], data.rows, 'Ботов и тестов за период не найдено') + '</div>';
@@ -2426,6 +2426,7 @@
             return humanChip(r.human) + ' ' + journeyStatus(r.status_now) + ((r.statuses || []).length > 1 ? '<div class="ow-card-s">' + esc((r.statuses || []).map(function (k) { return label(LIB.STATUS_RU, k); }).join(' → ')) + '</div>' : '');
           } },
           { title: 'Действия', key: 'actions', numeric: true },
+          { title: 'Открытия', key: 'views', numeric: true, html: function (r) { return num(LIB.personViews ? LIB.personViews(r) : 0); } },
           { title: 'Сессии', key: 'sessions', numeric: true },
           { title: 'Активно', key: 'engaged_ms', numeric: true, html: function (r) { return +r.engaged_ms >= 1000 ? esc(dur(r.engaged_ms)) : '—'; } },
           { title: 'Источник', key: 'channel', html: function (r) { return esc(r.channel ? label(LIB.CHANNEL_RU, r.channel) : '—'); } },

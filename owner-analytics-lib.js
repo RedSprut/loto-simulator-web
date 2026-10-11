@@ -412,6 +412,15 @@
   function journeyText(person, country) {
     return journeySteps(person, country).map(function (s) { return s.text; }).join(' → ');
   }
+  // The person's «Открытия» — what they only looked at (chose a lottery, opened a function), summed
+  // over the same journey the «Действия» column comes from. Kept apart on purpose: a robot that taps
+  // through every lottery has openings and no actions.
+  function personViews(person) {
+    var p = person || {}, n = 0;
+    (p.lotteries || []).forEach(function (l) { n += +l.views || 0; });
+    (p.global || []).forEach(function (f) { n += +f.views || 0; });
+    return n;
+  }
   var EVIDENCE_RU = {
     verified_account: 'Вошёл в аккаунт — личность подтверждена',
     anonymous_human_device: 'Анонимное устройство с признаками живого человека',
@@ -426,7 +435,7 @@
     multiple_devices: 'Несколько устройств в одной сети',
     repeat_days: 'Сеть повторяется в разные дни',
     single_visit_network: 'Сеть встретилась один раз',
-    'human:interactions': 'Есть действия в приложении',
+    'human:interactions': 'Есть нажатия в приложении',
     'human:engaged_10s': 'Активность дольше 10 секунд',
     'human:returning_days': 'Возвращался в разные дни',
     'human:verified_account': 'Есть вход в аккаунт',
@@ -437,7 +446,8 @@
     hosting_network: 'Сеть дата-центра',
     vpn_network: 'VPN',
     tor_exit: 'Выход из сети Tor',
-    post_deploy_single_hit: 'Один заход сразу после публикации сборки'
+    post_deploy_single_hit: 'Один заход сразу после публикации сборки',
+    'store_prelaunch:google_play': 'Тестовое устройство Google Play (предзапусковой отчёт)'
   };
   function evidenceRu(key) {
     if (!key) return '';
@@ -611,7 +621,7 @@
     KIND_RU: KIND_RU, CLASS_RU: CLASS_RU, CHANNEL_RU: CHANNEL_RU, EVENT_RU: EVENT_RU,
     ACTIVITY_ORDER: ACTIVITY_ORDER, ACTIVITY_RU: ACTIVITY_RU, activityText: activityText,
     LOTTERY_ORDER: LOTTERY_ORDER, LOTTERY_NAMES: LOTTERY_NAMES, lotteryName: lotteryName,
-    USAGE_ORDER: USAGE_ORDER, USAGE_RU: USAGE_RU, usageLabel: usageLabel, journeySteps: journeySteps, journeyText: journeyText,
+    USAGE_ORDER: USAGE_ORDER, USAGE_RU: USAGE_RU, usageLabel: usageLabel, journeySteps: journeySteps, journeyText: journeyText, personViews: personViews,
     EVIDENCE_RU: EVIDENCE_RU, evidenceRu: evidenceRu,
     PRECISION_RU: PRECISION_RU, TRAFFIC_RU: TRAFFIC_RU, CONTINENT_RU: CONTINENT_RU, CONTINENT_ORDER: CONTINENT_ORDER,
     BLUE_LIGHT: BLUE_LIGHT, BLUE_DARK: BLUE_DARK, choroplethColor: choroplethColor, flagEmoji: flagEmoji, kpiText: kpiText,
