@@ -283,6 +283,10 @@ export const CONFIG = {
     downgradeBelowFps: 42,
     upgradeAboveFps: 57,
     sampleSeconds: 2.5,
+    // Slow-device notice: the lowest preset still under this FPS for this many sample
+    // windows in a row (≥ 5 s) — a measured slowdown, not a device or OS guess.
+    slowBelowFps: 24,
+    slowWindows: 2,
   },
 
   colors: {

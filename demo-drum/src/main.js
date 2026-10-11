@@ -429,6 +429,13 @@ async function main() {
   } catch (e) {}
 
   quality.onChange((preset) => engine.applyPreset(preset));
+  // Shown only after the drum MEASURED a slowdown it cannot adapt away (QualityManager.slow),
+  // at most once per browser session.
+  quality.onSlow(() => {
+    const KEY = 'loto_drum_slow_notice_v1';
+    try { if (sessionStorage.getItem(KEY)) return; sessionStorage.setItem(KEY, '1'); } catch (e) {}
+    toast(t('perf.slow'), { duration: 8000, long: true });
+  });
   const syncStageCenter = () => {
     const r = canvas.getBoundingClientRect();
     document.documentElement.style.setProperty('--dd-stage-center-x', `${(r.left + r.width / 2).toFixed(2)}px`);

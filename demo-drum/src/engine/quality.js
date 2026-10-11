@@ -17,12 +17,20 @@ export class QualityManager {
     this._fpsSum = 0;
     this._fpsN = 0;
     this.locked = false; // user can pin a preset from Settings
+    // Confirmed slowdown: measured, never guessed from the user agent (Chrome reports
+    // "Android 10; K" on every Android version). Set once the LOWEST preset still averages
+    // below slowBelowFps for slowWindows sample windows in a row.
+    this._slowRun = 0;
+    this.slow = false;
+    this.slowListeners = new Set();
   }
 
   get preset() { return this.presets[this.level]; }
 
   onChange(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
   _emit() { for (const fn of this.listeners) fn(this.preset, this.level); }
+  /** Fires once, when the slowdown is confirmed (see `slow`). */
+  onSlow(fn) { this.slowListeners.add(fn); return () => this.slowListeners.delete(fn); }
 
   /** Rough starting tier from device hints (no benchmark stalls). */
   _probe() {
@@ -59,10 +67,19 @@ export class QualityManager {
     const avg = this._fpsSum / Math.max(1, this._fpsN);
     this._acc = 0; this._fpsSum = 0; this._fpsN = 0;
     const i = this.order.indexOf(this.level);
+    this._trackSlow(avg, i === this.order.length - 1);
     if (avg < CONFIG.quality.downgradeBelowFps && i < this.order.length - 1) {
       this.setLevel(this.order[i + 1]);
     } else if (avg > CONFIG.quality.upgradeAboveFps && i > 0) {
       this.setLevel(this.order[i - 1]);
     }
+  }
+
+  _trackSlow(avg, atLowest) {
+    if (this.slow) return;
+    this._slowRun = atLowest && avg < CONFIG.quality.slowBelowFps ? this._slowRun + 1 : 0;
+    if (this._slowRun < CONFIG.quality.slowWindows) return;
+    this.slow = true;
+    for (const fn of this.slowListeners) fn();
   }
 }

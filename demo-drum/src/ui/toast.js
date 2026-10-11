@@ -5,7 +5,7 @@
 let el = null;
 let hideTimer = 0;
 
-export function toast(message, { duration = 2200 } = {}) {
+export function toast(message, { duration = 2200, long = false } = {}) {
   if (!message) return;
   if (!el) {
     el = document.createElement('div');
@@ -15,6 +15,7 @@ export function toast(message, { duration = 2200 } = {}) {
     (document.getElementById('hud') || document.body).appendChild(el);
   }
   el.textContent = message;
+  el.classList.toggle('is-long', !!long);
   // restart the enter animation
   el.classList.remove('show');
   void el.offsetWidth;

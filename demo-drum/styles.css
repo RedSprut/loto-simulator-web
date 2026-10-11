@@ -503,6 +503,8 @@ html, body {
   opacity: 0; transition: opacity .2s ease, transform .2s ease;
 }
 .dd-toast.show { opacity: 1; transform: translate(-50%, 0); }
+/* A sentence-long notice: wrap at the toast's own max-width (left:50% would halve it), card corners. */
+.dd-toast.is-long { width: max-content; max-width: min(90vw, 380px); border-radius: 16px; line-height: 1.4; }
 
 /* ── Sound-off hint (top, non-blocking, aria-live) ──
    Sits below the game header + results, well clear of the dynamic island / safe-area
