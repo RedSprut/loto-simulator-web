@@ -334,10 +334,24 @@ async function main() {
     onQuality: (v) => { if (v === 'auto') quality.unlock(); else quality.lock(v); },
     onProfile: (key) => {
       if (!GAME_PROFILES[key]) return;
-      clearUnfinished(); paused = false;
-      audio.reset();
-      draw.loadProfile(GAME_PROFILES[key]);
-      postToHost('DRUM_GAME_CHANGED', { game: GAME_PROFILES[key].id, key });
+      const switchGame = () => {
+        clearUnfinished(); paused = false; pausedAutomatically = false;
+        audio.reset(); hud.setPaused(false);
+        hud.panel.querySelector('[data-profile]').value = key;
+        draw.loadProfile(GAME_PROFILES[key]);
+        postToHost('DRUM_GAME_CHANGED', { game: GAME_PROFILES[key].id, key });
+      };
+      // A game switch never discards an unfinished draw on its own: the selector returns to the
+      // drawn game, the draw pauses (saved) and the unfinished-draw prompt asks. Only «Полный
+      // сброс» discards it and opens the chosen game; «Продолжить» / «Остановить» keep it.
+      if (isActiveDraw()) {
+        const drawnKey = Object.keys(GAME_PROFILES).find((k) => GAME_PROFILES[k].id === draw.profile?.id);
+        if (drawnKey) hud.panel.querySelector('[data-profile]').value = drawnKey;
+        pauseDraw();
+        hud.showResumePrompt(drawnCount(), totalDrawnOf(draw.profile), resumeDraw, stopDraw, switchGame);
+        return;
+      }
+      switchGame();
     },
   }, { debug, profileKey });
   audio.onStatusChange = syncAudioHud;
