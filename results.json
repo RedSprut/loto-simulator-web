@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-13T19:33:40.142Z",
-    "sourceFetchedAt": "2026-10-13T19:33:40.142Z",
+    "generatedAt": "2026-10-13T21:58:52.179Z",
+    "sourceFetchedAt": "2026-10-13T21:58:52.179Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "97647a05a1626894",
     "updatedAt": "2026-10-13",
@@ -8867,13 +8867,94 @@
           4,
           11
         ],
-        "jackpot": null,
+        "jackpot": 37.7,
         "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
         "drawId": null,
         "ruleVersion": "euromillions-2-12",
-        "ruleEra": "current"
+        "ruleEra": "current",
+        "payoutTiers": [
+          {
+            "match": "5+2",
+            "label": "5+2",
+            "prizeAmount": 37737849,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 234500,
+            "winners": 2
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 36538,
+            "winners": 3
+          },
+          {
+            "match": "4+2",
+            "label": "4+2",
+            "prizeAmount": 1897,
+            "winners": 18
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 136,
+            "winners": 464
+          },
+          {
+            "match": "3+2",
+            "label": "3+2",
+            "prizeAmount": 70,
+            "winners": 953
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 47,
+            "winners": 999
+          },
+          {
+            "match": "2+2",
+            "label": "2+2",
+            "prizeAmount": 16,
+            "winners": 14632
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 13,
+            "winners": 20144
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 9,
+            "winners": 53856
+          },
+          {
+            "match": "1+2",
+            "label": "1+2",
+            "prizeAmount": 8,
+            "winners": 78212
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 6,
+            "winners": 301923
+          },
+          {
+            "match": "2+0",
+            "label": "2+0",
+            "prizeAmount": 4,
+            "winners": 741148
+          }
+        ],
+        "currency": "EUR"
       },
       {
         "date": "2026-10-09",
