@@ -83,7 +83,9 @@
     { id: 'bots', label: 'Боты и QA' },
     { id: 'agents', label: 'AI-агенты' },
     { id: 'consent', label: 'Согласия' },
-    { id: 'quality', label: 'Качество данных' }
+    { id: 'quality', label: 'Качество данных' },
+    // 2026-10-13: the designated FREE test account — its 19 preview budgets and the owner's reset.
+    { id: 'freetest', label: 'Тестирование FREE' }
   ];
   var PRESETS = [
     ['day', 'День по календарю'], ['live', 'Live · 30 минут'], ['today', 'Сегодня'], ['yesterday', 'Вчера'], ['7d', '7 дней'],
@@ -444,6 +446,17 @@
       '#ow-ov .ow-hg{font-size:34px;line-height:1}',
       '#ow-ov .ow-stages{color:var(--ow-sub);font-size:12px;text-align:center;max-width:280px}',
       '#ow-ov .ow-status{color:var(--ow-sub);font-size:12px;margin-left:auto;text-align:right}',
+      '#ow-ov .ow-ft-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}',
+      // The panel's dark accent carries white text at 3.2:1; this section's buttons use a deeper blue (5.2:1).
+      '#ow-ov[data-ow-theme="dark"] .ow-ft-actions .ow-btn-primary{background:#2563eb;border-color:#2563eb}',
+      '#ow-ov .ow-ft-confirm{background:var(--ow-card2);border:1px solid var(--ow-accent);border-radius:12px;padding:10px;margin-top:12px}',
+      '#ow-ov .ow-ft-confirm p{margin:0 0 8px}',
+      '#ow-ov .ow-ft-msg{border-radius:12px;padding:10px;margin-top:12px;border:1px solid var(--ow-bd);background:var(--ow-card2)}',
+      '#ow-ov .ow-ft-msg.ok{border-color:var(--ow-up)}#ow-ov .ow-ft-msg.bad{border-color:var(--ow-down)}',
+      '#ow-ov .ow-ft-note{color:var(--ow-sub);margin-top:8px}',
+      '#ow-ov .ow-ft-email{display:block;font-size:15px;line-height:1.3;overflow-wrap:anywhere}',
+      '#ow-ov .ow-ft-tools{margin-top:12px}#ow-ov .ow-ft-tools summary{cursor:pointer;font-weight:700}',
+      '#ow-ov .ow-ft-tools table{width:100%;border-collapse:collapse;margin-top:6px}#ow-ov .ow-ft-tools td{padding:3px 6px;border-top:1px solid var(--ow-bd)}#ow-ov .ow-ft-tools td.n{text-align:right;white-space:nowrap}',
       '#ow-ov .ow-err{background:rgba(242,120,154,.14);border:1px solid var(--ow-down);border-radius:12px;padding:10px;margin-top:10px;display:flex;gap:10px;align-items:center}',
       // The map is the section: as tall as the viewport allows on a desktop, wide and short on a phone.
       // The box follows the world's own proportions (≈1.9:1 between 56°S and 78°N): sizeMapBox() sets the
@@ -794,6 +807,7 @@
     // The day report shows the guest journey of the same day as its own block, from its own request.
     else if (section === 'day') await loadMany(['day', 'journey'], extra);
     else if (section === 'activity') await load('activity', actExtra(extra));
+    else if (section === 'freetest') await loadFreeTest();
     else await load(section, extra);
     render();
     if (section === 'overview') loadGa4();   // its own request, its own states — never on the overview's path
@@ -2932,11 +2946,105 @@
     });
   }
 
+  // ── «Тестирование FREE» ────────────────────────────────────────────────────────────────────
+  // The ONE test account the server pins (owner_free_test_account): its real 19 budgets from
+  // Supabase and the owner's reset. Nothing here is computed locally; the panel shows what the
+  // server returns and asks for a confirmation before the reset.
+  var FREE_TEST_REASON = {
+    test_account_missing: 'Тестовый аккаунт не найден в Supabase. Сначала войдите им в приложение хотя бы один раз.',
+    test_account_is_owner: 'Тестовый аккаунт совпадает с аккаунтом владельца — сброс запрещён.',
+    test_account_anonymous: 'Тестовый аккаунт анонимный — сброс запрещён.'
+  };
+  async function loadFreeTest() {
+    if (state.busy) return null;
+    state.busy = true;
+    state.error = null;
+    setHourglass(true, function () { return t('Загрузка раздела…'); });
+    try {
+      var response = await api({ free_test: { op: 'status' } });
+      state.data.freetest = { data: (response && response.freeTest) || {} };
+    } catch (error) {
+      state.error = error;
+    } finally {
+      state.busy = false;
+      setHourglass(false);
+    }
+  }
+  async function resetFreeTest() {
+    if (state.ftBusy) return;
+    state.ftBusy = true;
+    state.ftConfirm = false;
+    render();
+    try {
+      var response = await api({ free_test: { op: 'reset' } });
+      var out = (response && response.freeTest) || {};
+      if (out.ok) {
+        var current = (state.data.freetest && state.data.freetest.data) || {};
+        state.data.freetest = { data: Object.assign({}, current, { found: true, state: out.state }) };
+        var cancelled = +out.cancelledReservations || 0;
+        state.ftMessage = { ok: true, text: function () {
+          return t('Попытки сброшены: доступно {{0}} из {{1}}.', num(out.state && out.state.remaining), num(out.state && out.state.total)) +
+            (cancelled ? ' ' + t('Отменено незавершённых запусков: {{0}}.', num(cancelled)) : '');
+        } };
+      } else {
+        var reason = out.reason || '';
+        state.ftMessage = { ok: false, text: function () { return FREE_TEST_REASON[reason] ? t(FREE_TEST_REASON[reason]) : t('Сброс не выполнен: {{0}}', reason || t('неизвестно')); } };
+      }
+    } catch (error) {
+      state.ftMessage = { ok: false, text: function () { return t('Сброс не выполнен.') + ' ' + errorText(error); } };
+    } finally {
+      state.ftBusy = false;
+      if (state.section === 'freetest') render();
+    }
+  }
+  function renderFreeTest(data) {
+    var st = data.state || null;
+    var html = '';
+    if (!data.found || !st) {
+      html += '<div class="ow-block"><div class="ow-block-h">' + et('Тестовый аккаунт') + '</div>' +
+        '<div><b data-i18n-ignore>' + esc(data.email || '—') + '</b></div>' +
+        '<div class="ow-ft-note">' + et('Тестовый аккаунт не найден в Supabase. Сначала войдите им в приложение хотя бы один раз.') + '</div></div>';
+    } else {
+      var level = { free: 'FREE', trial: 'Trial', pro: 'PRO' }[st.accessLevel] || String(st.accessLevel || '—');
+      html += '<div class="ow-cards">' +
+        card('Тестовый аккаунт', '<span class="ow-ft-email" data-i18n-ignore>' + esc(st.email || data.email || '—') + '</span>', '<span class="ow-status-chip">' + esc(level) + '</span>') +
+        card('Инструменты', num(st.tools), et('с попытками: {{0}}', num(st.toolsAvailable))) +
+        card('Всего попыток', num(st.total), et('по {{0}} на инструмент', num(st.tools ? Math.round(st.total / st.tools) : 0))) +
+        card('Использовано', num(st.used), st.reserved ? et('в процессе: {{0}}', num(st.reserved)) : '') +
+        card('Осталось', num(st.remaining)) +
+      '</div>';
+      if (st.accessLevel !== 'free') html += '<div class="ow-ft-msg bad">' + et('Аккаунт сейчас не FREE: пока действует PRO или пробный период, попытки не расходуются.') + '</div>';
+      if (st.lastResetAt) html += '<div class="ow-ft-note">' + et('Последний сброс: {{0}}', new Date(st.lastResetAt).toLocaleString(intl())) + '</div>';
+      var tools = Array.isArray(st.byFeature) ? st.byFeature : [];
+      if (tools.length) {
+        html += '<details class="ow-ft-tools"><summary>' + et('По инструментам') + '</summary><table><tbody>' +
+          tools.map(function (row) {
+            return '<tr><td data-i18n-ignore><code>' + esc(row.feature) + '</code></td><td class="n">' +
+              et('осталось {{0}} из {{1}}', num(row.remaining), num(row.limit)) + (row.reserved ? ' · ' + et('в процессе: {{0}}', num(row.reserved)) : '') + '</td></tr>';
+          }).join('') + '</tbody></table></details>';
+      }
+      if (state.ftConfirm) {
+        html += '<div class="ow-ft-confirm" role="alertdialog" aria-label="' + et('Сбросить все попытки') + '">' +
+          '<p>' + et('Сбросить все {{0}} счётчиков бесплатных попыток аккаунта {{1}}? Незавершённые запуски будут отменены. Покупки, подписки и сохранённые данные не изменятся.', num(st.tools), st.email || data.email || '') + '</p>' +
+          '<div class="ow-ft-actions"><button class="ow-btn ow-btn-primary" type="button" data-ft-confirm>' + et('Да, сбросить') + '</button>' +
+          '<button class="ow-btn" type="button" data-ft-cancel>' + et('Отмена') + '</button></div></div>';
+      } else {
+        html += '<div class="ow-ft-actions"><button class="ow-btn ow-btn-primary" type="button" data-ft-reset' + (state.ftBusy ? ' disabled' : '') + '>' +
+          (state.ftBusy ? et('Сброс…') : et('Сбросить все попытки')) + '</button>' +
+          '<button class="ow-btn" type="button" data-ft-refresh' + (state.ftBusy ? ' disabled' : '') + '>' + et('Обновить') + '</button></div>';
+      }
+    }
+    if (state.ftMessage) html += '<div class="ow-ft-msg ' + (state.ftMessage.ok ? 'ok' : 'bad') + '" role="status">' + esc(state.ftMessage.text()) + '</div>';
+    html += '<div class="ow-ft-note">' + et('Данные — из Supabase. Сброс выполняется только по этой кнопке и касается только тестового аккаунта: каждый инструмент снова получает свои 3 попытки, списание дальше идёт по обычным правилам.') + '</div>';
+    return html;
+  }
+
   var RENDERERS = {
     activity: renderActivity, day: renderDay, journey: renderJourney, usage: renderUsage, overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
     devices: renderDevices, sessions: renderSessions, acquisition: renderAcquisition, geography: renderGeography,
     map: renderMap, games: renderGames, features: renderFeatures, funnels: renderFunnels,
-    retention: renderRetention, bots: renderBots, agents: renderAgents, consent: renderConsent, quality: renderQuality
+    retention: renderRetention, bots: renderBots, agents: renderAgents, consent: renderConsent, quality: renderQuality,
+    freetest: renderFreeTest
   };
 
   function render() {
@@ -2946,6 +3054,7 @@
     if (!response) { host.innerHTML = '<div class="ow-empty">' + et('Нет данных') + '</div>'; return; }
     var renderer = RENDERERS[state.section];
     host.innerHTML = renderer ? renderer(response.data || {}) : '<div class="ow-empty">' + et('Раздел недоступен') + '</div>';
+    if (state.section === 'freetest') { setStatus(''); return; }
     var range = response.range || {};
     var took = response.ms;
     var ms = function () { return took != null ? ' · ' + t('{{0}} мс', took) : ''; };
@@ -3114,6 +3223,13 @@
         if (drill.hasAttribute(pair[1])) next[pair[0]] = drill.getAttribute(pair[1]);
       });
       setUsageFilters(next);
+    });
+    ovEl.querySelector('#ow-content').addEventListener('click', function (event) {
+      if (state.section !== 'freetest') return;
+      if (event.target.closest('[data-ft-reset]')) { state.ftConfirm = true; state.ftMessage = null; render(); return; }
+      if (event.target.closest('[data-ft-cancel]')) { state.ftConfirm = false; render(); return; }
+      if (event.target.closest('[data-ft-confirm]')) { resetFreeTest(); return; }
+      if (event.target.closest('[data-ft-refresh]')) { state.ftMessage = null; show('freetest'); }
     });
     ovEl.querySelector('#ow-content').addEventListener('click', function (event) {
       if (event.target.id === 'ow-fit' && mapApi) { state.continent = 'all'; var sel = ovEl.querySelector('#ow-continent'); if (sel) sel.value = 'all'; mapApi.setContinent('all'); }

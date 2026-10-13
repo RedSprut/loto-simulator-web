@@ -1402,6 +1402,33 @@
     ["экраны: {{0}}", "screens: {{0}}", "skjermer: {{0}}"],
     ["Серверные операции без сессии приложения", "Server operations without an app session", "Serveroperasjoner uten appøkt"],
     ["Сессия {{0}}", "Session {{0}}", "Økt {{0}}"],
+    // «Тестирование FREE» (2026-10-13)
+    ["Тестирование FREE", "FREE testing", "FREE-testing"],
+    ["Тестовый аккаунт", "Test account", "Testkonto"],
+    ["Тестовый аккаунт не найден в Supabase. Сначала войдите им в приложение хотя бы один раз.", "The test account was not found in Supabase. Sign in to the app with it at least once first.", "Testkontoen ble ikke funnet i Supabase. Logg inn i appen med den minst én gang først."],
+    ["Тестовый аккаунт совпадает с аккаунтом владельца — сброс запрещён.", "The test account is the owner's account — the reset is not allowed.", "Testkontoen er eierens konto — tilbakestilling er ikke tillatt."],
+    ["Тестовый аккаунт анонимный — сброс запрещён.", "The test account is anonymous — the reset is not allowed.", "Testkontoen er anonym — tilbakestilling er ikke tillatt."],
+    ["Попытки сброшены: доступно {{0}} из {{1}}.", "Attempts reset: {{0}} of {{1}} available.", "Forsøkene er tilbakestilt: {{0}} av {{1}} tilgjengelig."],
+    ["Отменено незавершённых запусков: {{0}}.", "Unfinished runs cancelled: {{0}}.", "Uferdige kjøringer avbrutt: {{0}}."],
+    ["Сброс не выполнен: {{0}}", "Reset failed: {{0}}", "Tilbakestillingen mislyktes: {{0}}"],
+    ["Сброс не выполнен.", "Reset failed.", "Tilbakestillingen mislyktes."],
+    ["Инструменты", "Tools", "Verktøy"],
+    ["с попытками: {{0}}", "with attempts left: {{0}}", "med forsøk igjen: {{0}}"],
+    ["Всего попыток", "Total attempts", "Forsøk totalt"],
+    ["по {{0}} на инструмент", "{{0}} per tool", "{{0}} per verktøy"],
+    ["Использовано", "Used", "Brukt"],
+    ["в процессе: {{0}}", "in progress: {{0}}", "pågår: {{0}}"],
+    ["Осталось", "Remaining", "Gjenstår"],
+    ["Аккаунт сейчас не FREE: пока действует PRO или пробный период, попытки не расходуются.", "The account is not FREE right now: while PRO or a trial is active, attempts are not spent.", "Kontoen er ikke FREE nå: mens PRO eller en prøveperiode er aktiv, brukes ingen forsøk."],
+    ["Последний сброс: {{0}}", "Last reset: {{0}}", "Siste tilbakestilling: {{0}}"],
+    ["По инструментам", "By tool", "Per verktøy"],
+    ["осталось {{0}} из {{1}}", "{{0}} of {{1}} left", "{{0}} av {{1}} igjen"],
+    ["Сбросить все попытки", "Reset all attempts", "Tilbakestill alle forsøk"],
+    ["Сбросить все {{0}} счётчиков бесплатных попыток аккаунта {{1}}? Незавершённые запуски будут отменены. Покупки, подписки и сохранённые данные не изменятся.", "Reset all {{0}} free-attempt counters of the account {{1}}? Unfinished runs will be cancelled. Purchases, subscriptions and saved data stay unchanged.", "Tilbakestille alle {{0}} tellerne for gratis forsøk på kontoen {{1}}? Uferdige kjøringer avbrytes. Kjøp, abonnementer og lagrede data endres ikke."],
+    ["Да, сбросить", "Yes, reset", "Ja, tilbakestill"],
+    ["Отмена", "Cancel", "Avbryt"],
+    ["Сброс…", "Resetting…", "Tilbakestiller …"],
+    ["Данные — из Supabase. Сброс выполняется только по этой кнопке и касается только тестового аккаунта: каждый инструмент снова получает свои 3 попытки, списание дальше идёт по обычным правилам.", "Data comes from Supabase. The reset runs only from this button and affects only the test account: every tool gets its 3 attempts back, and attempts are then spent by the normal rules.", "Dataene kommer fra Supabase. Tilbakestillingen kjøres bare fra denne knappen og gjelder bare testkontoen: hvert verktøy får sine 3 forsøk tilbake, og forsøk brukes deretter etter de vanlige reglene."]
   ];
 
   var normalize = function (value) { return String(value == null ? '' : value).replace(/[ \s]+/g, ' ').trim(); };
