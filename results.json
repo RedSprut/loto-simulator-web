@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-14T22:25:39.520Z",
-    "sourceFetchedAt": "2026-10-14T22:25:39.520Z",
+    "generatedAt": "2026-10-15T00:00:33.338Z",
+    "sourceFetchedAt": "2026-10-15T00:00:33.338Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "3102682ae7dcc910",
     "updatedAt": "2026-10-14",
@@ -88,7 +88,7 @@
       "lottoMax": {
         "status": "ok",
         "source": "WCLC",
-        "fetched": 186,
+        "fetched": 1276,
         "merged": 53
       },
       "powerballAustralia": {
@@ -14122,11 +14122,11 @@
         "bonus": [
           36
         ],
-        "jackpot": null,
+        "jackpot": 85,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1278",
+        "drawId": 1278,
         "payoutTiers": [
           {
             "match": "7",
@@ -14201,11 +14201,11 @@
         "bonus": [
           36
         ],
-        "jackpot": null,
+        "jackpot": 80,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1277",
+        "drawId": 1277,
         "payoutTiers": [
           {
             "match": "7",
@@ -14280,11 +14280,11 @@
         "bonus": [
           7
         ],
-        "jackpot": null,
+        "jackpot": 75,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1276",
+        "drawId": 1276,
         "payoutTiers": [
           {
             "match": "7",
@@ -14359,11 +14359,11 @@
         "bonus": [
           26
         ],
-        "jackpot": null,
+        "jackpot": 70,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1275",
+        "drawId": 1275,
         "payoutTiers": [
           {
             "match": "7",
@@ -14438,11 +14438,11 @@
         "bonus": [
           17
         ],
-        "jackpot": null,
+        "jackpot": 65,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1274",
+        "drawId": 1274,
         "payoutTiers": [
           {
             "match": "7",
@@ -14517,11 +14517,11 @@
         "bonus": [
           7
         ],
-        "jackpot": null,
+        "jackpot": 60,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1273",
+        "drawId": 1273,
         "payoutTiers": [
           {
             "match": "7",
@@ -14596,11 +14596,11 @@
         "bonus": [
           8
         ],
-        "jackpot": null,
+        "jackpot": 55,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1272",
+        "drawId": 1272,
         "ruleVersion": "lottomax-7-52",
         "ruleEra": "current",
         "payoutTiers": [
@@ -14675,11 +14675,11 @@
         "bonus": [
           47
         ],
-        "jackpot": null,
+        "jackpot": 50,
         "lotteryId": "lottoMax",
-        "source": "lottomaxnumbers.com",
-        "sourceUrl": "https://www.lottomaxnumbers.com/numbers/2026",
-        "drawId": null,
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1271",
+        "drawId": 1271,
         "ruleVersion": "lottomax-7-52",
         "ruleEra": "current",
         "payoutTiers": [
