@@ -784,7 +784,7 @@ function setupLocalizedDateInputs(){['inp-date','period-from','period-to'].forEa
 .observe(document.body,{childList:true,subtree:true});}catch(_e){}}
 async function applyLang(){document.documentElement.lang=curLang;if(window.LotoI18n)await window.LotoI18n.setLanguage(curLang);const lb=document.getElementById('lang-btn');if(lb)lb.textContent=(LANG_FLAGS[curLang]||'')+' '+curLang.toUpperCase();}
 function openLangPicker(){const grid=document.getElementById('lang-grid');grid.innerHTML=LANG_PICKER_ORDER.map(c=>
-`<button class="lang-opt${c===curLang?' cur':''}" data-loto-event-click="selectLang('${c}')">
+`<button class="lang-opt${c===curLang?' cur':''}" data-lang="${c}" data-loto-event-click="selectLang('${c}')">
       <span class="lang-flag">${LANG_FLAGS[c]}</span>
       <span class="lang-name">${escapeHtml(LOCALE_CATALOG[c].name)}</span>
       ${c===curLang?'<span class="lang-check">✓</span>':''}

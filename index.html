@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" data-build="211983b" data-build-ts="2026-10-15T02:23:08.437Z">
+<html lang="en" data-build="0fa5b8d" data-build-ts="2026-10-15T15:43:11.674Z">
 <head>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-elem 'self' https://cdn.paddle.com https://challenges.cloudflare.com https://www.googletagmanager.com; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.supabase.co https://*.paddle.com https://*.revenuecat.com https://da08ctfrofx1b.cloudfront.net https://tiles.openfreemap.org https://*.google-analytics.com https://www.googletagmanager.com; font-src 'self' https://da08ctfrofx1b.cloudfront.net; connect-src 'self' https://eu.i.posthog.com https://eu-assets.i.posthog.com https://*.supabase.co https://lottosimulator.app https://lotosimulator.app https://redsprut.github.io https://api.revenuecat.com https://e.revenue.cat https://sdk.revenuecat-static.com https://da08ctfrofx1b.cloudfront.net https://*.paddle.com https://tiles.openfreemap.org https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; worker-src 'self'; manifest-src 'self'; frame-src 'self' https://*.paddle.com https://challenges.cloudflare.com; form-action 'self'; upgrade-insecure-requests">
-<script src="./boot-runtime.js?v=211983b"></script>
+<script src="./boot-runtime.js?v=0fa5b8d"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,14 +33,14 @@
 <meta property="og:locale:alternate" content="lv_LV">
 <meta property="og:locale:alternate" content="lt_LT">
 <meta property="og:url" content="https://lottosimulator.app/">
-<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=211983b">
+<meta property="og:image" content="https://lottosimulator.app/og-image-v2.png?v=0fa5b8d">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Lotto Simulator — Lottery Statistics &amp; Number Generator">
 <meta name="twitter:description" content="Lottery simulator, statistics &amp; number generator for EuroJackpot, Vikinglotto, Powerball &amp; more. Not a ticket seller.">
-<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=211983b">
+<meta name="twitter:image" content="https://lottosimulator.app/og-image-v2.png?v=0fa5b8d">
 <meta name="twitter:image:alt" content="Lotto Simulator app icon: red numbered lottery balls in a draw machine">
 <link rel="canonical" href="https://lottosimulator.app/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Lotto Simulator","alternateName":"Loto Simulator","url":"https://lottosimulator.app/","applicationCategory":"UtilitiesApplication","applicationSubCategory":"Lottery simulator and statistics","operatingSystem":"Web, iOS, Android","browserRequirements":"Requires JavaScript","softwareVersion":"1.0","image":"https://lottosimulator.app/og-image-v2.png?v=20260901b","screenshot":"https://lottosimulator.app/og-image-v2.png?v=20260901b","inLanguage":["en","ru","uk","no","sv","da","fi","de","fr","es","it","pt","pl","nl","et","lv","lt"],"featureList":["Random lottery number generator","Animated 3D draw machine","Latest lottery results and past-draw archive","Number frequency and hot/cold statistics","Check your played numbers against real draws","Formats inspired by EuroJackpot, EuroMillions, Powerball, Mega Millions, SuperEnalotto, Vikinglotto, Lotto Max, Norwegian Lotto and Australian Powerball"],"description":"Lottery simulator, statistics and number generator for EuroJackpot, Vikinglotto, Powerball, Mega Millions, EuroMillions, SuperEnalotto, Lotto Max and more.","disambiguatingDescription":"Educational simulation and statistics only. Not affiliated with any lottery operator; no ticket sales, bets, or guaranteed winnings."}</script>
@@ -821,6 +821,51 @@ body[data-game] .qa-ball.bonus{color:var(--gb-txt);background:radial-gradient(ci
 .lang-check{color:var(--gold);font-weight:900;font-size:15px}
 @media (min-width:700px){.lang-grid{grid-template-columns:repeat(3,1fr)}.lang-box{max-width:560px}}
 #lang-ov .lang-box>.btn-close2{font-size:24px;line-height:1;font-weight:900;padding:10px 13px}
+#lang-ov .lang-opt{position:relative;overflow:hidden;isolation:isolate;--on:0;--up:0;--a:.34;--halo:0 0 5px rgba(255,252,245,calc(var(--on)*.95));transform:translateY(calc(var(--up)*-1.5px));transition:transform .25s cubic-bezier(.2,.7,.3,1),box-shadow .25s,border-color .25s}
+body.dark #lang-ov .lang-opt{--a:.42;--halo:0 1px 3px rgba(0,0,0,calc(var(--on)*.85))}
+#lang-ov .lang-opt:not(.cur){--edge:color-mix(in srgb,var(--fe) 60%,var(--border));--ring:0 0 0 1px color-mix(in srgb,var(--fe) 45%,transparent),0 6px 18px -6px color-mix(in srgb,var(--fe) 75%,transparent)}
+#lang-ov .lang-opt.cur{--edge:var(--gold);--ring:0 0 0 1px var(--gold),0 6px 18px rgba(233,180,76,.32)}
+#lang-ov .lang-opt::before,#lang-ov .lang-opt::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+#lang-ov .lang-opt::before{background:linear-gradient(135deg,var(--g));opacity:calc(var(--on)*var(--a));transition:opacity .26s}
+#lang-ov .lang-opt::after{opacity:0;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.42) 50%,transparent 62%) 130% 0/260% 100% no-repeat}
+#lang-ov .lang-opt>*{position:relative;text-shadow:var(--halo);transition:text-shadow .25s,filter .25s}
+#lang-ov .lang-flag{filter:drop-shadow(0 1px 2px rgba(0,0,0,calc(var(--on)*.35)))}
+#lang-ov .lang-name{overflow-wrap:break-word}
+#lang-ov [data-lang=en]{--g:#012169 0 30%,#fff 40% 60%,#C8102E 70%;--fe:#012169}
+#lang-ov [data-lang=no]{--g:#BA0C2F 0 30%,#fff 40% 60%,#00205B 70%;--fe:#BA0C2F}
+#lang-ov [data-lang=sv]{--g:#006AA7 0 44%,#FECC02 56%;--fe:#006AA7}
+#lang-ov [data-lang=da]{--g:#C8102E 0 44%,#fff 56%;--fe:#C8102E}
+#lang-ov [data-lang=fi]{--g:#002F6C 0 44%,#fff 56%;--fe:#002F6C}
+#lang-ov [data-lang=de]{--g:#000 0 30%,#D00 40% 60%,#FC0 70%;--fe:#D00}
+#lang-ov [data-lang=fr]{--g:#002395 0 30%,#fff 40% 60%,#ED2939 70%;--fe:#002395}
+#lang-ov [data-lang=es]{--g:#AA151B 0 44%,#F1BF00 56%;--fe:#AA151B}
+#lang-ov [data-lang=it]{--g:#009246 0 30%,#fff 40% 60%,#CE2B37 70%;--fe:#009246}
+#lang-ov [data-lang=pt]{--g:#060 0 44%,#F00 56%;--fe:#060}
+#lang-ov [data-lang=pl]{--g:#fff 0 44%,#DC143C 56%;--fe:#DC143C}
+#lang-ov [data-lang=nl]{--g:#AE1C28 0 30%,#fff 40% 60%,#21468B 70%;--fe:#AE1C28}
+#lang-ov [data-lang=et]{--g:#0072CE 0 30%,#000 40% 60%,#fff 70%;--fe:#0072CE}
+#lang-ov [data-lang=lv]{--g:#9E3039 0 30%,#fff 40% 60%,#9E3039 70%;--fe:#9E3039}
+#lang-ov [data-lang=lt]{--g:#FDB913 0 30%,#006A44 40% 60%,#C1272D 70%;--fe:#006A44}
+#lang-ov [data-lang=uk]{--g:#0057B7 0 44%,#FFD700 56%;--fe:#0057B7}
+#lang-ov [data-lang=ru]{--g:#fff 0 30%,#0039A6 40% 60%,#D52B1E 70%;--fe:#0039A6}
+#lang-ov .lang-opt:active{--on:1;transform:scale(.98)}
+#lang-ov .lang-opt:active::before{transition-duration:.06s}
+#lang-ov .lang-opt:focus-visible{--on:1;--up:1;border-color:var(--edge);box-shadow:var(--ring);outline:2px solid var(--fg);outline-offset:2px}
+#lang-ov .lang-box>.btn-close2{box-shadow:inset 0 0 0 1.5px transparent;transition:background-color .25s,color .25s,box-shadow .25s,transform .08s,filter .08s}
+#lang-ov .lang-x{display:inline-block;transition:transform .28s cubic-bezier(.3,.7,.3,1)}
+#lang-ov .lang-box>.btn-close2:focus-visible{background:var(--border);background:color-mix(in srgb,var(--fg) 13%,var(--close-bg));color:var(--fg);box-shadow:inset 0 0 0 1.5px var(--sub)}
+#lang-ov .btn-close2:focus-visible .lang-x{transform:rotate(90deg)}
+@media (hover:hover) and (pointer:fine){
+  #lang-ov .lang-opt:hover{--on:1;--up:1;border-color:var(--edge);box-shadow:var(--ring)}
+  #lang-ov .lang-opt:hover::after{animation:lang-sheen .7s cubic-bezier(.3,.6,.4,1) .05s both}
+  #lang-ov .lang-opt:hover:active{transform:scale(.98)}
+  #lang-ov .lang-box>.btn-close2:hover{background:var(--border);background:color-mix(in srgb,var(--fg) 13%,var(--close-bg));color:var(--fg);box-shadow:inset 0 0 0 1.5px var(--sub)}
+  #lang-ov .btn-close2:hover .lang-x{transform:rotate(90deg)}
+}
+@keyframes lang-sheen{from{opacity:1;background-position:130% 0}to{opacity:1;background-position:-30% 0}}
+@media (max-width:420px){#lang-ov .lang-opt{padding:11px 9px;gap:7px}#lang-ov .lang-opt>.lang-check{position:absolute;top:2px;right:5px;font-size:11px;line-height:1}}
+@media (max-width:359px){#lang-ov .lang-opt{padding:11px 7px;gap:6px}#lang-ov .lang-flag{font-size:20px}#lang-ov .lang-name{font-size:12px}}
+@media (prefers-reduced-motion:reduce){#lang-ov .lang-opt,#lang-ov .lang-opt::before,#lang-ov .lang-opt>*,#lang-ov .lang-x,#lang-ov .btn-close2{transition:none!important;animation:none!important;transform:none!important}#lang-ov .lang-opt::after{display:none}}
 #period-ov{padding:max(16px,var(--loto-safe-top,env(safe-area-inset-top,0px))) max(14px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));overflow:hidden;overscroll-behavior:contain;touch-action:none}
 #period-ov .lang-box{max-width:min(400px,calc(100vw - 28px));max-height:min(82vh,calc(100dvh - 32px));overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;box-sizing:border-box;touch-action:pan-y}
 @media (min-width:700px){#period-ov .lang-box{max-width:min(560px,calc(100vw - 28px))}}
@@ -2009,8 +2054,8 @@ body.dark .row-prov-mark.is-done{color:#5fd3b5}
 
 
 <div id="loto-splash" aria-hidden="true"></div>
-<script src="./smart-start.js?v=211983b"></script>
-<script src="./lottery-whirl.js?v=211983b"></script>
+<script src="./smart-start.js?v=0fa5b8d"></script>
+<script src="./lottery-whirl.js?v=0fa5b8d"></script>
 
 
 <div id="db-loading" class="db-loading" role="dialog" aria-modal="true" aria-live="polite" aria-labelledby="db-loading-title" aria-describedby="db-loading-msg" tabindex="-1" hidden>
@@ -2579,7 +2624,7 @@ body.dark .row-prov-mark.is-done{color:#5fd3b5}
   <div class="lang-box">
     <div class="lang-title">🌐 Language</div>
     <div class="lang-grid" id="lang-grid"></div>
-    <button class="btn-close2" data-loto-event-click="closeLangPicker()">✕</button>
+    <button class="btn-close2" data-loto-event-click="closeLangPicker()"><span class="lang-x">✕</span></button>
   </div>
 </div>
 
@@ -3763,27 +3808,27 @@ body.access-pending .sub-badge,body.access-pending #pro-access-status{visibility
 
 <div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./version.js?v=211983b"></script>
-<script src="./commercial-config.js?v=211983b"></script>
-<script src="./event-runtime.js?v=211983b"></script>
-<script src="./external-link-runtime.js?v=211983b"></script>
-<script src="./auth-client.js?v=211983b"></script>
-<script src="./native-loader.js?v=211983b"></script>
-<script src="./billing-web.js?v=211983b"></script>
-<script src="./i18n-catalog.js?v=211983b"></script>
-<script src="./lang-detect.js?v=211983b"></script>
-<script src="./i18n-runtime.js?v=211983b"></script>
-<script src="./consent-runtime.js?v=211983b"></script>
-<script src="./analytics-telemetry.js?v=211983b"></script>
-<script src="./ga4-runtime.js?v=211983b"></script>
-<script src="./posthog-runtime.js?v=211983b"></script>
-<script src="./win-match-core.js?v=211983b"></script>
-<script src="./court-core.js?v=211983b"></script>
-<script src="./app-runtime.js?v=211983b"></script>
-<script src="./inline-runtime-2.js?v=211983b"></script>
+<script src="./version.js?v=0fa5b8d"></script>
+<script src="./commercial-config.js?v=0fa5b8d"></script>
+<script src="./event-runtime.js?v=0fa5b8d"></script>
+<script src="./external-link-runtime.js?v=0fa5b8d"></script>
+<script src="./auth-client.js?v=0fa5b8d"></script>
+<script src="./native-loader.js?v=0fa5b8d"></script>
+<script src="./billing-web.js?v=0fa5b8d"></script>
+<script src="./i18n-catalog.js?v=0fa5b8d"></script>
+<script src="./lang-detect.js?v=0fa5b8d"></script>
+<script src="./i18n-runtime.js?v=0fa5b8d"></script>
+<script src="./consent-runtime.js?v=0fa5b8d"></script>
+<script src="./analytics-telemetry.js?v=0fa5b8d"></script>
+<script src="./ga4-runtime.js?v=0fa5b8d"></script>
+<script src="./posthog-runtime.js?v=0fa5b8d"></script>
+<script src="./win-match-core.js?v=0fa5b8d"></script>
+<script src="./court-core.js?v=0fa5b8d"></script>
+<script src="./app-runtime.js?v=0fa5b8d"></script>
+<script src="./inline-runtime-2.js?v=0fa5b8d"></script>
 <script src="./working-set.js"></script>
-<script src="./commercial-runtime.js?v=211983b"></script>
-<script src="./inline-runtime-3.js?v=211983b"></script>
+<script src="./commercial-runtime.js?v=0fa5b8d"></script>
+<script src="./inline-runtime-3.js?v=0fa5b8d"></script>
 <style id="lnc-styles">
 html.on-sim:not(.has-internal-back) #main-hdr .hdr-back{display:none}
 html.on-ana #main-hdr #bell-btn{display:none!important}
@@ -3929,16 +3974,16 @@ html[data-theme="dark"] .lnc-sheet{color-scheme:dark}
 .lnc-table th{color:var(--gold);font-weight:900;background:var(--notif-input)}
 .lnc-list,.lnc-settings,.lnc-detail-card{scrollbar-color:var(--notif-muted) var(--notif-surface)}
 </style>
-<script src="./notification-center.js?v=211983b"></script>
-<script src="./notifications-runtime.js?v=211983b"></script>
-<script src="./pwa-runtime.js?v=211983b"></script>
+<script src="./notification-center.js?v=0fa5b8d"></script>
+<script src="./notifications-runtime.js?v=0fa5b8d"></script>
+<script src="./pwa-runtime.js?v=0fa5b8d"></script>
 <div class="scroll-anchors" id="scroll-anchors">
   <button class="sa-btn" id="sa-btn" data-loto-event-click="SA_go()">↓</button>
 </div>
 
-<script src="./inline-runtime-4.js?v=211983b"></script>
-<script src="./inline-runtime-5.js?v=211983b"></script>
-<script src="./inline-runtime-6.js?v=211983b"></script>
-<script src="./discovery-ux.js?v=211983b"></script>
+<script src="./inline-runtime-4.js?v=0fa5b8d"></script>
+<script src="./inline-runtime-5.js?v=0fa5b8d"></script>
+<script src="./inline-runtime-6.js?v=0fa5b8d"></script>
+<script src="./discovery-ux.js?v=0fa5b8d"></script>
 </body>
 </html>
