@@ -107368,6 +107368,70 @@
     ],
     "powerballAustralia": [
       {
+        "date": "2026-10-15",
+        "lotteryId": "powerballAustralia",
+        "currency": "AUD",
+        "jackpot": 100,
+        "payoutTiers": [
+          {
+            "match": "7+1",
+            "label": "Division 1",
+            "prizeAmount": 100000000,
+            "winners": 1
+          },
+          {
+            "match": "7+0",
+            "label": "Division 2",
+            "prizeAmount": 172306.45,
+            "winners": 12
+          },
+          {
+            "match": "6+1",
+            "label": "Division 3",
+            "prizeAmount": 13749.4,
+            "winners": 186
+          },
+          {
+            "match": "6+0",
+            "label": "Division 4",
+            "prizeAmount": 619.85,
+            "winners": 3599
+          },
+          {
+            "match": "5+1",
+            "label": "Division 5",
+            "prizeAmount": 218.9,
+            "winners": 7706
+          },
+          {
+            "match": "4+1",
+            "label": "Division 6",
+            "prizeAmount": 93.6,
+            "winners": 112221
+          },
+          {
+            "match": "5+0",
+            "label": "Division 7",
+            "prizeAmount": 54.95,
+            "winners": 148546
+          },
+          {
+            "match": "3+1",
+            "label": "Division 8",
+            "prizeAmount": 24.55,
+            "winners": 708527
+          },
+          {
+            "match": "2+1",
+            "label": "Division 9",
+            "prizeAmount": 14.5,
+            "winners": 2063843
+          }
+        ],
+        "source": "The Lott",
+        "sourceUrl": "https://www.thelott.com/powerball/results"
+      },
+      {
         "date": "2026-10-08",
         "lotteryId": "powerballAustralia",
         "currency": "AUD",
@@ -108004,8 +108068,8 @@
             "winners": 408516
           }
         ],
-        "source": "The Lott",
-        "sourceUrl": "https://www.thelott.com/powerball/results"
+        "source": "Australia National Lottery / The Lott",
+        "sourceUrl": "https://australia.national-lottery.com/powerball/results-archive-2026"
       },
       {
         "date": "2026-07-30",
