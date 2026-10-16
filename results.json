@@ -15,30 +15,30 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-16T16:57:50.259Z",
-    "sourceFetchedAt": "2026-10-16T16:57:50.259Z",
+    "generatedAt": "2026-10-16T20:06:48.553Z",
+    "sourceFetchedAt": "2026-10-16T20:06:48.553Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "f1c1ce55e0b317eb",
+    "snapshotVersion": "9a237332c5994e5f",
     "updatedAt": "2026-10-16",
     "latestDrawByGame": {
       "lotto": "2026-10-10",
       "vikinglotto": "2026-10-14",
-      "eurojackpot": "2026-10-13",
+      "eurojackpot": "2026-10-16",
       "powerball": "2026-10-14",
       "megaMillions": "2026-10-13",
-      "euroMillions": "2026-10-13",
-      "superEnalotto": "2026-10-15",
+      "euroMillions": "2026-10-16",
+      "superEnalotto": "2026-10-16",
       "lottoMax": "2026-10-13",
       "powerballAustralia": "2026-10-15"
     },
     "recordCountByGame": {
       "lotto": 604,
       "vikinglotto": 280,
-      "eurojackpot": 476,
+      "eurojackpot": 477,
       "powerball": 1420,
       "megaMillions": 159,
-      "euroMillions": 1049,
-      "superEnalotto": 4284,
+      "euroMillions": 1050,
+      "superEnalotto": 4285,
       "lottoMax": 53,
       "powerballAustralia": 444
     },
@@ -58,8 +58,8 @@
       "eurojackpot": {
         "status": "ok",
         "source": "Euro-Jackpot.net",
-        "fetched": 998,
-        "merged": 476
+        "fetched": 999,
+        "merged": 477
       },
       "powerball": {
         "status": "ok",
@@ -76,14 +76,14 @@
       "euroMillions": {
         "status": "ok",
         "source": "Euro-Millions.com",
-        "fetched": 1989,
-        "merged": 1049
+        "fetched": 1990,
+        "merged": 1050
       },
       "superEnalotto": {
         "status": "ok",
         "source": "National-Lottery.com / Lottologia",
-        "fetched": 4284,
-        "merged": 4284
+        "fetched": 4285,
+        "merged": 4285
       },
       "lottoMax": {
         "status": "ok",
@@ -2704,6 +2704,103 @@
       }
     ],
     "eurojackpot": [
+      {
+        "date": "2026-10-16",
+        "main": [
+          12,
+          24,
+          25,
+          29,
+          45
+        ],
+        "bonus": [
+          1,
+          9
+        ],
+        "jackpot": 191.2,
+        "lotteryId": "eurojackpot",
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/eurojackpot/resultater",
+        "drawId": 239,
+        "currency": "NOK",
+        "payoutTiers": [
+          {
+            "match": "5+2",
+            "label": "5+2",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 5029745,
+            "winners": 4
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1620880,
+            "winners": 7
+          },
+          {
+            "match": "4+2",
+            "label": "4+2",
+            "prizeAmount": 71980,
+            "winners": 26
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 3590,
+            "winners": 651
+          },
+          {
+            "match": "3+2",
+            "label": "3+2",
+            "prizeAmount": 1720,
+            "winners": 1495
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 1260,
+            "winners": 1485
+          },
+          {
+            "match": "2+2",
+            "label": "2+2",
+            "prizeAmount": 275,
+            "winners": 21466
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 210,
+            "winners": 31579
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 170,
+            "winners": 72758
+          },
+          {
+            "match": "1+2",
+            "label": "1+2",
+            "prizeAmount": 140,
+            "winners": 111943
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 105,
+            "winners": 447649
+          }
+        ],
+        "drawName": "EJP2022F-16.10.2026 22:00",
+        "ruleVersion": "eurojackpot-2-12",
+        "ruleEra": "current"
+      },
       {
         "date": "2026-10-13",
         "main": [
@@ -5516,103 +5613,6 @@
           }
         ],
         "drawName": "EJP2022T-07.07.2026 22:00"
-      },
-      {
-        "date": "2026-07-03",
-        "main": [
-          4,
-          9,
-          20,
-          25,
-          28
-        ],
-        "bonus": [
-          1,
-          3
-        ],
-        "jackpot": 259.2,
-        "lotteryId": "eurojackpot",
-        "source": "Norsk Tipping",
-        "sourceUrl": "https://www.norsk-tipping.no/lotteri/eurojackpot/resultater",
-        "drawId": 224,
-        "ruleVersion": "eurojackpot-2-12",
-        "ruleEra": "current",
-        "currency": "NOK",
-        "payoutTiers": [
-          {
-            "match": "5+2",
-            "label": "5+2",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "5+1",
-            "prizeAmount": 9782075,
-            "winners": 2
-          },
-          {
-            "match": "5+0",
-            "label": "5+0",
-            "prizeAmount": 1576180,
-            "winners": 7
-          },
-          {
-            "match": "4+2",
-            "label": "4+2",
-            "prizeAmount": 43330,
-            "winners": 42
-          },
-          {
-            "match": "4+1",
-            "label": "4+1",
-            "prizeAmount": 3060,
-            "winners": 743
-          },
-          {
-            "match": "3+2",
-            "label": "3+2",
-            "prizeAmount": 1505,
-            "winners": 1658
-          },
-          {
-            "match": "4+0",
-            "label": "4+0",
-            "prizeAmount": 995,
-            "winners": 1824
-          },
-          {
-            "match": "2+2",
-            "label": "2+2",
-            "prizeAmount": 270,
-            "winners": 21088
-          },
-          {
-            "match": "3+1",
-            "label": "3+1",
-            "prizeAmount": 195,
-            "winners": 32847
-          },
-          {
-            "match": "3+0",
-            "label": "3+0",
-            "prizeAmount": 170,
-            "winners": 71486
-          },
-          {
-            "match": "1+2",
-            "label": "1+2",
-            "prizeAmount": 145,
-            "winners": 102916
-          },
-          {
-            "match": "2+1",
-            "label": "2+1",
-            "prizeAmount": 100,
-            "winners": 444568
-          }
-        ],
-        "drawName": "EJP2022F-03.07.2026 22:00"
       }
     ],
     "powerball": [
@@ -8855,6 +8855,108 @@
     ],
     "euroMillions": [
       {
+        "date": "2026-10-16",
+        "main": [
+          7,
+          15,
+          16,
+          22,
+          35
+        ],
+        "bonus": [
+          4,
+          6
+        ],
+        "jackpot": 49.7,
+        "lotteryId": "euroMillions",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "drawId": null,
+        "payoutTiers": [
+          {
+            "match": "5+2",
+            "label": "5+2",
+            "prizeAmount": 49735760,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 154533,
+            "winners": 5
+          },
+          {
+            "match": "4+2",
+            "label": "4+2",
+            "prizeAmount": 930,
+            "winners": 49
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 101,
+            "winners": 831
+          },
+          {
+            "match": "3+2",
+            "label": "3+2",
+            "prizeAmount": 46,
+            "winners": 1949
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 34,
+            "winners": 1855
+          },
+          {
+            "match": "2+2",
+            "label": "2+2",
+            "prizeAmount": 12,
+            "winners": 26470
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 10,
+            "winners": 35052
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 8,
+            "winners": 79495
+          },
+          {
+            "match": "1+2",
+            "label": "1+2",
+            "prizeAmount": 6,
+            "winners": 132769
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 5,
+            "winners": 486902
+          },
+          {
+            "match": "2+0",
+            "label": "2+0",
+            "prizeAmount": 4,
+            "winners": 1084418
+          }
+        ],
+        "currency": "EUR",
+        "ruleVersion": "euromillions-2-12",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-10-13",
         "main": [
           21,
@@ -10295,10 +10397,10 @@
           4,
           9
         ],
-        "jackpot": 59,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "ruleVersion": "euromillions-2-12",
         "ruleEra": "current",
@@ -12252,30 +12354,70 @@
         "drawId": null,
         "ruleVersion": "euromillions-2-12",
         "ruleEra": "current"
-      },
-      {
-        "date": "2026-04-21",
-        "main": [
-          13,
-          16,
-          29,
-          40,
-          47
-        ],
-        "bonus": [
-          3,
-          4
-        ],
-        "jackpot": null,
-        "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
-        "drawId": null,
-        "ruleVersion": "euromillions-2-12",
-        "ruleEra": "current"
       }
     ],
     "superEnalotto": [
+      {
+        "date": "2026-10-16",
+        "main": [
+          35,
+          41,
+          44,
+          54,
+          55,
+          76
+        ],
+        "bonus": [
+          58
+        ],
+        "jackpot": 41.1,
+        "lotteryId": "superEnalotto",
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/16-10-2026",
+        "drawId": null,
+        "superStar": 55,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 41071250.41,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 132932.32,
+            "winners": 1
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 499.07,
+            "winners": 274
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 39.26,
+            "winners": 10415
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 6.95,
+            "winners": 182140
+          }
+        ],
+        "currency": "EUR",
+        "ruleVersion": "superenalotto-6-90",
+        "ruleEra": "current"
+      },
       {
         "date": "2026-10-15",
         "main": [
@@ -13143,10 +13285,10 @@
         "bonus": [
           49
         ],
-        "jackpot": 29.6,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/19-09-2026",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
         "drawId": null,
         "payoutTiers": [
           {
@@ -14044,67 +14186,6 @@
         "ruleVersion": "superenalotto-6-90",
         "ruleEra": "current",
         "superStar": 40
-      },
-      {
-        "date": "2026-08-25",
-        "main": [
-          15,
-          36,
-          62,
-          67,
-          69,
-          70
-        ],
-        "bonus": [
-          32
-        ],
-        "jackpot": null,
-        "lotteryId": "superEnalotto",
-        "source": "National-Lottery.com / SuperEnalotto",
-        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
-        "drawId": null,
-        "ruleVersion": "superenalotto-6-90",
-        "ruleEra": "current",
-        "payoutTiers": [
-          {
-            "match": "6",
-            "label": "Match 6",
-            "prizeAmount": 214233128.53,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "Match 5 + Jolly",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "Match 5",
-            "prizeAmount": 19398.97,
-            "winners": 10
-          },
-          {
-            "match": "4",
-            "label": "Match 4",
-            "prizeAmount": 447.79,
-            "winners": 442
-          },
-          {
-            "match": "3",
-            "label": "Match 3",
-            "prizeAmount": 33.17,
-            "winners": 17941
-          },
-          {
-            "match": "2",
-            "label": "Match 2",
-            "prizeAmount": 6.24,
-            "winners": 295811
-          }
-        ],
-        "currency": "EUR",
-        "superStar": 15
       }
     ],
     "lottoMax": [
