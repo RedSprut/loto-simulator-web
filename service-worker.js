@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the 12715fb placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 8f54324 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-auto-20261015-tmz3d1';
+const CACHE_VERSION='loto-shell-v8f54324';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -109,10 +109,10 @@ function cacheable(request,response){
   return!NEVER_CACHE.test(request.url);
 }
 
-async function networkFirst(request,cacheName){
+async function networkFirst(request,cacheName,mode='no-store'){
   const cache=await caches.open(cacheName);
   try{
-    const response=await fetch(request,{cache:'no-store'});
+    const response=await fetch(request,{cache:mode});
     if(cacheable(request,response))await cache.put(request,response.clone());
     return response;
   }catch(error){
@@ -160,7 +160,8 @@ self.addEventListener('fetch',event=>{
     return;
   }
   if(/\/(?:results|jackpots|prizes|commercial-metadata)\.json$/i.test(url.pathname)){
-    event.respondWith(networkFirst(request,DATA_CACHE));
+    // Revalidated on every read (no-cache): an unchanged file costs a 304, a new one arrives at once.
+    event.respondWith(networkFirst(request,DATA_CACHE,'no-cache'));
     return;
   }
   // 3D-drum CODE (audio.js / main.js and the whole module graph) must NEVER be served
