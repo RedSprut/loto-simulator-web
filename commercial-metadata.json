@@ -361,7 +361,7 @@
   },
   "games": {
     "lotto": {
-      "availableDraws": 771,
+      "availableDraws": 772,
       "freeDraws": 15
     },
     "vikinglotto": {
@@ -385,7 +385,7 @@
       "freeDraws": 51
     },
     "superEnalotto": {
-      "availableDraws": 4285,
+      "availableDraws": 4286,
       "freeDraws": 30
     },
     "lottoMax": {
