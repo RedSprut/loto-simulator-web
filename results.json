@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-19T18:53:34.192Z",
-    "sourceFetchedAt": "2026-10-19T18:53:34.192Z",
+    "generatedAt": "2026-10-19T22:59:43.156Z",
+    "sourceFetchedAt": "2026-10-19T22:59:43.156Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "d7cf5d4956b1eff9",
     "updatedAt": "2026-10-19",
@@ -7940,10 +7940,10 @@
         "bonus": [
           11
         ],
-        "jackpot": 403,
+        "jackpot": null,
         "lotteryId": "megaMillions",
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-10-16",
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings",
         "drawId": "2026-10-16T00:00:00.000",
         "payoutTiers": [
           {
