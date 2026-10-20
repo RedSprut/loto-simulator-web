@@ -52,10 +52,10 @@
 .favorite-combos-card.fw-landed{animation:fw-landed 1.6s ease-out}
 @keyframes fw-landed{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 70%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
 @media(prefers-reduced-motion:reduce){.favorite-combos-card.fw-landed{animation:none}}
-.guide-replay,#about-ov .about-guide{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:8px 14px;border:1px solid color-mix(in srgb,var(--gold) 65%,var(--border));border-radius:999px;background:var(--bg2);color:var(--fg);font:800 13px/1.2 'Manrope',sans-serif;cursor:pointer;white-space:normal;text-align:center}
-.guide-replay:before,#about-ov .about-guide:before{content:"?";display:inline-grid;place-items:center;flex:none;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#28180A;font:900 13px/1 'Manrope',sans-serif}
-#about-ov .about-guide{width:100%;margin:6px 0 8px;min-height:48px;border-radius:14px}
-.guide-replay:focus-visible,#about-ov .about-guide:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.guide-replay,#about-ov .about-guide,#about-ov .about-math{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:8px 14px;border:1px solid color-mix(in srgb,var(--gold) 65%,var(--border));border-radius:999px;background:var(--bg2);color:var(--fg);font:800 13px/1.2 'Manrope',sans-serif;cursor:pointer;white-space:normal;text-align:center}
+.guide-replay:before,#about-ov .about-guide:before,#about-ov .about-math:before{content:"?";display:inline-grid;place-items:center;flex:none;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#28180A;font:900 13px/1 'Manrope',sans-serif}
+#about-ov .about-guide,#about-ov .about-math{width:100%;margin:6px 0 8px;min-height:48px;border-radius:14px}
+.guide-replay:focus-visible,#about-ov .about-guide:focus-visible,#about-ov .about-math:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 @media(max-width:360px){.guide-replay{padding:8px 10px;font-size:12px}}
 
 /* Court actions without a lottery colour fell back to the platform button (iOS: system-blue text,
