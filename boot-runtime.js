@@ -81,12 +81,21 @@ try{nativeSplashHiding=splash.hide({fadeOutDuration:160});}catch(_e){}
 return nativeSplashHiding;
 }
 window.__lotoHideLaunchSplash=hideNativeLaunchSplash;
-function reveal(){d.classList.remove('loto-booting');}
+var noCosmos=false;
+function reveal(){if(!noCosmos&&d.classList.contains('loto-booting'))cosmos();d.classList.remove('loto-booting');}
+var cosmosAsked=false;
+function loadCosmos(){
+if(cosmosAsked)return;cosmosAsked=true;
+try{if((navigator.webdriver&&window.__lotoCosmosForce!==true)||sessionStorage.getItem('loto_cosmos_seen'))return;}catch(_e){return;}
+var w=document.querySelector('script[src*="lottery-whirl.js"]'),v=w&&/[?&]v=([^&]+)/.exec(w.getAttribute('src')),c=document.createElement('script');
+c.src='./cosmos-ui.js'+(v?'?v='+v[1]:'');c.async=true;c.setAttribute('data-cosmos-boot','');document.head.appendChild(c);
+}
+function cosmos(){try{window.LotoCosmos&&window.LotoCosmos.auto();}catch(_e){}}
 function basicUiReady(){
 return !!(document.body&&document.getElementById('rows-c')&&document.querySelector('.page.show')&&document.getElementById('bn-sim'));
 }
 function hide(force){
-if(done)return;done=true;
+if(done)return;done=true;noCosmos=!!force;
 var s=document.getElementById('loto-splash');
 hideNativeLaunchSplash();
 if(!s){reveal();return;}
@@ -117,12 +126,13 @@ setTimeout(hide,whirl&&(whirl.active||whirl.skipped)?0:Math.max(0,minMs-(Date.no
 });
 }
 window.__lotoMarkAppReady=function(){
-appReady=true;requestHide();
+appReady=true;loadCosmos();requestHide();
 var s=document.getElementById('boot-err');
 if(s&&s.hasAttribute('data-slow')&&!(window.__bootErrors||[]).length&&s.parentNode)s.parentNode.removeChild(s);
 };
 function arm(){
 anchor=anchor||Date.now();
+setTimeout(loadCosmos,1500);
 requestAnimationFrame(function(){requestAnimationFrame(hideNativeLaunchSplash);});
 if(appReady||basicUiReady())requestHide();
 else setTimeout(function(){if(basicUiReady())window.__lotoMarkAppReady();},500);

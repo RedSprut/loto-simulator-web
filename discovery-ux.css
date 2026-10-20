@@ -270,11 +270,10 @@ body.loto-onboarding-open .ws-ov{z-index:860}
 .attempts-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;text-align:center}
 .attempts-totals b{display:block;font:900 clamp(24px,5vw,36px)/1.3 'Manrope',sans-serif;font-variant-numeric:tabular-nums;color:var(--gold-ink)}
 .attempts-totals span{font-size:12px;line-height:1.5;overflow-wrap:anywhere}
-.attempts-progress,.attempts-tool-progress{display:block;appearance:none;-webkit-appearance:none;border:0;border-radius:10px;overflow:hidden;background:var(--bg3);color:var(--gold);height:8px;width:100%;margin:16px 0 0}
-.attempts-tool-progress{height:4px;margin:8px 0 0}.attempts-tool-progress[hidden]{display:none}
-.attempts-progress::-webkit-progress-bar,.attempts-tool-progress::-webkit-progress-bar{background:var(--bg3)}
-.attempts-progress::-webkit-progress-value,.attempts-tool-progress::-webkit-progress-value{background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .45s ease}
-.attempts-progress::-moz-progress-bar,.attempts-tool-progress::-moz-progress-bar{background:var(--gold)}
+.attempts-progress{display:block;appearance:none;-webkit-appearance:none;border:0;border-radius:10px;overflow:hidden;background:var(--bg3);color:var(--gold);height:8px;width:100%;margin:16px 0 0}
+.attempts-progress::-webkit-progress-bar{background:var(--bg3)}
+.attempts-progress::-webkit-progress-value{background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .45s ease}
+.attempts-progress::-moz-progress-bar{background:var(--gold)}
 .attempts-icon{flex:none;display:grid;place-items:center;width:36px;height:36px;border:1px solid color-mix(in srgb,var(--gold-ink) 45%,transparent);border-radius:11px;background:color-mix(in srgb,var(--gold) 8%,var(--bg2));color:var(--gold-ink);font:800 17px/1 serif}
 .attempts-icon svg{width:22px;height:22px}#prev-ov .pro-crown-icon svg{width:30px;height:30px}
 .attempts-icon span{max-width:100%;font-size:clamp(10px,2.6vw,16px);overflow-wrap:anywhere}
@@ -282,10 +281,9 @@ body.loto-onboarding-open .ws-ov{z-index:860}
 #home-attempts{display:flex;align-items:center;justify-content:space-between;gap:16px;width:min(calc(100% - 28px),1120px);margin:22px auto 10px;padding:16px;border:1px solid var(--border);border-radius:18px;background:var(--bg2);box-sizing:border-box}
 #home-attempts p{margin:6px 0 0;font-variant-numeric:tabular-nums;color:var(--gold-ink);font-weight:800}
 @media(max-width:540px){#home-attempts{flex-wrap:wrap}.attempts-list{grid-template-columns:minmax(0,1fr)}}
-@media(prefers-reduced-motion:reduce){.attempts-progress::-webkit-progress-value,.attempts-tool-progress::-webkit-progress-value{transition:none}}
+@media(prefers-reduced-motion:reduce){.attempts-progress::-webkit-progress-value{transition:none}}
 .attempts-note{margin:8px 0 0;font-size:13px;line-height:1.55;color:var(--fg);overflow-wrap:anywhere}
 .attempts-row .attempts-note{margin-top:4px;font-size:12px;line-height:1.45;color:var(--sub2)}
-.attempts-row .attempts-tool-progress{margin-top:6px}
 .attempts-row .acc-btn{flex:none;white-space:normal;overflow-wrap:anywhere;min-height:40px;padding:8px 14px;font-size:13px}
 .attempts-row .acc-btn:disabled{opacity:1;color:var(--fg);border-style:dashed;cursor:default}
 /* Keep foreground and background in sync during a theme switch. */
@@ -305,3 +303,45 @@ body.loto-onboarding-open .ws-ov{z-index:860}
 #sg-ov .sg-algo.sel .sg-pick{background:var(--gold);border-color:var(--gold);color:#2A1608}
 #sg-ov .sg-pick:hover,#sg-ov .sg-adv:hover{filter:brightness(1.06)}
 #sg-ov .sg-pick:focus-visible,#sg-ov .sg-adv:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+/* FREE-attempt dial (commercial-runtime.js attemptDialHtml / setAttemptDial): ONE seven-segment display
+   for every balance — dark glass with soft amber light, the same in the light and the dark theme, so the
+   digits read like an instrument. A digit's class (c0…c9, cx = dash) lights its segments; the unlit ones
+   stay a faint «8» as on a real display. The text the digits stand for is in .seg-sr. */
+.seg{--seg-h:22px;--seg-on:#ffbf57;--seg-glow:rgba(255,166,43,.7);--seg-off:rgba(255,196,120,.085);position:relative;display:inline-flex;align-items:center;flex:none;vertical-align:middle;box-sizing:border-box;margin:0;padding:calc(var(--seg-h)*.2) calc(var(--seg-h)*.34);border-radius:calc(var(--seg-h)*.3);background-color:#110d08;background-image:linear-gradient(180deg,rgba(255,255,255,.075),rgba(255,255,255,0) 46%),radial-gradient(120% 90% at 50% 125%,rgba(255,160,40,.17),transparent 62%);box-shadow:inset 0 1px 2px rgba(0,0,0,.85),inset 0 0 0 1px rgba(255,200,120,.13),0 0 0 1px var(--border,rgba(0,0,0,.18)),0 2px 10px rgba(0,0,0,.16);color:var(--seg-on);font:800 12px/1 'Manrope',sans-serif;direction:ltr;unicode-bidi:isolate}
+.seg.seg-sm{--seg-h:19px}.seg.seg-md{--seg-h:32px}.seg.seg-lg{--seg-h:42px}
+.seg>.seg-face{display:inline-flex;align-items:center;gap:calc(var(--seg-h)*.09);margin:0;transform:skewX(-6deg);filter:drop-shadow(0 0 1.4px var(--seg-glow)) drop-shadow(0 0 calc(var(--seg-h)*.22) rgba(255,150,30,.32))}
+.seg .seg-d{display:block;flex:none;width:calc(var(--seg-h)*.571);height:var(--seg-h);overflow:visible}
+.seg .seg-d path{fill:var(--seg-off);transition:fill .3s ease}
+.seg .seg-d:is(.c0,.c2,.c3,.c5,.c6,.c7,.c8,.c9) .sa,.seg .seg-d:is(.c0,.c1,.c2,.c3,.c4,.c7,.c8,.c9) .sb,
+.seg .seg-d:is(.c0,.c1,.c3,.c4,.c5,.c6,.c7,.c8,.c9) .sc,.seg .seg-d:is(.c0,.c2,.c3,.c5,.c6,.c8,.c9) .sd,
+.seg .seg-d:is(.c0,.c2,.c6,.c8) .se,.seg .seg-d:is(.c0,.c4,.c5,.c6,.c8,.c9) .sf,
+.seg .seg-d:is(.c2,.c3,.c4,.c5,.c6,.c8,.c9,.cx) .sg{fill:var(--seg-on)}
+/* Between the balance and the allowance: a clock colon, two lit dots in the digits' amber. */
+.seg .seg-sep{position:relative;display:block;flex:none;width:calc(var(--seg-h)*.14);height:var(--seg-h);margin:0 calc(var(--seg-h)*.1)}
+.seg .seg-sep::before,.seg .seg-sep::after{content:'';position:absolute;left:0;width:calc(var(--seg-h)*.14);height:calc(var(--seg-h)*.14);border-radius:50%;background:var(--seg-on)}
+.seg .seg-sep::before{top:21%}.seg .seg-sep::after{bottom:21%}
+/* None left: the display rests, dimmed — no red, no alarm. Unknown: dashes, just as dim. */
+.seg[data-seg="empty"],.seg[data-seg="wait"]{--seg-on:rgba(255,191,87,.44);--seg-glow:transparent}
+.seg[data-seg="empty"]>.seg-face,.seg[data-seg="wait"]>.seg-face{filter:none}
+.seg>.seg-sr{position:absolute;display:block;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+@media(prefers-reduced-motion:reduce){.seg .seg-d path{transition:none}}
+@media(forced-colors:active){.seg{forced-color-adjust:none}}
+/* Where the dial stands: catalog cards, totals, home reminder, success notice, preview offer, welcome. */
+.attempts-meta{gap:6px 8px}
+.attempts-count.seg{font-size:12px}
+.attempts-cap{min-width:0;font-size:11.5px;font-weight:700;line-height:1.35;color:var(--sub2);overflow-wrap:anywhere}
+.attempts-row[data-exhausted="true"] .attempts-cap{color:var(--fg)}
+.attempts-totals>div{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0}
+.attempts-totals b.seg{display:inline-flex;color:var(--seg-on)}
+#attempts-buy{margin:8px 0 0}
+#attempts-ov [hidden],#prev-ov [hidden]{display:none!important}
+.home-attempts-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+#home-attempts [data-attempt-reminder-cap]{font-size:13px;line-height:1.4;color:var(--fg)}
+.attempts-toast{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px}
+.attempts-toast .seg{margin-right:4px}
+#prev-ov .prev-state[data-prev-state]{display:flex;flex-direction:column;align-items:center;gap:9px;padding:0;border:0;background:none;font:800 14.5px/1.45 'Manrope',sans-serif;color:var(--fg);max-width:420px}
+#prev-ov .prev-cap{overflow-wrap:anywhere}
+/* Exhausted: other trial attempts, the free features, then PRO. */
+#prev-ov[data-exhausted="true"] [data-prev-attempts]{order:1}#prev-ov[data-exhausted="true"] [data-prev-free]{order:2}#prev-ov[data-exhausted="true"] [data-prev-buy]{order:3}
+.fw-stat b.seg{display:inline-flex;font-size:12px;color:var(--seg-on)}
+@media(max-width:420px){.seg.seg-md{--seg-h:28px}.seg.seg-lg{--seg-h:36px}}
