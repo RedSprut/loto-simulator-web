@@ -42,7 +42,15 @@
 
 /* Models: the launch button stays in reach below the model list. */
 #court-body .ct-actions-dock{position:sticky;bottom:0;z-index:4;margin:12px calc(-1*var(--ct-gutter,16px)) 0;padding:12px var(--ct-gutter,16px);border-top:1px solid var(--border);background:var(--modal-bg,var(--bg2));box-shadow:0 -10px 18px -12px rgba(0,0,0,.35)}
-.guide-note{margin:0;color:var(--fg);font-size:12.5px;font-weight:800;line-height:1.4;text-align:center}
+.guide-note,#wheel-next-hint{margin:0;color:var(--fg);font-size:12.5px;font-weight:800;line-height:1.4;text-align:center}
+/* Wheel constructor after «Автопул»: «Сгенерировать wheel» pulses three times with the favourites' landing
+   ring, then carries .pro-next-glow (index.html wheelNextStart); the hint below it reads like a guide note. */
+#wheel-next-hint{margin-top:10px}
+/* Phones: the floating ↑/↓ page anchor (.scroll-anchors, fixed 14px from the right edge, 42–44px wide) passes
+   over the constructor; the hint keeps its text clear of that lane on both sides so it stays centred. */
+@media(max-width:699px){#wheel-next-hint{padding:0 34px}}
+#wheel-build-btn.wheel-next-pulse{animation:fw-landed .9s ease-out 3}
+#wheel-build-btn.pro-next-glow::before{border-radius:13.5px}#wheel-build-btn.pro-next-glow::after{border-radius:20px}
 
 /* «Как это работает?» — replays the walkthrough (Home + About). */
 .mine-tall{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px}
@@ -51,7 +59,7 @@
 .favorite-combos-card{scroll-margin-top:96px}
 .favorite-combos-card.fw-landed{animation:fw-landed 1.6s ease-out}
 @keyframes fw-landed{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 70%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
-@media(prefers-reduced-motion:reduce){.favorite-combos-card.fw-landed{animation:none}}
+@media(prefers-reduced-motion:reduce){.favorite-combos-card.fw-landed,#wheel-build-btn.wheel-next-pulse{animation:none}}
 .guide-replay,#about-ov .about-guide,#about-ov .about-math{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:8px 14px;border:1px solid color-mix(in srgb,var(--gold) 65%,var(--border));border-radius:999px;background:var(--bg2);color:var(--fg);font:800 13px/1.2 'Manrope',sans-serif;cursor:pointer;white-space:normal;text-align:center}
 .guide-replay:before,#about-ov .about-guide:before,#about-ov .about-math:before{content:"?";display:inline-grid;place-items:center;flex:none;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#28180A;font:900 13px/1 'Manrope',sans-serif}
 #about-ov .about-guide,#about-ov .about-math{width:100%;margin:6px 0 8px;min-height:48px;border-radius:14px}
