@@ -428,7 +428,10 @@ async function applyWheelBuilder(){const l=L(),pool=[...(wheelPools[cur]||[])].s
 const built=buildGuaranteedWheel(pool,l.pM,t,MAX_ROWS);const draws=await loadD(cur);if(!(await guardTicketReplace({kind:'model',modelId:'wheel'},()=>true)))return;rows=built.rows.map(m=>({m,b:genBonus(l,draws,'freq')}));if(!rows.length)rows=[randomFilteredRow(l,draws)];act=0;renderSim();resetBanner();revealResult(document.getElementById('rows-c'),'start');const pct=built.total?Math.round(built.covered/built.total*100):100;const el=document.getElementById('wheel-status');el.style.display='';el.textContent=built.full
 ?`Wheel готов: ${rows.length} ${rowWord(rows.length)} · полное покрытие ${t} из ${t} для пула ${pool.length} чисел. Нижняя граница: ${built.lowerBound}.`
 :`Wheel готов: ${rows.length} ${rowWord(rows.length)} · покрытие ${built.covered}/${built.total} (${pct}%). Полное покрытие ${t} из ${t} не поместилось в лимит ${MAX_ROWS} рядов.`;if(built.usedUnfiltered)el.textContent+=' Фильтры были слишком строгими для пула, часть wheel построена без них.';}
-function buildWheelPool(maxN,pick,poolSize,seed,freq){throw new Error('backend_only');}
+function buildWheelPool(maxN,pick,poolSize,seed,freq){const target=Math.max(pick,Math.min(maxN,poolSize));let pool=seed.length>target?shufSlice(seed,target):[...seed];if(freq){const ranked=[...freq.entries()].sort((a,b)=>b[1]-a[1]).map(e=>e[0]);const third=Math.max(1,Math.ceil(ranked.length/3));const hot=ranked.slice(0,third),mid=ranked.slice(third,ranked.length-third),cold=ranked.slice(-third).reverse();const mixed=[];for(let i=0;i<ranked.length;i++){if(hot[i]!==undefined)mixed.push(hot[i]);if(cold[i]!==undefined)mixed.push(cold[i]);if(mid[i]!==undefined)mixed.push(mid[i]);}
+mixed.forEach(n=>{if(pool.length<target&&!pool.includes(n))pool.push(n);});}
+while(pool.length<target){const n=Math.floor(Math.random()*maxN)+1;if(!pool.includes(n))pool.push(n);}
+return pool.sort((a,b)=>a-b);}
 function buildCoverageWheel(pool,pick,rowCount){throw new Error('backend_only');}
 function wheelCoverage(matrix,pool){throw new Error('backend_only');}
 async function buildWheelGenerated(rowCount,sourceDraws){throw new Error('backend_only');}
