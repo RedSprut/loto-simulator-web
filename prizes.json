@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-19",
+  "updatedAt": "2026-10-20",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
@@ -86575,7 +86575,7 @@
         "date": "2026-10-16",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 0,
+        "jackpot": 403,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86632,8 +86632,8 @@
             "winners": 176325
           }
         ],
-        "source": "NY Open Data / Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
+        "source": "Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-10-16"
       },
       {
         "date": "2026-10-13",

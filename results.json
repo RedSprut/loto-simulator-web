@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-10-19",
+  "updatedAt": "2026-10-20",
   "generatedBy": "Lotto Simulator secure public bundle",
   "rulesMode": "recent-free-only",
   "freeRecentDrawsByGame": {
@@ -15,11 +15,11 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-19T22:59:43.156Z",
-    "sourceFetchedAt": "2026-10-19T22:59:43.156Z",
+    "generatedAt": "2026-10-20T00:26:29.128Z",
+    "sourceFetchedAt": "2026-10-20T00:26:29.128Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "d7cf5d4956b1eff9",
-    "updatedAt": "2026-10-19",
+    "snapshotVersion": "c5520fb03311e89d",
+    "updatedAt": "2026-10-20",
     "latestDrawByGame": {
       "lotto": "2026-10-17",
       "vikinglotto": "2026-10-14",
@@ -7940,10 +7940,10 @@
         "bonus": [
           11
         ],
-        "jackpot": null,
+        "jackpot": 403,
         "lotteryId": "megaMillions",
-        "source": "NY Open Data / Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings",
+        "source": "Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-10-16",
         "drawId": "2026-10-16T00:00:00.000",
         "payoutTiers": [
           {
