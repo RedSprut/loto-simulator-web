@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-21T20:54:34.030Z",
-    "sourceFetchedAt": "2026-10-21T20:54:34.030Z",
+    "generatedAt": "2026-10-21T22:30:56.240Z",
+    "sourceFetchedAt": "2026-10-21T22:30:56.240Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "6f3334bcd11c3939",
     "updatedAt": "2026-10-21",
@@ -8867,10 +8867,10 @@
           7,
           10
         ],
-        "jackpot": 59,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -8969,10 +8969,10 @@
           4,
           6
         ],
-        "jackpot": 49.7,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9071,10 +9071,10 @@
           4,
           11
         ],
-        "jackpot": 37.7,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "ruleVersion": "euromillions-2-12",
         "ruleEra": "current",
@@ -9173,10 +9173,10 @@
           5,
           10
         ],
-        "jackpot": 28.8,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9275,10 +9275,10 @@
           8,
           10
         ],
-        "jackpot": 17,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9377,10 +9377,10 @@
           2,
           10
         ],
-        "jackpot": 28.9,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "ruleVersion": "euromillions-2-12",
         "ruleEra": "current",
@@ -9479,10 +9479,10 @@
           8,
           11
         ],
-        "jackpot": 17,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9581,10 +9581,10 @@
           10,
           12
         ],
-        "jackpot": 130,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9683,10 +9683,10 @@
           10,
           12
         ],
-        "jackpot": 37.6,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9785,10 +9785,10 @@
           2,
           3
         ],
-        "jackpot": 28.4,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9887,10 +9887,10 @@
           6,
           10
         ],
-        "jackpot": 17,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -9989,10 +9989,10 @@
           1,
           11
         ],
-        "jackpot": 111.5,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -10091,10 +10091,10 @@
           7,
           12
         ],
-        "jackpot": 98.7,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -10193,10 +10193,10 @@
           4,
           12
         ],
-        "jackpot": 89.3,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -10295,10 +10295,10 @@
           3,
           5
         ],
-        "jackpot": 78.1,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "ruleVersion": "euromillions-2-12",
         "ruleEra": "current",
