@@ -15,14 +15,14 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-21T17:41:59.697Z",
-    "sourceFetchedAt": "2026-10-21T17:41:59.697Z",
+    "generatedAt": "2026-10-21T20:54:34.030Z",
+    "sourceFetchedAt": "2026-10-21T20:54:34.030Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "40facfd6890df878",
+    "snapshotVersion": "6f3334bcd11c3939",
     "updatedAt": "2026-10-21",
     "latestDrawByGame": {
       "lotto": "2026-10-17",
-      "vikinglotto": "2026-10-14",
+      "vikinglotto": "2026-10-21",
       "eurojackpot": "2026-10-20",
       "powerball": "2026-10-19",
       "megaMillions": "2026-10-20",
@@ -33,7 +33,7 @@
     },
     "recordCountByGame": {
       "lotto": 605,
-      "vikinglotto": 280,
+      "vikinglotto": 281,
       "eurojackpot": 478,
       "powerball": 1422,
       "megaMillions": 161,
@@ -53,7 +53,7 @@
         "status": "ok",
         "source": "Viking-Lotto.net / Norsk Tipping",
         "fetched": 766,
-        "merged": 280
+        "merged": 281
       },
       "eurojackpot": {
         "status": "ok",
@@ -1788,6 +1788,67 @@
     ],
     "vikinglotto": [
       {
+        "date": "2026-10-21",
+        "main": [
+          18,
+          22,
+          29,
+          30,
+          34,
+          40
+        ],
+        "bonus": [
+          4
+        ],
+        "jackpot": 69.4,
+        "lotteryId": "vikinglotto",
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/vikinglotto/resultater",
+        "drawId": 1590,
+        "currency": "NOK",
+        "payoutTiers": [
+          {
+            "match": "6+1",
+            "label": "6+1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "6+0",
+            "label": "6+0",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 37995,
+            "winners": 30
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 4590,
+            "winners": 102
+          },
+          {
+            "match": "4",
+            "label": "4",
+            "prizeAmount": 165,
+            "winners": 6442
+          },
+          {
+            "match": "3",
+            "label": "3",
+            "prizeAmount": 85,
+            "winners": 112303
+          }
+        ],
+        "drawName": "VKL2021-21.10.2026 20:00",
+        "ruleVersion": "viking-1-5",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-10-14",
         "main": [
           3,
@@ -2638,67 +2699,6 @@
             "label": "3",
             "prizeAmount": 85,
             "winners": 106676
-          }
-        ]
-      },
-      {
-        "date": "2026-07-08",
-        "main": [
-          1,
-          7,
-          24,
-          29,
-          44,
-          48
-        ],
-        "bonus": [
-          2
-        ],
-        "jackpot": 278.4,
-        "lotteryId": "vikinglotto",
-        "source": "Norsk Tipping",
-        "sourceUrl": "https://www.norsk-tipping.no/lotteri/vikinglotto/resultater",
-        "drawId": 1575,
-        "drawName": "VKL2021-08.07.2026 20:00",
-        "ruleVersion": "viking-1-5",
-        "ruleEra": "current",
-        "currency": "NOK",
-        "payoutTiers": [
-          {
-            "match": "6+1",
-            "label": "6+1",
-            "prizeAmount": 278400000,
-            "winners": 1
-          },
-          {
-            "match": "6+0",
-            "label": "6+0",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "5+1",
-            "prizeAmount": 38865,
-            "winners": 34
-          },
-          {
-            "match": "5+0",
-            "label": "5+0",
-            "prizeAmount": 3965,
-            "winners": 137
-          },
-          {
-            "match": "4",
-            "label": "4",
-            "prizeAmount": 165,
-            "winners": 7476
-          },
-          {
-            "match": "3",
-            "label": "3",
-            "prizeAmount": 85,
-            "winners": 133697
           }
         ]
       }
