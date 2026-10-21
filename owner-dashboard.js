@@ -68,6 +68,8 @@
     { id: 'journey', label: 'Путь гостя' },
     { id: 'usage', label: 'Лотереи и функции' },
     { id: 'overview', label: 'Обзор' },
+    // 2026-10-23: acquisition, campaigns, advertising efficiency and Search Console (migration 074).
+    { id: 'promotion', label: 'Источники и продвижение' },
     { id: 'live', label: 'Live' },
     { id: 'people', label: 'Люди' },
     { id: 'households', label: 'Домохозяйства' },
@@ -165,7 +167,27 @@
     usageTransitions: 'Люди, которые в выбранном срезе были гостями, и что с ними стало к сегодняшнему дню: зарегистрировали аккаунт (вход на той же установке), делали что-то уже в аккаунте, получили PRO (действующий доступ или оплата). Адрес, сеть и похожие устройства людей не объединяют.',
     human: 'Кто за трафиком — по доказательствам, которые видит сервер, без новых данных о людях. «Человек ✓» — вошёл в аккаунт или сделал в приложении то, что делается только нажатием (выбрал лотерею, сгенерировал, открыл функцию, сохранил…). «Вероятно человек» — согласился на аналитику (это нажатие), но больше ничего не сделал; для визитов — браузер, где уже принято решение по согласию. «Не определено» — загрузка страницы без решения по согласию и без входа: так же выглядит и человек, закрывший вкладку, и сервис, открывший ссылку; такие визиты считаются, но не входят ни в людей, ни в страны, ни в уведомления. «Автоматический трафик» — боты, мониторинг, headless-браузеры, агенты, дата-центры, VPN, Tor; хранится для диагностики («Включить ботов»). Люди и визиты не складываются: загрузка страницы человеком с согласием — тоже визит.',
     usageShare: 'Одно нажатие человека на «Поделиться» (блок на главной или «О приложении») — одно действие; оно записывается, когда известен итог: сервис открыт, текст или ссылка скопированы, системное меню отправило. Показ блока не считается, повтор одного нажатия тоже. Канал — только код (системное меню, копировать ссылку, Facebook, X, Reddit, Telegram, WhatsApp, LinkedIn, e-mail, Instagram, TikTok): текст, ссылка и получатель не сохраняются. Только события с согласием на аналитику; владелец, тестовые установки и боты исключены.',
-    usagePeople: 'Люди выбираются фильтрами, а путь показывает всё, что человек делал за период: страна → лотерея → функции в ней (по первому использованию) → другие лотереи, интерес к PRO, регистрация, PRO. Функция, которую только открыли, помечена «открыл». Показано до 100 последних активных людей.'
+    usagePeople: 'Люди выбираются фильтрами, а путь показывает всё, что человек делал за период: страна → лотерея → функции в ней (по первому использованию) → другие лотереи, интерес к PRO, регистрация, PRO. Функция, которую только открыли, помечена «открыл». Показано до 100 последних активных людей.',
+    // 2026-10-23: «Источники и продвижение»
+    promoIntro: 'Раздел отвечает на вопросы продвижения: откуда приходят люди, какие публикации и кампании работают, сколько стоит привлечение. В нём четыре разных измерения, которые никогда не складываются: визиты (обезличенные счётчики, без источника), сессии с согласием (только у них есть источник), переходы по вашим ссылкам и точные регистрации и покупки. Период и часовой пояс (по умолчанию Europe/Oslo) — из панели сверху.',
+    promoVisits: 'Визиты — обезличенные счётчики: один на загрузку страницы или запуск приложения, независимо от согласия, без идентификаторов и без источника. Обычные визиты — без признаков автоматизации (не доказательство живого человека). Поэтому визиты нельзя разложить по источникам и нельзя сравнивать напрямую с кликами Search Console или переходами по ссылкам.',
+    promoOwner: 'Визиты владельца: вход в аккаунт владельца, установка, отмеченная ссылкой «#owner-test», или устройство владельца, узнанное с его согласием на распознавание. Счётчик ведётся с даты, показанной в карточке; за более ранний период визиты владельца не отделялись, поэтому «Внешние визиты» тогда не показываются.',
+    promoConsent: 'Состояние согласия в момент визита: приняли аналитику, отказались или ещё не решили. Источник перехода записывается только для тех, кто принял.',
+    promoSessions: 'Сессии с согласием на аналитику. Источник берётся из перехода, которым сессия началась: домен сайта, метки кампании, признак рекламного клика. «Прямой / источник не передан» — браузер ничего не сообщил: это не обязательно ввод адреса вручную (приложения соцсетей и мессенджеры часто скрывают источник). «Неизвестно» — источник не записан (возврат в уже открытой вкладке, старые данные).',
+    promoSources: 'Один источник на сессию — по одному правилу для истории и новых данных (тот же классификатор, что на сервере приёма). Метки кампании важнее сайта-источника. Регистрации и покупки показаны по первому источнику человека (first touch) — только если его устройство дало согласие до регистрации или покупки. Остальные — в строке «Атрибуция неизвестна». Владелец и боты исключены, пока не включены переключатели.',
+    promoConversions: 'Регистрации — точное число новых аккаунтов (без анонимных и без владельца). Покупки — оплаченные покупки из журнала магазина (без пробных периодов, промо-доступа и sandbox). Источник известен только у тех, чьё устройство дало согласие на аналитику до этого; остальным источник не приписывается.',
+    promoCampaigns: 'Ваши кампании и ссылки. Ссылка ведёт на выбранную страницу Lotto Simulator и добавляет метки utm_source, utm_medium, utm_campaign (код кампании) и utm_content (код ссылки). Сессии, регистрации и покупки кампании — от людей с согласием, пришедших по её меткам. Расходы вы вносите сами.',
+    promoCounting: 'Подсчёт переходов по ссылкам выключен по умолчанию. Сервер умеет считать переходы без cookie, без записи на устройство и без идентификаторов (день, ссылка, класс трафика), но EDPB (Guidelines 2/2023, Art. 5(3) ePrivacy) относит ссылки для отслеживания источника к этой статье, а Nkom не называет исключения для статистики (ekomloven § 3-15). Законность подсчёта без согласия не подтверждена, поэтому решение за вами: после собственной юридической оценки задайте секрет Supabase LOTO_PROMO_COUNT_CLICKS=1 и переразверните функцию go.',
+    promoClicks: 'Переходы — нажатия на ваши ссылки, посчитанные сервером при перенаправлении (только если подсчёт включён). Повторные — та же сеть и та же ссылка в пределах 30 минут. Предпросмотры — роботы, строящие карточку ссылки (Facebook, X, Slack, Telegram, WhatsApp, iMessage и др.), предзагрузка браузера. Боты — объявленные роботы и скрипты. Подозрительные — headless-браузеры и более 60 переходов в час из одной сети. Адрес и браузер не сохраняются; один человек может дать несколько переходов.',
+    promoSpend: 'Расходы вносятся вручную, по дням, в NOK, EUR или USD. Курсы валют не выдумываются: суммы в разных валютах не складываются, а показатели считаются отдельно для каждой валюты. За период учитываются расходы с датой внутри периода.',
+    promoMetrics: 'CPC = расходы ÷ переходы. Цена сессии = расходы ÷ сессии с согласием. Цена регистрации (CPA) = расходы ÷ регистрации, привлечённые кампанией. Конверсия = регистрации ÷ переходы — нижняя граница: люди без согласия не связываются с кампанией. ROAS = выручка от привлечённых покупателей ÷ расходы — только в одной валюте; если выручка в другой валюте, показано «другая валюта». Нет данных — «—», не ноль.',
+    promoLinks: 'Публикуйте ссылку вида lottosimulator.app/go/?l=код — это обычная страница сайта с карточкой Lotto Simulator, она передаёт переход серверу, а сервер ведёт на фиксированную страницу сайта с метками. Короткая ссылка lottosimulator.app/go/код тоже работает, но некоторые соцсети показывают для неё карточку хуже. Перенаправить на чужой адрес нельзя. Отключённая ссылка ведёт на главную страницу без меток и не считается.',
+    promoUtm: 'Метки utm_campaign, которые не совпадают ни с одной вашей кампанией: ссылки, размеченные вручную или кем-то другим. Создайте кампанию с таким же кодом — и они войдут в неё.',
+    promoPlatforms: 'Статистика публикаций внутри площадок (просмотры, охват) доступна только через их API, обычно с проверкой приложения или платным доступом. Ничего из этого не подключено и не имитируется; парсинг страниц площадок не используется.',
+    promoUnknown: 'Честный список того, чего система не знает и не пытается угадать.',
+    gsc: 'Данные Google Search Console читаются сервисным аккаунтом только на чтение после проверки владельца. Это то, что видел Google: показы и клики в результатах поиска, CTR, средняя позиция. Данные появляются с задержкой 2–3 дня, даты — по тихоокеанскому времени, Google хранит около 16 месяцев. Редкие запросы Google не показывает, поэтому сумма по запросам меньше итога.',
+    gscClicks: 'Клик в Search Console — нажатие на результат Google, а не визит: часть людей уходит до загрузки страницы, часть визитов из Google без согласия не видна в сессиях. Поэтому клики, визиты и сессии из Google не совпадают и не складываются.',
+    gscQueries: 'Поисковые запросы, по которым сайт показывался в Google. Google скрывает редкие запросы для защиты приватности; запросы конкретных посетителей неизвестны никому, кроме Google.'
   };
 
   var state = {
@@ -518,6 +540,21 @@
       '#ow-ov .ow-dayhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0 0 10px}',
       '#ow-ov .ow-dayhead h2{margin:0;font-size:20px}',
       '#ow-ov .ow-dayhead .ow-card-s{font-size:13px}',
+      // «Источники и продвижение»: campaign forms, publish links, muted rows
+      '#ow-ov tr.ow-muted td{color:var(--ow-sub)}',
+      '#ow-ov .ow-pr-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-top:10px}',
+      '#ow-ov .ow-pr-form .ow-ft-actions{grid-column:1/-1}',
+      '#ow-ov .ow-pr-field{display:flex;flex-direction:column;gap:4px;min-width:0;font-size:12px;color:var(--ow-sub);font-weight:700}',
+      '#ow-ov .ow-pr-field small{font-weight:400}',
+      '#ow-ov .ow-pr-field input,#ow-ov .ow-pr-field textarea,#ow-ov .ow-pr-url input{min-height:32px;padding:5px 8px;border-radius:9px;border:1px solid var(--ow-bd);background:var(--ow-card);color:var(--ow-tx);font:inherit;font-weight:400;font-size:14px;box-sizing:border-box;width:100%;min-width:0}',
+      '#ow-ov .ow-pr-field select{width:100%}',
+      '#ow-ov .ow-pr-link{border:1px solid var(--ow-bd);border-radius:12px;padding:10px;margin:8px 0;background:var(--ow-card2)}',
+      '#ow-ov .ow-pr-link.is-off{opacity:.7}',
+      '#ow-ov .ow-pr-url{display:flex;gap:6px;margin:6px 0;min-width:0}',
+      '#ow-ov .ow-pr-list{margin:0;padding-left:18px;color:var(--ow-sub)}#ow-ov .ow-pr-list li{margin:4px 0}',
+      '#ow-ov .ow-sheet-in h3{margin:0 0 6px;font-size:17px}',
+      // money and ratios («200,00 NOK», «0,49× (NOK)») never break inside a word
+      '#ow-ov .ow-pr-cards .ow-card-v{font-size:20px;overflow-wrap:normal;word-break:keep-all}',
       '#ow-ov .ow-cmp{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:6px;font-size:11.5px;color:var(--ow-sub);line-height:1.35}',
       '#ow-ov .ow-cmp b{font-weight:800}',
       '#ow-ov .ow-cmp .up{color:var(--ow-up)}#ow-ov .ow-cmp .down{color:var(--ow-down)}',
@@ -811,6 +848,7 @@
     else await load(section, extra);
     render();
     if (section === 'overview') loadGa4();   // its own request, its own states — never on the overview's path
+    if (section === 'promotion') loadGsc();  // likewise: Search Console never delays or breaks the section
     if (section === 'live') startLive();
     if (section === 'activity') startActivityPoll();
     if (section === 'map') {
@@ -3039,7 +3077,511 @@
     return html;
   }
 
+  // ── «Источники и продвижение» (2026-10-23, migration 202610230074) ──────────────────────────────
+  // Four measurements that are never added together, each labelled with where it comes from:
+  //   visits (consent-free counters, no source) · consented sessions (the only place a source exists) ·
+  //   managed-link clicks (only when the owner switched counting on) · exact conversions (accounts,
+  //   paid purchases), attributed by the first touch of a consented profile — otherwise «Атрибуция
+  //   неизвестна». Plus Google Search Console, read on its own request. Campaigns, links and spend are
+  //   managed here (owner_promo_manage); every ratio stays in the currency the money was spent in.
+  var PROMO_ERROR_RU = {
+    invalid_name: 'Укажите название (до 120 символов).', invalid_slug: 'Код: латинские буквы, цифры и дефис, 1–31 символ, без двух дефисов подряд и без 9 цифр подряд.',
+    slug_taken: 'Такой код уже используется — выберите другой.', invalid_platform: 'Выберите площадку.', invalid_kind: 'Выберите тип кампании.',
+    invalid_route: 'Выберите страницу из списка.', invalid_locale: 'Выберите язык страницы из списка.', invalid_status: 'Выберите статус.',
+    invalid_description: 'Описание — не длиннее 1000 символов.', invalid_budget: 'Бюджет — число до 9 999 999,99.', invalid_currency: 'Выберите валюту: NOK, EUR или USD.',
+    invalid_dates: 'Проверьте даты.', invalid_amount: 'Сумма — положительное число, не больше двух знаков после запятой.', invalid_note: 'Заметка — не длиннее 200 символов.',
+    invalid_label: 'Укажите название ссылки (до 80 символов).', not_found: 'Запись не найдена — обновите раздел.',
+    campaign_has_history: 'У кампании есть ссылки или расходы: её нельзя удалить, но можно завершить.', payload_too_large: 'Слишком длинный текст.'
+  };
+  function promoState() {
+    if (!state.promo) state.promo = { sheet: null, msg: null, busy: false, allSources: false, showFinished: false, gsc: null, gscLoading: false, gscError: null };
+    return state.promo;
+  }
+  function promoData() { var r = state.data.promotion; return (r && r.data) || null; }
+  function promoCampaign(id) { var d = promoData(); return d && (d.campaigns || []).filter(function (c) { return c.id === id; })[0] || null; }
+  function promoMoney(rows) { var text = moneyList(rows); return text ? esc(text) : '—'; }
+  function promoRate(x) { return x == null ? '—' : (Math.round(x * 1000) / 10).toLocaleString(intl()) + '%'; }
+  // Per spend currency: «12,50 kr». More than one currency gives one value per currency, never a sum.
+  function promoPer(m, key) {
+    var parts = m.perCurrency.filter(function (p) { return p[key] != null; }).map(function (p) { return money(p[key], p.currency); });
+    return parts.length ? esc(parts.join(' · ')) : '—';
+  }
+  function promoRoas(m) {
+    if (!m.perCurrency.length) return '—';
+    var parts = m.perCurrency.map(function (p) {
+      if (p.roas != null) return (Math.round(p.roas * 100) / 100).toLocaleString(intl()) + '× (' + p.currency + ')';
+      return p.roasMismatch ? t('другая валюта') : t('нет выручки');
+    });
+    return esc(parts.join(' · '));
+  }
+  function promoClicks(c, counting) {
+    if (!counting) return '<span class="ow-kpi-none">' + et('не считаются') + '</span>';
+    var k = c.clicks || {};
+    var other = (+k.repeat || 0) + (+k.preview || 0) + (+k.bot || 0) + (+k.suspicious || 0);
+    return num(k.human) + (other ? ' <span class="ow-card-s">+' + num(other) + '</span>' : '');
+  }
+  function renderPromotion(d) {
+    var ps = promoState();
+    var v = d.visitors || {};
+    var conv = d.conversions || {};
+    var counting = d.click_counting === true;
+    var html = '<div class="ow-kpi-h"><h2>' + et('Источники и продвижение') + '</h2>' + how('promoIntro') + '</div>' +
+      '<div class="ow-card-s">' + et('Откуда приходят посетители, какие публикации и кампании приводят людей, регистрации и покупки, сколько стоит привлечение. Каждая цифра — из своего источника данных, они не складываются.') + '</div>';
+
+    // visitors
+    var ownerSince = v.owner_counted_since ? new Date(v.owner_counted_since).toLocaleDateString(intl(), { timeZone: state.tz }) : null;
+    var external = v.owner_complete && v.visits_owner_human != null ? Math.max(0, (+v.visits_human || 0) - (+v.visits_owner_human || 0)) : null;
+    html += block('pr-visitors', 'Посетители', 'promoVisits', '<div class="ow-cards">' +
+      kcard('Всего визитов', v.visits_total, et('все загрузки страниц и запуски приложения'), 'promoVisits', 'filtered') +
+      kcard('Обычные визиты', v.visits_human, et('автоматический трафик: {{0}}', num((+v.visits_bot || 0) + (+v.visits_suspicious || 0))), 'visitsHuman', 'filtered') +
+      kcard('Внешние визиты', external, v.owner_complete ? et('обычные визиты без визитов владельца') : et('владелец отделяется с {{0}}', ownerSince || '—'), 'promoOwner', 'filtered') +
+      kcard('Визиты владельца', v.visits_owner, ownerSince ? et('считаются с {{0}}', ownerSince) : '', 'promoOwner', 'filtered') +
+      kcard('С согласием на аналитику', v.visits_accepted, et('отказались: {{0}} · без решения: {{1}}', num(v.visits_declined), num(v.visits_undecided)), 'promoConsent', 'filtered') +
+      kcard('Сессии с известным источником', v.sessions_known_source, et('из {{0}} сессий с согласием · прямой / не передан: {{1}} · неизвестно: {{2}}', num(v.sessions), num(v.sessions_direct), num(v.sessions_unknown_source)), 'promoSessions', 'consented') +
+      '</div>');
+    html += lineChart(d.daily || [], ['visits_human', 'sessions', 'clicks'], ['Обычные визиты', 'Сессии с согласием', 'Переходы по вашим ссылкам']);
+
+    // sources
+    var rows = (d.sources || []).filter(function (r) {
+      return ps.allSources || r.sessions || r.registrations || r.purchases || r.via_links;
+    }).map(function (r) { return Object.assign({ __class: r.group === 'unknown' || r.group === 'direct' ? 'ow-muted' : '' }, r); });
+    var unattributedRegs = Math.max(0, (+conv.registrations || 0) - (+conv.registrations_attributed || 0));
+    var unattributedBuys = Math.max(0, (+conv.purchases || 0) - (+conv.purchases_attributed || 0));
+    if (unattributedRegs || unattributedBuys || ps.allSources) rows.push({ group: 'no_attribution', sessions: null, people: null, via_links: null, registrations: unattributedRegs, purchases: unattributedBuys, __class: 'ow-muted' });
+    var dash = function (x) { return x == null ? '—' : num(x); };
+    html += block('pr-sources', 'Источники', 'promoSources',
+      table([
+        { title: 'Источник', key: 'group', html: function (r) { return esc(label(LIB.SOURCE_GROUP_RU, r.group)); } },
+        { title: 'Сессии', key: 'sessions', numeric: true, html: function (r) { return dash(r.sessions); } },
+        { title: 'Люди', key: 'people', numeric: true, html: function (r) { return dash(r.people); } },
+        { title: 'Через ваши ссылки', key: 'via_links', numeric: true, html: function (r) { return r.via_links ? '+' + num(r.via_links) : '—'; } },
+        { title: 'Регистрации', key: 'registrations', numeric: true, html: function (r) { return dash(r.registrations); } },
+        { title: 'Покупки', key: 'purchases', numeric: true, html: function (r) { return dash(r.purchases); } }
+      ], rows, 'Нет сессий с согласием за период') +
+      '<div class="ow-ft-actions"><button class="ow-btn" type="button" data-pr-sources>' + (ps.allSources ? et('Скрыть пустые строки') : et('Показать все источники')) + '</button></div>' +
+      '<div class="ow-card-s">' + et('Сессии и люди — по источнику сессии; регистрации и покупки — по первому источнику человека (first touch). «Через ваши ссылки» — сессии ваших кампаний на этой площадке; они учтены в строке «Собственные кампании», а не здесь, поэтому ничего не считается дважды.') + '</div>' +
+      '<div class="ow-cards" style="margin-top:10px">' +
+        kcard('Регистрации', conv.registrations, et('с известным первым источником: {{0}}', num(conv.registrations_attributed)), 'promoConversions', 'exact') +
+        kcard('Покупки', conv.purchases, et('с известным первым источником: {{0}} · покупателей: {{1}}', num(conv.purchases_attributed), num(conv.buyers)), 'promoConversions', 'exact') +
+        kcard('Выручка за период', (conv.revenue || []).length ? moneyList(conv.revenue) : null, et('покупки и продления, в валюте покупателя'), 'revenue', 'exact', { text: true }) +
+      '</div>');
+
+    // campaigns
+    var campaigns = (d.campaigns || []).filter(function (c) { return ps.showFinished || c.status !== 'finished'; });
+    var finished = (d.campaigns || []).length - campaigns.length;
+    html += block('pr-campaigns', 'Кампании', 'promoCampaigns',
+      '<div class="ow-ft-actions"><button class="ow-btn ow-btn-primary" type="button" data-pr-new>' + et('Новая кампания') + '</button>' +
+      (finished || ps.showFinished ? '<button class="ow-btn" type="button" data-pr-finished>' + (ps.showFinished ? et('Скрыть завершённые') : et('Показать завершённые ({{0}})', num(finished))) + '</button>' : '') + '</div>' +
+      (counting ? '' : '<div class="ow-ft-msg">' + et('Переходы по ссылкам сейчас не считаются: ссылки работают и передают метки кампании, а кампании видны по сессиям, регистрациям и покупкам людей с согласием. Как включить подсчёт — в «Как считается».') + how('promoCounting') + '</div>') +
+      (campaigns.length ? table([
+        { title: 'Кампания', key: 'name', html: function (c) { return '<b>' + esc(c.name) + '</b><div class="ow-card-s">' + esc(label(LIB.PROMO_PLATFORM_RU, c.platform)) + ' · ' + esc(label(LIB.PROMO_STATUS_RU, c.status)) + '</div>'; } },
+        { title: 'Переходы', key: 'clicks', numeric: true, html: function (c) { return promoClicks(c, counting); } },
+        { title: 'Сессии', key: 'sessions', numeric: true, html: function (c) { return num(c.sessions); } },
+        { title: 'Регистрации', key: 'registrations', numeric: true, html: function (c) { return num(c.registrations); } },
+        { title: 'Покупки', key: 'purchases', numeric: true, html: function (c) { return num(c.purchases); } },
+        { title: 'Расходы', key: 'spend', numeric: true, html: function (c) { return promoMoney(c.spend); } },
+        { title: 'CPC', key: 'cpc', numeric: true, html: function (c) { return promoPer(LIB.promoMetrics(c, counting), 'cpc'); } },
+        { title: 'Цена регистрации', key: 'cpa', numeric: true, html: function (c) { return promoPer(LIB.promoMetrics(c, counting), 'perRegistration'); } },
+        { title: 'Конверсия', key: 'rate', numeric: true, html: function (c) { return promoRate(LIB.promoMetrics(c, counting).registrationRate); } },
+        { title: 'ROAS', key: 'roas', numeric: true, html: function (c) { return promoRoas(LIB.promoMetrics(c, counting)); } }
+      ], campaigns.map(function (c) { return Object.assign({ __click: true }, c); })) :
+        '<div class="ow-empty">' + et('Кампаний пока нет. Создайте первую — получите ссылку для публикации.') + '</div>'));
+
+    // where the consented sessions came from, in detail
+    html += block('pr-referrers', 'Сайты-источники', 'promoSources', table([
+      { title: 'Домен', key: 'domain', html: function (r) { return '<code data-i18n-ignore>' + esc(r.domain) + '</code>'; } },
+      { title: 'Источник', key: 'group', html: function (r) { return esc(label(LIB.SOURCE_GROUP_RU, r.group)); } },
+      { title: 'Сессии', key: 'sessions', numeric: true }
+    ], d.referrers || [], 'Нет переходов с других сайтов за период'));
+    if ((d.untracked_campaigns || []).length) {
+      html += block('pr-utm', 'Метки кампаний вне ваших кампаний', 'promoUtm', table([
+        { title: 'utm_campaign', key: 'campaign', html: function (r) { return '<code data-i18n-ignore>' + esc(r.campaign) + '</code>'; } },
+        { title: 'Сессии', key: 'sessions', numeric: true }
+      ], d.untracked_campaigns));
+    }
+    html += block('pr-landing', 'Страницы входа (сессии с согласием)', 'promoSessions', table([
+      { title: 'Страница', key: 'page', html: function (r) { return '<code data-i18n-ignore>' + esc(r.page) + '</code>'; } },
+      { title: 'Сессии', key: 'sessions', numeric: true }
+    ], d.landing_pages || []));
+
+    html += '<div id="ow-pr-gsc">' + renderGsc() + '</div>';
+    html += block('pr-platforms', 'Статистика самих площадок', 'promoPlatforms', table([
+      { title: 'Площадка', key: 'p', html: function (r) { return esc(r.p); } },
+      { title: 'Что можно получить по API', key: 'a', html: function (r) { return et(r.a); } },
+      { title: 'Что для этого нужно', key: 'n', html: function (r) { return et(r.n); } }
+    ], PLATFORM_APIS.map(function (r) { return { p: r[0], a: r[1], n: r[2] }; })) +
+      '<div class="ow-card-s">' + et('Сейчас ни одна площадка не подключена: ваши ссылки и метки кампаний уже дают переходы, сессии, регистрации и покупки без доступа к чужим API. Показатели самих площадок (просмотры, охват) здесь не появляются и не придумываются.') + '</div>');
+    html += block('pr-unknown', 'Что остаётся неизвестным', 'promoUnknown',
+      '<ul class="ow-pr-list">' + PROMO_UNKNOWN.map(function (s) { return '<li>' + et(s) + '</li>'; }).join('') + '</ul>');
+    if (ps.msg && !ps.sheet) html += '<div class="ow-ft-msg ' + (ps.msg.ok ? 'ok' : 'bad') + '" role="status">' + esc(ps.msg.text()) + '</div>';
+    return html;
+  }
+  var PLATFORM_APIS = [
+    ['Reddit', 'Комментарии и голоса своих постов; просмотров в API нет.', 'Одобрение доступа к Data API (Responsible Builder Policy).'],
+    ['Instagram', 'Просмотры, охват и взаимодействия своих публикаций.', 'Профессиональный аккаунт (Business / Creator), приложение Meta.'],
+    ['Facebook', 'Статистика страницы и её публикаций (просмотры, взаимодействия).', 'Страница Facebook и приложение Meta с ролью на этой странице.'],
+    ['TikTok', 'Просмотры, лайки, комментарии и репосты своих видео.', 'Приложение TikTok for Developers с проверкой (App Review).'],
+    ['YouTube', 'Просмотры, время просмотра и переходы по своему каналу.', 'Вход Google с доступом только на чтение (бесплатно, есть квоты).'],
+    ['LinkedIn', 'Показы и охват своих публикаций и страницы компании.', 'Одобрение Community Management API.'],
+    ['X / Twitter', 'Показы и клики по ссылкам своих постов за последние 30 дней.', 'Платный доступ к API (оплата за каждый запрос).']
+  ];
+  var PROMO_UNKNOWN = [
+    'Источник посетителей без согласия на аналитику: для них есть только обезличенные счётчики визитов, без источника.',
+    'Источник, который браузер не передал: приложения соцсетей, мессенджеры и настройки приватности часто скрывают его — такие сессии попадают в «Прямой / источник не передан».',
+    'Поисковые запросы конкретных посетителей: Google их не передаёт; запросы и позиции видны только в сводке Search Console.',
+    'Регистрации и покупки людей без согласия или с другого устройства: они учтены в итогах, но их источник — «Атрибуция неизвестна».',
+    'Просмотры и охват публикаций внутри самих площадок: без подключения их API этих данных нет.',
+    'Уникальные люди по переходам: переходы считаются без идентификаторов, поэтому один человек может дать несколько переходов.'
+  ];
+
+  // ── Search Console block (its own request and states) ────────────────────────────────────────
+  function gscMetric(m, key) {
+    if (!m) return null;
+    if (key === 'ctr') return promoRate(m.ctr);
+    if (key === 'position') return m.position == null ? null : (Math.round(m.position * 10) / 10).toLocaleString(intl());
+    return num(m[key]);
+  }
+  function renderGsc() {
+    var ps = promoState();
+    var head = 'SEO — Google Search Console';
+    if (ps.gscLoading) return block('pr-gsc', head, 'gsc', '<div class="ow-empty">' + et('Загрузка Search Console…') + '</div>');
+    if (ps.gscError) return block('pr-gsc', head, 'gsc', '<div class="ow-err"><span>' + esc(t('Ошибка запроса Search Console: {{0}}', gscErrorText(ps.gscError))) + '</span>' +
+      '<button class="ow-btn" type="button" data-pr-gsc>' + et('Повторить') + '</button></div>');
+    var g = ps.gsc;
+    if (!g) return block('pr-gsc', head, 'gsc', '<div class="ow-empty">' + et('Search Console ещё не запрашивался') + '</div>');
+    if (g.configured === false) {
+      return block('pr-gsc', head, 'gsc', '<div class="ow-ft-msg">' + et('Search Console не подключён.') + ' ' +
+        et('Чтобы подключить: добавьте e-mail сервисного аккаунта (тот же, что для GA4) в Search Console → Настройки → Пользователи и разрешения с правом «Ограниченный доступ» и сохраните секрет GSC_SITE_URL (например sc-domain:lottosimulator.app). Доступ — только чтение.') +
+        '<div class="ow-card-s">' + et('Не заданы: {{0}}', (g.missing || []).join(', ')) + '</div></div>');
+    }
+    var tot = g.totals;
+    var html = '<div class="ow-cards">' +
+      kcard('Клики в поиске', tot ? tot.clicks : null, et('клики по результатам Google, не визиты'), 'gscClicks', 'exact') +
+      kcard('Показы', tot ? tot.impressions : null, et('сколько раз сайт был в результатах'), 'gsc', 'exact') +
+      kcard('CTR', tot ? gscMetric(tot, 'ctr') : null, et('клики ÷ показы'), 'gsc', 'exact', { text: true }) +
+      kcard('Средняя позиция', tot ? gscMetric(tot, 'position') : null, et('1 — первое место в выдаче'), 'gsc', 'exact', { text: true }) +
+      '</div>' +
+      '<div class="ow-card-s">' + et('Период Search Console: {{0}} — {{1}} (по тихоокеанскому времени).', g.range && g.range.from, g.range && g.range.to) +
+      (g.first_incomplete_date ? ' ' + et('Данные с {{0}} ещё неполные.', g.first_incomplete_date) : '') +
+      (g.clamped ? ' ' + et('Google хранит около 16 месяцев — более ранние дни недоступны.') : '') + '</div>';
+    var daily = (g.daily || []).map(function (r) { return { bucket: r.date, clicks: r.clicks, impressions: r.impressions }; });
+    html += lineChart(daily, ['impressions'], ['Показы']) + lineChart(daily, ['clicks'], ['Клики в поиске']);
+    var cols = function (first, key, render) {
+      return [{ title: first, key: key, html: render || function (r) { return '<span data-i18n-ignore>' + esc(r[key]) + '</span>'; } },
+        { title: 'Клики', key: 'clicks', numeric: true }, { title: 'Показы', key: 'impressions', numeric: true },
+        { title: 'CTR', key: 'ctr', numeric: true, html: function (r) { return gscMetric(r, 'ctr'); } },
+        { title: 'Позиция', key: 'position', numeric: true, html: function (r) { return gscMetric(r, 'position') || '—'; } }];
+    };
+    html += block('pr-gsc-q', 'Поисковые запросы', 'gscQueries', table(cols('Запрос', 'query'), g.queries || [], 'Google не вернул запросов за период'));
+    html += block('pr-gsc-p', 'Страницы входа из поиска', 'gsc', table(cols('Страница', 'page', function (r) { return '<code data-i18n-ignore>' + esc(r.page) + '</code>'; }), g.pages || [], 'Google не вернул страниц за период'));
+    html += block('pr-gsc-c', 'Страны', 'gsc', table(cols('Страна', 'country', function (r) { return esc(flagName(r.country)); }), g.countries || [], 'Google не вернул стран за период'));
+    html += block('pr-gsc-d', 'Устройства', 'gsc', table(cols('Устройство', 'device', function (r) { return esc(t(GSC_DEVICE_RU[r.device] || r.device)); }), g.devices || [], 'Google не вернул устройств за период'));
+    return block('pr-gsc', head, 'gsc', html);
+  }
+  var GSC_DEVICE_RU = { desktop: 'Компьютер', mobile: 'Телефон', tablet: 'Планшет' };
+  function gscErrorText(error) {
+    var code = error && error.code;
+    if (code === 'gsc_forbidden') return t('у сервисного аккаунта нет доступа к ресурсу Search Console');
+    if (code === 'gsc_site_not_found') return t('ресурс Search Console не найден — проверьте GSC_SITE_URL');
+    if (code === 'gsc_quota') return t('исчерпана квота Search Console API');
+    if (code === 'ga4_auth_failed') return t('не удалось получить токен сервисного аккаунта');
+    return (error && (error.detail || error.message)) || t('неизвестно');
+  }
+  async function loadGsc(force) {
+    var ps = promoState();
+    var range = currentRange();
+    var key = range.from + '|' + range.to;
+    if (!force && ps.gscKey === key && (ps.gsc || ps.gscLoading)) { paintGsc(); return; }
+    ps.gscKey = key;
+    ps.gscLoading = true; ps.gscError = null;
+    paintGsc();
+    try {
+      ps.gsc = await api({ gsc: { op: 'report', from: range.from, to: range.to, tz: range.tz } });
+    } catch (error) {
+      ps.gsc = null;
+      ps.gscError = error;
+    } finally {
+      ps.gscLoading = false;
+      paintGsc();
+    }
+  }
+  function paintGsc() {
+    var host = ovEl && ovEl.querySelector('#ow-pr-gsc');
+    if (host && state.section === 'promotion') host.innerHTML = renderGsc();
+  }
+
+  // ── campaign sheet: the card, its links, its spend, and the edit form ────────────────────────
+  function promoOptions(list, labels, current, allowEmpty, emptyLabel) {
+    return (allowEmpty ? '<option value="">' + et(emptyLabel || '—') + '</option>' : '') + list.map(function (v) {
+      var text = typeof labels === 'function' ? labels(v) : label(labels, v);
+      return '<option value="' + esc(v) + '"' + (v === current ? ' selected' : '') + '>' + esc(text) + '</option>';
+    }).join('');
+  }
+  function promoField(labelText, control) { return '<label class="ow-pr-field"><span>' + et(labelText) + '</span>' + control + '</label>'; }
+  function promoLocaleLabel(code) {
+    try { var n = new Intl.DisplayNames([intl()], { type: 'language' }).of(code === 'no' ? 'nb' : code); if (n) return n; } catch (e) {}
+    return code;
+  }
+  function promoForm(c) {
+    var isNew = !c;
+    c = c || { platform: 'reddit', kind: 'organic', target_route: 'home', status: 'active', currency: 'NOK' };
+    return '<form class="ow-pr-form" data-pr-form="campaign" data-id="' + esc(c.id || '') + '" novalidate>' +
+      promoField('Название', '<input name="name" maxlength="120" required value="' + esc(c.name || '') + '" data-pr-slug-source>') +
+      (isNew ? promoField('Код кампании (в ссылках и метке utm_campaign)', '<input name="slug" maxlength="31" required pattern="[a-z0-9-]{1,31}" value="" data-pr-slug data-i18n-ignore>') :
+        '<div class="ow-pr-field"><span>' + et('Код кампании') + '</span><code data-i18n-ignore>' + esc(c.slug) + '</code><small>' + et('Код не меняется: он уже стоит в опубликованных ссылках.') + '</small></div>') +
+      promoField('Площадка', '<select name="platform">' + promoOptions(LIB.PROMO_PLATFORMS, LIB.PROMO_PLATFORM_RU, c.platform) + '</select>') +
+      promoField('Тип', '<select name="kind">' + promoOptions(['organic', 'paid'], { organic: 'Бесплатная публикация', paid: 'Платная реклама' }, c.kind) + '</select>') +
+      promoField('Описание', '<textarea name="description" maxlength="1000" rows="2">' + esc(c.description || '') + '</textarea>') +
+      promoField('Целевая страница', '<select name="target_route">' + promoOptions(LIB.PROMO_ROUTES, LIB.routeLabel, c.target_route) + '</select>') +
+      promoField('Язык страницы (для страниц сайта)', '<select name="target_locale">' + promoOptions(LIB.PROMO_LOCALES, promoLocaleLabel, c.target_locale || '', true, 'Английский (по умолчанию)') + '</select>') +
+      promoField('Статус', '<select name="status">' + promoOptions(['active', 'paused', 'finished'], LIB.PROMO_STATUS_RU, c.status) + '</select>') +
+      promoField('Рекламный бюджет', '<input name="budget" inputmode="decimal" value="' + esc(c.budget == null ? '' : c.budget) + '">') +
+      promoField('Валюта', '<select name="currency">' + promoOptions(LIB.PROMO_CURRENCIES, function (x) { return x; }, c.currency || 'NOK') + '</select>') +
+      promoField('Начало', '<input type="date" name="starts_on" value="' + esc(c.starts_on || '') + '">') +
+      promoField('Окончание', '<input type="date" name="ends_on" value="' + esc(c.ends_on || '') + '">') +
+      '<div class="ow-ft-actions"><button class="ow-btn ow-btn-primary" type="submit"' + (promoState().busy ? ' disabled' : '') + '>' + et(isNew ? 'Создать кампанию' : 'Сохранить') + '</button>' +
+      '<button class="ow-btn" type="button" data-pr-close>' + et('Отмена') + '</button>' +
+      (!isNew && !(c.links || []).length && !(c.spend_entries || []).length ? '<button class="ow-btn" type="button" data-pr-delete="' + esc(c.id) + '">' + et('Удалить черновик') + '</button>' : '') +
+      '</div></form>';
+  }
+  function promoSheetHtml() {
+    var ps = promoState();
+    var s = ps.sheet || {};
+    var d = promoData() || {};
+    var counting = d.click_counting === true;
+    var msg = ps.msg ? '<div class="ow-ft-msg ' + (ps.msg.ok ? 'ok' : 'bad') + '" role="status">' + esc(ps.msg.text()) + '</div>' : '';
+    var close = '<button class="ow-btn" type="button" data-pr-close style="float:right">' + et('Закрыть') + '</button>';
+    if (s.mode === 'new') return '<div class="ow-sheet-in">' + close + '<h3>' + et('Новая кампания') + '</h3>' + msg + promoForm(null) + '</div>';
+    var c = promoCampaign(s.id);
+    if (!c) return '<div class="ow-sheet-in">' + close + '<div class="ow-empty">' + et('Кампания не найдена — обновите раздел.') + '</div></div>';
+    if (s.mode === 'edit') return '<div class="ow-sheet-in">' + close + '<h3>' + esc(c.name) + '</h3>' + msg + promoForm(c) + '</div>';
+    var m = LIB.promoMetrics(c, counting);
+    var cfg = W.LOTO_COMMERCIAL_CONFIG || {};
+    var html = '<div class="ow-sheet-in">' + close +
+      '<h3>' + esc(c.name) + '</h3><div class="ow-card-s">' + esc(label(LIB.PROMO_PLATFORM_RU, c.platform)) + ' · ' +
+      esc(t(c.kind === 'paid' ? 'Платная реклама' : 'Бесплатная публикация')) + ' · ' + esc(label(LIB.PROMO_STATUS_RU, c.status)) +
+      ' · <code data-i18n-ignore>utm_campaign=' + esc(c.slug) + '</code> · ' + esc(LIB.routeLabel(c.target_route)) +
+      (c.budget != null ? ' · ' + et('бюджет {{0}}', money(c.budget, c.currency)) : '') + '</div>' +
+      (c.description ? '<p>' + esc(c.description) + '</p>' : '') + msg +
+      '<div class="ow-ft-actions"><button class="ow-btn" type="button" data-pr-edit="' + esc(c.id) + '">' + et('Изменить кампанию') + '</button></div>' +
+      '<div class="ow-cards ow-pr-cards">' +
+        card('Переходы', counting ? num(m.clicks) : '<span class="ow-kpi-none">' + et('не считаются') + '</span>',
+          counting ? et('повторные: {{0}} · предпросмотры: {{1}} · боты: {{2}} · подозрительные: {{3}}', num(c.clicks.repeat), num(c.clicks.preview), num(c.clicks.bot), num(c.clicks.suspicious)) : '', 'promoClicks') +
+        card('Сессии с согласием', num(c.sessions), et('людей: {{0}}', num(c.people)), 'promoSessions') +
+        card('Регистрации', num(c.registrations), et('по первому источнику'), 'promoConversions') +
+        card('Покупки', num(c.purchases), (c.revenue || []).length ? et('выручка: {{0}}', moneyList(c.revenue)) : '', 'promoConversions') +
+        card('Расходы за период', promoMoney(c.spend), et('всего: {{0}}', moneyList(c.spend_all_time) || '—'), 'promoSpend') +
+        card('CPC', promoPer(m, 'cpc'), et('расходы ÷ переходы'), 'promoMetrics') +
+        card('Цена сессии', promoPer(m, 'perSession'), et('расходы ÷ сессии с согласием'), 'promoMetrics') +
+        card('Цена регистрации (CPA)', promoPer(m, 'perRegistration'), et('расходы ÷ регистрации'), 'promoMetrics') +
+        card('Цена покупки', promoPer(m, 'perPurchase'), et('расходы ÷ покупки'), 'promoMetrics') +
+        card('Конверсия', promoRate(m.registrationRate), et('регистрации ÷ переходы, нижняя граница'), 'promoMetrics') +
+        card('ROAS', promoRoas(m), et('выручка ÷ расходы, в одной валюте'), 'promoMetrics') +
+      '</div>';
+    // links
+    html += '<div class="ow-block"><div class="ow-block-h">' + et('Ссылки для публикаций') + how('promoLinks') + '</div>' +
+      ((c.links || []).length ? (c.links || []).map(function (l) {
+        var urls = LIB.promoLinks(l.slug, cfg.supabaseUrl);
+        var k = l.clicks || {};
+        return '<div class="ow-pr-link' + (l.status === 'disabled' ? ' is-off' : '') + '">' +
+          '<div><b>' + esc(l.label) + '</b> <span class="ow-status-chip">' + esc(label(LIB.PROMO_STATUS_RU, l.status)) + '</span>' +
+          (l.target_route ? ' <span class="ow-card-s">' + esc(LIB.routeLabel(l.target_route)) + '</span>' : '') + '</div>' +
+          '<div class="ow-pr-url"><input readonly value="' + esc(urls.page) + '" data-i18n-ignore aria-label="' + et('Ссылка для публикации') + '">' +
+          '<button class="ow-btn" type="button" data-pr-copy="' + esc(urls.page) + '">' + et('Копировать') + '</button></div>' +
+          '<div class="ow-card-s">' + (counting ? et('переходы: {{0}} · повторные: {{1}} · предпросмотры: {{2}} · боты и подозрительные: {{3}}', num(k.human), num(k.repeat), num(k.preview), num((+k.bot || 0) + (+k.suspicious || 0))) + ' · ' : '') +
+          et('сессии с согласием: {{0}}', num(l.sessions)) + ' · <code data-i18n-ignore>utm_content=' + esc(l.slug) + '</code></div>' +
+          '<div class="ow-ft-actions"><button class="ow-btn" type="button" data-pr-link-toggle="' + esc(l.id) + '">' + et(l.status === 'disabled' ? 'Включить ссылку' : 'Отключить ссылку') + '</button>' +
+          '<button class="ow-btn" type="button" data-pr-copy="' + esc(urls.short) + '">' + et('Копировать короткую') + '</button></div></div>';
+      }).join('') : '<div class="ow-empty">' + et('Ссылок пока нет. Добавьте ссылку для каждой публикации — так будет видно, какая работает лучше.') + '</div>') +
+      '<form class="ow-pr-form" data-pr-form="link" data-campaign="' + esc(c.id) + '" novalidate>' +
+        promoField('Название ссылки (например, post-1)', '<input name="label" maxlength="80" required data-pr-link-label>') +
+        promoField('Код ссылки', '<input name="slug" maxlength="31" required data-pr-link-slug data-i18n-ignore value="">') +
+        promoField('Своя целевая страница', '<select name="target_route">' + promoOptions(LIB.PROMO_ROUTES, LIB.routeLabel, '', true, 'Как у кампании') + '</select>') +
+        '<div class="ow-ft-actions"><button class="ow-btn ow-btn-primary" type="submit"' + (ps.busy ? ' disabled' : '') + '>' + et('Добавить ссылку') + '</button></div>' +
+      '</form></div>';
+    // spend
+    html += '<div class="ow-block"><div class="ow-block-h">' + et('Рекламные расходы') + how('promoSpend') + '</div>' +
+      table([
+        { title: 'Дата', key: 'spent_on' },
+        { title: 'Сумма', key: 'amount', numeric: true, html: function (r) { return esc(money(r.amount, r.currency)); } },
+        { title: 'Заметка', key: 'note', html: function (r) { return esc(r.note || ''); } },
+        { title: '', key: 'id', html: function (r) { return '<button class="ow-btn" type="button" data-pr-spend-delete="' + esc(r.id) + '">' + et('Удалить') + '</button>'; } }
+      ], c.spend_entries || [], 'Расходов пока нет') +
+      '<form class="ow-pr-form" data-pr-form="spend" data-campaign="' + esc(c.id) + '" novalidate>' +
+        promoField('Дата', '<input type="date" name="spent_on" required value="' + esc(LIB.todayYMD ? LIB.todayYMD('Europe/Oslo') : '') + '">') +
+        promoField('Сумма', '<input name="amount" inputmode="decimal" required>') +
+        promoField('Валюта', '<select name="currency">' + promoOptions(LIB.PROMO_CURRENCIES, function (x) { return x; }, c.currency || 'NOK') + '</select>') +
+        promoField('Заметка', '<input name="note" maxlength="200">') +
+        '<div class="ow-ft-actions"><button class="ow-btn ow-btn-primary" type="submit"' + (ps.busy ? ' disabled' : '') + '>' + et('Добавить расход') + '</button></div>' +
+      '</form><div class="ow-card-s">' + et('Валюты не пересчитываются: курсы не выдумываются, поэтому расходы и показатели видны в той валюте, в которой внесены.') + '</div></div>';
+    return html + '</div>';
+  }
+  function openPromoSheet(mode, id) {
+    var ps = promoState();
+    ps.sheet = { mode: mode, id: id || null };
+    ps.msg = null;
+    var sheet = openSheet(promoSheetHtml, function () { return t('Кампания'); });
+    sheet.addEventListener('click', function (event) { if (event.target === sheet) closePromoSheet(); });
+  }
+  function closePromoSheet() {
+    var ps = promoState();
+    ps.sheet = null; ps.msg = null;
+    var sheet = ovEl.querySelector('#ow-sheet'); if (sheet) sheet.remove();
+  }
+  // A repaint after a refusal must not wipe what the owner typed: the open forms keep their values
+  // (and the «edited by hand» marks of the code fields). After a successful save they start clean.
+  function repaintPromoSheet(clean) {
+    var sheet = ovEl.querySelector('#ow-sheet');
+    if (!sheet || !sheet.__render || !promoState().sheet) return;
+    var kept = {};
+    if (!clean) Array.prototype.forEach.call(sheet.querySelectorAll('form[data-pr-form]'), function (form) {
+      var key = form.getAttribute('data-pr-form') + ':' + (form.getAttribute('data-id') || form.getAttribute('data-campaign') || '');
+      kept[key] = {};
+      Array.prototype.forEach.call(form.elements, function (el) { if (el.name) kept[key][el.name] = [el.value, el.getAttribute('data-touched')]; });
+    });
+    sheet.__render();
+    Array.prototype.forEach.call(sheet.querySelectorAll('form[data-pr-form]'), function (form) {
+      var values = kept[form.getAttribute('data-pr-form') + ':' + (form.getAttribute('data-id') || form.getAttribute('data-campaign') || '')];
+      if (!values) return;
+      Array.prototype.forEach.call(form.elements, function (el) {
+        if (!el.name || !values[el.name]) return;
+        el.value = values[el.name][0];
+        if (values[el.name][1]) el.setAttribute('data-touched', values[el.name][1]);
+      });
+    });
+  }
+  // One mutation at a time: the request, then the report again, then the sheet with fresh numbers.
+  async function promoMutate(op, payload, after) {
+    var ps = promoState();
+    if (ps.busy) return;
+    ps.busy = true;
+    repaintPromoSheet();
+    try {
+      var result = await api({ promo: { op: op, payload: payload } });
+      ps.busy = false;
+      if (after) after(result || {});
+      var keep = ps.sheet, msg = ps.msg;
+      state.data.promotion = null;
+      await show('promotion');
+      if (keep && (keep.mode !== 'view' || promoCampaign(keep.id))) {
+        ps.sheet = keep; ps.msg = msg;
+        if (!ovEl.querySelector('#ow-sheet')) openSheet(promoSheetHtml, function () { return t('Кампания'); });
+        repaintPromoSheet(true);
+      }
+    } catch (error) {
+      ps.busy = false;
+      var code = (error && error.detail) || '';
+      ps.msg = { ok: false, text: function () { return PROMO_ERROR_RU[code] ? t(PROMO_ERROR_RU[code]) : t('Не сохранено.') + ' ' + errorText(error); } };
+      repaintPromoSheet();
+    }
+  }
+  function formValues(form) {
+    var out = {};
+    Array.prototype.forEach.call(form.elements, function (el) { if (el.name) out[el.name] = String(el.value || '').trim(); });
+    return out;
+  }
+  // Money typed the local way («12,50») is sent the database way («12.50»).
+  function promoAmount(text) { return String(text || '').replace(/\s/g, '').replace(',', '.'); }
+  function promoSubmit(form) {
+    var kind = form.getAttribute('data-pr-form');
+    var v = formValues(form);
+    var ps = promoState();
+    if (kind === 'campaign') {
+      var id = form.getAttribute('data-id');
+      if (!id && !LIB.promoSlugValid(v.slug)) { ps.msg = { ok: false, text: function () { return t(PROMO_ERROR_RU.invalid_slug); } }; repaintPromoSheet(); return; }
+      var payload = { name: v.name, platform: v.platform, kind: v.kind, description: v.description, target_route: v.target_route,
+        target_locale: v.target_locale, status: v.status, budget: promoAmount(v.budget), currency: v.budget ? v.currency : '', starts_on: v.starts_on, ends_on: v.ends_on };
+      if (id) payload.id = id; else payload.slug = v.slug;
+      promoMutate('campaign_save', payload, function (r) {
+        ps.sheet = { mode: 'view', id: r.id || id };
+        ps.msg = { ok: true, text: function () { return t(id ? 'Кампания сохранена.' : 'Кампания создана. Добавьте ссылку для первой публикации.'); } };
+      });
+    } else if (kind === 'link') {
+      if (!LIB.promoSlugValid(v.slug)) { ps.msg = { ok: false, text: function () { return t(PROMO_ERROR_RU.invalid_slug); } }; repaintPromoSheet(); return; }
+      promoMutate('link_save', { campaign_id: form.getAttribute('data-campaign'), label: v.label, slug: v.slug, target_route: v.target_route }, function () {
+        ps.msg = { ok: true, text: function () { return t('Ссылка добавлена — скопируйте её и опубликуйте.'); } };
+      });
+    } else if (kind === 'spend') {
+      promoMutate('spend_add', { campaign_id: form.getAttribute('data-campaign'), spent_on: v.spent_on, amount: promoAmount(v.amount), currency: v.currency, note: v.note }, function () {
+        ps.msg = { ok: true, text: function () { return t('Расход добавлен.'); } };
+      });
+    }
+  }
+  function promoCopy(text, button) {
+    var done = function () { var was = button.textContent; button.textContent = t('Скопировано'); setTimeout(function () { button.textContent = was; }, 1600); };
+    try {
+      if (W.navigator && W.navigator.clipboard && W.navigator.clipboard.writeText) { W.navigator.clipboard.writeText(text).then(done, function () { fallback(); }); return; }
+    } catch (e) {}
+    fallback();
+    function fallback() {
+      var input = button.parentNode && button.parentNode.querySelector('input');
+      if (input && input.value === text) { input.focus(); input.select(); }
+      try { D.execCommand('copy'); done(); } catch (e) {}
+    }
+  }
+  function wirePromotion() {
+    ovEl.addEventListener('click', function (event) {
+      if (state.section !== 'promotion') return;
+      var t0 = event.target;
+      if (t0.closest('[data-how]')) return;
+      var ps = promoState();
+      if (t0.closest('[data-pr-sources]')) { ps.allSources = !ps.allSources; render(); return; }
+      if (t0.closest('[data-pr-finished]')) { ps.showFinished = !ps.showFinished; render(); return; }
+      if (t0.closest('[data-pr-gsc]')) { loadGsc(true); return; }
+      if (t0.closest('[data-pr-new]')) { openPromoSheet('new'); return; }
+      if (t0.closest('[data-pr-close]')) { closePromoSheet(); return; }
+      var edit = t0.closest('[data-pr-edit]');
+      if (edit) { ps.sheet = { mode: 'edit', id: edit.getAttribute('data-pr-edit') }; ps.msg = null; repaintPromoSheet(); return; }
+      var copy = t0.closest('[data-pr-copy]');
+      if (copy) { promoCopy(copy.getAttribute('data-pr-copy'), copy); return; }
+      var del = t0.closest('[data-pr-delete]');
+      if (del) { promoMutate('campaign_delete', { id: del.getAttribute('data-pr-delete') }, function () { ps.sheet = null; ps.msg = { ok: true, text: function () { return t('Черновик удалён.'); } }; }); closePromoSheet(); return; }
+      var spendDel = t0.closest('[data-pr-spend-delete]');
+      if (spendDel) { promoMutate('spend_delete', { id: spendDel.getAttribute('data-pr-spend-delete') }, function () { ps.msg = { ok: true, text: function () { return t('Расход удалён.'); } }; }); return; }
+      var toggle = t0.closest('[data-pr-link-toggle]');
+      if (toggle) {
+        var c = promoCampaign(ps.sheet && ps.sheet.id);
+        var l = c && (c.links || []).filter(function (x) { return x.id === toggle.getAttribute('data-pr-link-toggle'); })[0];
+        if (l) promoMutate('link_save', { id: l.id, label: l.label, target_route: l.target_route || '', target_locale: l.target_locale || '', status: l.status === 'disabled' ? 'active' : 'disabled' }, function () {
+          ps.msg = { ok: true, text: function () { return t(l.status === 'disabled' ? 'Ссылка включена.' : 'Ссылка отключена: она ведёт на главную страницу без меток и не считается.'); } };
+        });
+        return;
+      }
+      var row = t0.closest('#ow-b-pr-campaigns tr.ow-click');
+      if (row) {
+        var d = promoData() || {};
+        var list = (d.campaigns || []).filter(function (c) { return ps.showFinished || c.status !== 'finished'; });
+        var picked = list[+row.getAttribute('data-row')];
+        if (picked) openPromoSheet('view', picked.id);
+      }
+    });
+    ovEl.addEventListener('submit', function (event) {
+      var form = event.target.closest && event.target.closest('form[data-pr-form]');
+      if (!form) return;
+      event.preventDefault();
+      promoSubmit(form);
+    });
+    // A code suggestion follows the name until the owner types his own.
+    ovEl.addEventListener('input', function (event) {
+      var el = event.target;
+      if (el.hasAttribute && el.hasAttribute('data-pr-slug')) { el.setAttribute('data-touched', '1'); return; }
+      if (el.hasAttribute && el.hasAttribute('data-pr-link-slug')) { el.setAttribute('data-touched', '1'); return; }
+      var form = el.closest && el.closest('form[data-pr-form]');
+      if (!form) return;
+      if (el.hasAttribute('data-pr-slug-source')) {
+        var slug = form.querySelector('[data-pr-slug]');
+        if (slug && !slug.getAttribute('data-touched')) slug.value = LIB.promoSlug(el.value);
+      }
+      if (el.hasAttribute('data-pr-link-label')) {
+        var linkSlug = form.querySelector('[data-pr-link-slug]');
+        var c = promoCampaign(form.getAttribute('data-campaign'));
+        if (linkSlug && !linkSlug.getAttribute('data-touched')) linkSlug.value = LIB.promoSlug((c ? c.slug + '-' : '') + el.value);
+      }
+    });
+  }
+
   var RENDERERS = {
+    promotion: renderPromotion,
     activity: renderActivity, day: renderDay, journey: renderJourney, usage: renderUsage, overview: renderOverview, live: renderLive, people: renderPeople, households: renderHouseholds,
     devices: renderDevices, sessions: renderSessions, acquisition: renderAcquisition, geography: renderGeography,
     map: renderMap, games: renderGames, features: renderFeatures, funnels: renderFunnels,
@@ -3193,6 +3735,7 @@
       }
     });
     wireActivity();
+    wirePromotion();
     ovEl.querySelector('#ow-content').addEventListener('change', function (event) {
       if (event.target.id === 'ow-kind') {
         state.peopleKind = event.target.value;

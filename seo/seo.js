@@ -79,4 +79,31 @@
     go.addEventListener('click', run);
     game.addEventListener('change', function () { out.textContent = ''; if (saved) saved.hidden = true; });
   });
+
+  // Where the visitor came from, handed to the app. These pages run no analytics, so a visit that
+  // reached Google → this page → the app arrived there with an internal referrer and no source. The
+  // links into the app now carry the referrer's HOST (`ref`, never a path or a query) and any campaign
+  // tags this page was opened with. Nothing is stored and nothing is sent: the app reads them only
+  // with analytics consent (analytics-telemetry.js LANDING) and takes `ref` off its address bar.
+  (function handOver() {
+    var pass = [];
+    try {
+      var ref = document.referrer ? new URL(document.referrer) : null;
+      var host = ref && /^https?:$|^android-app:$/.test(ref.protocol) ? ref.hostname.toLowerCase() : '';
+      if (host && host !== location.hostname.toLowerCase()) pass.push(['ref', host]);
+      var own = new URLSearchParams(location.search);
+      ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(function (k) {
+        var v = own.get(k);
+        if (v) pass.push([k, v.slice(0, 100)]);
+      });
+    } catch (_e) { return; }
+    if (!pass.length) return;
+    Array.prototype.forEach.call(document.querySelectorAll('a[href^="/"]'), function (a) {
+      var url;
+      try { url = new URL(a.getAttribute('href'), location.origin); } catch (_e) { return; }
+      if (url.pathname !== '/' && url.pathname !== '/index.html') return;   // only links into the app
+      pass.forEach(function (p) { if (!url.searchParams.has(p[0])) url.searchParams.set(p[0], p[1]); });
+      a.setAttribute('href', url.pathname + url.search + url.hash);
+    });
+  })();
 })();

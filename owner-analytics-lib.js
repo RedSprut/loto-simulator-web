@@ -614,7 +614,109 @@
     return formatMoney(d, row.currency) + (shares.length ? ' (' + shares.join(' + ') + ')' : '');
   }
 
+  // ── «Источники и продвижение» (2026-10-23, migration 202610230074) ────────────────────────────
+  // Source groups of public.analytics_source_group, in the order the panel lists them.
+  var SOURCE_GROUP_ORDER = ['google', 'bing', 'duckduckgo', 'yahoo', 'reddit', 'instagram', 'facebook', 'tiktok', 'youtube',
+    'linkedin', 'x', 'other_search', 'other_social', 'other_sites', 'email', 'own_campaign', 'direct', 'unknown'];
+  var SOURCE_GROUP_RU = {
+    google: 'Google', bing: 'Bing', duckduckgo: 'DuckDuckGo', yahoo: 'Yahoo', reddit: 'Reddit', instagram: 'Instagram',
+    facebook: 'Facebook', tiktok: 'TikTok', youtube: 'YouTube', linkedin: 'LinkedIn', x: 'X / Twitter',
+    other_search: 'Другие поисковые системы', other_social: 'Другие социальные сети', other_sites: 'Другие сайты',
+    email: 'Email', own_campaign: 'Собственные кампании', direct: 'Прямой / источник не передан', unknown: 'Неизвестно',
+    no_attribution: 'Атрибуция неизвестна'
+  };
+  var PROMO_PLATFORMS = ['reddit', 'instagram', 'facebook', 'tiktok', 'youtube', 'linkedin', 'x', 'google', 'email', 'other'];
+  var PROMO_PLATFORM_RU = {
+    reddit: 'Reddit', instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok', youtube: 'YouTube', linkedin: 'LinkedIn',
+    x: 'X / Twitter', google: 'Google Ads', email: 'Email-рассылка', other: 'Другая площадка'
+  };
+  var PROMO_STATUS_RU = { active: 'Активна', paused: 'Приостановлена', finished: 'Завершена', disabled: 'Отключена' };
+  var CLICK_CLASS_RU = { human: 'Переходы', repeat: 'Повторные', preview: 'Предпросмотры ссылок', bot: 'Боты', suspicious: 'Подозрительные' };
+  var PROMO_CURRENCIES = ['NOK', 'EUR', 'USD'];
+  // The fixed targets — identical to PROMO_ROUTES in supabase/functions/_shared/promo.ts and to
+  // public.promo_route_valid (tests/promotion-analytics.mjs compares the three).
+  var PROMO_ROUTES = [
+    'home',
+    'game:lotto', 'game:viking', 'game:euro', 'game:powerball', 'game:mega', 'game:euromillions', 'game:superenalotto', 'game:lottomax', 'game:powerballau',
+    'page:generator', 'page:statistics', 'page:results',
+    'lottery:norsk-lotto', 'lottery:vikinglotto', 'lottery:eurojackpot', 'lottery:powerball', 'lottery:mega-millions', 'lottery:euromillions',
+    'lottery:superenalotto', 'lottery:lotto-max', 'lottery:powerball-australia'
+  ];
+  var PROMO_LOCALES = ['en', 'da', 'de', 'es', 'et', 'fi', 'fr', 'it', 'lt', 'lv', 'nl', 'no', 'pl', 'pt', 'ru', 'sv', 'uk'];
+  var ROUTE_GAME = { lotto: 'Norsk Lotto', viking: 'Vikinglotto', euro: 'Eurojackpot', powerball: 'Powerball', mega: 'Mega Millions',
+    euromillions: 'EuroMillions', superenalotto: 'SuperEnalotto', lottomax: 'Lotto Max', powerballau: 'Powerball Australia' };
+  var ROUTE_LOTTERY = { 'norsk-lotto': 'Norsk Lotto', vikinglotto: 'Vikinglotto', eurojackpot: 'Eurojackpot', powerball: 'Powerball',
+    'mega-millions': 'Mega Millions', euromillions: 'EuroMillions', superenalotto: 'SuperEnalotto', 'lotto-max': 'Lotto Max', 'powerball-australia': 'Powerball Australia' };
+  function routeLabel(route) {
+    var parts = String(route || 'home').split(':');
+    if (parts[0] === 'game' && ROUTE_GAME[parts[1]]) return tr('Приложение: {{0}}', ROUTE_GAME[parts[1]]);
+    if (parts[0] === 'page') return parts[1] === 'generator' ? tr('Страница генератора чисел') : parts[1] === 'statistics' ? tr('Страница статистики') : tr('Страница результатов');
+    if (parts[0] === 'lottery' && ROUTE_LOTTERY[parts[1]]) return tr('Страница лотереи: {{0}}', ROUTE_LOTTERY[parts[1]]);
+    return tr('Главная страница приложения');
+  }
+  // A slug is what utm_campaign / utm_content carry: lowercase latin, digits and single hyphens, ≤ 31.
+  function promoSlugValid(slug) {
+    return typeof slug === 'string' && /^[a-z0-9](?:[a-z0-9-]{0,29}[a-z0-9])?$/.test(slug) && !/\d{9,}/.test(slug) && slug.indexOf('--') < 0;
+  }
+  var TRANSLIT = { а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', е: 'e', ё: 'e', ж: 'zh', з: 'z', и: 'i', й: 'y', к: 'k', л: 'l', м: 'm', н: 'n',
+    о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f', х: 'h', ц: 'c', ч: 'ch', ш: 'sh', щ: 'sch', ъ: '', ы: 'y', ь: '', э: 'e', ю: 'yu', я: 'ya',
+    æ: 'ae', ø: 'o', å: 'a', ä: 'a', ö: 'o', ü: 'u', ß: 'ss' };
+  function promoSlug(text) {
+    var s = String(text || '').replace(/№/g, ' ').toLowerCase().split('').map(function (ch) { return TRANSLIT[ch] != null ? TRANSLIT[ch] : ch; }).join('');
+    try { s = s.normalize('NFKD').replace(/[̀-ͯ]/g, ''); } catch (e) {}
+    s = s.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').replace(/\d{9,}/g, function (d) { return d.slice(0, 8); });
+    s = s.slice(0, 31).replace(/-+$/g, '');
+    return s;
+  }
+  // The links the owner publishes. The page link is the one to post (a normal 200 page with the
+  // site's own preview card); the direct link skips that page and is the server redirect itself.
+  function promoLinks(slug, supabaseUrl) {
+    var base = String(supabaseUrl || '').replace(/\/+$/, '');
+    return {
+      page: 'https://lottosimulator.app/go/?l=' + encodeURIComponent(slug),
+      short: 'https://lottosimulator.app/go/' + encodeURIComponent(slug),
+      direct: base ? base + '/functions/v1/go/' + encodeURIComponent(slug) : ''
+    };
+  }
+  // Advertising efficiency of one campaign from the report row. Money stays in its own currency:
+  // every ratio is computed per spend currency, ROAS only where revenue exists in that same currency.
+  // Clicks exist only when the server counts them (countClicks); without them the click-based figures
+  // are null — never 0 — and the session-based ones (consented visitors only) remain.
+  function promoMetrics(c, countClicks) {
+    var clicks = countClicks && c && c.clicks ? +c.clicks.human || 0 : null;
+    var sessions = c ? +c.sessions || 0 : 0;
+    var regs = c ? +c.registrations || 0 : 0;
+    var buys = c ? +c.purchases || 0 : 0;
+    var revenue = {};
+    ((c && c.revenue) || []).forEach(function (r) { if (r && r.currency && isFinite(+r.amount)) revenue[r.currency] = (revenue[r.currency] || 0) + +r.amount; });
+    var per = ((c && c.spend) || []).filter(function (s) { return s && s.currency && +s.amount > 0; }).map(function (s) {
+      var amount = +s.amount;
+      var sameRevenue = revenue[s.currency];
+      return {
+        currency: s.currency, spend: amount,
+        cpc: clicks ? amount / clicks : null,
+        perSession: sessions ? amount / sessions : null,
+        perRegistration: regs ? amount / regs : null,
+        perPurchase: buys ? amount / buys : null,
+        roas: sameRevenue != null ? sameRevenue / amount : null,
+        roasMismatch: sameRevenue == null && Object.keys(revenue).length > 0
+      };
+    });
+    return {
+      clicks: clicks, sessions: sessions, registrations: regs, purchases: buys,
+      // lower bounds: people without consent are never linked to the campaign
+      registrationRate: clicks ? regs / clicks : null,
+      purchaseRate: clicks ? buys / clicks : null,
+      sessionRate: clicks ? sessions / clicks : null,
+      spendCurrencies: per.length, perCurrency: per, revenue: revenue
+    };
+  }
+
   return {
+    SOURCE_GROUP_ORDER: SOURCE_GROUP_ORDER, SOURCE_GROUP_RU: SOURCE_GROUP_RU, PROMO_PLATFORMS: PROMO_PLATFORMS, PROMO_PLATFORM_RU: PROMO_PLATFORM_RU,
+    PROMO_STATUS_RU: PROMO_STATUS_RU, CLICK_CLASS_RU: CLICK_CLASS_RU, PROMO_CURRENCIES: PROMO_CURRENCIES, PROMO_ROUTES: PROMO_ROUTES,
+    PROMO_LOCALES: PROMO_LOCALES, routeLabel: routeLabel, promoSlugValid: promoSlugValid, promoSlug: promoSlug, promoLinks: promoLinks,
+    promoMetrics: promoMetrics,
     osloRange: osloRange, forecast: forecast, pctChange: pctChange,
     COUNTRY_RU: COUNTRY_RU, countryNameRu: countryNameRu, countryName: countryName, countryList: countryList,
     range: range, ZONES: ZONES, formatDuration: formatDuration, csv: csv, confidence: confidence,
