@@ -128,7 +128,18 @@ body.loto-onboarding-open .busy-ov{-webkit-backdrop-filter:none;backdrop-filter:
 .rows-ready-t b{font:800 14px 'Manrope',sans-serif}
 .rows-ready-t span{color:var(--sub2);font-size:12.5px;line-height:1.35}
 .rows-ready-go{flex:none;color:var(--gold-ink);font-size:20px;font-weight:900}
-/* The court's bulk actions are real calls to action, in both themes and every state. */
+/* «Ваши ряды готовы!» — a finished set in the same place: its two next steps, side by side where
+   they fit (each at least 44 px tall), stacked under the title on a phone. */
+.rows-done{flex-wrap:wrap;cursor:default}
+.rows-done-btns{display:flex;flex:1 1 100%;flex-wrap:wrap;gap:8px}
+.rows-done-btn{position:relative;isolation:isolate;flex:1 1 200px;min-height:44px;padding:9px 12px;border:1px solid color-mix(in srgb,var(--gold) 65%,transparent);border-radius:14px;background:linear-gradient(150deg,var(--bg2),var(--bg3));color:var(--fg);font:800 13px/1.25 'Manrope',sans-serif;text-align:center;cursor:pointer;touch-action:manipulation}
+.rows-done-btn:focus-visible{outline:3px solid var(--gold-ink);outline-offset:3px}
+.rows-done-btn.pro-next-glow::before{border-radius:14px}.rows-done-btn.pro-next-glow::after{border-radius:20px}
+/* The feedback dialog's ✕, shown only for a dialog that may simply be closed. */
+.fb-box{position:relative}
+.fb-x{position:absolute;top:8px;right:8px;width:44px;height:44px;border:0;border-radius:12px;background:var(--bg3);color:var(--fg);font-size:16px;font-weight:900;cursor:pointer}
+.fb-x[hidden]{display:none}
+.fb-x:focus-visible{outline:3px solid var(--gold-ink);outline-offset:2px}/* The court's bulk actions are real calls to action, in both themes and every state. */
 .ct-cta{min-height:48px;padding:11px 16px;border:2px solid var(--gold);border-radius:14px;background:color-mix(in srgb,var(--gold) 16%,var(--bg2));color:var(--fg);font:800 14px/1.3 'Manrope',sans-serif;cursor:pointer;box-shadow:0 3px 12px color-mix(in srgb,var(--gold) 22%,transparent);transition:background-color .15s,box-shadow .15s,transform .1s;touch-action:manipulation}
 .ct-cta:hover{background:color-mix(in srgb,var(--gold) 27%,var(--bg2));box-shadow:0 4px 16px color-mix(in srgb,var(--gold) 32%,transparent)}
 .ct-cta:active{transform:translateY(1px);background:color-mix(in srgb,var(--gold) 36%,var(--bg2));box-shadow:none}
