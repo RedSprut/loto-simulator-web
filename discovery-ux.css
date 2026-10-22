@@ -55,7 +55,7 @@
 /* «Как это работает?» — replays the walkthrough (Home + About). */
 .mine-tall{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px 12px}
 .mine-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.guide-intro:before{content:"★"}
+.guide-replay.guide-intro:before{content:"★"}
 /* Home «Приветствие»: the cosmic splash again, in its manual mode (cosmos-ui.js, the About entry's handler). */
 .guide-replay.guide-cosmos:before{content:"✦"}
 .favorite-combos-card{scroll-margin-top:96px}
