@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-22T10:36:49.517Z",
-    "sourceFetchedAt": "2026-10-22T10:36:49.517Z",
+    "generatedAt": "2026-10-22T13:59:55.045Z",
+    "sourceFetchedAt": "2026-10-22T13:59:55.045Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "34bfd8462a2b8d41",
     "updatedAt": "2026-10-22",
@@ -82,7 +82,7 @@
       "superEnalotto": {
         "status": "ok",
         "source": "National-Lottery.com / Lottologia",
-        "fetched": 3364,
+        "fetched": 4287,
         "merged": 4287
       },
       "lottoMax": {
