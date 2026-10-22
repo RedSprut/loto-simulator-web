@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-21",
+  "updatedAt": "2026-10-22",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
@@ -100081,7 +100081,7 @@
         "date": "2026-10-20",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 59,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -100162,14 +100162,14 @@
             "winners": 732141
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-10-16",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 49.7,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -100250,14 +100250,14 @@
             "winners": 1084418
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-10-13",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 37.7,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -100338,14 +100338,14 @@
             "winners": 741148
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-10-09",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 28.8,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -100426,14 +100426,14 @@
             "winners": 968094
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-10-06",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 17,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -100514,14 +100514,14 @@
             "winners": 649412
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-10-02",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 28.9,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -100602,14 +100602,14 @@
             "winners": 1142046
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-09-29",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 17,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -100690,14 +100690,14 @@
             "winners": 833478
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-09-25",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 130,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -100778,14 +100778,14 @@
             "winners": 1815929
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-09-22",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 37.6,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -100866,14 +100866,14 @@
             "winners": 810873
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-09-18",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 28.4,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -100954,14 +100954,14 @@
             "winners": 976806
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-09-15",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 17,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -101042,14 +101042,14 @@
             "winners": 810916
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-09-11",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 111.5,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -101130,14 +101130,14 @@
             "winners": 1276869
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-09-08",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 98.7,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -101218,14 +101218,14 @@
             "winners": 962587
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-09-04",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 89.3,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -101306,14 +101306,14 @@
             "winners": 1279265
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-09-01",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 0,
+        "jackpot": 78.1,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -101394,8 +101394,8 @@
             "winners": 810885
           }
         ],
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
       },
       {
         "date": "2026-08-28",
