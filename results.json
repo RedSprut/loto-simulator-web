@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-24T08:25:40.491Z",
-    "sourceFetchedAt": "2026-10-24T08:25:40.491Z",
+    "generatedAt": "2026-10-24T09:03:40.904Z",
+    "sourceFetchedAt": "2026-10-24T09:03:40.904Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "8dbe756878c703fc",
     "updatedAt": "2026-10-24",
@@ -7940,13 +7940,70 @@
         "bonus": [
           5
         ],
-        "jackpot": null,
+        "jackpot": 433,
         "lotteryId": "megaMillions",
-        "source": "NY Open Data / Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings",
+        "source": "Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-10-23",
         "drawId": "2026-10-23T00:00:00.000",
         "ruleVersion": "mega-70-24",
-        "ruleEra": "current"
+        "ruleEra": "current",
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 433000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 2000000,
+            "winners": 0
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 20000,
+            "winners": 3
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 1000,
+            "winners": 172
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 400,
+            "winners": 420
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 20,
+            "winners": 9470
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 20,
+            "winners": 9484
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 14,
+            "winners": 73905
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 10,
+            "winners": 174789
+          }
+        ],
+        "currency": "USD"
       },
       {
         "date": "2026-10-20",
