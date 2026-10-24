@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-23",
+  "updatedAt": "2026-10-24",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
@@ -87809,7 +87809,7 @@
         "date": "2026-09-01",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 160,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87866,8 +87866,8 @@
             "winners": 137355
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-09-01"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2026-08-28",
@@ -106126,6 +106126,70 @@
     ],
     "lottoMax": [
       {
+        "date": "2026-10-23",
+        "lotteryId": "lottoMax",
+        "currency": "CAD",
+        "jackpot": 20,
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 of 7",
+            "prizeAmount": null,
+            "winners": 0
+          },
+          {
+            "match": "6+1",
+            "label": "6 of 7 + Bonus",
+            "prizeAmount": 97469.9,
+            "winners": 1
+          },
+          {
+            "match": "6+0",
+            "label": "6 of 7",
+            "prizeAmount": 6207.1,
+            "winners": 32
+          },
+          {
+            "match": "5+1",
+            "label": "5 of 7 + Bonus",
+            "prizeAmount": 956.2,
+            "winners": 135
+          },
+          {
+            "match": "5+0",
+            "label": "5 of 7",
+            "prizeAmount": 96.2,
+            "winners": 3013
+          },
+          {
+            "match": "4+1",
+            "label": "4 of 7 + Bonus",
+            "prizeAmount": 47.5,
+            "winners": 5076
+          },
+          {
+            "match": "4+0",
+            "label": "4 of 7",
+            "prizeAmount": 20,
+            "winners": 70555
+          },
+          {
+            "match": "3+1",
+            "label": "3 of 7 + Bonus",
+            "prizeAmount": 20,
+            "winners": 71429
+          },
+          {
+            "match": "3+0",
+            "label": "3 of 7",
+            "prizeAmount": null,
+            "winners": 718984
+          }
+        ],
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1281"
+      },
+      {
         "date": "2026-10-20",
         "lotteryId": "lottoMax",
         "currency": "CAD",
@@ -107025,7 +107089,7 @@
         "date": "2026-09-01",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -107083,7 +107147,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1266"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=1"
       },
       {
         "date": "2026-08-28",
