@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the dc08a99 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the d60c5eb placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-auto-20261024-tnf6if';
+const CACHE_VERSION='loto-shell-vd60c5eb';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -19,12 +19,12 @@ const CORE_PRECACHE=[
 // screen wait until loadCourtApp() gave up after 20s.
 
 const OPTIONAL_PRECACHE=[
-  './win-match-core.js','./smart-start.js','./court-core.js','./court-ui.js','./working-set.js','./worksets.js','./action-center.js','./free-welcome.js','./prize-archive.js','./leaders-ui.js','./calendar-core.js','./calendar-ui.js','./rec-core.js','./rec-analysis.js','./rec-ui.js','./math-tech.js','./math-tech.css','./cosmos-ui.js','./cosmos.css','./turnstile-runtime.js',
+  './win-match-core.js','./smart-start.js','./court-core.js','./court-ui.js','./working-set.js','./worksets.js','./action-center.js','./free-welcome.js','./prize-archive.js','./leaders-ui.js','./calendar-core.js','./calendar-ui.js','./rec-core.js','./rec-analysis.js','./rec-ui.js','./math-tech.js','./math-tech.css','./cosmos-ui.js','./cosmos.css','./jackpot-ceremony.js','./jackpot-ceremony.css','./turnstile-runtime.js',
   './safe-payment.html','./safe-payment-runtime.js','./auth-client.js','./native-bridge.js','./billing-web.js',
   './privacy.html','./terms.html','./subscription-terms.html','./legal.css','./legal-runtime.js',
   './jackpots.json','./prizes.json',
 ];
-const LOCALE_PARTS=new Set(['court','cosmos']);
+const LOCALE_PARTS=new Set(['court','cosmos','jackpot']);
 const SUPPORTED_LOCALES=new Set(['ru','en','no','sv','da','fi','de','fr','es','it','pt','pl','nl','et','lv','lt','uk']);
 const NEVER_CACHE=/(?:results-archive|\/functions\/v1\/|\/auth\/v1\/|pro-(?:analysis|compute)|access-state|consume-feature|start-trial|billing-(?:status|reconcile)|checkout|management|payment-return|revenuecat|paddle|token|session)/i;
 

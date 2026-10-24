@@ -58,6 +58,10 @@
 .guide-replay.guide-intro:before{content:"★"}
 /* Home «Приветствие»: the cosmic splash again, in its manual mode (cosmos-ui.js, the About entry's handler). */
 .guide-replay.guide-cosmos:before{content:"✦"}
+/* Home «Джекпот»: the entry to the DEMO ceremony (jackpot-ceremony.js). An outline trophy in the same
+   gold disc as its neighbours' signs, drawn in their ink — and nothing else: no glow, no pulse, so it
+   never reads as a win that already happened. */
+.guide-replay.guide-jackpot:before{content:"";background:var(--gold) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2328180A' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 3.5h10v5.5a5 5 0 0 1-10 0z'/%3E%3Cpath d='M7 5.5H4.2a2.8 2.8 0 0 0 3.3 4.3M17 5.5h2.8a2.8 2.8 0 0 1-3.3 4.3M12 14v3.5M8 20.5h8M9.5 17.5h5'/%3E%3C/svg%3E") center/14px 14px no-repeat}
 .favorite-combos-card{scroll-margin-top:96px}
 .favorite-combos-card.fw-landed{animation:fw-landed 1.6s ease-out}
 @keyframes fw-landed{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 70%,transparent)}100%{box-shadow:0 0 0 14px transparent}}
@@ -276,7 +280,7 @@ body.loto-onboarding-open .ws-ov{z-index:860}
 .attempts-chip[hidden]{display:none}
 .attempts-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
 .attempts-actions:empty,.attempts-actions:not(:has(:not([hidden]))){display:none}
-.attempts-others{border:0;padding:6px 2px;background:none;color:var(--gold-ink);font:800 12px/1.3 inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.attempts-others{border:0;min-height:40px;padding:6px 4px;background:none;color:var(--gold-ink);font:800 12px/1.3 inherit;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .attempts-others:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px}
 .attempts-summary{padding:18px;border:1px solid var(--gold-ink);border-radius:18px;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--gold) 16%,transparent),transparent 75%),var(--bg2);box-shadow:0 8px 28px color-mix(in srgb,var(--gold) 8%,transparent)}
 .attempts-summary[hidden],#home-attempts[hidden]{display:none}
