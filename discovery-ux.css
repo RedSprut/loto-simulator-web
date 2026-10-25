@@ -362,3 +362,84 @@ body.loto-onboarding-open .ws-ov{z-index:860}
 #prev-ov[data-exhausted="true"] [data-prev-attempts]{order:1}#prev-ov[data-exhausted="true"] [data-prev-free]{order:2}#prev-ov[data-exhausted="true"] [data-prev-buy]{order:3}
 .fw-stat b.seg{display:inline-flex;font-size:12px;color:var(--seg-on)}
 @media(max-width:420px){.seg.seg-md{--seg-h:28px}.seg.seg-lg{--seg-h:36px}}
+/* Home tool cards + simulator buttons + bottom bar: coloured by the selected lottery, through the game's
+   own tokens on body[data-game] (--hdr-a/b/c, --game-glow) — selLot() recolours live, a restart restores.
+   Tint = translucent theme surface over the game gradient (padding-box); border = that gradient
+   (border-box). Text centred on the card: equal side padding, the decorative arrow/glyph hidden (it stays
+   in the DOM: court-ui reads the wheel's ⠿ from it). Readability first: dark scrims under white ink. */
+#pg-sim .ndb,#btn-draw,#chk-btn,.bnav{--tc-a:var(--hdr-a,var(--curtain-a));--tc-b:var(--hdr-b,var(--curtain-a));--tc-c:var(--hdr-c,var(--curtain-b));--tc-glow:var(--game-glow,var(--curtain-glow));--tc-ease:cubic-bezier(.2,.7,.2,1)}
+#pg-sim .ndb{--tc-surf:rgba(255,255,255,.9);--tc-edge:rgba(255,255,255,.5);--tc-side:24px;--on:0;--up:0;--fill:.24;--halo:0 0 6px rgba(255,255,255,calc(var(--on)*.9));--ring:0 0 0 1px var(--tc-glow),0 12px 26px -14px var(--tc-glow);position:relative;isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:72px;margin-top:10px;padding:14px var(--tc-side);border:1px solid transparent;border-radius:18px;color:var(--fg);text-align:center;background:linear-gradient(var(--tc-surf),var(--tc-surf)) padding-box,linear-gradient(150deg,var(--tc-a),var(--tc-b) 55%,var(--tc-c)) padding-box,linear-gradient(var(--tc-edge),var(--tc-edge)) border-box,linear-gradient(150deg,var(--tc-a),var(--tc-c)) border-box;box-shadow:0 1px 2px rgba(40,20,30,.05),0 6px 18px -14px var(--tc-glow);transform:translateY(calc(var(--up)*-1.5px));transition:transform .25s cubic-bezier(.2,.7,.3,1),box-shadow .25s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body.dark #pg-sim .ndb{--tc-surf:rgba(22,9,18,.78);--tc-edge:rgba(22,9,18,.18);--fill:.36;--halo:0 1px 3px rgba(0,0,0,calc(var(--on)*.85));box-shadow:0 10px 24px -16px rgba(0,0,0,.75)}
+/* Hover/press, after the language picker: the card fills diagonally in its game's colours (::before,
+   opacity only), the edge takes a game-tinted ring, a 1.5px lift and one sheen (::after); touch gets a
+   short :active flash. The description ink switches to full --fg BEFORE the fill rises and back only
+   AFTER it has faded, so contrast holds through the whole animation, not just at its ends. */
+#pg-sim .ndb::before,#pg-sim .ndb::after{content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none}
+#pg-sim .ndb::before{background:linear-gradient(135deg,var(--tc-a),var(--tc-b) 50%,var(--tc-c));opacity:calc(var(--on)*var(--fill));transition:opacity .26s}
+#pg-sim .ndb::after{opacity:0;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.34) 50%,transparent 62%) 130% 0/260% 100% no-repeat}
+body.dark #pg-sim .ndb::after{background-image:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.16) 50%,transparent 62%)}
+#pg-sim .ndb-l>*{text-shadow:var(--halo);transition:text-shadow .25s}
+#pg-sim .ndb .ndb-sub{transition:text-shadow .25s,color 0s .26s}
+#pg-sim .ndb-l{flex:1 1 auto;min-width:0;align-items:center;gap:3px;text-align:center}
+/* A single compound longer than the column (fi «Puolustusasianajajat») is hyphenated in its own language
+   (html[lang] follows the UI language); ordinary words are never split. */
+#pg-sim .ndb-l>*{-webkit-hyphens:auto;hyphens:auto;hyphenate-limit-chars:12 6 6;-webkit-hyphenate-limit-before:6;-webkit-hyphenate-limit-after:6}
+#pg-sim .ndb-title{font-size:15.5px;line-height:1.28;color:inherit;text-wrap:balance;overflow-wrap:break-word}
+#pg-sim .ndb-sub{font-size:12.5px;line-height:1.42;color:var(--sub2);opacity:1;text-wrap:pretty;overflow-wrap:break-word}
+#pg-sim .ndb>.ndb-l+div{display:none}
+#pg-sim .calan-btn-left{color:var(--gold-ink)}
+@media (max-width:520px){#pg-sim .ndb-title :is(.if-badge,.qa-badge){display:table;margin:5px auto 0}}
+/* Primary: the generator takes the game gradient (the header's) under a flat scrim, white ink. */
+#pg-sim #ndb{color:#fff;background:linear-gradient(rgba(0,0,0,.24),rgba(0,0,0,.24)) padding-box,linear-gradient(150deg,var(--tc-a),var(--tc-b) 55%,var(--tc-c)) padding-box,linear-gradient(rgba(255,255,255,.3),rgba(255,255,255,.12)) border-box,linear-gradient(150deg,var(--tc-a),var(--tc-c)) border-box;box-shadow:0 10px 24px -16px var(--tc-glow)}
+#pg-sim #ndb .ndb-sub{color:rgba(255,255,255,.96)}
+#pg-sim #ndb{--fill:1}
+#pg-sim #ndb::before{background:linear-gradient(rgba(0,0,0,.24),rgba(0,0,0,.24)),linear-gradient(315deg,var(--tc-a),var(--tc-b) 50%,var(--tc-c))}
+#pg-sim #ndb .ndb-l>*{text-shadow:0 1px 3px rgba(0,0,0,calc(var(--on)*.5))}
+#pg-sim #ndb::after{display:none}
+/* Premium (Quantum-astral): violet identity, a quiet gold edge — gold stays for premium only. */
+#pg-sim .qa-card{background:linear-gradient(var(--tc-surf),var(--tc-surf)) padding-box,linear-gradient(150deg,#6A46C4,#4A2B7A 50%,var(--tc-b)) padding-box,linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)) border-box,linear-gradient(150deg,#D9B65F,#9B7BD8 60%,#B07E1F) border-box!important;border-color:transparent!important}
+body.dark #pg-sim .qa-card{background:linear-gradient(var(--tc-surf),var(--tc-surf)) padding-box,linear-gradient(150deg,#6A46C4,#4A2B7A 50%,var(--tc-b)) padding-box,linear-gradient(150deg,#F5CE7B,#B07E1F 55%,#7A4B2B) border-box!important}
+#pg-sim .qa-card .ndb-title{color:var(--fg)}#pg-sim .qa-card .ndb-sub{color:var(--sub2)}
+#pg-sim .qa-card::before{background:linear-gradient(135deg,#6A46C4,#4A2B7A 50%,#B07E1F)}
+/* Jury | Defense: two equal columns, everything centred. */
+#pg-sim .court-duo{gap:10px;margin-top:10px}
+#pg-sim .court-duo::before{top:-10px;height:10px;background:var(--hdr-a,var(--gold));opacity:.5}
+#pg-sim .court-duo .ndb{height:100%;min-height:76px;margin-top:0;padding:14px 10px;justify-content:center;text-align:center}
+#pg-sim .court-duo .ndb-title{font-size:14px;line-height:1.25}
+#pg-sim .court-duo .ndb-sub{font-size:12px}
+/* Simulator buttons: the game gradient under the same flat scrim, centred both ways. */
+#btn-draw,#chk-btn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:52px;text-align:center;border:1px solid rgba(255,255,255,.2);color:#fff;background:linear-gradient(rgba(0,0,0,.24),rgba(0,0,0,.24)),linear-gradient(150deg,var(--tc-a),var(--tc-b) 55%,var(--tc-c));box-shadow:0 10px 22px -16px var(--tc-glow);transition:transform .2s var(--tc-ease),box-shadow .2s ease;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+#chk-btn{min-height:46px}
+@media (hover:hover) and (pointer:fine){
+#pg-sim .ndb:hover{--on:1;--up:1;box-shadow:var(--ring)}
+#pg-sim .ndb:hover::after{animation:tc-sheen .7s cubic-bezier(.3,.6,.4,1) .05s both}
+#pg-sim .ndb:hover .ndb-sub{color:var(--fg);transition-delay:0s}
+#pg-sim .ndb:hover:active{transform:scale(.985)}
+#btn-draw:hover,#chk-btn:hover{transform:translateY(-1.5px);box-shadow:0 0 0 1px var(--tc-glow),0 12px 24px -14px var(--tc-glow)}}
+@keyframes tc-sheen{from{opacity:1;background-position:130% 0}to{opacity:1;background-position:-30% 0}}
+#pg-sim .ndb:active{--on:1;transform:scale(.985)}
+#pg-sim .ndb:active::before{transition-duration:.06s}
+#pg-sim .ndb:is(:active,:focus-visible) .ndb-sub{color:var(--fg);transition-delay:0s}
+#pg-sim #ndb .ndb-sub,#pg-sim #ndb:is(:hover,:active,:focus-visible) .ndb-sub{color:rgba(255,255,255,.96)}
+#btn-draw:active,#chk-btn:active{transform:scale(.985);filter:none;transition-duration:.06s}
+#pg-sim .ndb:focus-visible{--on:1;--up:1;box-shadow:var(--ring);outline:2px solid var(--fg);outline-offset:3px}
+#btn-draw:focus-visible,#chk-btn:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+/* Phones: the floating ↑/↓ anchor (.scroll-anchors) runs over the cards' right edge: it shows 36px (a 46px hit pad) 8px from the edge,
+   both sides keep that lane free, so the text stays centred and never passes under it. */
+@media (max-width:699px){#pg-sim .ndb{--tc-side:32px}#pg-sim .court-duo .ndb{padding:13px 8px}#pg-sim .court-duo #defense-btn{padding-inline:32px}
+.scroll-anchors{right:max(8px,calc(env(safe-area-inset-right,0px) + 8px));bottom:calc(110px + env(safe-area-inset-bottom,0px))}
+.scroll-anchors .sa-btn{position:relative;width:36px;height:36px;min-width:36px;min-height:36px;font-size:16px}
+.scroll-anchors .sa-btn::before{content:"";position:absolute;inset:-5px;border-radius:50%}}
+@media (max-width:400px){#pg-sim .ndb{min-height:68px;padding-block:12px}#pg-sim .ndb-title{font-size:14.5px}#pg-sim .ndb-sub{font-size:12px}#pg-sim .court-duo .ndb-title{font-size:13.5px}}
+.sa-btn{color:var(--gold-ink);border-color:var(--gold-ink)}
+/* Bottom bar: the game gradient under a scrim dark enough for white ink on every palette; the active
+   route = a darker pill with a light ring and solid white — never gold on gold. */
+.bnav{background:linear-gradient(rgba(12,6,10,.42),rgba(12,6,10,.42)),linear-gradient(100deg,var(--tc-a) 0%,var(--tc-b) 52%,var(--tc-c) 100%)}
+.bnav .bn-icon,.bnav .bn-lbl{color:rgba(255,255,255,.86)}
+.bnav .bn.on .bn-icon,.bnav .bn.on .bn-lbl{color:#fff}
+.bnav .bn.on::after{background:rgba(0,0,0,.34);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.62)}
+@media (min-width:700px){.bnav .bn.on{background:rgba(0,0,0,.34);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.62)}}
+.bnav .bn:focus-visible{outline-color:#fff}
+@media (prefers-reduced-motion:reduce){#pg-sim .ndb::after{animation:none!important}#pg-sim .ndb,#pg-sim .ndb:hover,#pg-sim .ndb:active,#pg-sim .ndb:focus-visible,#btn-draw,#btn-draw:hover,#btn-draw:active,#chk-btn,#chk-btn:hover,#chk-btn:active{transform:none}}
+@media (prefers-contrast:more){#pg-sim .ndb,#pg-sim #ndb,#pg-sim .qa-card{color:var(--fg)!important;background:var(--bg2)!important;border:2px solid var(--fg)!important}#pg-sim .ndb::before{display:none}#pg-sim .ndb .ndb-sub,#pg-sim #ndb .ndb-sub{color:var(--fg)}}
+@media (forced-colors:active){#pg-sim .ndb,#btn-draw,#chk-btn{border:1px solid ButtonText}}
