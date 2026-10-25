@@ -203,13 +203,17 @@
   // ── Owner Analytics 2.0: ranges in ANY timezone, comparisons, formatting, labels ──────────
   var ZONES = ['Europe/Oslo', 'UTC'];
 
-  function zoneOffsetMinutes(tz, utcMs) {
-    var dtf = new Intl.DateTimeFormat('en-US', {
+  // One formatter per zone: building an Intl.DateTimeFormat is far slower than using one.
+  var zoneFormatters = {};
+  function zoneFormatter(tz) {
+    return zoneFormatters[tz] || (zoneFormatters[tz] = new Intl.DateTimeFormat('en-US', {
       timeZone: tz, hour12: false, year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
+    }));
+  }
+  function zoneOffsetMinutes(tz, utcMs) {
     var parts = {};
-    dtf.formatToParts(new Date(utcMs)).forEach(function (p) { parts[p.type] = p.value; });
+    zoneFormatter(tz).formatToParts(new Date(utcMs)).forEach(function (p) { parts[p.type] = p.value; });
     var asUTC = Date.UTC(+parts.year, +parts.month - 1, +parts.day, (+parts.hour) % 24, +parts.minute, +parts.second);
     return Math.round((asUTC - Math.floor(utcMs / 1000) * 1000) / 60000);
   }
@@ -218,15 +222,25 @@
     var shifted = new Date(utcMs + offset * 60000);
     return { y: shifted.getUTCFullYear(), m: shifted.getUTCMonth() + 1, d: shifted.getUTCDate() };
   }
-  // Civil midnight in tz → UTC instant. The offset is resolved twice, so DST switches land right.
+  // Civil wall time in tz → UTC instant. Offsets come only from the tz database the engine ships
+  // (Intl), so no switch date or offset is written here and future rule changes need no code change.
+  // The offsets a day before and a day after bracket any switch near the wall time (switches are
+  // months apart): a wall time that exists once matches one of them; one that exists twice (autumn)
+  // is its EARLIER instant; one that does not exist (spring; America/Santiago or America/Asuncion
+  // switch AT midnight) is the switch instant itself — the first instant of that civil day. The same
+  // rule as Temporal's disambiguation 'compatible' (2026-10-24, RA-09).
+  var SWITCH_PROBE_MS = 86400000;
   function zoneCivilToUTC(tz, y, mo, d, h, mi) {
-    var guess = Date.UTC(y, mo - 1, d, h || 0, mi || 0);
-    var utc = guess - zoneOffsetMinutes(tz, guess) * 60000;
-    return guess - zoneOffsetMinutes(tz, utc) * 60000;
+    var wall = Date.UTC(y, mo - 1, d, h || 0, mi || 0);
+    var before = wall - zoneOffsetMinutes(tz, wall - SWITCH_PROBE_MS) * 60000;
+    var after = wall - zoneOffsetMinutes(tz, wall + SWITCH_PROBE_MS) * 60000;
+    var hits = [before, after].filter(function (t) { return t + zoneOffsetMinutes(tz, t) * 60000 === wall; });
+    return hits.length ? Math.min.apply(null, hits) : before;
   }
+  // Calendar arithmetic on the civil date itself (Date.UTC normalises month / year / leap days); no
+  // instant is moved by a fixed 24 hours.
   function addDays(ymd, n) {
-    var t = Date.UTC(ymd.y, ymd.m - 1, ymd.d) + n * 86400000;
-    var d = new Date(t);
+    var d = new Date(Date.UTC(ymd.y, ymd.m - 1, ymd.d + n));
     return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() };
   }
   function civilMidnight(tz, ymd) { return zoneCivilToUTC(tz, ymd.y, ymd.m, ymd.d, 0, 0); }
@@ -238,50 +252,55 @@
   function shiftDay(ymdStr, n) { var p = parseYMD(ymdStr); return p ? ymdText(addDays(p, n)) : null; }
 
   // Presets used by the Owner Panel. Every range is [from, to) in UTC ISO, with the bucket the
-  // charts should use and the immediately preceding window of the same length for comparison.
+  // charts should use and the immediately preceding window of the same number of CIVIL days for
+  // comparison. Every boundary is a civil midnight resolved through the tz database (2026-10-22, audit
+  // A17): a fixed 86 400 000 ms dropped the last hour of the period on a 25-hour day (Europe/Oslo
+  // 2026-10-25) and ran an hour into the next day on a 23-hour one (2026-03-29), and the comparison
+  // window, taken as «from − the same number of milliseconds», was shifted by an hour in the same way.
+  function civilDays(a, b) { return Math.round((Date.UTC(b.y, b.m - 1, b.d) - Date.UTC(a.y, a.m - 1, a.d)) / 86400000); }
   function range(preset, nowMs, tz, customFrom, customTo) {
     tz = tz || TZ;
     nowMs = nowMs == null ? Date.now() : nowMs;
     var today = zoneYMD(tz, nowMs);
-    var startOfToday = zoneCivilToUTC(tz, today.y, today.m, today.d, 0, 0);
-    var from, to, bucket = 'day';
+    var tomorrow = addDays(today, 1);
+    // first and last+1 civil day of the window; `from` / `to` are their civil midnights
+    var first = null, end = tomorrow, from, to, bucket = 'day';
     switch (preset) {
       case 'live': from = nowMs - 30 * 60000; to = nowMs + 60000; bucket = 'hour'; break;
-      // Civil day boundaries: the next midnight is resolved through the tz database, so a DST day
-      // is 23 or 25 hours long instead of a fixed 86 400 000 ms.
-      case 'today': from = startOfToday; to = civilMidnight(tz, addDays(today, 1)); bucket = 'hour'; break;
-      case 'yesterday': from = civilMidnight(tz, addDays(today, -1)); to = startOfToday; bucket = 'hour'; break;
-      case 'day': {
-        var d = parseYMD(customFrom) || today;
-        from = civilMidnight(tz, d); to = civilMidnight(tz, addDays(d, 1)); bucket = 'hour';
-        break;
-      }
-      case '7d': from = zoneCivilToUTC(tz, addDays(today, -6).y, addDays(today, -6).m, addDays(today, -6).d, 0, 0); to = startOfToday + 86400000; break;
-      case '30d': from = zoneCivilToUTC(tz, addDays(today, -29).y, addDays(today, -29).m, addDays(today, -29).d, 0, 0); to = startOfToday + 86400000; break;
-      case '90d': from = zoneCivilToUTC(tz, addDays(today, -89).y, addDays(today, -89).m, addDays(today, -89).d, 0, 0); to = startOfToday + 86400000; bucket = 'week'; break;
-      case 'month': from = zoneCivilToUTC(tz, today.y, today.m, 1, 0, 0); to = startOfToday + 86400000; break;
+      case 'today': first = today; bucket = 'hour'; break;
+      case 'yesterday': first = addDays(today, -1); end = today; bucket = 'hour'; break;
+      case 'day': first = parseYMD(customFrom) || today; end = addDays(first, 1); bucket = 'hour'; break;
+      case '7d': first = addDays(today, -6); break;
+      case '30d': first = addDays(today, -29); break;
+      case '90d': first = addDays(today, -89); bucket = 'week'; break;
+      case 'month': first = { y: today.y, m: today.m, d: 1 }; break;
       case 'lastMonth': {
         var prev = today.m === 1 ? { y: today.y - 1, m: 12 } : { y: today.y, m: today.m - 1 };
-        from = zoneCivilToUTC(tz, prev.y, prev.m, 1, 0, 0);
-        to = zoneCivilToUTC(tz, today.y, today.m, 1, 0, 0);
+        first = { y: prev.y, m: prev.m, d: 1 }; end = { y: today.y, m: today.m, d: 1 };
         break;
       }
-      case 'all': from = Date.UTC(2026, 7, 1); to = startOfToday + 86400000; bucket = 'week'; break;
+      case 'all': first = { y: 2026, m: 8, d: 1 }; bucket = 'week'; break;
       case 'custom': {
         var a = parseYMD(customFrom), b = parseYMD(customTo);
         if (!a || !b) return range('7d', nowMs, tz);
-        from = zoneCivilToUTC(tz, a.y, a.m, a.d, 0, 0);
-        to = zoneCivilToUTC(tz, b.y, b.m, b.d, 0, 0) + 86400000;
-        if (to - from > 120 * 86400000) bucket = 'week';
+        first = a; end = addDays(b, 1);
+        if (civilDays(a, end) > 120) bucket = 'week';
         break;
       }
       default: return range('7d', nowMs, tz);
     }
-    var span = to - from;
+    var prevFrom;
+    if (first) {
+      from = civilMidnight(tz, first); to = civilMidnight(tz, end);
+      prevFrom = civilMidnight(tz, addDays(first, -civilDays(first, end)));
+    } else {
+      prevFrom = from - (to - from);
+    }
     return {
       preset: preset, tz: tz, bucket: bucket,
       from: new Date(from).toISOString(), to: new Date(to).toISOString(),
-      prev_from: new Date(from - span).toISOString(), prev_to: new Date(from).toISOString()
+      prev_from: new Date(prevFrom).toISOString(), prev_to: new Date(from).toISOString(),
+      hours: Math.round((to - from) / 3600000)
     };
   }
 
