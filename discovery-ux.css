@@ -443,3 +443,14 @@ body.dark #pg-sim .qa-card{background:linear-gradient(var(--tc-surf),var(--tc-su
 @media (prefers-reduced-motion:reduce){#pg-sim .ndb::after{animation:none!important}#pg-sim .ndb,#pg-sim .ndb:hover,#pg-sim .ndb:active,#pg-sim .ndb:focus-visible,#btn-draw,#btn-draw:hover,#btn-draw:active,#chk-btn,#chk-btn:hover,#chk-btn:active{transform:none}}
 @media (prefers-contrast:more){#pg-sim .ndb,#pg-sim #ndb,#pg-sim .qa-card{color:var(--fg)!important;background:var(--bg2)!important;border:2px solid var(--fg)!important}#pg-sim .ndb::before{display:none}#pg-sim .ndb .ndb-sub,#pg-sim #ndb .ndb-sub{color:var(--fg)}}
 @media (forced-colors:active){#pg-sim .ndb,#btn-draw,#chk-btn{border:1px solid ButtonText}}
+
+/* Required choices share the active lottery's header gradient and the current theme's surfaces.
+   A finite pulse draws attention; the solid contour remains until the condition is fulfilled. */
+.required-choice{outline:2px solid var(--hdr-a);outline-offset:3px;border-radius:12px;scroll-margin-block:calc(100px + var(--loto-safe-top,env(safe-area-inset-top,0px))) calc(90px + env(safe-area-inset-bottom,0px));animation:requiredChoicePulse .85s ease-in-out 3}
+.required-choice-note{box-sizing:border-box;display:block;flex:0 0 100%;grid-column:1/-1;min-width:0;max-width:100%;margin:0 0 10px;padding:10px 12px;border:2px solid transparent;border-inline-start-width:5px;border-radius:10px;background:var(--bg3);background:linear-gradient(var(--bg3),var(--bg3)) padding-box,linear-gradient(135deg,var(--hdr-a),var(--hdr-b),var(--hdr-c)) border-box;color:var(--fg);font:700 13px/1.5 'Manrope',sans-serif;white-space:normal;overflow-wrap:anywhere;text-align:start}
+@keyframes requiredChoicePulse{50%{box-shadow:0 0 0 6px var(--game-glow)}}
+@media(prefers-reduced-motion:reduce){.required-choice{animation:none}}
+@media(forced-colors:active){.required-choice{outline-color:Highlight}.required-choice-note{border-color:CanvasText}}
+
+.required-choice-host{flex-wrap:wrap}
+body.dark .required-choice{outline-color:var(--gm-hi)}
