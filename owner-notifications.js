@@ -102,6 +102,23 @@
     return body;
   }
 
+  // One failed renewal is ONE card (migration 084): its state, read live — RevenueCat sends nothing when
+  // the last retry fails, so a card still «retrying» after its window is the end of the subscription.
+  function renewalState(row) { return LIB.renewalFailureState ? LIB.renewalFailureState(row.data || {}) : null; }
+  function cardTitle(row) {
+    var r = renewalState(row);
+    if (r && r.state === 'ended') return t('PRO: подписка завершена — оплата не прошла после всех повторов');
+    return row.title ? tx(row.title) : catLabel(row.category);
+  }
+  function renewalLine(row) {
+    var r = renewalState(row);
+    if (!r) return '';
+    var n = t('событий магазина: {{0}}', num(r.events));
+    if (r.state === 'retrying') return t('Повторы оплаты до {{0}}', when(r.until)) + ' · ' + n;
+    if (r.state === 'recovered') return t('Оплата прошла {{0}}', when(r.settledAt)) + ' · ' + n;
+    if (r.state === 'closed') return t('Отмена или возврат {{0}}', when(r.settledAt)) + ' · ' + n;
+    return t('Повторы закончились {{0}} без оплаты', when(r.until)) + ' · ' + n;
+  }
   // The guest-journey facts a presence card carries (migration 059): first visit, last action and the
   // client-MEASURED engaged time. Only what the server sent is shown — a missing value stays missing.
   function journeyLine(row) {
@@ -474,7 +491,8 @@
       if (data.platform) meta.push({ web: t('Веб'), ios: 'iOS', android: 'Android' }[data.platform] || data.platform);
       return '<button class="own-card' + (row.read ? '' : ' unread') + '" type="button" data-id="' + esc(row.id) + '" title="' + esc(t('Открыть панель владельца: {{0}}', row.deep_link || '')) + '">' +
         '<span class="own-ico" aria-hidden="true">' + esc(catIcon(row.category)) + '</span>' +
-        '<span class="own-main"><h4>' + esc(row.title ? tx(row.title) : catLabel(row.category)) + '</h4><p>' + esc(prettyBody(row)) + '</p>' +
+        '<span class="own-main"><h4>' + esc(cardTitle(row)) + '</h4><p>' + esc(prettyBody(row)) + '</p>' +
+          (renewalLine(row) ? '<p class="own-journey own-renewal">' + esc(renewalLine(row)) + '</p>' : '') +
           (journeyLine(row) ? '<p class="own-journey">' + esc(journeyLine(row)) + '</p>' : '') +
           '<span class="own-meta">' + meta.map(esc).join(' · ') + ' <span class="own-sev own-sev-' + esc(row.severity) + '">' + esc(sevLabel(row.severity)) + '</span>' + (row.day ? ' · ' + esc(row.day) : '') + '</span>' +
           (data.error ? '<span class="own-errbtn" role="button" tabindex="0" data-err-toggle="' + esc(row.id) + '" aria-expanded="' + !!state.expanded[row.id] + '">' +

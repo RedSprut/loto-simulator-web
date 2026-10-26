@@ -593,10 +593,52 @@
     // every other RevenueCat event type the ledger may file (billing_<type>): named, never shown raw
     billing_invoice_issuance: 'Счёт выставлен', billing_subscription_paused: 'Подписка приостановлена',
     billing_subscription_extended: 'Подписка продлена магазином', billing_temporary_entitlement_grant: 'Временный доступ (магазин)',
-    billing_virtual_currency_transaction: 'Виртуальная валюта', billing_refund_reversed: 'Возврат отменён'
+    billing_virtual_currency_transaction: 'Виртуальная валюта', billing_refund_reversed: 'Возврат отменён',
+    // a CANCELLATION / EXPIRATION with reason BILLING_ERROR (commerceEventKey): a failed renewal, never a voluntary cancel
+    billing_retry_cancellation: 'Продление не оплачено — RevenueCat повторяет оплату',
+    billing_retry_expiration: 'Доступ приостановлен до оплаты — RevenueCat повторяет оплату',
+    billing_retry_recovered: 'Сбой продления — оплата затем прошла',
+    billing_retry_closed: 'Сбой продления — затем отмена или возврат',
+    billing_retry_ended: 'Подписка завершена: оплата не прошла после всех повторов'
   };
   // What a ledger row IS (server field `kind`): only paid rows are sales.
   var COMMERCE_KIND_RU = { paid: 'Оплачено', promo: 'Промо-доступ', sandbox: 'Sandbox / Test Store', trial: 'Пробный период', zero: 'Без оплаты' };
+  // migration 084: a failed renewal (BILLING_ERROR) and its outcome
+  COMMERCE_KIND_RU.billing_retry = 'Сбой продления';
+  COMMERCE_KIND_RU.billing_recovered = 'Сбой продления (оплата прошла)';
+  COMMERCE_KIND_RU.billing_closed = 'Сбой продления (затем отмена)';
+  // How long the store keeps retrying a failed renewal — the same rule as commerce_retry_window()
+  // (migration 084): RevenueCat Web Billing (stripe) 30 days, every other store 60 days (upper bound).
+  // RevenueCat sends NO event when the last retry fails, so the end of the window is the end.
+  function retryWindowMs(store) { return (store === 'stripe' ? 30 : 60) * 86400000; }
+  // The COMMERCE_RU key of a ledger / LIVE row. RevenueCat sends CANCELLATION and EXPIRATION with
+  // reason BILLING_ERROR at a failed renewal charge and keeps retrying; migration 084 files them as
+  // kind billing_retry and settles them (billing_recovered on a later renewal, billing_closed on the
+  // customer's own cancel / refund). An unsettled one past its window is the final end of the
+  // subscription. A row stored before 084 (kind paid) is named by its reason; its outcome is unknown.
+  function commerceEventKey(row, nowMs) {
+    var name = row && row.name;
+    if (name !== 'cancellation' && name !== 'expiration') return name;
+    var kind = row.row_kind || row.kind;
+    if (kind === 'billing_recovered') return 'billing_retry_recovered';
+    if (kind === 'billing_closed') return 'billing_retry_closed';
+    if (kind === 'billing_retry') {
+      var at = Date.parse(row.at), now = nowMs == null ? Date.now() : nowMs;
+      return isFinite(at) && now - at > retryWindowMs(row.store || row.platform) ? 'billing_retry_ended' : 'billing_retry_' + name;
+    }
+    if (String(row.reason || '').toUpperCase() === 'BILLING_ERROR') return 'billing_retry_' + name;
+    return name;
+  }
+  // The state of an owner «renewal failure» card (payload kind renewal_failure, migration 084):
+  // retrying | recovered | closed | ended (the window passed with no renewal), or null for other cards.
+  function renewalFailureState(data, nowMs) {
+    if (!data || data.kind !== 'renewal_failure') return null;
+    var until = Date.parse(data.retryUntil), now = nowMs == null ? Date.now() : nowMs;
+    var state = data.retryState === 'recovered' || data.retryState === 'closed' ? data.retryState
+      : (isFinite(until) && now > until ? 'ended' : 'retrying');
+    return { state: state, until: isFinite(until) ? data.retryUntil : null, settledAt: data.settledAt || null,
+      events: Array.isArray(data.events) ? data.events.length : 0 };
+  }
   function formatMoney(amount, currency) {
     var n = +amount;
     if (!isFinite(n)) return '—';
@@ -748,7 +790,7 @@
     BLUE_LIGHT: BLUE_LIGHT, BLUE_DARK: BLUE_DARK, choroplethColor: choroplethColor, flagEmoji: flagEmoji, kpiText: kpiText,
     dayRange: dayRange, todayYMD: todayYMD, shiftDay: shiftDay, delta: delta, parseOwnerLink: parseOwnerLink, buildOwnerLink: buildOwnerLink,
     CATEGORY_RU: CATEGORY_RU, CATEGORY_ICON: CATEGORY_ICON, SEVERITY_RU: SEVERITY_RU, MODE_RU: MODE_RU, STATUS_RU: STATUS_RU,
-    FEED_KIND_RU: FEED_KIND_RU, HUMAN_ORDER: HUMAN_ORDER, HUMAN_RU: HUMAN_RU, COMMERCE_RU: COMMERCE_RU, COMMERCE_KIND_RU: COMMERCE_KIND_RU, formatMoney: formatMoney,
+    FEED_KIND_RU: FEED_KIND_RU, HUMAN_ORDER: HUMAN_ORDER, HUMAN_RU: HUMAN_RU, COMMERCE_RU: COMMERCE_RU, COMMERCE_KIND_RU: COMMERCE_KIND_RU, commerceEventKey: commerceEventKey, retryWindowMs: retryWindowMs, renewalFailureState: renewalFailureState, formatMoney: formatMoney,
     moneyList: moneyList, usdEstimate: usdEstimate, netText: netText, deductionText: deductionText,
     _zoneOffsetMinutes: zoneOffsetMinutes, _zoneCivilToUTC: zoneCivilToUTC, _zoneYMD: zoneYMD,
     _osloCivilToUTC: osloCivilToUTC, _osloYMD: osloYMD, _osloOffsetMinutes: osloOffsetMinutes
