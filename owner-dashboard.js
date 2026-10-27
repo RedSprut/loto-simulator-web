@@ -721,6 +721,7 @@
     // back and the page stayed locked with the panel's timers running.
     ovEl.__lotoClose = function (reason) {
       // Escape closes the innermost layer first (notification centre, ⓘ note, sheet), the panel last.
+      if (W.LotoSuggestions && (reason === 'escape' || reason === 'back') && W.LotoSuggestions.closeOwner()) return;
       if (reason === 'escape' && closeInnermost()) return;
       close();
     };
@@ -3915,6 +3916,7 @@
     state.denied = !owner;
     if (!owner) { renderDenied(); return; }
     startOwnerNotifications();
+    startOwnerSuggestions();
     await show(state.section);
   }
   // A switch of the panel language re-renders everything on screen from the data already held:
@@ -3935,6 +3937,14 @@
   W.addEventListener('loto:ownerlanguagechange', onLanguageChange);
   // The Owner Notification Center is part of THIS panel, not of the public page: it is fetched on
   // the first open and started/stopped with the panel, so no owner query, listener or timer can
+  // The suggestions inbox (suggestions.js) loads with the panel through index.html's loader, never at
+  // startup; like the bell it starts only while the panel is still open.
+  function startOwnerSuggestions() {
+    if (typeof W.LotoLoadSuggestions !== 'function') return;
+    W.LotoLoadSuggestions().then(function (api) {
+      if (api && ovEl && ovEl.classList.contains('show') && !state.denied) api.startOwner();
+    }).catch(function () { /* the inbox button simply stays hidden; the report itself is unaffected */ });
+  }
   // run while the panel is closed.
   var notifPromise = null;
   function startOwnerNotifications() {
@@ -3958,6 +3968,7 @@
     D.documentElement.style.overflow = '';
     stopLive();
     stopOwnerNotifications();
+    if (W.LotoSuggestions) W.LotoSuggestions.stopOwner();
     closePopup();
     if (mapApi) { mapApi.destroy(); mapApi = null; }
     if (location.hash.indexOf('#owner') === 0) {

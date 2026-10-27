@@ -431,6 +431,7 @@
         var cid = card.getAttribute('data-id'); var crow = state.rows.filter(function (r) { return r.id === cid; })[0];
         if (crow && !crow.read) markRead([cid], true);
         // A support letter opens its own view (safe metadata + the Gmail link), never the analytics panel.
+        if (crow && crow.data && crow.data.suggestionId && W.LotoLoadSuggestions) { close(); W.LotoLoadSuggestions().then(function (api) { api.openOwner(); }).catch(function () {}); return; }
         if (crow && crow.category === 'support_mail' && crow.data && crow.data.mailId) { openMail(crow.data.mailId); return; }
         openLink(crow && crow.deep_link); return;
       }

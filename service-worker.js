@@ -1,8 +1,8 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the d7c3d4f placeholder → short git SHA). Every deploy therefore gets a unique
+// (the ecffa7f placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-auto-20261027-tnkw3u';
+const CACHE_VERSION='loto-shell-vecffa7f';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 const CORE_PRECACHE=[
@@ -19,6 +19,7 @@ const CORE_PRECACHE=[
 // screen wait until loadCourtApp() gave up after 20s.
 
 const OPTIONAL_PRECACHE=[
+  './suggestions.js','./suggestions-i18n.js','./suggestions.css',
   './discovery-guide.js',
   './win-match-core.js','./smart-start.js','./court-core.js','./court-ui.js','./working-set.js','./worksets.js','./action-center.js','./free-welcome.js','./prize-archive.js','./leaders-ui.js','./calendar-core.js','./calendar-ui.js','./rec-core.js','./rec-analysis.js','./rec-ui.js','./math-tech.js','./math-tech.css','./cosmos-ui.js','./cosmos.css','./jackpot-ceremony.js','./jackpot-ceremony.css','./turnstile-runtime.js',
   './safe-payment.html','./safe-payment-runtime.js','./auth-client.js','./native-bridge.js','./billing-web.js',

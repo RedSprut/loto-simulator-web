@@ -105,6 +105,7 @@
           widgetId = turnstile.render(host, {
             sitekey: siteKey(),
             action: settings.action || ACTION,
+            size: settings.size || 'normal',
             theme: (document.documentElement.dataset || {}).theme === 'dark' ? 'dark' : 'light',
             language: (document.documentElement.lang || 'en').slice(0, 2),
             callback: function (token) { clearTimeout(timer); finish(token); },
