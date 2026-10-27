@@ -115,6 +115,7 @@ body.loto-onboarding-open .busy-ov{-webkit-backdrop-filter:none;backdrop-filter:
 /* Rows against real draws: Calendar sample and Analytics history share this block. */
 .ac-myrows{display:flex;flex-direction:column;gap:8px;margin:8px 0;padding:0;list-style:none}
 .ac-myrow{padding:10px;border:1px solid var(--border);border-radius:14px;background:var(--bg2)}
+.ac-next-row{display:flex;justify-content:flex-end;margin:10px 0}.ac-next-row .ac-next{width:auto;min-height:44px;margin:0;padding:8px 20px}
 .ac-myrow-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:6px}
 .ac-myrow-head b{color:var(--fg);font-size:13px}
 .ac-myrow-head .if-rowballs{flex-wrap:wrap}
