@@ -1,0 +1,19 @@
+/* Static «Mathematics & Technology» pages (scripts/build-math-tech-pages.mjs). The content keeps the
+   app's own classes and stylesheet (/math-tech.css); this file only supplies the theme tokens that
+   stylesheet reads from the app (seo.css has the rest) and lays out the native MathML formulas. */
+:root{--sub2:var(--sub);--gold-ink:#7A5200;--teal-ink:#1D7A6C}
+@media (prefers-color-scheme:dark){:root{--gold-ink:#F5CE7B;--teal-ink:#5FC9B6}}
+.mt-page{--mt-gold-line:color-mix(in srgb,var(--gold) 42%,var(--border));--mt-soft:color-mix(in srgb,var(--gold) 7%,var(--bg2));margin:8px 0 24px}
+.mt-toc-static ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:4px 18px}
+.mt-toc-static li{padding:3px 0}
+.mt-page math{font-size:1.08em}
+.mt-page math[display="block"]{display:block;margin:0 auto;font-size:1.15em;overflow-x:auto;overflow-y:hidden}
+.mt-page .mt-eq-scroll{text-align:center}
+.mt-page .mt-def dt math{font-size:1em}
+@media (prefers-color-scheme:dark){
+  .mt-page .mt-note-limit{border-left-color:#F59E66}
+  .mt-page .mt-note-limit>b{color:#F59E66}
+  .mt-page .mt-note-plain{border-left-color:#5FC9B6}
+  .mt-page .mt-note-plain>b,.mt-page .mt-badge-free{color:#5FC9B6}
+  .mt-page .mt-badge-exp{color:#D3A6F0}
+}

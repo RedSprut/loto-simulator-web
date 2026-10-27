@@ -245,6 +245,44 @@
   }
   function civilMidnight(tz, ymd) { return zoneCivilToUTC(tz, ymd.y, ymd.m, ymd.d, 0, 0); }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  // A wall time that happens twice in tz: on the autumn switch Europe/Oslo runs 02:00–02:59 first at
+  // UTC+2, then again at UTC+1 (2026-10-25 has 25 hours). True when the same wall time is also reached
+  // under the offset in force a day before or a day after (the bracketing rule of zoneCivilToUTC).
+  function repeatedWallTime(tz, utcMs) {
+    var offset = zoneOffsetMinutes(tz, utcMs), wall = utcMs + offset * 60000;
+    return [zoneOffsetMinutes(tz, utcMs - SWITCH_PROBE_MS), zoneOffsetMinutes(tz, utcMs + SWITCH_PROBE_MS)].some(function (other) {
+      if (other === offset) return false;
+      var twin = wall - other * 60000;
+      return twin + zoneOffsetMinutes(tz, twin) * 60000 === wall;
+    });
+  }
+  function utcOffsetText(minutes) {
+    var m = Math.abs(minutes || 0);
+    if (!m) return 'UTC';
+    return 'UTC' + (minutes < 0 ? '−' : '+') + Math.floor(m / 60) + (m % 60 ? ':' + pad2(m % 60) : '');
+  }
+  // « (UTC+2)» on an instant whose wall time occurs twice that day in tz, '' on every other instant:
+  // the two 02:00 hours of a 25-hour day are told apart, nothing else changes.
+  function repeatedHourSuffix(tz, value) {
+    var ms = typeof value === 'number' ? value : Date.parse(value);
+    if (!isFinite(ms) || !repeatedWallTime(tz || TZ, ms)) return '';
+    return ' (' + utcOffsetText(zoneOffsetMinutes(tz || TZ, ms)) + ')';
+  }
+  // Chart label of an hourly point. A point the server dates with the UTC instant `at` is labelled from
+  // that instant in tz ('MM-DD HH:00', the offset on a repeated hour); one without (a server before the
+  // hour-bucket migration) keeps its own 'YYYY-MM-DD HH:00' bucket text.
+  function hourPointLabel(point, tz) {
+    var ms = point && point.at != null ? Date.parse(point.at) : NaN;
+    if (!isFinite(ms)) return String(point && point.bucket != null ? point.bucket : '').slice(5);
+    var offset = zoneOffsetMinutes(tz || TZ, ms), wall = new Date(ms + offset * 60000);
+    return pad2(wall.getUTCMonth() + 1) + '-' + pad2(wall.getUTCDate()) + ' ' + pad2(wall.getUTCHours()) + ':' + pad2(wall.getUTCMinutes()) + repeatedHourSuffix(tz, ms);
+  }
+  // Points in time order when every one carries `at`; otherwise as the server sent them.
+  function timeOrdered(points) {
+    var list = Array.isArray(points) ? points.slice() : [];
+    if (!list.length || !list.every(function (p) { return p && isFinite(Date.parse(p.at)); })) return list;
+    return list.sort(function (a, b) { return Date.parse(a.at) - Date.parse(b.at); });
+  }
   function ymdText(ymd) { return ymd.y + '-' + pad2(ymd.m) + '-' + pad2(ymd.d); }
   // Today's civil date in tz as 'YYYY-MM-DD'; shiftDay moves a civil date by n days (calendar math,
   // month / year boundaries handled by Date.UTC normalisation).
@@ -362,12 +400,13 @@
     subscription_info_open: 'О подписке', notification_center_open: 'Центр уведомлений',
     notification_open: 'Открыл уведомление', language_change: 'Сменил язык', theme_change: 'Сменил тему',
     signup: 'Регистрация', login: 'Вход', logout: 'Выход', paywall_view: 'Экран PRO',
-    purchase_start: 'Начал оплату', purchase_success: 'Оплатил', restore_success: 'Восстановил покупку',
+    purchase_start: 'Начал оплату', purchase_success: 'Приложение сообщило об оплате', restore_success: 'Приложение сообщило о восстановлении',
     purchase_failed: 'Оплата не прошла', purchase_cancelled: 'Отменил оплату',
     client_error: 'Ошибка в приложении',
     simulation_run: 'Симуляция тиража', draw3d_complete: '3D-тираж завершён', court_action: 'Бесплатный защитник',
     calendar_run: 'Календарный анализ', pro_feature_use: 'Запустил PRO-функцию', pro_feature_attempt: 'Попытка PRO-функции',
-    feature_open: 'Открыл функцию', favorite_use: 'Взял из избранного', app_share: 'Поделился приложением'
+    feature_open: 'Открыл функцию', favorite_use: 'Взял из избранного', app_share: 'Поделился приложением',
+    sign_in_gate: 'Окно входа'
   };
   // Meaningful product actions — the SAME kinds as public.owner_activity_kind() (migration 059), in
   // display order; PRO-interest is a separate signal and always last.
@@ -586,7 +625,7 @@
   var HUMAN_RU = { confirmed: 'Человек ✓', likely: 'Вероятно человек', unknown: 'Не определено', automated: 'Автоматический трафик' };
   var FEED_KIND_RU = { event: 'Событие', commerce: 'Платёж', account: 'Аккаунт', visits: 'Визиты' };
   var COMMERCE_RU = {
-    checkout_open: 'Открыл оплату', checkout_failed: 'Оплата не удалась', checkout_cancelled: 'Оплата отменена',
+    checkout_open: 'Открыл оплату', checkout_failed: 'Оплата не удалась', checkout_cancelled: 'Оплата отменена', trial_start: 'Начал пробный период',
     purchase_success: 'Покупка PRO', renewal: 'Продление', cancellation: 'Отмена подписки', uncancellation: 'Отмена отозвана',
     expiration: 'Подписка истекла', refund: 'Возврат', payment_failed: 'Проблема с оплатой', plan_change: 'Смена тарифа',
     transfer: 'Перенос покупки', billing_test: 'Тест RevenueCat', billing_webhook_failed: 'Сбой вебхука платежей', restore_success: 'Восстановление',
@@ -602,7 +641,8 @@
     billing_retry_ended: 'Подписка завершена: оплата не прошла после всех повторов'
   };
   // What a ledger row IS (server field `kind`): only paid rows are sales.
-  var COMMERCE_KIND_RU = { paid: 'Оплачено', promo: 'Промо-доступ', sandbox: 'Sandbox / Test Store', trial: 'Пробный период', zero: 'Без оплаты' };
+  // `client`: a row the store webhook did not write (checkout telemetry) — never a sale (migration 075).
+  var COMMERCE_KIND_RU = { paid: 'Оплачено', promo: 'Промо-доступ', sandbox: 'Sandbox / Test Store', trial: 'Пробный период', zero: 'Без оплаты', client: 'Событие клиента' };
   // migration 084: a failed renewal (BILLING_ERROR) and its outcome
   COMMERCE_KIND_RU.billing_retry = 'Сбой продления';
   COMMERCE_KIND_RU.billing_recovered = 'Сбой продления (оплата прошла)';
@@ -659,6 +699,33 @@
     if (value == null || !isFinite(n)) return '';
     return tr('≈ {{0}} по курсу RevenueCat', formatMoney(n, 'USD'));
   }
+  // Who wrote a product_events row decides what it is (2026-10-25). Only the RevenueCat webhook
+  // (record_commerce_event) writes the store's names — the list of public.commerce_ledger_event(),
+  // migration 075. The client reports its checkout / paywall telemetry through `experiment`, which
+  // refuses purchase_success and restore_success since v36. Until 075 is live the server files a row
+  // without `kind` as `paid`, so a client row is told apart by its name here; after 075 the server's
+  // own `client` holds for every name (a forged store name included).
+  var COMMERCE_LEDGER_EVENTS = ['purchase_success', 'renewal', 'cancellation', 'uncancellation', 'refund', 'payment_failed', 'expiration', 'plan_change', 'transfer'];
+  // Client rows on the payment path: listed among the store's events, marked as the client's. The rest
+  // (paywall, onboarding, analysis views) is funnel telemetry, not a store event.
+  var COMMERCE_CLIENT_EVENTS = ['checkout_open', 'checkout_failed', 'checkout_cancelled', 'trial_start', 'purchase_success', 'restore_success'];
+  function isLedgerEvent(name) { return COMMERCE_LEDGER_EVENTS.indexOf(name) >= 0 || /^billing_/.test(String(name || '')); }
+  function commerceRowKind(name, kind) {
+    if (kind === 'client' || !isLedgerEvent(name)) return 'client';
+    return kind || 'paid';
+  }
+  function isStoreEventRow(name, kind) {
+    return commerceRowKind(name, kind) !== 'client' || COMMERCE_CLIENT_EVENTS.indexOf(name) >= 0;
+  }
+  // A restore the store confirmed: RevenueCat moves the purchase to the restoring account (TRANSFER →
+  // `transfer`). A restore inside the same account changes no store record; the app's own report of it
+  // is telemetry (restore_success), counted apart. Sandbox / Test Store transfers are tests.
+  function storeRestores(rows) {
+    return (Array.isArray(rows) ? rows : []).filter(function (r) {
+      var kind = r && r.name === 'transfer' ? commerceRowKind(r.name, r.kind) : 'client';
+      return kind !== 'client' && kind !== 'sandbox';
+    }).length;
+  }
   // Net of one ledger row: exact when the server computed it, «нет данных» otherwise — never 0 by default.
   function netText(row) {
     if (!row) return tr('нет данных');
@@ -678,13 +745,21 @@
   // ── «Источники и продвижение» (2026-10-23, migration 202610230074) ────────────────────────────
   // Source groups of public.analytics_source_group, in the order the panel lists them.
   var SOURCE_GROUP_ORDER = ['google', 'bing', 'duckduckgo', 'yahoo', 'reddit', 'instagram', 'facebook', 'tiktok', 'youtube',
-    'linkedin', 'x', 'other_search', 'other_social', 'other_sites', 'email', 'own_campaign', 'direct', 'unknown'];
+    'linkedin', 'x', 'other_search', 'other_social', 'ai_assistants', 'other_sites', 'email', 'own_campaign', 'direct', 'unknown'];
   var SOURCE_GROUP_RU = {
     google: 'Google', bing: 'Bing', duckduckgo: 'DuckDuckGo', yahoo: 'Yahoo', reddit: 'Reddit', instagram: 'Instagram',
     facebook: 'Facebook', tiktok: 'TikTok', youtube: 'YouTube', linkedin: 'LinkedIn', x: 'X / Twitter',
-    other_search: 'Другие поисковые системы', other_social: 'Другие социальные сети', other_sites: 'Другие сайты',
+    other_search: 'Другие поисковые системы', other_social: 'Другие социальные сети', ai_assistants: 'ИИ-ассистенты', other_sites: 'Другие сайты',
     email: 'Email', own_campaign: 'Собственные кампании', direct: 'Прямой / источник не передан', unknown: 'Неизвестно',
     no_attribution: 'Атрибуция неизвестна'
+  };
+  // «ИИ-ассистенты» (2026-10-30, migration 202610300081): the assistants the panel names, in its order — the report lists
+  // them always. Any other assistant the classifier knows (AI_HOSTS / public.analytics_ai_host) arrives under its own
+  // key after them and is shown by that key until it is named here; nothing else has to change for a new one.
+  var AI_ASSISTANT_ORDER = ['chatgpt', 'claude', 'perplexity', 'gemini', 'copilot', 'deepseek', 'grok', 'mistral'];
+  var AI_ASSISTANT_NAMES = {
+    chatgpt: 'ChatGPT / OpenAI', claude: 'Claude / Anthropic', perplexity: 'Perplexity', gemini: 'Google Gemini',
+    copilot: 'Microsoft Copilot', deepseek: 'DeepSeek', grok: 'Grok', mistral: 'Mistral Le Chat', you: 'You.com', phind: 'Phind', poe: 'Poe'
   };
   var PROMO_PLATFORMS = ['reddit', 'instagram', 'facebook', 'tiktok', 'youtube', 'linkedin', 'x', 'google', 'email', 'other'];
   var PROMO_PLATFORM_RU = {
@@ -774,7 +849,7 @@
   }
 
   return {
-    SOURCE_GROUP_ORDER: SOURCE_GROUP_ORDER, SOURCE_GROUP_RU: SOURCE_GROUP_RU, PROMO_PLATFORMS: PROMO_PLATFORMS, PROMO_PLATFORM_RU: PROMO_PLATFORM_RU,
+    SOURCE_GROUP_ORDER: SOURCE_GROUP_ORDER, SOURCE_GROUP_RU: SOURCE_GROUP_RU, AI_ASSISTANT_ORDER: AI_ASSISTANT_ORDER, AI_ASSISTANT_NAMES: AI_ASSISTANT_NAMES, PROMO_PLATFORMS: PROMO_PLATFORMS, PROMO_PLATFORM_RU: PROMO_PLATFORM_RU,
     PROMO_STATUS_RU: PROMO_STATUS_RU, CLICK_CLASS_RU: CLICK_CLASS_RU, PROMO_CURRENCIES: PROMO_CURRENCIES, PROMO_ROUTES: PROMO_ROUTES,
     PROMO_LOCALES: PROMO_LOCALES, routeLabel: routeLabel, promoSlugValid: promoSlugValid, promoSlug: promoSlug, promoLinks: promoLinks,
     promoMetrics: promoMetrics,
@@ -792,6 +867,9 @@
     CATEGORY_RU: CATEGORY_RU, CATEGORY_ICON: CATEGORY_ICON, SEVERITY_RU: SEVERITY_RU, MODE_RU: MODE_RU, STATUS_RU: STATUS_RU,
     FEED_KIND_RU: FEED_KIND_RU, HUMAN_ORDER: HUMAN_ORDER, HUMAN_RU: HUMAN_RU, COMMERCE_RU: COMMERCE_RU, COMMERCE_KIND_RU: COMMERCE_KIND_RU, commerceEventKey: commerceEventKey, retryWindowMs: retryWindowMs, renewalFailureState: renewalFailureState, formatMoney: formatMoney,
     moneyList: moneyList, usdEstimate: usdEstimate, netText: netText, deductionText: deductionText,
+    COMMERCE_LEDGER_EVENTS: COMMERCE_LEDGER_EVENTS, COMMERCE_CLIENT_EVENTS: COMMERCE_CLIENT_EVENTS, isLedgerEvent: isLedgerEvent,
+    commerceRowKind: commerceRowKind, isStoreEventRow: isStoreEventRow, storeRestores: storeRestores,
+    repeatedWallTime: repeatedWallTime, utcOffsetText: utcOffsetText, repeatedHourSuffix: repeatedHourSuffix, hourPointLabel: hourPointLabel, timeOrdered: timeOrdered,
     _zoneOffsetMinutes: zoneOffsetMinutes, _zoneCivilToUTC: zoneCivilToUTC, _zoneYMD: zoneYMD,
     _osloCivilToUTC: osloCivilToUTC, _osloYMD: osloYMD, _osloOffsetMinutes: osloOffsetMinutes
   };

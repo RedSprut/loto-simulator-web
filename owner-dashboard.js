@@ -150,7 +150,7 @@
     dayStatuses: 'Статусы активных за день аккаунтов — из серверной таблицы прав доступа: FREE, PRO (активная платная подписка), PRO Lifetime, PRO истёк/отменён. Гости — устройства без входа в аккаунт. Владелец и тестовые аккаунты считаются отдельно и в эти цифры не входят даже при включённом переключателе.',
     dayRegistrations: 'Регистрации — аккаунты, созданные в этот день (точно, из базы авторизации, без анонимных сессий и без владельца). Анонимная сессия, ставшая аккаунтом, считается по дате создания её записи.',
     dayLanguages: 'Язык интерфейса — из событий с согласием (locale приложения). Страна — из счётчиков визитов (сервер, по сети) и сессий с согласием. Это две независимые величины: язык не выводится из страны и наоборот.',
-    dayCommerce: 'Покупки, продления, отмены, возвраты, сбои оплаты, тариф (1/3/6/12 мес.) и магазин — из журнала событий магазина (вебхук RevenueCat), только оплаченные события production. Промо-доступ, пробные периоды, sandbox и Test Store считаются отдельно и покупками не являются. У событий без цены сумма не выдумывается: они показаны как «без суммы». Checkout начат / не удался — клиентские события экрана оплаты. Отмена или истечение с причиной BILLING_ERROR — не отказ от подписки: магазин не смог списать продление и повторяет оплату (RevenueCat Web Billing — до 30 дней, другие магазины — до 60); такие события показаны как «Сбой продления» и в отмены не входят. Продление в этот срок — «оплата затем прошла»; отмена или возврат клиентом считаются обычной отменой. Если срок прошёл без оплаты, подписка завершена: отдельного события RevenueCat об этом не присылает.',
+    dayCommerce: 'Покупки, продления, отмены, возвраты, сбои оплаты, тариф (1/3/6/12 мес.) и магазин — из журнала событий магазина (вебхук RevenueCat), только оплаченные события production. Промо-доступ, пробные периоды, sandbox и Test Store считаются отдельно и покупками не являются. У событий без цены сумма не выдумывается: они показаны как «без суммы». Восстановление, подтверждённое магазином, — перенос покупки (TRANSFER). «Открыли оплату», «Начали оформление» и «Checkout не удался» — события приложения, не покупки; в таблице событий магазина они помечены «Событие клиента», просмотры экранов в неё не входят. Отмена или истечение с причиной BILLING_ERROR — не отказ от подписки: магазин не смог списать продление и повторяет оплату (RevenueCat Web Billing — до 30 дней, другие магазины — до 60); такие события показаны как «Сбой продления» и в отмены не входят. Продление в этот срок — «оплата затем прошла»; отмена или возврат клиентом считаются обычной отменой. Если срок прошёл без оплаты, подписка завершена: отдельного события RevenueCat об этом не присылает.',
     dayFeatures: 'Функции — все события приложения за день: сколько раз произошло и сколько уникальных пользователей (аккаунт, человек или устройство) их совершили. Периодические отчёты об активности не показываются.',
     daySystem: 'Сбои за день: отклонённые и невалидные события приёма, ошибки разбора аналитики, недоставленные push, ошибки в приложении у пользователей и системные уведомления владельца.',
     identity: 'Шесть разных величин, которые не складываются друг в друга. Точные аккаунты — один auth-аккаунт = один пользователь, сколько бы визитов, сессий и устройств у него ни было (владелец отдельно). Оценка уникальных гостей — гостевые профили с согласием (одна стабильная анонимная идентичность) плюс дневные ключи гостей без согласия: HMAC суток, сети, браузера, ОС, устройства, платформы и языка; 50 загрузок одного такого гостя за день — 1 гость и 50 визитов, на следующий день — новый ключ. IP не хранится, ключ не считается доказанным человеком и не является аккаунтом; ключи, за которыми в тот же день был вход в аккаунт, исключены. Визиты, сессии, устройства и домохозяйства — отдельные метрики.',
@@ -175,6 +175,7 @@
     promoConsent: 'Состояние согласия в момент визита: приняли аналитику, отказались или ещё не решили. Источник перехода записывается только для тех, кто принял.',
     promoSessions: 'Сессии с согласием на аналитику. Источник берётся из перехода, которым сессия началась: домен сайта, метки кампании, признак рекламного клика. «Прямой / источник не передан» — браузер ничего не сообщил: это не обязательно ввод адреса вручную (приложения соцсетей и мессенджеры часто скрывают источник). «Неизвестно» — источник не записан (возврат в уже открытой вкладке, старые данные).',
     promoSources: 'Один источник на сессию — по одному правилу для истории и новых данных (тот же классификатор, что на сервере приёма). Метки кампании важнее сайта-источника. Регистрации и покупки показаны по первому источнику человека (first touch) — только если его устройство дало согласие до регистрации или покупки. Остальные — в строке «Атрибуция неизвестна». Владелец и боты исключены, пока не включены переключатели.',
+    promoAi: 'ИИ-ассистенты — сессии с согласием на аналитику, пришедшие из ChatGPT, Claude, Perplexity, Gemini, Copilot, DeepSeek, Grok, Mistral Le Chat и других ассистентов, которых знает классификатор: по сайту-источнику или приложению Android, а также по метке utm_source, равной адресу ассистента (ChatGPT сам добавляет utm_source=chatgpt.com). Метка, которая лишь упоминает ассистента, ничего не определяет. Ответы ИИ внутри Google и Bing (AI Overviews, AI Mode, Copilot в поиске) приходят с адреса поисковика и остаются в поиске. Переход, о котором браузер ничего не сообщил, остаётся в «Прямой / источник не передан» — ассистент не угадывается. Правило применяется при чтении: прошлые сессии показаны по сегодняшнему правилу, сохранённые данные не меняются. Регистрации и покупки — по первому источнику человека, как в таблице источников. Страны — по GeoIP сессии; «неизвестно» — GeoIP страну не определил. Визиты без согласия источника не имеют и здесь не учитываются.',
     promoConversions: 'Регистрации — точное число новых аккаунтов (без анонимных и без владельца). Покупки — оплаченные покупки из журнала магазина (без пробных периодов, промо-доступа и sandbox). Источник известен только у тех, чьё устройство дало согласие на аналитику до этого; остальным источник не приписывается.',
     promoCampaigns: 'Ваши кампании и ссылки. Ссылка ведёт на выбранную страницу Lotto Simulator и добавляет метки utm_source, utm_medium, utm_campaign (код кампании) и utm_content (код ссылки). Сессии, регистрации и покупки кампании — от людей с согласием, пришедших по её меткам. Расходы вы вносите сами.',
     promoCounting: 'Подсчёт переходов по ссылкам выключен по умолчанию. Сервер умеет считать переходы без cookie, без записи на устройство и без идентификаторов (день, ссылка, класс трафика), но EDPB (Guidelines 2/2023, Art. 5(3) ePrivacy) относит ссылки для отслеживания источника к этой статье, а Nkom не называет исключения для статистики (ekomloven § 3-15). Законность подсчёта без согласия не подтверждена, поэтому решение за вами: после собственной юридической оценки задайте секрет Supabase LOTO_PROMO_COUNT_CLICKS=1 и переразверните функцию go.',
@@ -279,12 +280,14 @@
   function timeText(value) {
     if (!value) return '—';
     try {
-      return new Date(value).toLocaleString(intl(), { timeZone: state.tz, day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+      return new Date(value).toLocaleString(intl(), { timeZone: state.tz, day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + hourSuffix(value);
     } catch (e) { return String(value); }
   }
   function clockText(value) {
-    try { return new Date(value).toLocaleTimeString(intl(), { timeZone: state.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' }); } catch (e) { return ''; }
+    try { return new Date(value).toLocaleTimeString(intl(), { timeZone: state.tz, hour: '2-digit', minute: '2-digit', second: '2-digit' }) + hourSuffix(value); } catch (e) { return ''; }
   }
+  // The repeated hour of an autumn switch day (02:00 twice in Europe/Oslo) carries its UTC offset.
+  function hourSuffix(value) { return LIB.repeatedHourSuffix ? LIB.repeatedHourSuffix(state.tz, value) : ''; }
   function label(map, key) { return (map && map[key]) ? t(map[key]) : (key || '—'); }
   function place(row) {
     var parts = [];
@@ -344,6 +347,7 @@
       : ['#1d4ed8', '#0891b2', '#7c3aed'];
   }
   function lineChart(series, keys, titles) {
+    series = LIB.timeOrdered ? LIB.timeOrdered(series) : series;
     if (!series || series.length < 2) return '<div class="ow-empty">' + esc(t('Для графика нужно минимум две точки')) + '</div>';
     var width = 720, height = 190, padLeft = 42, padBottom = 26, padTop = 12;
     var max = 0;
@@ -367,7 +371,9 @@
     var labels = series.map(function (point, i) {
       if (series.length > 8 && i % Math.ceil(series.length / 8) !== 0) return '';
       var x = padLeft + i * stepX;
-      return '<text x="' + x + '" y="' + (height - 8) + '" class="ow-axis" text-anchor="middle">' + esc(String(point.bucket).slice(5)) + '</text>';
+      // an hourly point ('YYYY-MM-DD HH:00') dated by the server is labelled from its instant
+      var text = LIB.hourPointLabel && String(point.bucket).length > 10 ? LIB.hourPointLabel(point, state.tz) : String(point.bucket).slice(5);
+      return '<text x="' + x + '" y="' + (height - 8) + '" class="ow-axis" text-anchor="middle">' + esc(text) + '</text>';
     }).join('');
     var legend = keys.map(function (key, index) {
       return '<span><i style="background:' + colors[index % colors.length] + '"></i>' + esc(t(titles[index])) + '</span>';
@@ -1501,12 +1507,18 @@
         device: row.device, status: row.owner_test ? 'owner' : (row.kind === 'verified' ? 'free' : 'guest'), who: row.person, class: row.class };
     });
   }
+  // A product_events row is a «Платёж» only when the store webhook wrote it; the client's checkout and
+  // paywall telemetry in the same table is an «Событие» of the client (never «Оплачено»).
+  function commerceKind(name, kind) { return LIB.commerceRowKind ? LIB.commerceRowKind(name, kind) : (kind || 'paid'); }
+  function commerceName(name) { return LIB.COMMERCE_RU[name] ? t(LIB.COMMERCE_RU[name]) : label(LIB.EVENT_RU, name); }
+  function feedKind(row) { return row.kind === 'commerce' && commerceKind(row.name, row.row_kind) === 'client' ? 'event' : row.kind; }
   function feedWhat(row) {
     if (row.kind === 'commerce') {
       var amount = row.price != null && row.currency ? ' · ' + esc(money(row.price, row.currency)) : '';
       var net = row.net != null && row.currency ? ' · ' + et('чистыми {{0}}', money(row.net, row.currency)) : '';
-      var kind = row.row_kind && row.row_kind !== 'paid' ? ' <span class="ow-tag ow-tag-kind">' + esc(label(LIB.COMMERCE_KIND_RU, row.row_kind)) + '</span>' : '';
-      return esc(label(LIB.COMMERCE_RU, LIB.commerceEventKey(row))) + kind + (row.plan ? ' · ' + et('{{0}} мес.', row.plan) : '') + amount + net + (row.reason ? ' · ' + esc(tx(row.reason)) : '');
+      var rowKind = commerceKind(row.name, row.row_kind);
+      var kind = rowKind !== 'paid' ? ' <span class="ow-tag ow-tag-kind">' + esc(label(LIB.COMMERCE_KIND_RU, rowKind)) + '</span>' : '';
+      return esc(commerceName(LIB.commerceEventKey(row))) + kind + (row.plan ? ' · ' + et('{{0}} мес.', row.plan) : '') + amount + net + (row.reason ? ' · ' + esc(tx(row.reason)) : '');
     }
     if (row.kind === 'account') return et('Новый аккаунт') + (row.platform ? ' · ' + esc(label(PLATFORM_RU, row.platform)) : '');
     if (row.kind === 'visits') {
@@ -1546,7 +1558,7 @@
       '<div class="ow-block" id="ow-b-feed"><div class="ow-block-h">' + et('Живая активность сегодня') + how('liveFeed') + '<span class="ow-tag" style="margin-left:auto">' + et('{{0}} записей', num(rows.length)) + '</span></div>' +
       table([
         { title: 'Время', key: 'at', html: function (r) { return esc(clockText(r.at)); } },
-        { title: 'Что', key: 'kind', html: function (r) { return '<span class="ow-tag">' + esc(label(LIB.FEED_KIND_RU, r.kind)) + '</span>'; } },
+        { title: 'Что', key: 'kind', html: function (r) { return '<span class="ow-tag">' + esc(label(LIB.FEED_KIND_RU, feedKind(r))) + '</span>'; } },
         { title: 'Событие', key: 'name', html: feedWhat },
         { title: 'Статус', key: 'status', html: function (r) { return statusChip(r.status); } },
         { title: 'Платформа', key: 'platform', html: function (r) { return esc(label(PLATFORM_RU, r.platform)); } },
@@ -1740,15 +1752,28 @@
     var grossText = moneyList(grossRows), netText = moneyList(netRows, 'amount'), dedText = moneyList(netRows, 'deductions'), refundText = moneyList(commerce.refunds_by_currency || []);
     var netTotal = (+s.net_known || 0) + (+s.net_unknown || 0);
     var notSalesRows = [['Промо-доступ', s.promo_grants], ['Пробные периоды', s.trial_starts], ['Без оплаты', s.zero_price_events], ['Sandbox / Test Store', s.sandbox_events]].filter(function (r) { return +r[1] > 0; });
+    // The payment path, each step from its own source: the app opens the checkout (checkout_open,
+    // every visitor) and reports the start (purchase_start, consented telemetry) — neither is a sale;
+    // purchases, renewals, restores and refunds are the store webhook's. The store table lists the
+    // webhook's rows and the client's payment-path rows (marked); screen views are funnel telemetry.
+    var commerceRows = commerce.events || [];
+    var storeRows = commerceRows.filter(function (r) { return LIB.isStoreEventRow ? LIB.isStoreEventRow(r.name, r.kind) : true; });
+    var funnelRows = commerceRows.length - storeRows.length;
+    var telemetry = commerce.telemetry || {};
+    // the server lists at most 200 rows of the day: a full list may hide more transfers
+    var restores = LIB.storeRestores ? LIB.storeRestores(commerceRows) : 0;
+    var restoresText = (commerceRows.length >= 200 ? '≥ ' : '') + num(restores);
     var commerceBlock = block('commerce', 'Платежи и подписки', 'dayCommerce',
       '<div class="ow-cards">' +
         dayCard('Покупки PRO', 'purchases', et('оплачено · подтверждено магазином'), 'dayCommerce', 'exact', compare) +
         dayCard('Продления', 'renewals', et('оплачено · подтверждено магазином'), 'dayCommerce', 'exact', compare) +
+        card('Восстановления', restoresText, et('перенос покупки, подтверждено магазином · приложение сообщило: {{0}}', num(telemetry.restore_success)), 'dayCommerce') +
         dayCard('Отмены', 'cancellations', et('истекло: {{0}}', num(s.expirations)), 'dayCommerce', 'exact', compare) +
         dayCard('Возвраты', 'refunds', refundText ? et('на сумму {{0}}', refundText) + (commerce.refund_usd != null ? ' · ' + esc(usdEstimate(commerce.refund_usd)) : '') : (+s.refunds ? et('сумма неизвестна') : et('возвратов не было')), 'revenue', 'exact', compare) +
         dayCard('Сбои оплаты', 'payment_failures', et('магазин + клиент'), 'dayCommerce', 'exact', compare) +
-        dayCard('Checkout начат', 'checkout_started', et('клиент открыл оплату · по телеметрии: {{0}}', num((commerce.telemetry || {}).purchase_start)), 'dayCommerce', 'exact', compare) +
-        dayCard('Checkout не удался', 'checkout_failed', et('отменено пользователем: {{0}}', num(s.checkout_cancelled)), 'dayCommerce', 'exact', compare) +
+        dayCard('Открыли оплату', 'checkout_started', et('событие приложения (checkout_open) · не покупка'), 'dayCommerce', 'exact', compare) +
+        card('Начали оформление', num(telemetry.purchase_start), et('телеметрия с согласием (purchase_start) · не покупка'), 'dayCommerce') +
+        dayCard('Checkout не удался', 'checkout_failed', et('событие приложения · отменено пользователем: {{0}}', num(s.checkout_cancelled)), 'dayCommerce', 'exact', compare) +
         card('Не продажи (отдельно)', notSalesRows.length ? notSalesRows.map(function (r) { return et(r[0]) + ': ' + num(r[1]); }).join('<br>') : '0', et('промо, пробные, без оплаты, sandbox — в покупки и суммы не входят'), 'notSales') +
       '</div>' +
       '<div class="ow-cards ow-money" style="margin-top:10px">' +
@@ -1766,8 +1791,8 @@
       '<div class="ow-block-h" style="margin-top:12px">' + et('События магазина') + '</div>' +
       table([
         { title: 'Время', key: 'at', html: function (r) { return esc(clockText(r.at)); } },
-        { title: 'Событие', key: 'name', html: function (r) { return esc(label(LIB.COMMERCE_RU, LIB.commerceEventKey(r))) + (r.error ? '<br><span class="ow-card-s">' + esc(tx(r.error)) + '</span>' : ''); } },
-        { title: 'Вид', key: 'kind', html: function (r) { var k = r.kind || 'paid'; return '<span class="ow-tag' + (k === 'paid' ? ' ow-tag-exact' : ' ow-tag-kind') + '">' + esc(label(LIB.COMMERCE_KIND_RU, k)) + '</span>'; } },
+        { title: 'Событие', key: 'name', html: function (r) { return esc(commerceName(LIB.commerceEventKey(r))) + (r.error ? '<br><span class="ow-card-s">' + esc(tx(r.error)) + '</span>' : ''); } },
+        { title: 'Вид', key: 'kind', html: function (r) { var k = commerceKind(r.name, r.kind); return '<span class="ow-tag' + (k === 'paid' ? ' ow-tag-exact' : ' ow-tag-kind') + '">' + esc(label(LIB.COMMERCE_KIND_RU, k)) + '</span>'; } },
         { title: 'Тариф', key: 'plan', html: function (r) { return r.plan ? et('{{0}} мес.', r.plan) : '—'; } },
         { title: 'Магазин', key: 'store', html: function (r) { return esc(r.store || '—'); } },
         { title: 'Сумма (gross)', key: 'price', html: function (r) { return r.price != null && r.currency ? esc(money(r.price, r.currency)) : '<span class="ow-card-s">' + et('без суммы') + '</span>'; }, numeric: true },
@@ -1777,7 +1802,8 @@
         { title: 'Статус', key: 'status', html: function (r) { return statusChip(r.status); } },
         { title: 'Страна', key: 'country', html: function (r) { return esc(r.country ? countryName(r.country) : '—'); } },
         { title: 'Причина', key: 'reason', html: function (r) { return esc(r.reason ? tx(r.reason) : '—'); } }
-      ], commerce.events, 'Событий магазина в этот день не было') +
+      ], storeRows, 'Событий магазина в этот день не было') +
+      (funnelRows > 0 ? '<div class="ow-card-s" style="margin-top:6px">' + et('Ещё {{0}} событий воронки приложения (просмотры экранов) — не платежи, в таблицу не входят.', num(funnelRows)) + '</div>' : '') +
       '<div class="ow-card-s" style="margin-top:6px">' + esc(tx(commerce.note || '')) + (commerce.net_source ? '<br>' + esc(tx(commerce.net_source)) : '') + (commerce.usd_source ? '<br>USD: ' + esc(tx(commerce.usd_source)) : '') + '</div>');
 
     var ingest = {};
@@ -2560,7 +2586,12 @@
   function actTitle(r) {
     if (r.src === 'server') return ACT_OP_RU[r.type] ? t(ACT_OP_RU[r.type]) : r.type;
     if (r.src === 'ledger') return t('Прогнозы зафиксированы в журнале: {{0}}', num(r.x && r.x.count));
-    if (r.src === 'store') return label(LIB.EVENT_RU, r.type) !== r.type ? label(LIB.EVENT_RU, r.type) : t('Событие магазина: {{0}}', r.type);
+    if (r.src === 'store') {
+      // A CANCELLATION / EXPIRATION with reason BILLING_ERROR is a failed renewal in retry (migration 084), never a cancel.
+      var x = r.x || {}, key = LIB.commerceEventKey({ name: r.type, kind: x.kind, reason: x.reason, at: r.at, store: x.store });
+      if (key !== r.type && LIB.COMMERCE_RU[key]) return t(LIB.COMMERCE_RU[key]);
+      return label(LIB.EVENT_RU, r.type) !== r.type ? label(LIB.EVENT_RU, r.type) : t('Событие магазина: {{0}}', r.type);
+    }
     return label(LIB.EVENT_RU, r.type);
   }
   function actSubline(r) {
@@ -2661,12 +2692,14 @@
       return '<button type="button" class="ow-chip" data-act-chart="' + key + ':' + k + '" aria-pressed="' + (a.charts[key] === k) + '">' + et(ACT_CHART_RU[k]) + '</button>';
     }).join('') + '</span>';
   }
-  function actBucketLabel(value, bucket) {
-    var s = String(value || '');
+  function actBucketLabel(point, bucket) {
+    var s = String(point.t || '');
+    if (bucket === 'hour' && point.at != null && LIB.hourPointLabel) return LIB.hourPointLabel(point, state.tz).slice(3);
     return bucket === 'hour' ? s.slice(8, 10) + ' ' + s.slice(11, 16) : s.slice(5, 10);
   }
   // One time-series chart in three forms (lines / bars / areas) over the same points.
   function actSeriesChart(points, keys, titles, kind, bucket) {
+    points = LIB.timeOrdered ? LIB.timeOrdered(points) : points;
     if (!points || !points.length) return '<div class="ow-empty">' + et('Нет данных за период') + '</div>';
     var width = 720, height = 200, padLeft = 42, padBottom = 26, padTop = 12, colors = chartColors().concat(['#e11d48']);
     var max = 1;
@@ -2701,7 +2734,7 @@
       if (i % every && i !== n - 1) return '';
       var x = kind === 'bar' ? padLeft + i * slot + slot / 2 : (n > 1 ? padLeft + i * stepX : padLeft + plotW / 2);
       var anchor = n > 1 && i === 0 && kind !== 'bar' ? 'start' : n > 1 && i === n - 1 && kind !== 'bar' ? 'end' : 'middle';
-      return '<text x="' + x.toFixed(1) + '" y="' + (height - 8) + '" class="ow-axis" text-anchor="' + anchor + '">' + esc(actBucketLabel(p.t, bucket)) + '</text>';
+      return '<text x="' + x.toFixed(1) + '" y="' + (height - 8) + '" class="ow-axis" text-anchor="' + anchor + '">' + esc(actBucketLabel(p, bucket)) + '</text>';
     }).join('');
     var legend = keys.map(function (k, j) { return '<span><i style="background:' + colors[j % colors.length] + '"></i>' + et(titles[j]) + '</span>'; }).join('');
     return '<div class="ow-chart"><svg viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none" role="img" aria-label="' + esc(t('График')) + '">' + ticks + marks + labels + '</svg><div class="ow-legend">' + legend + '</div></div>';
@@ -3165,6 +3198,7 @@
         kcard('Покупки', conv.purchases, et('с известным первым источником: {{0}} · покупателей: {{1}}', num(conv.purchases_attributed), num(conv.buyers)), 'promoConversions', 'exact') +
         kcard('Выручка за период', (conv.revenue || []).length ? moneyList(conv.revenue) : null, et('покупки и продления, в валюте покупателя'), 'revenue', 'exact', { text: true }) +
       '</div>');
+    html += renderPromoAi(d);
 
     // campaigns
     var campaigns = (d.campaigns || []).filter(function (c) { return ps.showFinished || c.status !== 'finished'; });
@@ -3216,6 +3250,46 @@
     if (ps.msg && !ps.sheet) html += '<div class="ow-ft-msg ' + (ps.msg.ok ? 'ok' : 'bad') + '" role="status">' + esc(ps.msg.text()) + '</div>';
     return html;
   }
+  // «ИИ-ассистенты» (2026-10-30, migration 202610300081): the group of the sources table in detail.
+  function promoDay(value) { return value ? new Date(value).toLocaleDateString(intl(), { timeZone: state.tz }) : ''; }
+  function renderPromoAi(d) {
+    var ai = d.ai_assistants;
+    // a server before 081 does not send the group: say so, never zeros
+    if (!ai) return block('pr-ai', 'ИИ-ассистенты', 'promoAi', '<div class="ow-empty">' + et('Сервер ещё не выделяет ИИ-ассистентов: такие переходы пока входят в «Другие сайты».') + '</div>');
+    var v = d.visitors || {};
+    var rows = (ai.assistants || []).filter(function (r) {
+      return LIB.AI_ASSISTANT_ORDER.indexOf(r.assistant) >= 0 || r.sessions || r.registrations || r.purchases;
+    }).map(function (r) { return Object.assign({ __class: r.sessions || r.registrations || r.purchases ? '' : 'ow-muted' }, r); });
+    var countries = function (r) {
+      var list = (r.countries || []).map(function (c) { return (c.country ? flagName(c.country) : t('неизвестно')) + ' ' + num(c.sessions); });
+      var named = (r.countries || []).filter(function (c) { return c.country; }).length;
+      var more = Math.max(0, (+r.countries_total || 0) - named);
+      return list.length ? esc(list.join(' · ')) + (more ? ' <span class="ow-card-s">' + et('и ещё {{0}}', num(more)) + '</span>' : '') : '—';
+    };
+    var dates = function (r) {
+      if (!r.first_at) return '—';
+      var first = promoDay(r.first_at), last = promoDay(r.last_at);
+      return esc(first === last ? first : first + ' — ' + last);
+    };
+    return block('pr-ai', 'ИИ-ассистенты', 'promoAi',
+      '<div class="ow-cards">' +
+        kcard('Сессии из ИИ-ассистентов', ai.sessions, et('из {{0}} сессий с согласием', num(v.sessions)), 'promoAi', 'consented') +
+        kcard('Люди', ai.people, et('разные люди этих сессий'), 'promoAi', 'consented') +
+        kcard('Регистрации', ai.registrations, et('первый источник — ИИ-ассистент'), 'promoConversions', 'exact') +
+        kcard('Покупки', ai.purchases, et('первый источник — ИИ-ассистент'), 'promoConversions', 'exact') +
+      '</div>' +
+      lineChart(d.daily || [], ['sessions_ai'], ['Сессии из ИИ-ассистентов']) +
+      table([
+        { title: 'ИИ-ассистент', key: 'assistant', html: function (r) { return '<span data-i18n-ignore>' + esc(LIB.AI_ASSISTANT_NAMES[r.assistant] || r.assistant) + '</span>'; } },
+        { title: 'Сессии', key: 'sessions', numeric: true, html: function (r) { return num(r.sessions); } },
+        { title: 'Люди', key: 'people', numeric: true, html: function (r) { return num(r.people); } },
+        { title: 'Регистрации', key: 'registrations', numeric: true, html: function (r) { return num(r.registrations); } },
+        { title: 'Покупки', key: 'purchases', numeric: true, html: function (r) { return num(r.purchases); } },
+        { title: 'Страны', key: 'countries', html: countries },
+        { title: 'Первая — последняя сессия', key: 'first_at', html: dates }
+      ], rows, 'Нет переходов из ИИ-ассистентов за период') +
+      '<div class="ow-card-s">' + et('Ответы ИИ внутри Google и Bing приходят с адреса поисковика и остаются в Google и Bing. Переход без источника остаётся в «Прямой / источник не передан»: ассистент не угадывается.') + '</div>');
+  }
   var PLATFORM_APIS = [
     ['Reddit', 'Комментарии и голоса своих постов; просмотров в API нет.', 'Одобрение доступа к Data API (Responsible Builder Policy).'],
     ['Instagram', 'Просмотры, охват и взаимодействия своих публикаций.', 'Профессиональный аккаунт (Business / Creator), приложение Meta.'],
@@ -3228,6 +3302,7 @@
   var PROMO_UNKNOWN = [
     'Источник посетителей без согласия на аналитику: для них есть только обезличенные счётчики визитов, без источника.',
     'Источник, который браузер не передал: приложения соцсетей, мессенджеры и настройки приватности часто скрывают его — такие сессии попадают в «Прямой / источник не передан».',
+    'Ответы ИИ внутри поисковиков (Google AI Overviews и AI Mode, Copilot в Bing): браузер сообщает только адрес поисковика, поэтому такие переходы учитываются как Google или Bing, а не как ИИ-ассистенты.',
     'Поисковые запросы конкретных посетителей: Google их не передаёт; запросы и позиции видны только в сводке Search Console.',
     'Регистрации и покупки людей без согласия или с другого устройства: они учтены в итогах, но их источник — «Атрибуция неизвестна».',
     'Просмотры и охват публикаций внутри самих площадок: без подключения их API этих данных нет.',
