@@ -3898,8 +3898,27 @@
         if (!(W.LotoAuth && W.LotoAuth.getSession)) return;
         var session = await W.LotoAuth.getSession();
         var button = D.getElementById('acc-owner-btn');
+        var jackpot = D.getElementById('acc-jackpot-btn');
+        if (jackpot) jackpot.hidden = true;
         if (!session || !session.user || session.user.is_anonymous) { if (button) button.hidden = true; return; }
         var owner = await isOwner();
+        var current = await W.LotoAuth.getSession();
+        if (!current || current.user.id !== session.user.id || current.access_token !== session.access_token) return;
+        if (jackpot) {
+          jackpot.hidden = !owner;
+          if (owner && !jackpot.__wired) {
+            jackpot.__wired = true;
+            jackpot.addEventListener('click', async function () {
+              jackpot.disabled = true;
+              try {
+                if (!(await isOwner())) { jackpot.hidden = true; return; }
+                await W.LotoLoadRuntimeScript('jackpot-ceremony.js');
+                await W.LotoJackpotCeremony.openOwner();
+              } catch (e) { jackpot.hidden = true; }
+              finally { jackpot.disabled = false; }
+            });
+          }
+        }
         if (!button) return;
         if (!button.textContent) button.textContent = 'Панель владельца';
         button.hidden = !owner;
