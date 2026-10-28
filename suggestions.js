@@ -1,7 +1,7 @@
 /* Public form + owner inbox. Database permissions remain the authority for every owner action. */
 (function () {
   'use strict';
-  var W=window,D=document,overlay=null,busy=false,ownerHost=null,ownerButton=null,timer=null;
+  var W=window,D=document,overlay=null,opener=null,busy=false,ownerHost=null,ownerButton=null,timer=null;
   var requestId=null,offset=0,ownerData=null,ownerBusy=false,pendingReply={},ownerEpoch=0;
   function lang(owner){
     var app=D.documentElement.lang||'en';
@@ -41,13 +41,21 @@
   }
   function field(label,control){return '<label class="sg-field"><span>'+esc(label)+'</span>'+control+'</label>';}
   function relabelPublic(){
-    D.querySelectorAll('[data-suggestion-open]').forEach(function(b){b.setAttribute('aria-label',t('action'));b.title=t('action');var label=b.querySelector('.suggestion-label');if(label)label.textContent=t('action');});
+    D.querySelectorAll('[data-suggestion-open] .suggestion-label').forEach(function(label){label.textContent=t('action');});
     if(!overlay)return;
+    validate();
     overlay.querySelectorAll('[data-sgt]').forEach(function(el){el.textContent=t(el.dataset.sgt);});
     overlay.querySelector('.sg-close').setAttribute('aria-label',t('close'));
     overlay.querySelector('#sg-email-note').textContent=t(overlay.dataset.signed==='1'?'verified':'optional');
     if(busy)overlay.querySelector('[type=submit]').textContent=t('sending');
     var notice=overlay.querySelector('#sg-notice');if(notice.dataset.key)notice.textContent=t(notice.dataset.key);
+  }
+  // The form's own words for invalid fields: the browser's default bubble text follows the browser's
+  // language, not the app's. Recomputed on every input and language change, before reportValidity.
+  function validate(){
+    var form=overlay.querySelector('form'),message=form.elements.message,email=form.elements.email;
+    message.setCustomValidity(message.value.trim()?'':t('required'));
+    email.setCustomValidity('');email.setCustomValidity(email.validity.typeMismatch?t('invalidEmail'):'');
   }
   function build(){
     if(overlay)return;
@@ -63,17 +71,20 @@
     // These labels repaint in place without replacing a typed draft.
     var labels=overlay.querySelectorAll('.sg-field>span');labels[0].dataset.sgt='email';labels[1].dataset.sgt='message';
     D.body.appendChild(overlay);
-    overlay.__lotoClose=function(){overlay.classList.remove('show');D.getElementById('suggestion-btn').setAttribute('aria-expanded','false');};
+    overlay.__lotoClose=function(){overlay.classList.remove('show');if(opener)opener.setAttribute('aria-expanded','false');};
     overlay.querySelector('.sg-close').onclick=close;
     overlay.addEventListener('click',function(e){if(e.target===overlay)close();});
     overlay.querySelector('form').addEventListener('submit',submit);
-    overlay.querySelector('form').addEventListener('input',function(){if(!busy)requestId=null;});
+    overlay.querySelector('form').addEventListener('input',function(){if(!busy)requestId=null;validate();});
     if(W.LotoModals)W.LotoModals.register(overlay);
     relabelPublic();
   }
   function close(){if(W.LotoModals)W.LotoModals.closeModal(overlay.id);else overlay.__lotoClose();}
-  async function open(){
+  // from: the pressed entry (Home .mine-actions or About); it alone reports the dialog as expanded.
+  async function open(from){
     build();
+    if(opener&&opener!==from)opener.setAttribute('aria-expanded','false');
+    opener=from||D.querySelector('[data-suggestion-open]');
     var email=overlay.querySelector('#sg-email');email.disabled=true;
     try {
       var s=await session(),u=s&&s.user,signed=!!(u&&!u.is_anonymous&&u.email);
@@ -82,7 +93,7 @@
       else {if(email.readOnly)email.value='';email.readOnly=false;}
     } catch {overlay.dataset.signed='0';email.readOnly=true;}
     email.disabled=false;relabelPublic();
-    D.getElementById('suggestion-btn').setAttribute('aria-expanded','true');
+    if(opener)opener.setAttribute('aria-expanded','true');
     if(W.LotoModals)W.LotoModals.openModal(overlay.id);else overlay.classList.add('show');
   }
   function notice(key){var n=overlay.querySelector('#sg-notice');n.dataset.key=key;n.textContent=t(key);return n;}
@@ -94,8 +105,8 @@
   }
   async function submit(e){
     e.preventDefault();if(busy)return;
-    var form=e.target;if(!form.reportValidity())return;
-    var message=form.elements.message.value.trim();if(!message){form.elements.message.focus();return;}
+    var form=e.target;validate();if(!form.reportValidity())return;
+    var message=form.elements.message.value.trim();
     busy=true;form.querySelector('[type=submit]').disabled=true;notice('');relabelPublic();
     // Keep the same id after an uncertain network result; the database deduplicates retries.
     requestId=requestId||id();
@@ -171,7 +182,7 @@
     ownerButton.hidden=false;ownerButton.textContent=t('owner',true);updateUnread();if(!timer)timer=setInterval(updateUnread,60000);
   }
   function stopOwner(){ownerEpoch++;if(timer){clearInterval(timer);timer=null;}if(ownerHost){ownerHost.hidden=true;ownerHost.innerHTML='';}if(ownerButton)ownerButton.hidden=true;ownerData=null;pendingReply={};}
-  D.addEventListener('click',function(e){if(e.target.closest('[data-suggestion-open]')){e.preventDefault();if(overlay&&overlay.querySelector('form').hidden){overlay.querySelector('form').hidden=false;notice('');}open();}});
+  D.addEventListener('click',function(e){var from=e.target.closest('[data-suggestion-open]');if(from){e.preventDefault();if(overlay&&overlay.querySelector('form').hidden){overlay.querySelector('form').hidden=false;notice('');}open(from);}});
   W.addEventListener('loto:languagechange',function(){relabelPublic();if(ownerData)repaintOwner();else if(ownerButton)ownerButton.textContent=t('owner',true);});
   W.addEventListener('loto:ownerlanguagechange',function(){if(ownerData)repaintOwner();else if(ownerButton)ownerButton.textContent=t('owner',true);});
   W.LotoSuggestions={open:open,startOwner:startOwner,stopOwner:stopOwner,closeOwner:closeOwner,openOwner:openOwner};

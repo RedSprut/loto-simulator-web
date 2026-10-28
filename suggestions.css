@@ -1,8 +1,5 @@
-/* Uses the app's existing theme tokens and modal manager. */
-#suggestion-btn{color:#482a08;background:#f1c56c;border-color:#d4a54b;flex-shrink:0}
-#suggestion-btn svg{width:21px;height:21px;display:block}
-#suggestion-btn .suggestion-label{display:none}
-@media(min-width:1100px){#suggestion-btn{width:auto;display:flex;gap:7px;padding:0 12px}#suggestion-btn .suggestion-label{display:inline;font-size:12px;font-weight:800}}
+/* The form uses the app's existing theme tokens and modal manager. Its Home entry is a .guide-replay
+   in .mine-actions (discovery-ux.css); the About entry is a .btn-exp beside Support. */
 #suggestions-ov{position:fixed;inset:0;z-index:10010;background:rgba(8,4,12,.7);display:none;align-items:center;justify-content:center;padding:12px}
 #suggestions-ov.show{display:flex}
 .sg-box{box-sizing:border-box;width:min(590px,100%);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;border:1px solid var(--border);border-radius:22px;padding:22px;background:var(--bg2);color:var(--fg);box-shadow:0 20px 80px #0005;text-align:left}
@@ -34,13 +31,6 @@
 #ow-ov #owner-suggestions-view .sg-box{margin:0 auto;max-height:none;overflow:visible;width:min(850px,100%);box-shadow:none}
 #owner-suggestions-btn{white-space:normal}
 @media(max-width:390px){.sg-box{padding:16px;border-radius:16px}.sg-head h2{font-size:17px}#suggestions-ov{padding:8px}.sg-box{max-height:calc(100dvh - 16px)}.sg-card{padding:10px}}
-/* Keep existing 44 px touch controls. The labelled action gets its own line on phones. */
-@media(max-width:699px){
-  #main-hdr{flex-wrap:wrap;gap:6px}
-  #main-hdr #suggestion-btn{order:1;flex:1 0 100%;width:100%;border-radius:12px;gap:8px;padding:7px 12px;min-height:44px;height:auto}
-  #suggestion-btn .suggestion-label{display:inline;font-size:13px;font-weight:800;line-height:1.35}
-}
-@media(max-width:360px){html.has-internal-back #main-hdr .hdr-logo{display:none}}
 #owner-suggestions-btn[hidden]{display:none!important}
 
 #ow-ov #owner-suggestions-view .sg-primary{color:#fff;background:#1d4ed8;border-color:#1d4ed8}
