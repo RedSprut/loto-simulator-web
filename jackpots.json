@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-10-28T00:36:02.005Z",
+  "updated": "2026-10-28T07:50:35.780Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -92,21 +92,22 @@
       "source": "powerball.com"
     },
     "mega": {
-      "amount": "443",
+      "amount": "463",
       "prefix": "$",
       "sub": "MILLION · ESTIMATED",
       "cur": "USD",
       "currency": "USD",
-      "display": "$443 MILLION · ESTIMATED",
-      "lastDrawDate": "2026-10-23",
-      "expectedLastDraw": "2026-10-23",
-      "nextDrawDate": "2026-10-27",
-      "updatedAt": "2026-10-28T00:36:02.005Z",
-      "sourceUpdatedAt": "2026-10-28T00:36:02.005Z",
-      "sourceNextDraw": null,
+      "display": "$463 MILLION · ESTIMATED",
+      "lastDrawDate": "2026-10-27",
+      "expectedLastDraw": "2026-10-27",
+      "nextDrawDate": "2026-10-30",
+      "updatedAt": "2026-10-28T07:50:35.780Z",
+      "sourceUpdatedAt": "2026-10-28T07:50:35.780Z",
+      "sourceNextDraw": "2026-10-30",
       "status": "fresh",
       "synced": true,
-      "source": "megamillions.com"
+      "source": "megamillions.com",
+      "sourceUrl": "https://www.megamillions.com/cmspages/utilservice.asmx/GetLatestDrawData"
     },
     "euromillions": {
       "amount": "89",
@@ -188,33 +189,23 @@
       ]
     },
     "lottomax": {
-      "amount": "25",
+      "amount": "30",
       "prefix": "$",
       "sub": "MILLION CAD",
       "cur": "CAD",
       "currency": "CAD",
-      "display": "$25 MILLION CAD",
-      "lastDrawDate": "2026-10-23",
-      "expectedLastDraw": "2026-10-23",
-      "nextDrawDate": "2026-10-27",
-      "updatedAt": "2026-10-28T00:36:02.005Z",
-      "sourceUpdatedAt": "2026-10-28T00:36:02.005Z",
-      "sourceNextDraw": "2026-10-27",
+      "display": "$30 MILLION CAD",
+      "lastDrawDate": "2026-10-27",
+      "expectedLastDraw": "2026-10-27",
+      "nextDrawDate": "2026-10-30",
+      "updatedAt": "2026-10-28T07:50:35.780Z",
+      "sourceUpdatedAt": "2026-10-28T07:50:35.780Z",
+      "sourceNextDraw": "2026-10-30",
       "status": "fresh",
       "synced": true,
       "source": "wclc.com lotto max",
       "sourceUrl": "https://www.wclc.com/winning-numbers/lotto-max-extra.htm",
       "sourceAttempts": [
-        {
-          "source": "olg.ca",
-          "ok": false,
-          "sourceUrl": "https://www.olg.ca/en/lottery/play-lotto-max-encore.html"
-        },
-        {
-          "source": "wclc.com",
-          "ok": false,
-          "sourceUrl": "https://www.wclc.com/"
-        },
         {
           "source": "wclc.com lotto max",
           "ok": true,
