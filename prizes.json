@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-28T07:50:35.780Z",
+  "updatedAt": "2026-10-28",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
@@ -88123,7 +88123,7 @@
         "date": "2026-09-04",
         "lotteryId": "megaMillions",
         "currency": "USD",
-        "jackpot": 177,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -88180,8 +88180,8 @@
             "winners": 148437
           }
         ],
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-09-04"
+        "source": "NY Open Data / Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/winning-numbers/previous-drawings"
       },
       {
         "date": "2026-09-01",
@@ -107647,7 +107647,7 @@
         "date": "2026-09-04",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 20,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "7",
@@ -107705,7 +107705,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1267"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=1"
       },
       {
         "date": "2026-09-01",
