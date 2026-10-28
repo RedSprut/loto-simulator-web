@@ -2,15 +2,29 @@
   'use strict';
   if(!('serviceWorker'in navigator)||window.LotoNativeBilling?.isNative)return;
   if(!/^https?:$/.test(location.protocol))return;
-  const hadController=Boolean(navigator.serviceWorker.controller);
-  let reloading=false;
+  // No reload on a deploy (service-worker.js fromBuild); an older tab restarts on a return after 30 min.
+  const BUILD=document.documentElement.getAttribute('data-build')||'';
+  let stale=false,hiddenAt=0,reloading=false;
+  function controllerBuild(){
+    const worker=navigator.serviceWorker.controller;
+    if(!worker||typeof MessageChannel!=='function')return Promise.resolve('');
+    return new Promise(resolve=>{
+      const channel=new MessageChannel();
+      const timer=setTimeout(()=>resolve(''),3000);
+      channel.port1.onmessage=event=>{clearTimeout(timer);resolve(String(event.data||''));};
+      try{worker.postMessage({type:'BUILD'},[channel.port2]);}catch(_e){clearTimeout(timer);resolve('');}
+    });
+  }
   navigator.serviceWorker.addEventListener('controllerchange',()=>{
-    if(!hadController||reloading)return;
+    controllerBuild().then(build=>{if(build&&BUILD&&build!==BUILD)stale=true;});
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden'){hiddenAt=Date.now();return;}
+    const away=hiddenAt?Date.now()-hiddenAt:0;
+    hiddenAt=0;
+    if(!stale||reloading||away<18e5)return;
     reloading=true;
-    // A new version activating during the startup preloader must not replay it: Lottery Whirl finishes
-    // its flight, keeps the composition for the reloaded page (which continues it) and reloads then;
-    // after it has finished, the reloaded page skips it.
-    const whirl=window.LotoWhirl;
+    const whirl=window.LotoWhirl;   // skipped on the restart
     if(whirl&&typeof whirl.handOver==='function'&&whirl.handOver(()=>location.reload()))return;
     location.reload();
   });

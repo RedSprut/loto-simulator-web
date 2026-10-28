@@ -1,10 +1,17 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the 5c5db66 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the 55d9bb7 placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-auto-20261028-tnldpt';
+const CACHE_VERSION='loto-shell-v55d9bb7';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
+// The deploy this worker belongs to. Every script, stylesheet and catalog a built page loads carries
+// its own deploy as ?v=<build>, so the worker can tell a page of ANOTHER deploy from its own and
+// serve each page the files of the deploy it was built with (see fromBuild). That is what lets a new
+// worker take over open pages without reloading them.
+const BUILD='55d9bb7';
+const BUILT=!BUILD.startsWith('__');
+const shellCacheOf=build=>`loto-shell-v${build}-static`;
 const CORE_PRECACHE=[
   './','./index.html','./commercial-config.js',
   './i18n-catalog.js','./lang-detect.js','./i18n-runtime.js','./commercial-runtime.js','./pwa-runtime.js','./native-loader.js','./external-link-runtime.js',
@@ -40,7 +47,10 @@ const inflightPrecache=new Map();
 // loadCourtApp() gave up after 20s and showed «Анализ недоступен». So it runs AFTER activation,
 // one file at a time, it skips what is already cached, and it does not force-reload the HTTP
 // cache (the cache name already carries the build SHA, so a stale copy is impossible).
-let optionalPrecacheStarted=false,lastPageRequest=0;
+// superseded: a page of a NEWER deploy has asked this worker for its files. The network now serves
+// that deploy, so anything this worker downloaded from here on would put the new deploy's files
+// into this deploy's cache.
+let optionalPrecacheStarted=false,lastPageRequest=0,superseded=false;
 const idle=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 // The precache is opportunistic: it only ever runs while the page is asking for nothing. A user
 // who taps a lazily loaded screen must win that race every time — the whole point of this queue
@@ -55,8 +65,13 @@ async function whenPageIsQuiet(quietMs=1500,maxWaitMs=30000){
 }
 async function precacheOptional(){
   const cache=await caches.open(SHELL_CACHE);
+  // It stops as soon as a newer deploy is out (a page of it asked for its files, or its worker is
+  // installing): the files fetched then would be the new deploy's, and this queue's waitUntil is what
+  // holds back the new worker's activation.
+  const outdated=()=>superseded||self.registration.installing||self.registration.waiting;
   for(const url of OPTIONAL_PRECACHE){
     await whenPageIsQuiet();
+    if(outdated())return;
     try{
       if(await cache.match(url,{ignoreSearch:true}))continue;
       const request=new Request(url);
@@ -73,8 +88,9 @@ async function precacheOptional(){
 
 self.addEventListener('install',event=>{
   // Take over immediately so a version bump reaches returning users / installed
-  // PWAs on the very next visit (with clients.claim() on activate), and the old
-  // cache (stale index.html / JS) is purged — no manual Safari cache clearing.
+  // PWAs on the very next visit (with clients.claim() on activate), and older
+  // caches are purged — no manual Safari cache clearing. Taking over an open page
+  // needs no reload: each page keeps getting its own deploy's files (fromBuild).
   self.skipWaiting();
   event.waitUntil(caches.open(SHELL_CACHE).then(cache=>
     cache.addAll(CORE_PRECACHE.map(url=>new Request(url,{cache:'reload'})))
@@ -83,8 +99,12 @@ self.addEventListener('install',event=>{
 
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
+    // The previous deploy's shell is kept: tabs of that deploy may still be open (nothing reloads them
+    // any more) and load their lazy files from it by ?v=<their build>. Every older version goes.
+    // caches.keys() lists caches in the order they were created.
     const names=await caches.keys();
-    await Promise.all(names.filter(name=>name!==SHELL_CACHE&&name!==DATA_CACHE).map(name=>caches.delete(name)));
+    const previous=names.filter(name=>/^loto-shell-v.+-static$/.test(name)&&name!==SHELL_CACHE).pop();
+    await Promise.all(names.filter(name=>name!==SHELL_CACHE&&name!==DATA_CACHE&&name!==previous).map(name=>caches.delete(name)));
     await self.clients.claim();
   })());
 });
@@ -94,7 +114,14 @@ self.addEventListener('message',event=>{
     self.skipWaiting();
     return;
   }
+  // pwa-runtime.js asks the worker that has just taken over which deploy it serves.
+  if(event.data?.type==='BUILD'){
+    event.ports?.[0]?.postMessage(BUILT?BUILD:'');
+    return;
+  }
   if(event.data?.type!=='CACHE_LOCALE')return;
+  // A page of another deploy asking: the catalog on the network is not this deploy's.
+  if(BUILT&&event.data.build&&event.data.build!==BUILD)return;
   const code=String(event.data.code||'').toLowerCase();
   if(!SUPPORTED_LOCALES.has(code))return;
   // A lazily loaded catalog part (i18n/court-<code>.json) is cached the same way once it was used.
@@ -146,6 +173,40 @@ async function staleWhileRevalidate(request){
   return network||Response.error();
 }
 
+// The deploy a request belongs to when it is NOT this worker's: its ?v=<build> (a short git SHA).
+function foreignBuild(url){
+  if(!BUILT)return '';
+  const build=url.searchParams.get('v')||'';
+  return build&&build!==BUILD&&/^[0-9a-f]{7,40}$/i.test(build)?build:'';
+}
+// A page of another deploy gets that deploy's files, never this worker's copies (which would run
+// two deploys' code in one page — the reason a deploy used to reload every open page):
+//  · a NEWER page (the first visit after a deploy, while this older worker still controls it) finds
+//    them in the new worker's cache once that has installed, otherwise on the network, which serves
+//    the newest deploy;
+//  · an OLDER page (a tab left open across a deploy) finds them in its deploy's cache, kept by
+//    `activate` for exactly this.
+// Nothing is stored here: this worker's cache holds this deploy only.
+async function fromBuild(request,build){
+  const name=shellCacheOf(build);
+  if(await caches.has(name)){
+    const cached=await (await caches.open(name)).match(request,{ignoreSearch:true});
+    if(cached)return cached;
+  }else{
+    // No cache of that deploy: a newer one whose worker has not installed yet (activate keeps the
+    // previous deploy's cache; only a tab two or more deploys old can also land here, and stopping the
+    // optional precache for it costs nothing but a later retry).
+    superseded=true;
+  }
+  try{
+    return await fetch(request);
+  }catch(error){
+    const cached=await caches.match(request,{ignoreSearch:true});
+    if(cached)return cached;
+    throw error;
+  }
+}
+
 self.addEventListener('fetch',event=>{
   const request=event.request;
   // The optional precache is started from the FIRST request the page makes, not from `activate`:
@@ -164,6 +225,11 @@ self.addEventListener('fetch',event=>{
   if(/\/(?:results|jackpots|prizes|commercial-metadata)\.json$/i.test(url.pathname)){
     // Revalidated on every read (no-cache): an unchanged file costs a 304, a new one arrives at once.
     event.respondWith(networkFirst(request,DATA_CACHE,'no-cache'));
+    return;
+  }
+  const build=foreignBuild(url);
+  if(build){
+    event.respondWith(fromBuild(request,build));
     return;
   }
   // 3D-drum CODE (audio.js / main.js and the whole module graph) must NEVER be served
