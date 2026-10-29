@@ -15,10 +15,10 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-10-29T18:42:18.901Z",
-    "sourceFetchedAt": "2026-10-29T18:42:18.901Z",
+    "generatedAt": "2026-10-29T22:02:12.770Z",
+    "sourceFetchedAt": "2026-10-29T22:02:12.770Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "db091bfa8a0b8799",
+    "snapshotVersion": "8250d7d9895b8fd6",
     "updatedAt": "2026-10-29",
     "latestDrawByGame": {
       "lotto": "2026-10-24",
@@ -27,7 +27,7 @@
       "powerball": "2026-10-28",
       "megaMillions": "2026-10-27",
       "euroMillions": "2026-10-27",
-      "superEnalotto": "2026-10-27",
+      "superEnalotto": "2026-10-29",
       "lottoMax": "2026-10-27",
       "powerballAustralia": "2026-10-29"
     },
@@ -38,7 +38,7 @@
       "powerball": 1426,
       "megaMillions": 163,
       "euroMillions": 1053,
-      "superEnalotto": 4291,
+      "superEnalotto": 4292,
       "lottoMax": 57,
       "powerballAustralia": 446
     },
@@ -82,8 +82,8 @@
       "superEnalotto": {
         "status": "ok",
         "source": "National-Lottery.com / Lottologia",
-        "fetched": 4291,
-        "merged": 4291
+        "fetched": 4292,
+        "merged": 4292
       },
       "lottoMax": {
         "status": "ok",
@@ -12601,6 +12601,67 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-10-29",
+        "main": [
+          13,
+          20,
+          41,
+          60,
+          77,
+          85
+        ],
+        "bonus": [
+          44
+        ],
+        "jackpot": 46.6,
+        "lotteryId": "superEnalotto",
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/29-10-2026",
+        "drawId": null,
+        "superStar": 60,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 46600243.67,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 32492.19,
+            "winners": 5
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 387.58,
+            "winners": 429
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 30.22,
+            "winners": 16505
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 5.52,
+            "winners": 280063
+          }
+        ],
+        "currency": "EUR",
+        "ruleVersion": "superenalotto-6-90",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-10-27",
         "main": [
           23,
@@ -13467,10 +13528,10 @@
         "bonus": [
           77
         ],
-        "jackpot": 34.8,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/02-10-2026",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
         "drawId": null,
         "payoutTiers": [
           {
@@ -14365,67 +14426,6 @@
           }
         ],
         "superStar": 47,
-        "currency": "EUR",
-        "ruleVersion": "superenalotto-6-90",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-09-05",
-        "main": [
-          12,
-          24,
-          28,
-          32,
-          37,
-          78
-        ],
-        "bonus": [
-          40
-        ],
-        "jackpot": null,
-        "lotteryId": "superEnalotto",
-        "source": "National-Lottery.com / SuperEnalotto",
-        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
-        "drawId": null,
-        "payoutTiers": [
-          {
-            "match": "6",
-            "label": "Match 6",
-            "prizeAmount": 220488458.44,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "Match 5 + Jolly",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "Match 5",
-            "prizeAmount": 214992.87,
-            "winners": 1
-          },
-          {
-            "match": "4",
-            "label": "Match 4",
-            "prizeAmount": 338.18,
-            "winners": 645
-          },
-          {
-            "match": "3",
-            "label": "Match 3",
-            "prizeAmount": 26.83,
-            "winners": 24533
-          },
-          {
-            "match": "2",
-            "label": "Match 2",
-            "prizeAmount": 5.29,
-            "winners": 386764
-          }
-        ],
-        "superStar": 16,
         "currency": "EUR",
         "ruleVersion": "superenalotto-6-90",
         "ruleEra": "current"
