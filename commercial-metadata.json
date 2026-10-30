@@ -369,7 +369,7 @@
       "freeDraws": 15
     },
     "eurojackpot": {
-      "availableDraws": 1002,
+      "availableDraws": 1003,
       "freeDraws": 30
     },
     "powerball": {
@@ -381,11 +381,11 @@
       "freeDraws": 12
     },
     "euroMillions": {
-      "availableDraws": 1993,
+      "availableDraws": 1994,
       "freeDraws": 51
     },
     "superEnalotto": {
-      "availableDraws": 4292,
+      "availableDraws": 4293,
       "freeDraws": 30
     },
     "lottoMax": {
