@@ -313,7 +313,9 @@ html, body {
 .dd-close:hover { background: rgba(255,255,255,.13); color: #fff; }
 .dd-close:active { transform: scale(.94); }
 .dd-close:focus-visible,.dd-gear:focus-visible { outline: 2px solid color-mix(in srgb,var(--gold) 82%,white); outline-offset: 2px; }
-.dd-row { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+/* A long label + game list that do not fit one line (lt «Žaidimas» at 320 px) wrap instead of pushing
+   the list into the panel padding; rows that fit keep their one-line layout. */
+.dd-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px;
   font-size: 13px; color: var(--sub); margin: 10px 0; }
 .dd-row select, .dd-row input[type="range"] { accent-color: var(--gold); }
 .dd-row select {

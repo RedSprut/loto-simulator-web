@@ -24,7 +24,7 @@ export const DRUM_LOCALES = ['ru', 'en', 'no', 'sv', 'da', 'fi', 'de', 'fr', 'es
 export const DRUM_STRINGS = {
   // ── Result-group / pool labels ───────────────────────────────────────────
   'pool.main': {
-    ru: 'Основные', en: 'Main numbers', no: 'Hovedtall', sv: 'Huvudtal', da: 'Hovedtal',
+    ru: 'Основные', en: 'Main numbers', no: 'Hovedtall', sv: 'Huvudnummer', da: 'Hovedtal',
     fi: 'Päänumerot', de: 'Hauptzahlen', fr: 'Numéros principaux', es: 'Números principales',
     it: 'Numeri principali', pt: 'Números principais', pl: 'Liczby główne', nl: 'Hoofdgetallen',
     et: 'Põhinumbrid', lv: 'Pamatskaitļi', lt: 'Pagrindiniai skaičiai',
@@ -37,8 +37,8 @@ export const DRUM_STRINGS = {
     uk: 'Зірки',
   },
   'pool.tilleggstall': {
-    ru: 'Tilleggstall', en: 'Tilleggstall', no: 'Tilleggstall', sv: 'Tilleggstall', da: 'Tilleggstall',
-    fi: 'Tilleggstall', de: 'Tilleggstall', fr: 'Tilleggstall', es: 'Tilleggstall', it: 'Tilleggstall',
+    ru: 'Доп. число', en: 'Bonus', no: 'Tilleggstall', sv: 'Tilleggstall', da: 'Tillægstal',
+    fi: 'Tilleggstall', de: 'Zusatzzahlen', fr: 'Tilleggstall', es: 'Tilleggstall', it: 'Tilleggstall',
     pt: 'Tilleggstall', pl: 'Tilleggstall', nl: 'Tilleggstall', et: 'Tilleggstall', lv: 'Tilleggstall', lt: 'Tilleggstall',
     uk: 'Tilleggstall',
   },
@@ -49,7 +49,7 @@ export const DRUM_STRINGS = {
     uk: 'Viking',
   },
   'pool.euro': {
-    ru: 'Euro', en: 'Euro', no: 'Euro', sv: 'Euro', da: 'Euro',
+    ru: 'Евро-числа', en: 'Euro', no: 'Euro', sv: 'Euro', da: 'Euro',
     fi: 'Euro', de: 'Euro', fr: 'Euro', es: 'Euro', it: 'Euro',
     pt: 'Euro', pl: 'Euro', nl: 'Euro', et: 'Euro', lv: 'Euro', lt: 'Euro',
     uk: 'Euro',
@@ -173,12 +173,12 @@ export const DRUM_STRINGS = {
   },
   'settings.reset': {
     ru: 'Сбросить', en: 'Reset', no: 'Nullstill', sv: 'Återställ', da: 'Nulstil',
-    fi: 'Palauta', de: 'Zurücksetzen', fr: 'Réinitialiser', es: 'Restablecer', it: 'Reimposta',
+    fi: 'Nollaa', de: 'Zurücksetzen', fr: 'Réinitialiser', es: 'Restablecer', it: 'Reimposta',
     pt: 'Repor', pl: 'Resetuj', nl: 'Herstellen', et: 'Lähtesta', lv: 'Atiestatīt', lt: 'Atstatyti',
     uk: 'Скинути',
   },
   'settings.note': {
-    ru: 'Победитель определяется только когда шар физически выпадает из барабана. Заранее заданной последовательности нет.',
+    ru: 'Победитель определяется, только когда шар физически выпадает из барабана. Заранее заданной последовательности нет.',
     en: 'The winner is decided only when a ball physically leaves the drum. There is no pre-set sequence.',
     no: 'Vinneren avgjøres først når en kule fysisk faller ut av trommelen. Det finnes ingen forhåndsbestemt rekkefølge.',
     sv: 'Vinnaren avgörs först när en boll fysiskt lämnar trumman. Det finns ingen förutbestämd ordning.',
@@ -194,7 +194,7 @@ export const DRUM_STRINGS = {
     et: 'Võitja selgub alles siis, kui kuul füüsiliselt trumlist väljub. Eelnevalt määratud järjestust ei ole.',
     lv: 'Uzvarētājs tiek noteikts tikai tad, kad bumbiņa fiziski izkrīt no cilindra. Iepriekš noteiktas secības nav.',
     lt: 'Laimėtojas nustatomas tik tada, kai kamuoliukas fiziškai iškrenta iš būgno. Iš anksto nustatytos sekos nėra.',
-    uk: 'Переможець визначається лише коли куля фізично випадає з барабана. Заздалегідь заданої послідовності немає.',
+    uk: 'Переможець визначається лише тоді, коли куля фізично випадає з барабана. Заздалегідь заданої послідовності немає.',
   },
 
   // ── Quality options ──────────────────────────────────────────────────────
@@ -326,7 +326,7 @@ export const DRUM_STRINGS = {
     sv: 'Ljudet är av. Tryck på högtalarknappen för att se dragningen med ljud.',
     da: 'Lyden er slået fra. Tryk på højttalerknappen for at se trækningen med lyd.',
     fi: 'Ääni on pois. Katso arvonta äänen kanssa napauttamalla kaiutinpainiketta.',
-    de: 'Der Ton ist aus. Tippe auf die Lautsprechertaste, um die Ziehung mit Ton zu sehen.',
+    de: 'Der Ton ist aus. Tippen Sie auf die Lautsprechertaste, um die Ziehung mit Ton zu sehen.',
     fr: 'Le son est coupé. Touchez le bouton haut-parleur pour suivre le tirage avec le son.',
     es: 'El sonido está apagado. Toca el botón del altavoz para ver el sorteo con sonido.',
     it: 'L’audio è disattivato. Tocca il pulsante altoparlante per vedere l’estrazione con l’audio.',
@@ -386,20 +386,20 @@ export const DRUM_STRINGS = {
   },
   'saved.source': {
     ru: '3D-барабан', en: '3D drum', no: '3D-trommel', sv: '3D-trumma', da: '3D-tromle',
-    fi: '3D-rumpu', de: '3D-Trommel', fr: 'Tambour 3D', es: 'Bombo 3D', it: 'Tamburo 3D',
-    pt: 'Tambor 3D', pl: 'Bęben 3D', nl: '3D-trommel', et: '3D-trummel', lv: '3D cilindrs', lt: '3D būgnas',
+    fi: '3D-rumpu', de: '3D-Trommel', fr: 'Tambour 3D', es: 'Bombo 3D', it: 'Urna 3D',
+    pt: 'Tambor 3D', pl: 'Bęben 3D', nl: '3D-trommel', et: '3D-trummel', lv: '3D bungas', lt: '3D būgnas',
     uk: '3D-барабан',
   },
   'saved.supreme': {
     ru: 'Верховный судья', en: 'Supreme Judge', no: 'Høyesterettsdommer', sv: 'Högsta domaren', da: 'Højesteretsdommer',
-    fi: 'Ylin tuomari', de: 'Oberster Richter', fr: 'Juge suprême', es: 'Juez supremo', it: 'Giudice supremo',
-    pt: 'Juiz supremo', pl: 'Najwyższy sędzia', nl: 'Opperrechter', et: 'Ülemkohtunik', lv: 'Augstākais tiesnesis', lt: 'Aukščiausiasis teisėjas',
+    fi: 'Korkein tuomari', de: 'Oberster Richter', fr: 'Juge suprême', es: 'Juez supremo', it: 'Giudice supremo',
+    pt: 'Juiz Supremo', pl: 'Sędzia Najwyższy', nl: 'Hoogste Rechter', et: 'Ülemkohtunik', lv: 'Augstākais tiesnesis', lt: 'Aukščiausiasis teisėjas',
     uk: 'Верховний суддя',
   },
   'saved.consensus': {
     ru: 'Консенсус моделей', en: 'Model consensus', no: 'Modellkonsensus', sv: 'Modellkonsensus', da: 'Modelkonsensus',
     fi: 'Mallien konsensus', de: 'Modell-Konsens', fr: 'Consensus des modèles', es: 'Consenso de modelos', it: 'Consenso dei modelli',
-    pt: 'Consenso dos modelos', pl: 'Konsensus modeli', nl: 'Modelconsensus', et: 'Mudelite konsensus', lv: 'Modeļu konsenss', lt: 'Modelių konsensusas',
+    pt: 'Consenso dos modelos', pl: 'Konsensus modeli', nl: 'Modelconsensus', et: 'Mudelite konsensus', lv: 'Modeļu konsenss', lt: 'Modelių sutarimas',
     uk: 'Консенсус моделей',
   },
   'saved.delete': {
@@ -410,7 +410,7 @@ export const DRUM_STRINGS = {
   },
   'saved.confirmDelete': {
     ru: 'Удалить?', en: 'Delete?', no: 'Slette?', sv: 'Ta bort?', da: 'Slet?',
-    fi: 'Poista?', de: 'Löschen?', fr: 'Supprimer ?', es: '¿Eliminar?', it: 'Eliminare?',
+    fi: 'Poistetaanko?', de: 'Löschen?', fr: 'Supprimer ?', es: '¿Eliminar?', it: 'Eliminare?',
     pt: 'Eliminar?', pl: 'Usunąć?', nl: 'Verwijderen?', et: 'Kustutada?', lv: 'Dzēst?', lt: 'Ištrinti?',
     uk: 'Видалити?',
   },
@@ -430,18 +430,18 @@ export const DRUM_STRINGS = {
   },
   'bulk.selected': {
     ru: 'Выбрано: {{0}}', en: 'Selected: {{0}}', no: 'Valgt: {{0}}', sv: 'Valda: {{0}}', da: 'Valgt: {{0}}',
-    fi: 'Valittu: {{0}}', de: 'Ausgewählt: {{0}}', fr: 'Sélectionné : {{0}}', es: 'Seleccionado: {{0}}', it: 'Selezionati: {{0}}',
-    pt: 'Selecionado: {{0}}', pl: 'Wybrano: {{0}}', nl: 'Geselecteerd: {{0}}', et: 'Valitud: {{0}}', lv: 'Atlasīts: {{0}}', lt: 'Pasirinkta: {{0}}',
+    fi: 'Valittu: {{0}}', de: 'Ausgewählt: {{0}}', fr: 'Sélectionnées : {{0}}', es: 'Seleccionadas: {{0}}', it: 'Selezionate: {{0}}',
+    pt: 'Selecionadas: {{0}}', pl: 'Wybrano: {{0}}', nl: 'Geselecteerd: {{0}}', et: 'Valitud: {{0}}', lv: 'Atlasīts: {{0}}', lt: 'Pasirinkta: {{0}}',
     uk: 'Вибрано: {{0}}',
   },
   'bulk.selectedFor': {
     ru: 'Выбрано: {{0}} · {{1}}', en: 'Selected: {{0}} · {{1}}', no: 'Valgt: {{0}} · {{1}}', sv: 'Valda: {{0}} · {{1}}', da: 'Valgt: {{0}} · {{1}}',
-    fi: 'Valittu: {{0}} · {{1}}', de: 'Ausgewählt: {{0}} · {{1}}', fr: 'Sélectionné : {{0}} · {{1}}', es: 'Seleccionado: {{0}} · {{1}}', it: 'Selezionati: {{0}} · {{1}}',
-    pt: 'Selecionado: {{0}} · {{1}}', pl: 'Wybrano: {{0}} · {{1}}', nl: 'Geselecteerd: {{0}} · {{1}}', et: 'Valitud: {{0}} · {{1}}', lv: 'Atlasīts: {{0}} · {{1}}', lt: 'Pasirinkta: {{0}} · {{1}}',
+    fi: 'Valittu: {{0}} · {{1}}', de: 'Ausgewählt: {{0}} · {{1}}', fr: 'Sélectionnées : {{0}} · {{1}}', es: 'Seleccionadas: {{0}} · {{1}}', it: 'Selezionate: {{0}} · {{1}}',
+    pt: 'Selecionadas: {{0}} · {{1}}', pl: 'Wybrano: {{0}} · {{1}}', nl: 'Geselecteerd: {{0}} · {{1}}', et: 'Valitud: {{0}} · {{1}}', lv: 'Atlasīts: {{0}} · {{1}}', lt: 'Pasirinkta: {{0}} · {{1}}',
     uk: 'Вибрано: {{0}} · {{1}}',
   },
   'bulk.addToHome': {
-    ru: 'Добавить на главный экран ({{0}})', en: 'Add to home screen ({{0}})', no: 'Legg til på startskjermen ({{0}})', sv: 'Lägg till på startskärmen ({{0}})', da: 'Føj til startskærm ({{0}})',
+    ru: 'Добавить на главный экран ({{0}})', en: 'Add to home screen ({{0}})', no: 'Legg til på hovedskjermen ({{0}})', sv: 'Lägg till på startskärmen ({{0}})', da: 'Føj til startskærm ({{0}})',
     fi: 'Lisää aloitusnäyttöön ({{0}})', de: 'Zum Startbildschirm hinzufügen ({{0}})', fr: 'Ajouter à l’écran principal ({{0}})', es: 'Añadir a la pantalla principal ({{0}})', it: 'Aggiungi alla schermata principale ({{0}})',
     pt: 'Adicionar ao ecrã principal ({{0}})', pl: 'Dodaj do ekranu głównego ({{0}})', nl: 'Toevoegen aan startscherm ({{0}})', et: 'Lisa avakuvale ({{0}})', lv: 'Pievienot sākuma ekrānam ({{0}})', lt: 'Pridėti į pagrindinį ekraną ({{0}})',
     uk: 'Додати на головний екран ({{0}})',
@@ -452,7 +452,7 @@ export const DRUM_STRINGS = {
     no: 'Du kan legge til kombinasjoner fra bare ett lotteri per overføring.',
     sv: 'Du kan lägga till kombinationer från endast ett lotteri per överföring.',
     da: 'Du kan kun tilføje kombinationer fra ét lotteri pr. overførsel.',
-    fi: 'Voit lisätä yhdistelmiä vain yhdestä arvonnasta kerrallaan.',
+    fi: 'Voit lisätä kerralla vain yhden lottopelin yhdistelmiä.',
     de: 'Pro Übertragung lassen sich nur Kombinationen einer Lotterie hinzufügen.',
     fr: 'Vous ne pouvez ajouter que les combinaisons d’une seule loterie par transfert.',
     es: 'Solo puedes añadir combinaciones de una lotería por operación.',
@@ -472,7 +472,7 @@ export const DRUM_STRINGS = {
     sv: 'Det här är en {{0}}-kombination. För en överföring kan du bara välja {{1}}-kombinationer.',
     da: 'Dette er en {{0}}-kombination. I én overførsel kan du kun vælge {{1}}-kombinationer.',
     fi: 'Tämä on {{0}}-yhdistelmä. Yhdellä siirrolla voit valita vain {{1}}-yhdistelmiä.',
-    de: 'Dies ist eine {{0}}-Kombination. Für eine Übertragung kannst du nur {{1}}-Kombinationen auswählen.',
+    de: 'Dies ist eine {{0}}-Kombination. Für eine Übertragung können Sie nur {{1}}-Kombinationen auswählen.',
     fr: 'C’est une combinaison {{0}}. Pour un transfert, vous ne pouvez choisir que des combinaisons {{1}}.',
     es: 'Esta es una combinación de {{0}}. En una transferencia solo puedes seleccionar combinaciones de {{1}}.',
     it: 'Questa è una combinazione {{0}}. Per un trasferimento puoi selezionare solo combinazioni {{1}}.',
@@ -492,8 +492,8 @@ export const DRUM_STRINGS = {
   },
   'bulk.rowLimit': {
     ru: 'Достигнут лимит строк: {{0}}', en: 'Row limit reached: {{0}}', no: 'Radgrense nådd: {{0}}', sv: 'Radgräns nådd: {{0}}', da: 'Rækkegrænse nået: {{0}}',
-    fi: 'Riviraja saavutettu: {{0}}', de: 'Zeilenlimit erreicht: {{0}}', fr: 'Limite de lignes atteinte : {{0}}', es: 'Límite de filas alcanzado: {{0}}', it: 'Limite di righe raggiunto: {{0}}',
-    pt: 'Limite de linhas atingido: {{0}}', pl: 'Osiągnięto limit wierszy: {{0}}', nl: 'Rijlimiet bereikt: {{0}}', et: 'Ridade limiit täis: {{0}}', lv: 'Sasniegts rindu limits: {{0}}', lt: 'Pasiektas eilučių limitas: {{0}}',
+    fi: 'Riviraja saavutettu: {{0}}', de: 'Reihenlimit erreicht: {{0}}', fr: 'Limite de lignes atteinte : {{0}}', es: 'Límite de filas alcanzado: {{0}}', it: 'Limite di righe raggiunto: {{0}}',
+    pt: 'Limite de linhas atingido: {{0}}', pl: 'Osiągnięto limit zakładów: {{0}}', nl: 'Rijlimiet bereikt: {{0}}', et: 'Ridade limiit täis: {{0}}', lv: 'Sasniegts rindu limits: {{0}}', lt: 'Pasiektas eilučių limitas: {{0}}',
     uk: 'Досягнуто ліміту рядків: {{0}}',
   },
   'bulk.allPresent': {
@@ -503,7 +503,7 @@ export const DRUM_STRINGS = {
     uk: 'Усі вибрані комбінації вже на головному екрані',
   },
   'bulk.mixed': {
-    ru: 'Добавлено: {{0}}, уже были: {{1}}', en: 'Added: {{0}}, already present: {{1}}', no: 'Lagt til: {{0}}, allerede til stede: {{1}}', sv: 'Tillagda: {{0}}, redan där: {{1}}', da: 'Tilføjet: {{0}}, allerede der: {{1}}',
+    ru: 'Добавлено: {{0}}, уже были: {{1}}', en: 'Added: {{0}}, already present: {{1}}', no: 'Lagt til: {{0}}, allerede til stede: {{1}}', sv: 'Tillagda: {{0}}, fanns redan: {{1}}', da: 'Tilføjet: {{0}}, fandtes allerede: {{1}}',
     fi: 'Lisätty: {{0}}, jo mukana: {{1}}', de: 'Hinzugefügt: {{0}}, bereits vorhanden: {{1}}', fr: 'Ajoutées : {{0}}, déjà présentes : {{1}}', es: 'Añadidas: {{0}}, ya presentes: {{1}}', it: 'Aggiunte: {{0}}, già presenti: {{1}}',
     pt: 'Adicionadas: {{0}}, já presentes: {{1}}', pl: 'Dodano: {{0}}, już były: {{1}}', nl: 'Toegevoegd: {{0}}, al aanwezig: {{1}}', et: 'Lisatud: {{0}}, juba olemas: {{1}}', lv: 'Pievienotas: {{0}}, jau bija: {{1}}', lt: 'Pridėta: {{0}}, jau buvo: {{1}}',
     uk: 'Додано: {{0}}, уже були: {{1}}',
@@ -513,7 +513,7 @@ export const DRUM_STRINGS = {
   'limit.title': {
     ru: 'Достигнут лимит сохранений', en: 'Save limit reached', no: 'Lagringsgrensen er nådd', sv: 'Spargränsen är nådd', da: 'Grænsen for gemte er nået',
     fi: 'Tallennusraja saavutettu', de: 'Speicherlimit erreicht', fr: 'Limite d’enregistrement atteinte', es: 'Límite de guardado alcanzado', it: 'Limite di salvataggio raggiunto',
-    pt: 'Limite de guardados atingido', pl: 'Osiągnięto limit zapisów', nl: 'Opslaglimiet bereikt', et: 'Salvestuslimiit täis', lv: 'Sasniegts saglabāšanas limits', lt: 'Pasiektas išsaugojimų limitas',
+    pt: 'Limite de combinações guardadas atingido', pl: 'Osiągnięto limit zapisów', nl: 'Opslaglimiet bereikt', et: 'Salvestuslimiit täis', lv: 'Sasniegts saglabāšanas limits', lt: 'Pasiektas išsaugojimų limitas',
     uk: 'Досягнуто ліміту збережень',
   },
   'limit.body': {
@@ -523,13 +523,13 @@ export const DRUM_STRINGS = {
     sv: 'Gratis kan du spara upp till {{0}} kombinationer. Ersätt en eller uppgradera till PRO.',
     da: 'Gratis kan du gemme op til {{0}} kombinationer. Erstat én eller skift til PRO.',
     fi: 'Ilmaiseksi voit tallentaa enintään {{0}} yhdistelmää. Korvaa yksi tai siirry PRO:hon.',
-    de: 'Kostenlos sind bis zu {{0}} Kombinationen möglich. Ersetze eine oder wechsle zu PRO.',
+    de: 'Kostenlos können Sie bis zu {{0}} Kombinationen speichern. Ersetzen Sie eine oder wechseln Sie zu PRO.',
     fr: 'L’offre gratuite garde jusqu’à {{0}} combinaisons. Remplacez-en une ou passez à PRO.',
     es: 'Gratis puedes guardar hasta {{0}} combinaciones. Sustituye una o pásate a PRO.',
     it: 'Con il piano gratuito puoi salvare fino a {{0}} combinazioni. Sostituiscine una o passa a PRO.',
     pt: 'No plano grátis pode guardar até {{0}} combinações. Substitua uma ou mude para PRO.',
     pl: 'W planie darmowym zapiszesz do {{0}} kombinacji. Zamień jedną lub przejdź na PRO.',
-    nl: 'Gratis kun je tot {{0}} combinaties bewaren. Vervang er een of ga PRO.',
+    nl: 'Gratis kun je tot {{0}} combinaties bewaren. Vervang er een of stap over op PRO.',
     et: 'Tasuta saad hoida kuni {{0}} kombinatsiooni. Asenda üks või vali PRO.',
     lv: 'Bez maksas var glabāt līdz {{0}} kombinācijām. Nomainiet vienu vai izvēlieties PRO.',
     lt: 'Nemokamai galima saugoti iki {{0}} derinių. Pakeiskite vieną arba pereikite prie PRO.',
@@ -544,12 +544,12 @@ export const DRUM_STRINGS = {
   'limit.pro': {
     ru: 'Перейти на PRO', en: 'Go PRO', no: 'Oppgrader til PRO', sv: 'Uppgradera till PRO', da: 'Skift til PRO',
     fi: 'Hanki PRO', de: 'Zu PRO wechseln', fr: 'Passer à PRO', es: 'Pasar a PRO', it: 'Passa a PRO',
-    pt: 'Mudar para PRO', pl: 'Przejdź na PRO', nl: 'Ga PRO', et: 'Vali PRO', lv: 'Pāriet uz PRO', lt: 'Pereiti prie PRO',
+    pt: 'Mudar para PRO', pl: 'Przejdź na PRO', nl: 'Overstappen op PRO', et: 'Vali PRO', lv: 'Pāriet uz PRO', lt: 'Pereiti prie PRO',
     uk: 'Перейти на PRO',
   },
   'pro.demo': {
     ru: 'В демо PRO недоступен', en: 'PRO is off in this demo', no: 'PRO er av i denne demoen', sv: 'PRO är av i denna demo', da: 'PRO er slået fra i denne demo',
-    fi: 'PRO on pois tässä demossa', de: 'PRO ist in dieser Demo aus', fr: 'PRO est désactivé dans cette démo', es: 'PRO está desactivado en esta demo', it: 'PRO è disattivato in questa demo',
+    fi: 'PRO ei ole käytettävissä demossa', de: 'PRO ist in dieser Demo aus', fr: 'PRO est désactivé dans cette démo', es: 'PRO está desactivado en esta demo', it: 'PRO è disattivato in questa demo',
     pt: 'PRO está desativado nesta demo', pl: 'PRO jest wyłączone w tym demie', nl: 'PRO staat uit in deze demo', et: 'PRO on selles demos väljas', lv: 'PRO šajā demo ir izslēgts', lt: 'PRO šioje demonstracijoje išjungtas',
     uk: 'PRO вимкнено в цьому демо',
   },
