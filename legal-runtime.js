@@ -7,6 +7,16 @@
     try{mode=String(localStorage.getItem('loto_theme')||'');}catch(_error){}
     if(mode==='light'||mode==='dark')document.documentElement.dataset.theme=mode;
   }
+  // Opened from the iOS app (?app=ios, commercial-runtime appLegalUrl): Apple sells PRO there, so the
+  // web checkout (Paddle, «Безопасная оплата») is left out and the page's own links keep the mark
+  // (Guideline 3.1.1). The web pages are unchanged without it.
+  let iosApp=false;
+  try{iosApp=new URLSearchParams(location.search).get('app')==='ios';}catch(_error){}
+  if(iosApp){
+    document.querySelectorAll('[data-web-checkout]').forEach(node=>{node.hidden=true;});
+    document.querySelectorAll('[data-ios-app]').forEach(node=>{node.hidden=false;});
+    document.querySelectorAll('.legal-nav a[href^="./"]').forEach(link=>{link.href=`${link.getAttribute('href')}?app=ios`;});
+  }
   const select=document.getElementById('legal-language');
   const i18n=window.LotoI18n;
   if(select&&i18n){
