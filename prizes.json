@@ -8,6 +8,46 @@
   "games": {
     "lotto": [
       {
+        "date": "2026-10-31",
+        "lotteryId": "lotto",
+        "currency": "NOK",
+        "jackpot": 4.5,
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 rette",
+            "prizeAmount": 4477610,
+            "winners": 3
+          },
+          {
+            "match": "6+1",
+            "label": "6 + 1 rette",
+            "prizeAmount": 135410,
+            "winners": 14
+          },
+          {
+            "match": "6",
+            "label": "6 rette",
+            "prizeAmount": 4705,
+            "winners": 422
+          },
+          {
+            "match": "5",
+            "label": "5 rette",
+            "prizeAmount": 115,
+            "winners": 18184
+          },
+          {
+            "match": "4",
+            "label": "4 rette",
+            "prizeAmount": 50,
+            "winners": 265448
+          }
+        ],
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/lotto/resultater"
+      },
+      {
         "date": "2026-10-24",
         "lotteryId": "lotto",
         "currency": "NOK",
@@ -103852,6 +103892,52 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-10-31",
+        "lotteryId": "superEnalotto",
+        "currency": "EUR",
+        "jackpot": 48.1,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 48096703.9,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 31234.06,
+            "winners": 6
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 303.52,
+            "winners": 630
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 23.64,
+            "winners": 24315
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 5,
+            "winners": 372418
+          }
+        ],
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/31-10-2026"
+      },
+      {
         "date": "2026-10-30",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
@@ -104499,7 +104585,7 @@
         "date": "2026-10-06",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 36.6,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "6",
@@ -104538,8 +104624,8 @@
             "winners": 266270
           }
         ],
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/06-10-2026"
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive"
       },
       {
         "date": "2026-10-03",
