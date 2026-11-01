@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-10-31",
+  "updatedAt": "2026-11-01",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
@@ -83742,6 +83742,70 @@
     ],
     "powerball": [
       {
+        "date": "2026-10-31",
+        "lotteryId": "powerball",
+        "currency": "USD",
+        "jackpot": 770,
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 770000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 2
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 50000,
+            "winners": 25
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 100,
+            "winners": 621
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 100,
+            "winners": 1592
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 7,
+            "winners": 41148
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 32919
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 243193
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 4,
+            "winners": 573313
+          }
+        ],
+        "source": "Powerball",
+        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-10-31&gc=powerball"
+      },
+      {
         "date": "2026-10-28",
         "lotteryId": "powerball",
         "currency": "USD",
@@ -84641,7 +84705,7 @@
         "date": "2026-09-26",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 370,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -84698,8 +84762,8 @@
             "winners": 344431
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-26&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-23",
@@ -108227,7 +108291,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=1"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
       },
       {
         "date": "2026-09-04",
@@ -108291,7 +108355,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=1"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
       },
       {
         "date": "2026-09-01",
@@ -108355,7 +108419,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=1"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
       },
       {
         "date": "2026-08-28",
@@ -108419,7 +108483,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-25",
@@ -108483,7 +108547,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-21",
@@ -108547,7 +108611,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-18",
@@ -108611,7 +108675,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-14",
@@ -108675,7 +108739,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-11",
@@ -108739,7 +108803,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-07",
@@ -108803,7 +108867,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-04",
@@ -108867,7 +108931,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-07-31",
@@ -108931,7 +108995,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-28",
@@ -108995,7 +109059,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-24",
@@ -109059,7 +109123,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-21",
@@ -109123,7 +109187,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-17",
@@ -109187,7 +109251,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-14",
@@ -109251,7 +109315,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-10",
@@ -109315,7 +109379,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-07",
@@ -109379,7 +109443,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-03",
@@ -109443,7 +109507,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-06-30",
@@ -109507,7 +109571,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-26",
@@ -109571,7 +109635,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-23",
@@ -109635,7 +109699,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-19",
@@ -109699,7 +109763,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-16",
@@ -109763,7 +109827,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-12",
@@ -109827,7 +109891,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-09",
@@ -109891,7 +109955,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-05",
@@ -109955,7 +110019,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       }
     ],
     "powerballAustralia": [
