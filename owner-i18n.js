@@ -1440,6 +1440,7 @@
     ["Сброс не выполнен.", "Reset failed.", "Tilbakestillingen mislyktes."],
     ["Инструменты", "Tools", "Verktøy"],
     ["с попытками: {{0}}", "with attempts left: {{0}}", "med forsøk igjen: {{0}}"],
+    ["Служебные лимиты сервера (не отдельные инструменты, не считаются): {{0}}", "Server bookkeeping grants (not separate tools, not counted): {{0}}", "Tekniske grenser på serveren (ikke egne verktøy, telles ikke): {{0}}"],
     ["Всего попыток", "Total attempts", "Forsøk totalt"],
     ["по {{0}} на инструмент", "{{0}} per tool", "{{0}} per verktøy"],
     ["Использовано", "Used", "Brukt"],

@@ -1,15 +1,15 @@
 // CACHE_VERSION is stamped with the deployed build SHA by scripts/build-public-bundle.mjs
-// (the bca1448 placeholder → short git SHA). Every deploy therefore gets a unique
+// (the ba69f2e placeholder → short git SHA). Every deploy therefore gets a unique
 // cache name, so returning users/PWAs always pick up the new shell (index.html, nav,
 // i18n) on the next visit — no manually-bumped constant to forget.
-const CACHE_VERSION='loto-shell-auto-20261102-tnvkwk';
+const CACHE_VERSION='loto-shell-vba69f2e';
 const SHELL_CACHE=`${CACHE_VERSION}-static`;
 const DATA_CACHE=`${CACHE_VERSION}-data`;
 // The deploy this worker belongs to. Every script, stylesheet and catalog a built page loads carries
 // its own deploy as ?v=<build>, so the worker can tell a page of ANOTHER deploy from its own and
 // serve each page the files of the deploy it was built with (see fromBuild). That is what lets a new
 // worker take over open pages without reloading them.
-const BUILD='bca1448';
+const BUILD='ba69f2e';
 const BUILT=!BUILD.startsWith('__');
 const shellCacheOf=build=>`loto-shell-v${build}-static`;
 const CORE_PRECACHE=[
@@ -29,7 +29,7 @@ const OPTIONAL_PRECACHE=[
   './suggestions.js','./suggestions-i18n.js','./suggestions.css',
   './app-update.js',
   './discovery-guide.js',
-  './win-match-core.js','./smart-start.js','./court-core.js','./court-ui.js','./working-set.js','./worksets.js','./action-center.js','./free-welcome.js','./prize-archive.js','./leaders-ui.js','./calendar-core.js','./calendar-ui.js','./rec-core.js','./rec-analysis.js','./rec-ui.js','./math-tech.js','./math-tech.css','./cosmos-ui.js','./cosmos.css','./jackpot-ceremony.js','./jackpot-ceremony.css','./turnstile-runtime.js',
+  './loto-store.js','./win-match-core.js','./smart-start.js','./court-core.js','./court-ui.js','./working-set.js','./worksets.js','./action-center.js','./free-welcome.js','./prize-archive.js','./leaders-ui.js','./world-analysis.js','./whats-new.js','./calendar-core.js','./calendar-ui.js','./rec-core.js','./rec-analysis.js','./rec-ui.js','./math-tech.js','./math-tech.css','./cosmos-ui.js','./cosmos.css','./jackpot-ceremony.js','./jackpot-ceremony.css','./turnstile-runtime.js',
   './safe-payment.html','./safe-payment-runtime.js','./auth-client.js','./native-bridge.js','./billing-web.js',
   './privacy.html','./terms.html','./subscription-terms.html','./legal.css','./legal-runtime.js',
   './jackpots.json','./prizes.json',

@@ -3055,7 +3055,8 @@
         state.data.freetest = { data: Object.assign({}, current, { found: true, state: out.state }) };
         var cancelled = +out.cancelledReservations || 0;
         state.ftMessage = { ok: true, text: function () {
-          return t('Попытки сброшены: доступно {{0}} из {{1}}.', num(out.state && out.state.remaining), num(out.state && out.state.total)) +
+          var counted = countedFreeTest(out.state || null) || {};
+          return t('Попытки сброшены: доступно {{0}} из {{1}}.', num(counted.remaining), num(counted.total)) +
             (cancelled ? ' ' + t('Отменено незавершённых запусков: {{0}}.', num(cancelled)) : '');
         } };
       } else {
@@ -3069,8 +3070,28 @@
       if (state.section === 'freetest') render();
     }
   }
+  // The same count the app shows its users (commercial-runtime.js meteredTool), owner 2026-11-02: the
+  // legacy `calendar` grant (Calendar Analysis runs without a counter since 2026-10-13) and the `court`
+  // budget the Court tools were split from are no tools of their own — nothing spends them — so the 23
+  // grants the server keeps read as 21 tools · 63 attempts here too, never 23 · 69.
+  var FREE_TEST_SPLIT_COURT = ['court_defense', 'court_models', 'court_check', 'court_rows'];
+  function countedFreeTest(st) {
+    var rows = st && Array.isArray(st.byFeature) ? st.byFeature : [];
+    if (!rows.length) return st;
+    var split = rows.some(function (r) { return FREE_TEST_SPLIT_COURT.indexOf(r.feature) >= 0; });
+    var kept = rows.filter(function (r) { return r.feature !== 'calendar' && !(r.feature === 'court' && split); });
+    var n = function (v) { return +v || 0; };
+    var sum = function (f) { return kept.reduce(function (acc, r) { return acc + f(r); }, 0); };
+    var total = sum(function (r) { return n(r.limit); }), remaining = sum(function (r) { return n(r.remaining); }), reserved = sum(function (r) { return n(r.reserved); });
+    return Object.assign({}, st, {
+      tools: kept.length, toolsAvailable: kept.filter(function (r) { return n(r.remaining) > 0; }).length,
+      total: total, remaining: remaining, reserved: reserved,
+      used: sum(function (r) { return r.used != null ? n(r.used) : Math.max(0, n(r.limit) - n(r.remaining) - n(r.reserved)); }),
+      byFeature: kept, uncounted: rows.filter(function (r) { return kept.indexOf(r) < 0; }).map(function (r) { return r.feature; })
+    });
+  }
   function renderFreeTest(data) {
-    var st = data.state || null;
+    var st = countedFreeTest(data.state || null);
     var html = '';
     if (!data.found || !st) {
       html += '<div class="ow-block"><div class="ow-block-h">' + et('Тестовый аккаунт') + '</div>' +
@@ -3093,7 +3114,9 @@
           tools.map(function (row) {
             return '<tr><td data-i18n-ignore><code>' + esc(row.feature) + '</code></td><td class="n">' +
               et('осталось {{0}} из {{1}}', num(row.remaining), num(row.limit)) + (row.reserved ? ' · ' + et('в процессе: {{0}}', num(row.reserved)) : '') + '</td></tr>';
-          }).join('') + '</tbody></table></details>';
+          }).join('') + '</tbody></table>' +
+          (st.uncounted && st.uncounted.length ? '<div class="ow-ft-note">' + et('Служебные лимиты сервера (не отдельные инструменты, не считаются): {{0}}', st.uncounted.join(', ')) + '</div>' : '') +
+          '</details>';
       }
       if (state.ftConfirm) {
         html += '<div class="ow-ft-confirm" role="alertdialog" aria-label="' + et('Сбросить все попытки') + '">' +
