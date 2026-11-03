@@ -15,16 +15,16 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-03T03:00:21.126Z",
-    "sourceFetchedAt": "2026-11-03T03:00:21.126Z",
+    "generatedAt": "2026-11-03T11:19:34.967Z",
+    "sourceFetchedAt": "2026-11-03T11:19:34.967Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "59f60f7e71197940",
+    "snapshotVersion": "5d271415f8c2c194",
     "updatedAt": "2026-11-03",
     "latestDrawByGame": {
       "lotto": "2026-10-31",
       "vikinglotto": "2026-10-28",
       "eurojackpot": "2026-10-30",
-      "powerball": "2026-10-31",
+      "powerball": "2026-11-02",
       "megaMillions": "2026-10-30",
       "euroMillions": "2026-10-30",
       "superEnalotto": "2026-10-31",
@@ -35,7 +35,7 @@
       "lotto": 607,
       "vikinglotto": 282,
       "eurojackpot": 481,
-      "powerball": 1427,
+      "powerball": 1428,
       "megaMillions": 164,
       "euroMillions": 1054,
       "superEnalotto": 4294,
@@ -64,8 +64,8 @@
       "powerball": {
         "status": "ok",
         "source": "NY Open Data / Powerball",
-        "fetched": 2019,
-        "merged": 1427
+        "fetched": 2020,
+        "merged": 1428
       },
       "megaMillions": {
         "status": "ok",
@@ -5617,6 +5617,83 @@
     ],
     "powerball": [
       {
+        "date": "2026-11-02",
+        "main": [
+          7,
+          23,
+          29,
+          64,
+          66
+        ],
+        "bonus": [
+          23
+        ],
+        "jackpot": 804,
+        "lotteryId": "powerball",
+        "source": "Powerball",
+        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-11-02&gc=powerball",
+        "drawId": "2026-11-02T00:00:00.000",
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 804000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 1
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 50000,
+            "winners": 16
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 100,
+            "winners": 410
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 100,
+            "winners": 1144
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 7,
+            "winners": 28334
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 23833
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 180378
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 4,
+            "winners": 416790
+          }
+        ],
+        "currency": "USD",
+        "ruleVersion": "powerball-69-26",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-10-31",
         "main": [
           2,
@@ -6706,10 +6783,10 @@
         "bonus": [
           7
         ],
-        "jackpot": 389,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-28&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-28T00:00:00.000",
         "payoutTiers": [
           {
@@ -7843,83 +7920,6 @@
             "label": "0+1",
             "prizeAmount": 4,
             "winners": 180538
-          }
-        ],
-        "currency": "USD",
-        "ruleVersion": "powerball-69-26",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-08-24",
-        "main": [
-          3,
-          16,
-          33,
-          38,
-          68
-        ],
-        "bonus": [
-          2
-        ],
-        "jackpot": null,
-        "lotteryId": "powerball",
-        "source": "NY Open Data / Powerball",
-        "sourceUrl": "https://www.powerball.com/previous-results",
-        "drawId": "2026-08-24T00:00:00.000",
-        "payoutTiers": [
-          {
-            "match": "5+1",
-            "label": "5+1",
-            "prizeAmount": 83000000,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "5+0",
-            "prizeAmount": 1000000,
-            "winners": 0
-          },
-          {
-            "match": "4+1",
-            "label": "4+1",
-            "prizeAmount": 50000,
-            "winners": 5
-          },
-          {
-            "match": "4+0",
-            "label": "4+0",
-            "prizeAmount": 100,
-            "winners": 197
-          },
-          {
-            "match": "3+1",
-            "label": "3+1",
-            "prizeAmount": 100,
-            "winners": 427
-          },
-          {
-            "match": "3+0",
-            "label": "3+0",
-            "prizeAmount": 7,
-            "winners": 10925
-          },
-          {
-            "match": "2+1",
-            "label": "2+1",
-            "prizeAmount": 7,
-            "winners": 8300
-          },
-          {
-            "match": "1+1",
-            "label": "1+1",
-            "prizeAmount": 4,
-            "winners": 65009
-          },
-          {
-            "match": "0+1",
-            "label": "0+1",
-            "prizeAmount": 4,
-            "winners": 155054
           }
         ],
         "currency": "USD",
