@@ -31324,6 +31324,52 @@
     ],
     "vikinglotto": [
       {
+        "date": "2026-11-04",
+        "lotteryId": "vikinglotto",
+        "currency": "NOK",
+        "jackpot": 105,
+        "payoutTiers": [
+          {
+            "match": "6+1",
+            "label": "6+1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "6+0",
+            "label": "6+0",
+            "prizeAmount": 1258965,
+            "winners": 1
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 47455,
+            "winners": 24
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 5710,
+            "winners": 82
+          },
+          {
+            "match": "4",
+            "label": "4",
+            "prizeAmount": 175,
+            "winners": 6074
+          },
+          {
+            "match": "3",
+            "label": "3",
+            "prizeAmount": 90,
+            "winners": 109828
+          }
+        ],
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/vikinglotto/resultater"
+      },
+      {
         "date": "2026-10-28",
         "lotteryId": "vikinglotto",
         "currency": "NOK",
