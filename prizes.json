@@ -83870,6 +83870,70 @@
     ],
     "powerball": [
       {
+        "date": "2026-11-04",
+        "lotteryId": "powerball",
+        "currency": "USD",
+        "jackpot": 847,
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 847000000,
+            "winners": 1
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 0
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 50000,
+            "winners": 25
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 100,
+            "winners": 526
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 100,
+            "winners": 1324
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 7,
+            "winners": 34265
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 28572
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 223203
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 4,
+            "winners": 557811
+          }
+        ],
+        "source": "Powerball",
+        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-11-04&gc=powerball"
+      },
+      {
         "date": "2026-11-02",
         "lotteryId": "powerball",
         "currency": "USD",
@@ -84769,7 +84833,7 @@
         "date": "2026-09-30",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 411,
+        "jackpot": 0,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -84826,8 +84890,8 @@
             "winners": 281999
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-30&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-28",
@@ -110478,6 +110542,70 @@
     ],
     "powerballAustralia": [
       {
+        "date": "2026-11-05",
+        "lotteryId": "powerballAustralia",
+        "currency": "AUD",
+        "jackpot": 0,
+        "payoutTiers": [
+          {
+            "match": "7+1",
+            "label": "Division 1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "7+0",
+            "label": "Division 2",
+            "prizeAmount": 113078.55,
+            "winners": 5
+          },
+          {
+            "match": "6+1",
+            "label": "Division 3",
+            "prizeAmount": 13194.35,
+            "winners": 53
+          },
+          {
+            "match": "6+0",
+            "label": "Division 4",
+            "prizeAmount": 640.8,
+            "winners": 952
+          },
+          {
+            "match": "5+1",
+            "label": "Division 5",
+            "prizeAmount": 214.35,
+            "winners": 2152
+          },
+          {
+            "match": "4+1",
+            "label": "Division 6",
+            "prizeAmount": 91.55,
+            "winners": 31370
+          },
+          {
+            "match": "5+0",
+            "label": "Division 7",
+            "prizeAmount": 54.95,
+            "winners": 40631
+          },
+          {
+            "match": "3+1",
+            "label": "Division 8",
+            "prizeAmount": 23.85,
+            "winners": 199753
+          },
+          {
+            "match": "2+1",
+            "label": "Division 9",
+            "prizeAmount": 14.1,
+            "winners": 580661
+          }
+        ],
+        "source": "The Lott",
+        "sourceUrl": "https://www.thelott.com/powerball/results"
+      },
+      {
         "date": "2026-10-29",
         "lotteryId": "powerballAustralia",
         "currency": "AUD",
@@ -111114,8 +111242,8 @@
             "winners": 445963
           }
         ],
-        "source": "The Lott",
-        "sourceUrl": "https://www.thelott.com/powerball/results"
+        "source": "Australia National Lottery / The Lott",
+        "sourceUrl": "https://australia.national-lottery.com/powerball/results-archive-2026"
       },
       {
         "date": "2026-08-20",

@@ -373,7 +373,7 @@
       "freeDraws": 30
     },
     "powerball": {
-      "availableDraws": 2020,
+      "availableDraws": 2021,
       "freeDraws": 30
     },
     "megaMillions": {
@@ -393,7 +393,7 @@
       "freeDraws": 8
     },
     "powerballAustralia": {
-      "availableDraws": 1589,
+      "availableDraws": 1590,
       "freeDraws": 10
     }
   }
