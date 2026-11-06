@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-06T21:03:01.755Z",
-    "sourceFetchedAt": "2026-11-06T21:03:01.755Z",
+    "generatedAt": "2026-11-06T23:49:54.277Z",
+    "sourceFetchedAt": "2026-11-06T23:49:54.277Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "b684e1f355ea691b",
     "updatedAt": "2026-11-06",
@@ -88,7 +88,7 @@
       "lottoMax": {
         "status": "ok",
         "source": "WCLC",
-        "fetched": 1284,
+        "fetched": 1283,
         "merged": 59
       },
       "powerballAustralia": {
