@@ -84833,7 +84833,7 @@
         "date": "2026-09-30",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 411,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -84890,14 +84890,14 @@
             "winners": 368579
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-30&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-28",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 389,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -84954,14 +84954,14 @@
             "winners": 336930
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-28&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-26",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 370,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85018,14 +85018,14 @@
             "winners": 449932
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-26&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-23",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 333,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85082,14 +85082,14 @@
             "winners": 323445
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-23&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-21",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 314,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85146,14 +85146,14 @@
             "winners": 261582
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-21&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-19",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 298,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85210,14 +85210,14 @@
             "winners": 443651
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-19&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-16",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 271,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85274,14 +85274,14 @@
             "winners": 336335
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-16&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-14",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 253,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85338,14 +85338,14 @@
             "winners": 268789
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-14&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-12",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 236,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85402,14 +85402,14 @@
             "winners": 428630
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-12&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-09",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 207,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85466,14 +85466,14 @@
             "winners": 290324
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-09&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-07",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 190,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85530,14 +85530,14 @@
             "winners": 252713
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-07&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-05",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 175,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85594,14 +85594,14 @@
             "winners": 423934
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-05&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-09-02",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 150,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85658,14 +85658,14 @@
             "winners": 271095
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-02&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-31",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 134,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85722,14 +85722,14 @@
             "winners": 244316
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-31&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-29",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 119,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85786,14 +85786,14 @@
             "winners": 376314
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-29&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-26",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 98,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85850,14 +85850,14 @@
             "winners": 241844
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-26&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-24",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 83,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85914,14 +85914,14 @@
             "winners": 208441
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-24&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-22",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 69,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -85978,14 +85978,14 @@
             "winners": 327647
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-22&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-19",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 48,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86042,14 +86042,14 @@
             "winners": 238824
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-19&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-17",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 34,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86106,14 +86106,14 @@
             "winners": 194830
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-17&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-15",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 22,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86170,14 +86170,14 @@
             "winners": 370658
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-15&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-12",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 1040,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86234,14 +86234,14 @@
             "winners": 2129387
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-12&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-10",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 929,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86298,14 +86298,14 @@
             "winners": 1261931
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-10&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-08",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 864,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86362,14 +86362,14 @@
             "winners": 1362926
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-08&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-05",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 794,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86426,14 +86426,14 @@
             "winners": 740409
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-05&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-03",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 754,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86490,14 +86490,14 @@
             "winners": 689782
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-03&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-08-01",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 719,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86554,14 +86554,14 @@
             "winners": 882554
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-01&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-29",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 668,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86618,14 +86618,14 @@
             "winners": 555038
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-29&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-27",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 638,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86682,14 +86682,14 @@
             "winners": 457647
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-27&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-25",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 613,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86746,14 +86746,14 @@
             "winners": 679027
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-25&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-22",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 570,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86810,14 +86810,14 @@
             "winners": 426244
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-22&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-20",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 545,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86874,14 +86874,14 @@
             "winners": 371430
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-20&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-18",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 526,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -86938,14 +86938,14 @@
             "winners": 543754
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-18&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-15",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 499,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87002,14 +87002,14 @@
             "winners": 338651
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-15&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-13",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 480,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87066,14 +87066,14 @@
             "winners": 322474
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-13&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-11",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 464,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87130,14 +87130,14 @@
             "winners": 483115
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-11&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-08",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 435,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87194,14 +87194,14 @@
             "winners": 333308
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-08&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-06",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 418,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87258,14 +87258,14 @@
             "winners": 309536
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-06&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-04",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 403,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87322,14 +87322,14 @@
             "winners": 410196
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-04&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-07-01",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 375,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87386,14 +87386,14 @@
             "winners": 299275
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-07-01&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-06-29",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 360,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87450,14 +87450,14 @@
             "winners": 277394
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-06-29&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-06-27",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 346,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87514,14 +87514,14 @@
             "winners": 422987
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-06-27&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-06-24",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 327,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87578,14 +87578,14 @@
             "winners": 278201
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-06-24&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-06-22",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 313,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87642,14 +87642,14 @@
             "winners": 265644
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-06-22&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       },
       {
         "date": "2026-06-20",
         "lotteryId": "powerball",
         "currency": "USD",
-        "jackpot": 300,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+1",
@@ -87706,8 +87706,8 @@
             "winners": 379653
           }
         ],
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-06-20&gc=powerball"
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results"
       }
     ],
     "megaMillions": [
@@ -105011,7 +105011,7 @@
         "date": "2026-10-10",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 38.8,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "6",
@@ -105050,8 +105050,8 @@
             "winners": 282717
           }
         ],
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/10-10-2026"
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive"
       },
       {
         "date": "2026-10-09",
@@ -108733,7 +108733,7 @@
         "date": "2026-09-11",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 30,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -108791,13 +108791,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1269"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
       },
       {
         "date": "2026-09-08",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 25,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -108855,13 +108855,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1268"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
       },
       {
         "date": "2026-09-04",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 20,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -108919,13 +108919,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1267"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
       },
       {
         "date": "2026-09-01",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -108983,13 +108983,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1266"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
       },
       {
         "date": "2026-08-28",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109047,13 +109047,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1265"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-25",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109111,13 +109111,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1264"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-21",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 55,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109175,13 +109175,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1263"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-18",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 50,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109239,13 +109239,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1262"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-14",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 40,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109303,13 +109303,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1261"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-11",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 30,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109367,13 +109367,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1260"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-07",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 25,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109431,13 +109431,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1259"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-08-04",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 20,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109495,13 +109495,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1258"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=3"
       },
       {
         "date": "2026-07-31",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109559,13 +109559,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1257"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-28",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109623,13 +109623,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1256"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-24",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 25,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109687,13 +109687,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1255"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-21",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 20,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109751,13 +109751,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1254"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-17",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109815,13 +109815,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1253"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-14",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109879,13 +109879,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1252"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-10",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 25,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -109943,13 +109943,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1251"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-07",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 20,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110007,13 +110007,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1250"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-07-03",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110071,13 +110071,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1249"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=4"
       },
       {
         "date": "2026-06-30",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110135,13 +110135,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1248"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-26",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 40,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110199,13 +110199,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1247"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-23",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 30,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110263,13 +110263,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1246"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-19",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 25,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110327,13 +110327,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1245"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-16",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 20,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110391,13 +110391,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1244"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-12",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110455,13 +110455,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1243"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-09",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110519,13 +110519,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1242"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-05",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110583,13 +110583,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1241"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-06-02",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110647,13 +110647,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1240"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=5"
       },
       {
         "date": "2026-05-29",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110711,13 +110711,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1239"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=6"
       },
       {
         "date": "2026-05-26",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110775,13 +110775,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1238"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=6"
       },
       {
         "date": "2026-05-22",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 10,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110839,13 +110839,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1237"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=6"
       },
       {
         "date": "2026-05-19",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 25,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110903,13 +110903,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1236"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=6"
       },
       {
         "date": "2026-05-15",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 20,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -110967,13 +110967,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1235"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=6"
       },
       {
         "date": "2026-05-12",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 15,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -111031,13 +111031,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1234"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=6"
       },
       {
         "date": "2026-05-08",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 70,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -111095,13 +111095,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1233"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=6"
       },
       {
         "date": "2026-05-05",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 65,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -111159,13 +111159,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1232"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=6"
       },
       {
         "date": "2026-05-01",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 60,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -111223,13 +111223,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1231"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=6"
       },
       {
         "date": "2026-04-28",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 55,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -111287,13 +111287,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1230"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=7"
       },
       {
         "date": "2026-04-24",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 50,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -111351,13 +111351,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1229"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=7"
       },
       {
         "date": "2026-04-21",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 40,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -111415,13 +111415,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1228"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=7"
       },
       {
         "date": "2026-04-17",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 30,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -111479,13 +111479,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1227"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=7"
       },
       {
         "date": "2026-04-14",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 25,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -111543,13 +111543,13 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1226"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=7"
       },
       {
         "date": "2026-04-10",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 18,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -111607,7 +111607,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1225"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=7"
       }
     ],
     "powerballAustralia": [

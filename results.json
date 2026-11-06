@@ -15,10 +15,10 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-06T19:32:01.356Z",
-    "sourceFetchedAt": "2026-11-06T19:32:01.356Z",
+    "generatedAt": "2026-11-06T19:44:21.423Z",
+    "sourceFetchedAt": "2026-11-06T19:44:21.423Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "501e25d5512c01b1",
+    "snapshotVersion": "a5ce6790997c9ea7",
     "updatedAt": "2026-11-06",
     "latestDrawByGame": {
       "lotto": "2026-10-31",
@@ -27,7 +27,7 @@
       "powerball": "2026-11-04",
       "megaMillions": "2026-11-03",
       "euroMillions": "2026-11-03",
-      "superEnalotto": "2026-11-05",
+      "superEnalotto": "2026-11-06",
       "lottoMax": "2026-11-03",
       "powerballAustralia": "2026-11-05"
     },
@@ -38,7 +38,7 @@
       "powerball": 1429,
       "megaMillions": 165,
       "euroMillions": 1055,
-      "superEnalotto": 4296,
+      "superEnalotto": 4297,
       "lottoMax": 59,
       "powerballAustralia": 447
     },
@@ -82,8 +82,8 @@
       "superEnalotto": {
         "status": "ok",
         "source": "National-Lottery.com / Lottologia",
-        "fetched": 4296,
-        "merged": 4296
+        "fetched": 4297,
+        "merged": 4297
       },
       "lottoMax": {
         "status": "ok",
@@ -6783,10 +6783,10 @@
         "bonus": [
           13
         ],
-        "jackpot": 411,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-30&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-30T00:00:00.000",
         "payoutTiers": [
           {
@@ -6860,10 +6860,10 @@
         "bonus": [
           7
         ],
-        "jackpot": 389,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-28&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-28T00:00:00.000",
         "payoutTiers": [
           {
@@ -6937,10 +6937,10 @@
         "bonus": [
           24
         ],
-        "jackpot": 370,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-26&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-26T00:00:00.000",
         "payoutTiers": [
           {
@@ -7014,10 +7014,10 @@
         "bonus": [
           14
         ],
-        "jackpot": 333,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-23&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-23T00:00:00.000",
         "payoutTiers": [
           {
@@ -7091,10 +7091,10 @@
         "bonus": [
           20
         ],
-        "jackpot": 314,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-21&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-21T00:00:00.000",
         "payoutTiers": [
           {
@@ -7168,10 +7168,10 @@
         "bonus": [
           10
         ],
-        "jackpot": 298,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-19&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-19T00:00:00.000",
         "payoutTiers": [
           {
@@ -7245,10 +7245,10 @@
         "bonus": [
           7
         ],
-        "jackpot": 271,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-16&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-16T00:00:00.000",
         "payoutTiers": [
           {
@@ -7322,10 +7322,10 @@
         "bonus": [
           22
         ],
-        "jackpot": 253,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-14&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-14T00:00:00.000",
         "payoutTiers": [
           {
@@ -7399,10 +7399,10 @@
         "bonus": [
           3
         ],
-        "jackpot": 236,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-12&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-12T00:00:00.000",
         "payoutTiers": [
           {
@@ -7476,10 +7476,10 @@
         "bonus": [
           23
         ],
-        "jackpot": 207,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-09&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-09T00:00:00.000",
         "payoutTiers": [
           {
@@ -7553,10 +7553,10 @@
         "bonus": [
           3
         ],
-        "jackpot": 190,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-07&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-07T00:00:00.000",
         "payoutTiers": [
           {
@@ -7630,10 +7630,10 @@
         "bonus": [
           9
         ],
-        "jackpot": 175,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-05&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-05T00:00:00.000",
         "payoutTiers": [
           {
@@ -7707,10 +7707,10 @@
         "bonus": [
           14
         ],
-        "jackpot": 150,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-09-02&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-09-02T00:00:00.000",
         "payoutTiers": [
           {
@@ -7784,10 +7784,10 @@
         "bonus": [
           10
         ],
-        "jackpot": 134,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-31&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-08-31T00:00:00.000",
         "payoutTiers": [
           {
@@ -7861,10 +7861,10 @@
         "bonus": [
           18
         ],
-        "jackpot": 119,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-08-29&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-08-29T00:00:00.000",
         "payoutTiers": [
           {
@@ -12763,6 +12763,28 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-11-06",
+        "main": [
+          5,
+          20,
+          28,
+          47,
+          50,
+          67
+        ],
+        "bonus": [
+          87
+        ],
+        "jackpot": null,
+        "lotteryId": "superEnalotto",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
+        "drawId": null,
+        "superStar": 14,
+        "ruleVersion": "superenalotto-6-90",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-05",
         "main": [
           17,
@@ -13629,10 +13651,10 @@
         "bonus": [
           39
         ],
-        "jackpot": 38.8,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/10-10-2026",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
         "drawId": null,
         "superStar": 41,
         "payoutTiers": [
@@ -14527,67 +14549,6 @@
           }
         ],
         "superStar": 51,
-        "currency": "EUR",
-        "ruleVersion": "superenalotto-6-90",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-09-15",
-        "main": [
-          3,
-          12,
-          18,
-          32,
-          47,
-          54
-        ],
-        "bonus": [
-          69
-        ],
-        "jackpot": null,
-        "lotteryId": "superEnalotto",
-        "source": "National-Lottery.com / SuperEnalotto",
-        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
-        "drawId": null,
-        "payoutTiers": [
-          {
-            "match": "6",
-            "label": "Match 6",
-            "prizeAmount": 27203028.7,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "Match 5 + Jolly",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "Match 5",
-            "prizeAmount": 34423.33,
-            "winners": 5
-          },
-          {
-            "match": "4",
-            "label": "Match 4",
-            "prizeAmount": 236.82,
-            "winners": 740
-          },
-          {
-            "match": "3",
-            "label": "Match 3",
-            "prizeAmount": 19.49,
-            "winners": 27067
-          },
-          {
-            "match": "2",
-            "label": "Match 2",
-            "prizeAmount": 4.91,
-            "winners": 385296
-          }
-        ],
-        "superStar": 28,
         "currency": "EUR",
         "ruleVersion": "superenalotto-6-90",
         "ruleEra": "current"

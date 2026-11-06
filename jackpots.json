@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-11-06T19:30:50.407Z",
+  "updated": "2026-11-06T19:43:06.614Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-10-31",
       "expectedLastDraw": "2026-10-31",
       "nextDrawDate": "2026-11-07",
-      "updatedAt": "2026-11-06T19:30:50.407Z",
-      "sourceUpdatedAt": "2026-11-06T19:30:50.407Z",
+      "updatedAt": "2026-11-06T19:43:06.614Z",
+      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -36,8 +36,8 @@
       "lastDrawDate": "2026-11-04",
       "expectedLastDraw": "2026-11-04",
       "nextDrawDate": "2026-11-11",
-      "updatedAt": "2026-11-06T19:30:50.407Z",
-      "sourceUpdatedAt": "2026-11-06T19:30:50.407Z",
+      "updatedAt": "2026-11-06T19:43:06.614Z",
+      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -64,7 +64,7 @@
       "lastDrawDate": "2026-11-03",
       "expectedLastDraw": "2026-11-03",
       "nextDrawDate": "2026-11-06",
-      "updatedAt": "2026-11-06T19:30:50.407Z",
+      "updatedAt": "2026-11-06T19:43:06.614Z",
       "status": "fresh",
       "synced": true,
       "sourceAttempts": [
@@ -85,8 +85,8 @@
       "lastDrawDate": "2026-11-04",
       "expectedLastDraw": "2026-11-04",
       "nextDrawDate": "2026-11-07",
-      "updatedAt": "2026-11-06T19:30:50.407Z",
-      "sourceUpdatedAt": "2026-11-06T19:30:50.407Z",
+      "updatedAt": "2026-11-06T19:43:06.614Z",
+      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -102,8 +102,8 @@
       "lastDrawDate": "2026-11-03",
       "expectedLastDraw": "2026-11-03",
       "nextDrawDate": "2026-11-06",
-      "updatedAt": "2026-11-06T19:30:50.407Z",
-      "sourceUpdatedAt": "2026-11-06T19:30:50.407Z",
+      "updatedAt": "2026-11-06T19:43:06.614Z",
+      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -124,7 +124,7 @@
       "lastDrawDate": "2026-11-03",
       "expectedLastDraw": "2026-11-03",
       "nextDrawDate": "2026-11-06",
-      "updatedAt": "2026-11-06T19:30:50.407Z",
+      "updatedAt": "2026-11-06T19:43:06.614Z",
       "status": "fresh",
       "synced": true,
       "sourceAttempts": [
@@ -139,18 +139,18 @@
     "superenalotto": {
       "currency": "EUR",
       "cur": "EUR",
-      "lastDrawDate": "2026-11-05",
+      "lastDrawDate": "2026-11-06",
       "expectedLastDraw": "2026-11-06",
       "nextDrawDate": "2026-11-07",
-      "updatedAt": "2026-11-06T19:30:50.407Z",
+      "updatedAt": "2026-11-06T19:43:06.614Z",
       "status": "updating",
-      "synced": false,
+      "synced": true,
       "source": null,
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
           "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-5-novembre-2026",
+          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-6-novembre-2026",
           "error": "HTTP 403"
         },
         {
@@ -209,7 +209,7 @@
         {
           "source": "official backend",
           "ok": false,
-          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-11-05&next=2026-11-07"
+          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-11-06&next=2026-11-07"
         }
       ]
     },
@@ -223,8 +223,8 @@
       "lastDrawDate": "2026-11-03",
       "expectedLastDraw": "2026-11-03",
       "nextDrawDate": "2026-11-06",
-      "updatedAt": "2026-11-06T19:30:50.407Z",
-      "sourceUpdatedAt": "2026-11-06T19:30:50.407Z",
+      "updatedAt": "2026-11-06T19:43:06.614Z",
+      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
       "sourceNextDraw": "2026-11-06",
       "status": "fresh",
       "synced": true,
@@ -253,8 +253,8 @@
       "lastDrawDate": "2026-11-05",
       "expectedLastDraw": "2026-11-05",
       "nextDrawDate": "2026-11-12",
-      "updatedAt": "2026-11-06T19:30:50.407Z",
-      "sourceUpdatedAt": "2026-11-06T19:30:50.407Z",
+      "updatedAt": "2026-11-06T19:43:06.614Z",
+      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
