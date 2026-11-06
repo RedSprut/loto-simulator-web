@@ -363,9 +363,21 @@ export class HUD {
 
   /** Size the result chips so the main group always fits on ONE line. */
   _sizeChips() {
-    const vw = Math.min(window.visualViewport?.width || window.innerWidth, 660);
+    const viewW = window.visualViewport?.width || window.innerWidth;
+    const vw = Math.min(viewW, 660);
     const n = Math.max(this.mainCount || 6, 1);
-    const size = Math.max(20, Math.min(40, (vw - 40 - (n - 1) * 7) / n));
+    let avail = vw - 40;
+    // The row is centred on the stage, and the saved-combinations button sits in the top-left corner
+    // at the row's height. A centred row must stay clear of it on both sides, or the first ball of a
+    // 7-ball game (Lotto Max, Norsk Lotto) hides under it at phone width (QA 2026-11-06 N1).
+    const btn = document.querySelector('.dd-saved-btn');
+    if (btn && btn.getClientRects().length) {
+      const raw = getComputedStyle(document.documentElement).getPropertyValue('--dd-stage-center-x').trim();
+      const cx = raw.endsWith('px') ? parseFloat(raw) : viewW / 2;
+      const right = btn.getBoundingClientRect().right;
+      if (Number.isFinite(cx) && right > 0) avail = Math.min(avail, 2 * (cx - right - 8));
+    }
+    const size = Math.max(20, Math.min(40, (avail - (n - 1) * 7) / n));
     this.results.style.setProperty('--chip', `${size.toFixed(1)}px`);
   }
 

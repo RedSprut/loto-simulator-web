@@ -327,6 +327,9 @@ html, body {
 @media (max-width: 420px) {
   .dd-btn { font-size: 13px; padding: 10px 12px; }
   .dd-chip { min-width: 34px; height: 34px; font-size: 15px; }
+  /* The results row is sized by HUD._sizeChips (--chip) to clear the corner buttons; the 34px floor
+     above would push a 7-ball row back under the saved-combinations button (QA 2026-11-06 N1). */
+  .dd-results .dd-chip { min-width: var(--chip, 34px); height: var(--chip, 34px); font-size: calc(var(--chip, 34px) * 0.44); }
 }
 
 /* ── Small chip variant (save prompt / saved list) ── */
@@ -372,6 +375,8 @@ html, body {
   background: linear-gradient(160deg, var(--g-ball-main), color-mix(in srgb, var(--g-ball-main) 70%, #000 12%));
   box-shadow: 0 2px 6px rgba(0,0,0,.4);
 }
+/* `display:grid` above outranks the UA `[hidden]{display:none}`; without this the empty badge shows «0». */
+.dd-saved-badge[hidden] { display: none; }
 
 /* ── Saved-combinations panel (left-anchored, scrollable) ── */
 .dd-saved {

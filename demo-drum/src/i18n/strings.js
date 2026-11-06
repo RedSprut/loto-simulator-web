@@ -378,6 +378,12 @@ export const DRUM_STRINGS = {
     pt: 'Combinações guardadas', pl: 'Zapisane kombinacje', nl: 'Opgeslagen combinaties', et: 'Salvestatud kombinatsioonid', lv: 'Saglabātās kombinācijas', lt: 'Išsaugoti deriniai',
     uk: 'Збережені комбінації',
   },
+  'saved.close': {
+    ru: 'Закрыть сохранённые комбинации', en: 'Close saved combinations', no: 'Lukk lagrede kombinasjoner', sv: 'Stäng sparade kombinationer', da: 'Luk gemte kombinationer',
+    fi: 'Sulje tallennetut yhdistelmät', de: 'Gespeicherte Kombinationen schließen', fr: 'Fermer les combinaisons enregistrées', es: 'Cerrar combinaciones guardadas', it: 'Chiudi combinazioni salvate',
+    pt: 'Fechar combinações guardadas', pl: 'Zamknij zapisane kombinacje', nl: 'Opgeslagen combinaties sluiten', et: 'Sulge salvestatud kombinatsioonid', lv: 'Aizvērt saglabātās kombinācijas', lt: 'Uždaryti išsaugotus derinius',
+    uk: 'Закрити збережені комбінації',
+  },
   'saved.empty': {
     ru: 'Пока нет сохранённых комбинаций', en: 'No saved combinations yet', no: 'Ingen lagrede kombinasjoner ennå', sv: 'Inga sparade kombinationer ännu', da: 'Ingen gemte kombinationer endnu',
     fi: 'Ei vielä tallennettuja yhdistelmiä', de: 'Noch keine gespeicherten Kombinationen', fr: 'Aucune combinaison enregistrée', es: 'Aún no hay combinaciones guardadas', it: 'Nessuna combinazione salvata',

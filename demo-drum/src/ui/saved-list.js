@@ -97,7 +97,7 @@ export class SavedList {
 
   _applyStrings() {
     this.panel.querySelector('.dd-saved__title').textContent = t('saved.title');
-    this.panel.querySelector('[data-close]').setAttribute('aria-label', t('settings.close'));
+    this.panel.querySelector('[data-close]').setAttribute('aria-label', t('saved.close'));
     this.panel.querySelector('[data-selall]').textContent = t('bulk.selectAll');
     this.panel.querySelector('[data-selclear]').textContent = t('bulk.clear');
     this.btn.setAttribute('aria-label', t('saved.title'));

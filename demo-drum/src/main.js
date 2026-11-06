@@ -454,7 +454,7 @@ async function main() {
     const r = canvas.getBoundingClientRect();
     document.documentElement.style.setProperty('--dd-stage-center-x', `${(r.left + r.width / 2).toFixed(2)}px`);
   };
-  const onResize = () => { engine.resize(); syncStageCenter(); branding.setLayout((engine.camera.aspect || 1.6) < 1.05); };
+  const onResize = () => { engine.resize(); syncStageCenter(); hud?._sizeChips?.(); branding.setLayout((engine.camera.aspect || 1.6) < 1.05); };
   window.addEventListener('resize', onResize);
   window.addEventListener('orientationchange', () => setTimeout(onResize, 250));
   window.visualViewport?.addEventListener('resize', onResize);
