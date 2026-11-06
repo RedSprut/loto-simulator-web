@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-11-06T19:43:06.614Z",
+  "updated": "2026-11-06T21:01:56.753Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-10-31",
       "expectedLastDraw": "2026-10-31",
       "nextDrawDate": "2026-11-07",
-      "updatedAt": "2026-11-06T19:43:06.614Z",
-      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
+      "updatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceUpdatedAt": "2026-11-06T21:01:56.753Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -36,8 +36,8 @@
       "lastDrawDate": "2026-11-04",
       "expectedLastDraw": "2026-11-04",
       "nextDrawDate": "2026-11-11",
-      "updatedAt": "2026-11-06T19:43:06.614Z",
-      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
+      "updatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceUpdatedAt": "2026-11-06T21:01:56.753Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -51,26 +51,25 @@
       ]
     },
     "euro": {
-      "amount": "454",
+      "amount": "557",
       "prefix": "Ca. ",
       "sub": "MILLIONER NOK",
-      "display": "Ca. 454 MILLIONER NOK",
-      "source": "norsk-tipping.no",
-      "sourceUpdatedAt": "2026-11-06T14:21:40.128Z",
-      "lastVerifiedAt": "2026-11-06T14:21:40.128Z",
-      "carriedForward": true,
       "cur": "NOK",
       "currency": "NOK",
-      "lastDrawDate": "2026-11-03",
-      "expectedLastDraw": "2026-11-03",
-      "nextDrawDate": "2026-11-06",
-      "updatedAt": "2026-11-06T19:43:06.614Z",
+      "display": "Ca. 557 MILLIONER NOK",
+      "lastDrawDate": "2026-11-06",
+      "expectedLastDraw": "2026-11-06",
+      "nextDrawDate": "2026-11-10",
+      "updatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceUpdatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
+      "source": "norsk-tipping.no",
       "sourceAttempts": [
         {
           "source": "norsk-tipping.no",
-          "ok": false,
+          "ok": true,
           "sourceUrl": "https://www.norsk-tipping.no/lotteri/eurojackpot"
         }
       ]
@@ -85,8 +84,8 @@
       "lastDrawDate": "2026-11-04",
       "expectedLastDraw": "2026-11-04",
       "nextDrawDate": "2026-11-07",
-      "updatedAt": "2026-11-06T19:43:06.614Z",
-      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
+      "updatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceUpdatedAt": "2026-11-06T21:01:56.753Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -102,50 +101,48 @@
       "lastDrawDate": "2026-11-03",
       "expectedLastDraw": "2026-11-03",
       "nextDrawDate": "2026-11-06",
-      "updatedAt": "2026-11-06T19:43:06.614Z",
-      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
+      "updatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceUpdatedAt": "2026-11-06T21:01:56.753Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "megamillions.com"
     },
     "euromillions": {
-      "amount": "130",
+      "amount": "141",
       "prefix": "€",
       "sub": "MILLION",
-      "display": "€130 MILLION",
-      "source": "fdj.fr",
-      "sourceNextDraw": "2026-11-06",
-      "sourceUpdatedAt": "2026-11-06T19:11:09.948Z",
-      "lastVerifiedAt": "2026-11-06T19:11:09.948Z",
-      "carriedForward": true,
       "cur": "EUR",
       "currency": "EUR",
-      "lastDrawDate": "2026-11-03",
-      "expectedLastDraw": "2026-11-03",
-      "nextDrawDate": "2026-11-06",
-      "updatedAt": "2026-11-06T19:43:06.614Z",
+      "display": "€141 MILLION",
+      "lastDrawDate": "2026-11-06",
+      "expectedLastDraw": "2026-11-06",
+      "nextDrawDate": "2026-11-10",
+      "updatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceUpdatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceNextDraw": "2026-11-10",
       "status": "fresh",
       "synced": true,
-      "sourceAttempts": [
-        {
-          "source": "euromillions",
-          "ok": false,
-          "error": "stale amount rejected: source next-draw 2026-11-10 != computed 2026-11-06"
-        }
-      ],
-      "lastAttemptError": "stale amount rejected: source next-draw 2026-11-10 != computed 2026-11-06"
+      "source": "fdj.fr"
     },
     "superenalotto": {
-      "currency": "EUR",
+      "amount": "51.2",
+      "prefix": "€",
+      "sub": "MILLION",
       "cur": "EUR",
+      "currency": "EUR",
+      "display": "€51.2 MILLION",
       "lastDrawDate": "2026-11-06",
       "expectedLastDraw": "2026-11-06",
       "nextDrawDate": "2026-11-07",
-      "updatedAt": "2026-11-06T19:43:06.614Z",
-      "status": "updating",
+      "updatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceUpdatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceNextDraw": "2026-11-07",
+      "status": "fresh",
       "synced": true,
-      "source": null,
+      "source": "superenalotto.net",
+      "sourceUrl": "https://www.superenalotto.net/",
+      "extractedText": "jackpot di sabato vale circa 51,2 milioni di Euro",
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
@@ -185,31 +182,8 @@
         },
         {
           "source": "superenalotto.net",
-          "ok": false,
+          "ok": true,
           "sourceUrl": "https://www.superenalotto.net/"
-        },
-        {
-          "source": "sisal.it ultima estrazione",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/superenalotto/ultima-estrazione",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it estrazioni",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/estrazioni/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it news",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/news/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "official backend",
-          "ok": false,
-          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-11-06&next=2026-11-07"
         }
       ]
     },
@@ -223,8 +197,8 @@
       "lastDrawDate": "2026-11-03",
       "expectedLastDraw": "2026-11-03",
       "nextDrawDate": "2026-11-06",
-      "updatedAt": "2026-11-06T19:43:06.614Z",
-      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
+      "updatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceUpdatedAt": "2026-11-06T21:01:56.753Z",
       "sourceNextDraw": "2026-11-06",
       "status": "fresh",
       "synced": true,
@@ -253,8 +227,8 @@
       "lastDrawDate": "2026-11-05",
       "expectedLastDraw": "2026-11-05",
       "nextDrawDate": "2026-11-12",
-      "updatedAt": "2026-11-06T19:43:06.614Z",
-      "sourceUpdatedAt": "2026-11-06T19:43:06.614Z",
+      "updatedAt": "2026-11-06T21:01:56.753Z",
+      "sourceUpdatedAt": "2026-11-06T21:01:56.753Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
