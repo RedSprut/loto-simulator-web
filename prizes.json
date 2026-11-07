@@ -108885,7 +108885,7 @@
         "date": "2026-09-15",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 40,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -108943,7 +108943,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1270"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=2"
       },
       {
         "date": "2026-09-11",
