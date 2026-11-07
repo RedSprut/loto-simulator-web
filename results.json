@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-07T05:18:35.787Z",
-    "sourceFetchedAt": "2026-11-07T05:18:35.787Z",
+    "generatedAt": "2026-11-07T05:38:37.070Z",
+    "sourceFetchedAt": "2026-11-07T05:38:37.070Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "8c28293c24214bba",
     "updatedAt": "2026-11-07",
@@ -14689,13 +14689,70 @@
         "bonus": [
           30
         ],
-        "jackpot": null,
+        "jackpot": 50,
         "lotteryId": "lottoMax",
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=0",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1285",
         "drawId": 1285,
         "ruleVersion": "lottomax-7-52",
-        "ruleEra": "current"
+        "ruleEra": "current",
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 of 7",
+            "prizeAmount": 50000000,
+            "winners": 1
+          },
+          {
+            "match": "6+1",
+            "label": "6 of 7 + Bonus",
+            "prizeAmount": null,
+            "winners": 0
+          },
+          {
+            "match": "6+0",
+            "label": "6 of 7",
+            "prizeAmount": 6529.7,
+            "winners": 40
+          },
+          {
+            "match": "5+1",
+            "label": "5 of 7 + Bonus",
+            "prizeAmount": 1203.8,
+            "winners": 141
+          },
+          {
+            "match": "5+0",
+            "label": "5 of 7",
+            "prizeAmount": 136.2,
+            "winners": 2797
+          },
+          {
+            "match": "4+1",
+            "label": "4 of 7 + Bonus",
+            "prizeAmount": 67.6,
+            "winners": 4693
+          },
+          {
+            "match": "4+0",
+            "label": "4 of 7",
+            "prizeAmount": 20,
+            "winners": 67252
+          },
+          {
+            "match": "3+1",
+            "label": "3 of 7 + Bonus",
+            "prizeAmount": 20,
+            "winners": 68145
+          },
+          {
+            "match": "3+0",
+            "label": "3 of 7",
+            "prizeAmount": null,
+            "winners": 700777
+          }
+        ],
+        "currency": "CAD"
       },
       {
         "date": "2026-11-03",
