@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-11-10T19:49:53.654Z",
+  "updated": "2026-11-10T20:02:01.720Z",
   "values": {
     "lotto": {
       "amount": "30",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-11-07",
       "expectedLastDraw": "2026-11-07",
       "nextDrawDate": "2026-11-14",
-      "updatedAt": "2026-11-10T19:49:53.654Z",
-      "sourceUpdatedAt": "2026-11-10T19:49:53.654Z",
+      "updatedAt": "2026-11-10T20:02:01.720Z",
+      "sourceUpdatedAt": "2026-11-10T20:02:01.720Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -36,8 +36,8 @@
       "lastDrawDate": "2026-11-04",
       "expectedLastDraw": "2026-11-04",
       "nextDrawDate": "2026-11-11",
-      "updatedAt": "2026-11-10T19:49:53.654Z",
-      "sourceUpdatedAt": "2026-11-10T19:49:53.654Z",
+      "updatedAt": "2026-11-10T20:02:01.720Z",
+      "sourceUpdatedAt": "2026-11-10T20:02:01.720Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -64,7 +64,7 @@
       "lastDrawDate": "2026-11-06",
       "expectedLastDraw": "2026-11-06",
       "nextDrawDate": "2026-11-10",
-      "updatedAt": "2026-11-10T19:49:53.654Z",
+      "updatedAt": "2026-11-10T20:02:01.720Z",
       "status": "fresh",
       "synced": true,
       "sourceAttempts": [
@@ -85,8 +85,8 @@
       "lastDrawDate": "2026-11-09",
       "expectedLastDraw": "2026-11-09",
       "nextDrawDate": "2026-11-11",
-      "updatedAt": "2026-11-10T19:49:53.654Z",
-      "sourceUpdatedAt": "2026-11-10T19:49:53.654Z",
+      "updatedAt": "2026-11-10T20:02:01.720Z",
+      "sourceUpdatedAt": "2026-11-10T20:02:01.720Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -102,50 +102,48 @@
       "lastDrawDate": "2026-11-06",
       "expectedLastDraw": "2026-11-06",
       "nextDrawDate": "2026-11-10",
-      "updatedAt": "2026-11-10T19:49:53.654Z",
-      "sourceUpdatedAt": "2026-11-10T19:49:53.654Z",
+      "updatedAt": "2026-11-10T20:02:01.720Z",
+      "sourceUpdatedAt": "2026-11-10T20:02:01.720Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
       "source": "megamillions.com"
     },
     "euromillions": {
-      "amount": "141",
+      "amount": "17",
       "prefix": "€",
       "sub": "MILLION",
-      "display": "€141 MILLION",
-      "source": "fdj.fr",
-      "sourceNextDraw": "2026-11-10",
-      "sourceUpdatedAt": "2026-11-10T19:09:09.241Z",
-      "lastVerifiedAt": "2026-11-10T19:09:09.241Z",
-      "carriedForward": true,
       "cur": "EUR",
       "currency": "EUR",
+      "display": "€17 MILLION",
       "lastDrawDate": "2026-11-06",
-      "expectedLastDraw": "2026-11-06",
-      "nextDrawDate": "2026-11-10",
-      "updatedAt": "2026-11-10T19:49:53.654Z",
-      "status": "fresh",
-      "synced": true,
-      "sourceAttempts": [
-        {
-          "source": "euromillions",
-          "ok": false,
-          "error": "stale amount rejected: source next-draw 2026-11-13 != computed 2026-11-10"
-        }
-      ],
-      "lastAttemptError": "stale amount rejected: source next-draw 2026-11-13 != computed 2026-11-10"
+      "expectedLastDraw": "2026-11-10",
+      "nextDrawDate": "2026-11-13",
+      "updatedAt": "2026-11-10T20:02:01.720Z",
+      "sourceUpdatedAt": "2026-11-10T20:02:01.720Z",
+      "sourceNextDraw": "2026-11-13",
+      "status": "updating",
+      "synced": false,
+      "source": "fdj.fr"
     },
     "superenalotto": {
-      "currency": "EUR",
+      "amount": "52.8",
+      "prefix": "€",
+      "sub": "MILLION",
       "cur": "EUR",
+      "currency": "EUR",
+      "display": "€52.8 MILLION",
       "lastDrawDate": "2026-11-10",
       "expectedLastDraw": "2026-11-10",
       "nextDrawDate": "2026-11-12",
-      "updatedAt": "2026-11-10T19:49:53.654Z",
-      "status": "updating",
+      "updatedAt": "2026-11-10T20:02:01.720Z",
+      "sourceUpdatedAt": "2026-11-10T20:02:01.720Z",
+      "sourceNextDraw": "2026-11-12",
+      "status": "fresh",
       "synced": true,
-      "source": null,
+      "source": "superenalotto.net",
+      "sourceUrl": "https://www.superenalotto.net/",
+      "extractedText": "jackpot di giovedì vale circa 52,8 milioni di Euro",
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
@@ -185,31 +183,8 @@
         },
         {
           "source": "superenalotto.net",
-          "ok": false,
+          "ok": true,
           "sourceUrl": "https://www.superenalotto.net/"
-        },
-        {
-          "source": "sisal.it ultima estrazione",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/superenalotto/ultima-estrazione",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it estrazioni",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/estrazioni/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it news",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/news/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "official backend",
-          "ok": false,
-          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-11-10&next=2026-11-12"
         }
       ]
     },
@@ -223,8 +198,8 @@
       "lastDrawDate": "2026-11-06",
       "expectedLastDraw": "2026-11-06",
       "nextDrawDate": "2026-11-10",
-      "updatedAt": "2026-11-10T19:49:53.654Z",
-      "sourceUpdatedAt": "2026-11-10T19:49:53.654Z",
+      "updatedAt": "2026-11-10T20:02:01.720Z",
+      "sourceUpdatedAt": "2026-11-10T20:02:01.720Z",
       "sourceNextDraw": "2026-11-10",
       "status": "fresh",
       "synced": true,
@@ -258,8 +233,8 @@
       "lastDrawDate": "2026-11-05",
       "expectedLastDraw": "2026-11-05",
       "nextDrawDate": "2026-11-12",
-      "updatedAt": "2026-11-10T19:49:53.654Z",
-      "sourceUpdatedAt": "2026-11-10T19:49:53.654Z",
+      "updatedAt": "2026-11-10T20:02:01.720Z",
+      "sourceUpdatedAt": "2026-11-10T20:02:01.720Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
