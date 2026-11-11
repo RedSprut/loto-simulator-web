@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-10",
+  "updatedAt": "2026-11-11",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
@@ -104944,7 +104944,7 @@
           {
             "match": "6",
             "label": "Match 6",
-            "prizeAmount": 52000000,
+            "prizeAmount": 52025198.5,
             "winners": 0
           },
           {
