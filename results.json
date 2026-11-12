@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-11-11",
+  "updatedAt": "2026-11-12",
   "generatedBy": "Lotto Simulator secure public bundle",
   "rulesMode": "recent-free-only",
   "freeRecentDrawsByGame": {
@@ -15,32 +15,32 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-11T19:54:13.517Z",
-    "sourceFetchedAt": "2026-11-11T19:54:13.517Z",
+    "generatedAt": "2026-11-12T16:39:11.625Z",
+    "sourceFetchedAt": "2026-11-12T16:39:11.625Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "6daf538c995ab045",
-    "updatedAt": "2026-11-11",
+    "snapshotVersion": "a4690c7ba45771e2",
+    "updatedAt": "2026-11-12",
     "latestDrawByGame": {
       "lotto": "2026-11-07",
-      "vikinglotto": "2026-11-04",
+      "vikinglotto": "2026-11-11",
       "eurojackpot": "2026-11-10",
-      "powerball": "2026-11-09",
+      "powerball": "2026-11-11",
       "megaMillions": "2026-11-10",
       "euroMillions": "2026-11-10",
       "superEnalotto": "2026-11-10",
       "lottoMax": "2026-11-10",
-      "powerballAustralia": "2026-11-05"
+      "powerballAustralia": "2026-11-12"
     },
     "recordCountByGame": {
       "lotto": 608,
-      "vikinglotto": 283,
+      "vikinglotto": 284,
       "eurojackpot": 484,
-      "powerball": 1431,
+      "powerball": 1432,
       "megaMillions": 167,
       "euroMillions": 1057,
       "superEnalotto": 4299,
       "lottoMax": 61,
-      "powerballAustralia": 447
+      "powerballAustralia": 448
     },
     "sourceStatusByGame": {
       "lotto": {
@@ -53,7 +53,7 @@
         "status": "ok",
         "source": "Viking-Lotto.net / Norsk Tipping",
         "fetched": 769,
-        "merged": 283
+        "merged": 284
       },
       "eurojackpot": {
         "status": "ok",
@@ -64,8 +64,8 @@
       "powerball": {
         "status": "ok",
         "source": "NY Open Data / Powerball",
-        "fetched": 2023,
-        "merged": 1431
+        "fetched": 2024,
+        "merged": 1432
       },
       "megaMillions": {
         "status": "ok",
@@ -94,8 +94,8 @@
       "powerballAustralia": {
         "status": "ok",
         "source": "Australia National Lottery / The Lott",
-        "fetched": 1590,
-        "merged": 447
+        "fetched": 1591,
+        "merged": 448
       }
     },
     "validationStatus": "ok"
@@ -1788,6 +1788,67 @@
     ],
     "vikinglotto": [
       {
+        "date": "2026-11-11",
+        "main": [
+          2,
+          6,
+          21,
+          30,
+          35,
+          42
+        ],
+        "bonus": [
+          2
+        ],
+        "jackpot": 125.3,
+        "lotteryId": "vikinglotto",
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/vikinglotto/resultater",
+        "drawId": 1593,
+        "currency": "NOK",
+        "payoutTiers": [
+          {
+            "match": "6+1",
+            "label": "6+1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "6+0",
+            "label": "6+0",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 33850,
+            "winners": 32
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 4240,
+            "winners": 105
+          },
+          {
+            "match": "4",
+            "label": "4",
+            "prizeAmount": 165,
+            "winners": 6123
+          },
+          {
+            "match": "3",
+            "label": "3",
+            "prizeAmount": 85,
+            "winners": 108087
+          }
+        ],
+        "drawName": "VKL2021-11.11.2026 20:00",
+        "ruleVersion": "viking-1-5",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-04",
         "main": [
           11,
@@ -2638,67 +2699,6 @@
           }
         ],
         "drawName": "VKL2021-05.08.2026 20:00",
-        "ruleVersion": "viking-1-5",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-07-29",
-        "main": [
-          10,
-          13,
-          27,
-          35,
-          37,
-          44
-        ],
-        "bonus": [
-          5
-        ],
-        "jackpot": 81.4,
-        "lotteryId": "vikinglotto",
-        "source": "Norsk Tipping",
-        "sourceUrl": "https://www.norsk-tipping.no/lotteri/vikinglotto/resultater",
-        "drawId": 1578,
-        "currency": "NOK",
-        "payoutTiers": [
-          {
-            "match": "6+1",
-            "label": "6+1",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "6+0",
-            "label": "6+0",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "5+1",
-            "prizeAmount": 47650,
-            "winners": 23
-          },
-          {
-            "match": "5+0",
-            "label": "5+0",
-            "prizeAmount": 3950,
-            "winners": 114
-          },
-          {
-            "match": "4",
-            "label": "4",
-            "prizeAmount": 170,
-            "winners": 6150
-          },
-          {
-            "match": "3",
-            "label": "3",
-            "prizeAmount": 85,
-            "winners": 111066
-          }
-        ],
-        "drawName": "VKL2021-29.07.2026 20:00",
         "ruleVersion": "viking-1-5",
         "ruleEra": "current"
       }
@@ -5617,6 +5617,83 @@
     ],
     "powerball": [
       {
+        "date": "2026-11-11",
+        "main": [
+          8,
+          42,
+          45,
+          51,
+          57
+        ],
+        "bonus": [
+          17
+        ],
+        "jackpot": 45,
+        "lotteryId": "powerball",
+        "source": "Powerball",
+        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-11-11&gc=powerball",
+        "drawId": "2026-11-11T00:00:00.000",
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 45000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 1000000,
+            "winners": 0
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 50000,
+            "winners": 3
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 100,
+            "winners": 206
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 100,
+            "winners": 535
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 7,
+            "winners": 13001
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 11159
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 4,
+            "winners": 90565
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 4,
+            "winners": 225851
+          }
+        ],
+        "currency": "USD",
+        "ruleVersion": "powerball-69-26",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-09",
         "main": [
           13,
@@ -6706,10 +6783,10 @@
         "bonus": [
           19
         ],
-        "jackpot": 485,
+        "jackpot": null,
         "lotteryId": "powerball",
-        "source": "Powerball",
-        "sourceUrl": "https://www.powerball.com/draw-result?date=2026-10-07&gc=powerball",
+        "source": "NY Open Data / Powerball",
+        "sourceUrl": "https://www.powerball.com/previous-results",
         "drawId": "2026-10-07T00:00:00.000",
         "payoutTiers": [
           {
@@ -7843,83 +7920,6 @@
             "label": "0+1",
             "prizeAmount": 4,
             "winners": 423934
-          }
-        ],
-        "currency": "USD",
-        "ruleVersion": "powerball-69-26",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-09-02",
-        "main": [
-          3,
-          10,
-          29,
-          58,
-          64
-        ],
-        "bonus": [
-          14
-        ],
-        "jackpot": null,
-        "lotteryId": "powerball",
-        "source": "NY Open Data / Powerball",
-        "sourceUrl": "https://www.powerball.com/previous-results",
-        "drawId": "2026-09-02T00:00:00.000",
-        "payoutTiers": [
-          {
-            "match": "5+1",
-            "label": "5+1",
-            "prizeAmount": 150000000,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "5+0",
-            "prizeAmount": 1000000,
-            "winners": 1
-          },
-          {
-            "match": "4+1",
-            "label": "4+1",
-            "prizeAmount": 50000,
-            "winners": 8
-          },
-          {
-            "match": "4+0",
-            "label": "4+0",
-            "prizeAmount": 100,
-            "winners": 304
-          },
-          {
-            "match": "3+1",
-            "label": "3+1",
-            "prizeAmount": 100,
-            "winners": 761
-          },
-          {
-            "match": "3+0",
-            "label": "3+0",
-            "prizeAmount": 7,
-            "winners": 18772
-          },
-          {
-            "match": "2+1",
-            "label": "2+1",
-            "prizeAmount": 7,
-            "winners": 15288
-          },
-          {
-            "match": "1+1",
-            "label": "1+1",
-            "prizeAmount": 4,
-            "winners": 115869
-          },
-          {
-            "match": "0+1",
-            "label": "0+1",
-            "prizeAmount": 4,
-            "winners": 271095
           }
         ],
         "currency": "USD",
@@ -15391,6 +15391,87 @@
     ],
     "powerballAustralia": [
       {
+        "date": "2026-11-12",
+        "main": [
+          2,
+          7,
+          11,
+          13,
+          25,
+          27,
+          31
+        ],
+        "bonus": [
+          2
+        ],
+        "jackpot": 40,
+        "lotteryId": "powerballAustralia",
+        "source": "The Lott",
+        "sourceUrl": "https://www.thelott.com/powerball/results",
+        "drawId": 1591,
+        "currency": "AUD",
+        "payoutTiers": [
+          {
+            "match": "7+1",
+            "label": "Division 1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "7+0",
+            "label": "Division 2",
+            "prizeAmount": 90342.3,
+            "winners": 8
+          },
+          {
+            "match": "6+1",
+            "label": "Division 3",
+            "prizeAmount": 7981.35,
+            "winners": 112
+          },
+          {
+            "match": "6+0",
+            "label": "Division 4",
+            "prizeAmount": 427.5,
+            "winners": 1824
+          },
+          {
+            "match": "5+1",
+            "label": "Division 5",
+            "prizeAmount": 178.95,
+            "winners": 3295
+          },
+          {
+            "match": "4+1",
+            "label": "Division 6",
+            "prizeAmount": 80.5,
+            "winners": 45597
+          },
+          {
+            "match": "5+0",
+            "label": "Division 7",
+            "prizeAmount": 45.7,
+            "winners": 62435
+          },
+          {
+            "match": "3+1",
+            "label": "Division 8",
+            "prizeAmount": 22.55,
+            "winners": 269616
+          },
+          {
+            "match": "2+1",
+            "label": "Division 9",
+            "prizeAmount": 14.1,
+            "winners": 741043
+          }
+        ],
+        "jackpotRolledOver": true,
+        "jackpotRolledOverTo": 1592,
+        "ruleVersion": "powerballau-7-35",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-05",
         "main": [
           9,
@@ -16116,85 +16197,6 @@
         "ruleEra": "current",
         "jackpotRolledOver": true,
         "jackpotRolledOverTo": 1583
-      },
-      {
-        "date": "2026-09-03",
-        "main": [
-          1,
-          10,
-          11,
-          14,
-          16,
-          19,
-          32
-        ],
-        "bonus": [
-          11
-        ],
-        "jackpot": 5.2,
-        "lotteryId": "powerballAustralia",
-        "source": "The Lott",
-        "sourceUrl": "https://www.thelott.com/powerball/results",
-        "drawId": 1581,
-        "currency": "AUD",
-        "payoutTiers": [
-          {
-            "match": "7+1",
-            "label": "Division 1",
-            "prizeAmount": 5200007.13,
-            "winners": 4
-          },
-          {
-            "match": "7+0",
-            "label": "Division 2",
-            "prizeAmount": 13089.15,
-            "winners": 40
-          },
-          {
-            "match": "6+1",
-            "label": "Division 3",
-            "prizeAmount": 19046.15,
-            "winners": 34
-          },
-          {
-            "match": "6+0",
-            "label": "Division 4",
-            "prizeAmount": 747.2,
-            "winners": 756
-          },
-          {
-            "match": "5+1",
-            "label": "Division 5",
-            "prizeAmount": 208.65,
-            "winners": 2047
-          },
-          {
-            "match": "4+1",
-            "label": "Division 6",
-            "prizeAmount": 89.7,
-            "winners": 29648
-          },
-          {
-            "match": "5+0",
-            "label": "Division 7",
-            "prizeAmount": 55.25,
-            "winners": 37392
-          },
-          {
-            "match": "3+1",
-            "label": "Division 8",
-            "prizeAmount": 23.2,
-            "winners": 190142
-          },
-          {
-            "match": "2+1",
-            "label": "Division 9",
-            "prizeAmount": 13.7,
-            "winners": 552916
-          }
-        ],
-        "ruleVersion": "powerballau-7-35",
-        "ruleEra": "current"
       }
     ]
   }
