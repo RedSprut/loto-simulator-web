@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-12T20:17:02.554Z",
-    "sourceFetchedAt": "2026-11-12T20:17:02.554Z",
+    "generatedAt": "2026-11-12T20:25:08.604Z",
+    "sourceFetchedAt": "2026-11-12T20:25:08.604Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "bf6c4d1fac7f6e3a",
     "updatedAt": "2026-11-12",
@@ -52,7 +52,7 @@
       "vikinglotto": {
         "status": "ok",
         "source": "Viking-Lotto.net / Norsk Tipping",
-        "fetched": 724,
+        "fetched": 769,
         "merged": 284
       },
       "eurojackpot": {
@@ -12949,7 +12949,7 @@
           {
             "match": "6",
             "label": "Match 6",
-            "prizeAmount": 52800000,
+            "prizeAmount": 52797553.28,
             "winners": 0
           },
           {
