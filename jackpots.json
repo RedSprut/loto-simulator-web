@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-11-13T19:23:04.153Z",
+  "updated": "2026-11-13T19:44:04.558Z",
   "values": {
     "lotto": {
       "amount": "30",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-11-07",
       "expectedLastDraw": "2026-11-07",
       "nextDrawDate": "2026-11-14",
-      "updatedAt": "2026-11-13T19:23:04.153Z",
-      "sourceUpdatedAt": "2026-11-13T19:23:04.153Z",
+      "updatedAt": "2026-11-13T19:44:04.558Z",
+      "sourceUpdatedAt": "2026-11-13T19:44:04.558Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -36,8 +36,8 @@
       "lastDrawDate": "2026-11-11",
       "expectedLastDraw": "2026-11-11",
       "nextDrawDate": "2026-11-18",
-      "updatedAt": "2026-11-13T19:23:04.153Z",
-      "sourceUpdatedAt": "2026-11-13T19:23:04.153Z",
+      "updatedAt": "2026-11-13T19:44:04.558Z",
+      "sourceUpdatedAt": "2026-11-13T19:44:04.558Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -64,7 +64,7 @@
       "lastDrawDate": "2026-11-10",
       "expectedLastDraw": "2026-11-10",
       "nextDrawDate": "2026-11-13",
-      "updatedAt": "2026-11-13T19:23:04.153Z",
+      "updatedAt": "2026-11-13T19:44:04.558Z",
       "status": "fresh",
       "synced": true,
       "sourceAttempts": [
@@ -85,8 +85,8 @@
       "lastDrawDate": "2026-11-11",
       "expectedLastDraw": "2026-11-11",
       "nextDrawDate": "2026-11-14",
-      "updatedAt": "2026-11-13T19:23:04.153Z",
-      "sourceUpdatedAt": "2026-11-13T19:23:04.153Z",
+      "updatedAt": "2026-11-13T19:44:04.558Z",
+      "sourceUpdatedAt": "2026-11-13T19:44:04.558Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -102,8 +102,8 @@
       "lastDrawDate": "2026-11-10",
       "expectedLastDraw": "2026-11-10",
       "nextDrawDate": "2026-11-13",
-      "updatedAt": "2026-11-13T19:23:04.153Z",
-      "sourceUpdatedAt": "2026-11-13T19:23:04.153Z",
+      "updatedAt": "2026-11-13T19:44:04.558Z",
+      "sourceUpdatedAt": "2026-11-13T19:44:04.558Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -113,34 +113,44 @@
       "amount": "17",
       "prefix": "€",
       "sub": "MILLION",
+      "display": "€17 MILLION",
+      "source": "fdj.fr",
+      "sourceNextDraw": "2026-11-13",
+      "sourceUpdatedAt": "2026-11-13T19:23:04.153Z",
+      "lastVerifiedAt": "2026-11-13T19:23:04.153Z",
+      "carriedForward": true,
       "cur": "EUR",
       "currency": "EUR",
-      "display": "€17 MILLION",
       "lastDrawDate": "2026-11-10",
       "expectedLastDraw": "2026-11-10",
       "nextDrawDate": "2026-11-13",
-      "updatedAt": "2026-11-13T19:23:04.153Z",
-      "sourceUpdatedAt": "2026-11-13T19:23:04.153Z",
-      "sourceNextDraw": "2026-11-13",
+      "updatedAt": "2026-11-13T19:44:04.558Z",
       "status": "fresh",
       "synced": true,
-      "source": "fdj.fr"
+      "sourceAttempts": [
+        {
+          "source": "euromillions",
+          "ok": false,
+          "error": "stale amount rejected: source next-draw 2026-11-17 != computed 2026-11-13"
+        }
+      ],
+      "lastAttemptError": "stale amount rejected: source next-draw 2026-11-17 != computed 2026-11-13"
     },
     "superenalotto": {
       "currency": "EUR",
       "cur": "EUR",
-      "lastDrawDate": "2026-11-12",
+      "lastDrawDate": "2026-11-13",
       "expectedLastDraw": "2026-11-13",
       "nextDrawDate": "2026-11-14",
-      "updatedAt": "2026-11-13T19:23:04.153Z",
+      "updatedAt": "2026-11-13T19:44:04.558Z",
       "status": "updating",
-      "synced": false,
+      "synced": true,
       "source": null,
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
           "ok": false,
-          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-12-novembre-2026",
+          "sourceUrl": "https://www.superenalotto.it/news/risultati/2026/estrazione-superenalotto-13-novembre-2026",
           "error": "HTTP 403"
         },
         {
@@ -199,7 +209,7 @@
         {
           "source": "official backend",
           "ok": false,
-          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-11-12&next=2026-11-14"
+          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-11-13&next=2026-11-14"
         }
       ]
     },
@@ -213,8 +223,8 @@
       "lastDrawDate": "2026-11-10",
       "expectedLastDraw": "2026-11-10",
       "nextDrawDate": "2026-11-13",
-      "updatedAt": "2026-11-13T19:23:04.153Z",
-      "sourceUpdatedAt": "2026-11-13T19:23:04.153Z",
+      "updatedAt": "2026-11-13T19:44:04.558Z",
+      "sourceUpdatedAt": "2026-11-13T19:44:04.558Z",
       "sourceNextDraw": "2026-11-13",
       "status": "fresh",
       "synced": true,
@@ -248,8 +258,8 @@
       "lastDrawDate": "2026-11-12",
       "expectedLastDraw": "2026-11-12",
       "nextDrawDate": "2026-11-19",
-      "updatedAt": "2026-11-13T19:23:04.153Z",
-      "sourceUpdatedAt": "2026-11-13T19:23:04.153Z",
+      "updatedAt": "2026-11-13T19:44:04.558Z",
+      "sourceUpdatedAt": "2026-11-13T19:44:04.558Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
