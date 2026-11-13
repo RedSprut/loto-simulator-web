@@ -44430,6 +44430,88 @@
     ],
     "eurojackpot": [
       {
+        "date": "2026-11-13",
+        "lotteryId": "eurojackpot",
+        "currency": "NOK",
+        "jackpot": 792.7,
+        "payoutTiers": [
+          {
+            "match": "5+2",
+            "label": "5+2",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 3737445,
+            "winners": 7
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 546450,
+            "winners": 27
+          },
+          {
+            "match": "4+2",
+            "label": "4+2",
+            "prizeAmount": 55310,
+            "winners": 44
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 2755,
+            "winners": 1103
+          },
+          {
+            "match": "3+2",
+            "label": "3+2",
+            "prizeAmount": 1875,
+            "winners": 1783
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 855,
+            "winners": 2838
+          },
+          {
+            "match": "2+2",
+            "label": "2+2",
+            "prizeAmount": 320,
+            "winners": 24161
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 195,
+            "winners": 43461
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 160,
+            "winners": 106941
+          },
+          {
+            "match": "1+2",
+            "label": "1+2",
+            "prizeAmount": 160,
+            "winners": 122724
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 100,
+            "winners": 584547
+          }
+        ],
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/eurojackpot/resultater"
+      },
+      {
         "date": "2026-11-10",
         "lotteryId": "eurojackpot",
         "currency": "NOK",
@@ -101852,6 +101934,94 @@
     ],
     "euroMillions": [
       {
+        "date": "2026-11-13",
+        "lotteryId": "euroMillions",
+        "currency": "EUR",
+        "jackpot": 17,
+        "payoutTiers": [
+          {
+            "match": "5+2",
+            "label": "5+2",
+            "prizeAmount": 17000000,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 175412,
+            "winners": 4
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 20498,
+            "winners": 8
+          },
+          {
+            "match": "4+2",
+            "label": "4+2",
+            "prizeAmount": 1703,
+            "winners": 30
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 132,
+            "winners": 715
+          },
+          {
+            "match": "3+2",
+            "label": "3+2",
+            "prizeAmount": 79,
+            "winners": 1263
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 41,
+            "winners": 1690
+          },
+          {
+            "match": "2+2",
+            "label": "2+2",
+            "prizeAmount": 18,
+            "winners": 18949
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 14,
+            "winners": 28558
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 10,
+            "winners": 71701
+          },
+          {
+            "match": "1+2",
+            "label": "1+2",
+            "prizeAmount": 9,
+            "winners": 102329
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 7,
+            "winners": 422568
+          },
+          {
+            "match": "2+0",
+            "label": "2+0",
+            "prizeAmount": 4,
+            "winners": 1035060
+          }
+        ],
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
+      },
+      {
         "date": "2026-11-10",
         "lotteryId": "euroMillions",
         "currency": "EUR",
@@ -103087,7 +103257,7 @@
         "date": "2026-09-22",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 37.6,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -103168,8 +103338,8 @@
             "winners": 810873
           }
         ],
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
       },
       {
         "date": "2026-09-18",
