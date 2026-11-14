@@ -15,10 +15,10 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-14T04:37:50.133Z",
-    "sourceFetchedAt": "2026-11-14T04:37:50.133Z",
+    "generatedAt": "2026-11-14T04:57:55.988Z",
+    "sourceFetchedAt": "2026-11-14T04:57:55.988Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "b69db70b584d03f6",
+    "snapshotVersion": "e9256fca42c38d52",
     "updatedAt": "2026-11-14",
     "latestDrawByGame": {
       "lotto": "2026-11-07",
@@ -28,7 +28,7 @@
       "megaMillions": "2026-11-10",
       "euroMillions": "2026-11-13",
       "superEnalotto": "2026-11-13",
-      "lottoMax": "2026-11-10",
+      "lottoMax": "2026-11-13",
       "powerballAustralia": "2026-11-12"
     },
     "recordCountByGame": {
@@ -39,7 +39,7 @@
       "megaMillions": 167,
       "euroMillions": 1058,
       "superEnalotto": 4301,
-      "lottoMax": 61,
+      "lottoMax": 62,
       "powerballAustralia": 448
     },
     "sourceStatusByGame": {
@@ -88,8 +88,8 @@
       "lottoMax": {
         "status": "ok",
         "source": "WCLC",
-        "fetched": 1285,
-        "merged": 61
+        "fetched": 1286,
+        "merged": 62
       },
       "powerballAustralia": {
         "status": "ok",
@@ -14838,6 +14838,28 @@
     ],
     "lottoMax": [
       {
+        "date": "2026-11-13",
+        "main": [
+          4,
+          9,
+          15,
+          25,
+          27,
+          44,
+          47
+        ],
+        "bonus": [
+          29
+        ],
+        "jackpot": null,
+        "lotteryId": "lottoMax",
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=0",
+        "drawId": 1287,
+        "ruleVersion": "lottomax-7-52",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-10",
         "main": [
           3,
@@ -15384,85 +15406,6 @@
             "label": "3 of 7",
             "prizeAmount": null,
             "winners": 2375646
-          }
-        ],
-        "currency": "CAD",
-        "ruleVersion": "lottomax-7-52",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-10-16",
-        "main": [
-          1,
-          11,
-          13,
-          36,
-          41,
-          43,
-          51
-        ],
-        "bonus": [
-          52
-        ],
-        "jackpot": 90,
-        "lotteryId": "lottoMax",
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1279",
-        "drawId": 1279,
-        "payoutTiers": [
-          {
-            "match": "7",
-            "label": "7 of 7",
-            "prizeAmount": null,
-            "winners": 0
-          },
-          {
-            "match": "6+1",
-            "label": "6 of 7 + Bonus",
-            "prizeAmount": 154039,
-            "winners": 5
-          },
-          {
-            "match": "6+0",
-            "label": "6 of 7",
-            "prizeAmount": 4727.5,
-            "winners": 166
-          },
-          {
-            "match": "5+1",
-            "label": "5 of 7 + Bonus",
-            "prizeAmount": 1217.2,
-            "winners": 419
-          },
-          {
-            "match": "5+0",
-            "label": "5 of 7",
-            "prizeAmount": 118.8,
-            "winners": 9637
-          },
-          {
-            "match": "4+1",
-            "label": "4 of 7 + Bonus",
-            "prizeAmount": 61,
-            "winners": 15619
-          },
-          {
-            "match": "4+0",
-            "label": "4 of 7",
-            "prizeAmount": 20,
-            "winners": 223700
-          },
-          {
-            "match": "3+1",
-            "label": "3 of 7 + Bonus",
-            "prizeAmount": 20,
-            "winners": 219608
-          },
-          {
-            "match": "3+0",
-            "label": "3 of 7",
-            "prizeAmount": null,
-            "winners": 2311942
           }
         ],
         "currency": "CAD",
