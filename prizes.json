@@ -108916,6 +108916,70 @@
     ],
     "lottoMax": [
       {
+        "date": "2026-11-13",
+        "lotteryId": "lottoMax",
+        "currency": "CAD",
+        "jackpot": 15,
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 of 7",
+            "prizeAmount": null,
+            "winners": 0
+          },
+          {
+            "match": "6+1",
+            "label": "6 of 7 + Bonus",
+            "prizeAmount": 136541.8,
+            "winners": 1
+          },
+          {
+            "match": "6+0",
+            "label": "6 of 7",
+            "prizeAmount": 4637.5,
+            "winners": 30
+          },
+          {
+            "match": "5+1",
+            "label": "5 of 7 + Bonus",
+            "prizeAmount": 741.1,
+            "winners": 122
+          },
+          {
+            "match": "5+0",
+            "label": "5 of 7",
+            "prizeAmount": 88.9,
+            "winners": 2284
+          },
+          {
+            "match": "4+1",
+            "label": "4 of 7 + Bonus",
+            "prizeAmount": 44.6,
+            "winners": 3791
+          },
+          {
+            "match": "4+0",
+            "label": "4 of 7",
+            "prizeAmount": 20,
+            "winners": 52549
+          },
+          {
+            "match": "3+1",
+            "label": "3 of 7 + Bonus",
+            "prizeAmount": 20,
+            "winners": 52775
+          },
+          {
+            "match": "3+0",
+            "label": "3 of 7",
+            "prizeAmount": null,
+            "winners": 534762
+          }
+        ],
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1287"
+      },
+      {
         "date": "2026-11-10",
         "lotteryId": "lottoMax",
         "currency": "CAD",
