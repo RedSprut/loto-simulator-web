@@ -105384,6 +105384,52 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-11-14",
+        "lotteryId": "superEnalotto",
+        "currency": "EUR",
+        "jackpot": 54.3,
+        "payoutTiers": [
+          {
+            "match": "6",
+            "label": "Match 6",
+            "prizeAmount": 54321944.6,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "Match 5 + Jolly",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "Match 5",
+            "prizeAmount": 95536.15,
+            "winners": 2
+          },
+          {
+            "match": "4",
+            "label": "Match 4",
+            "prizeAmount": 738.98,
+            "winners": 377
+          },
+          {
+            "match": "3",
+            "label": "Match 3",
+            "prizeAmount": 40.58,
+            "winners": 16504
+          },
+          {
+            "match": "2",
+            "label": "Match 2",
+            "prizeAmount": 6.35,
+            "winners": 286339
+          }
+        ],
+        "source": "SuperEnalotto.net",
+        "sourceUrl": "https://www.superenalotto.net/en/results/14-11-2026"
+      },
+      {
         "date": "2026-11-13",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
