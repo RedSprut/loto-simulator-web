@@ -106031,7 +106031,7 @@
         "date": "2026-10-20",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 42.7,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "6",
@@ -106070,8 +106070,8 @@
             "winners": 281575
           }
         ],
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/20-10-2026"
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive"
       },
       {
         "date": "2026-10-17",
