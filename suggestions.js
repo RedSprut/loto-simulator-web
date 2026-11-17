@@ -179,7 +179,7 @@
         if(row&&(row.replies||[]).some(function(r){return r.request_id===sentDraft.id;})){delete pendingReply[key];var current=ownerHost.querySelector('[data-reply="'+key+'"]');if(current)current.value='';ownerNotice('queued');}
       });
     }
-    ownerButton.hidden=false;ownerButton.textContent=t('owner',true);updateUnread();if(!timer)timer=setInterval(updateUnread,60000);
+    ownerButton.hidden=false;ownerButton.textContent=t('owner',true);updateUnread();if(!timer)timer=setInterval(function(){if(!D.hidden)updateUnread();},300000);
   }
   function stopOwner(){ownerEpoch++;if(timer){clearInterval(timer);timer=null;}if(ownerHost){ownerHost.hidden=true;ownerHost.innerHTML='';}if(ownerButton)ownerButton.hidden=true;ownerData=null;pendingReply={};}
   D.addEventListener('click',function(e){var from=e.target.closest('[data-suggestion-open]');if(from){e.preventDefault();if(overlay&&overlay.querySelector('form').hidden){overlay.querySelector('form').hidden=false;notice('');}open(from);}});

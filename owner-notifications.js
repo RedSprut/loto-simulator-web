@@ -33,7 +33,10 @@
   var BASE = String(CFG.supabaseUrl || '').replace(/\/+$/, '');
   var APIKEY = String(CFG.supabasePublishableKey || '');
   var LIB = W.LotoOwnerLib || {};
-  var POLL_MS = 60000;
+  // Badge refresh while the panel is visible. Owner pushes and returning to the tab refresh at once
+  // (visibilitychange below), so a slow poll only bounds staleness: each poll is an Edge call + an
+  // Auth check, i.e. Supabase log events (log reduction, 2026-11-17: was 60 s).
+  var POLL_MS = 300000;
   var PAGE = 60;
   // A burst of analytics events must not grow the DOM without bound: the centre keeps at most this
   // many cards in memory/DOM and pages further back on demand. The unread COUNT is always the

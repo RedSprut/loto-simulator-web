@@ -981,7 +981,7 @@
       if (state.section !== 'live' || D.hidden || state.busy || state.refreshing) return;
       await load('live');
       if (state.section === 'live') render();
-    }, 15000);
+    }, 60000);   // was 15 s: each refresh is an Edge call + an Auth check (Supabase log events)
   }
   function stopLive() { if (livePoll) { clearInterval(livePoll); livePoll = null; } }
 
@@ -2926,7 +2926,7 @@
     stopLive();
     var range = currentRange();
     if (new Date(range.to).getTime() < Date.now() - 60000) return;   // a closed period does not change
-    livePoll = setInterval(function () { reloadActivity(true); }, 20000);
+    livePoll = setInterval(function () { if (!D.hidden) reloadActivity(true); }, 60000);   // was 20 s, also in hidden tabs
   }
   // The visitor card: who, how much, and the full chronological story, page after page.
   async function openVisitor(person) {
