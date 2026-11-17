@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-17T21:10:00.685Z",
-    "sourceFetchedAt": "2026-11-17T21:10:00.685Z",
+    "generatedAt": "2026-11-17T21:21:50.177Z",
+    "sourceFetchedAt": "2026-11-17T21:21:50.177Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "55cb379ac07f4d28",
     "updatedAt": "2026-11-17",
@@ -13111,7 +13111,7 @@
           {
             "match": "6",
             "label": "Match 6",
-            "prizeAmount": 55100000,
+            "prizeAmount": 55127649.67,
             "winners": 0
           },
           {
