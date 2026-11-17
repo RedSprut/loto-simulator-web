@@ -212,11 +212,12 @@
     busy: false,
     refreshing: false,
     lastRefresh: null,
+    loadedAt: null,
     data: {},
     error: null
   };
   var mapRemount = false;
-  var ovEl = null, mapApi = null, livePoll = null, hourglassTimer = null, mapLoading = false;
+  var ovEl = null, mapApi = null, hourglassTimer = null, mapLoading = false;
 
   // ── api ────────────────────────────────────────────────────────────────────────────────────
   async function api(payload) {
@@ -404,6 +405,16 @@
       '#ow-ov .ow-btn{min-height:34px;padding:6px 12px;border-radius:10px;border:1px solid var(--ow-bd);background:var(--ow-card2);color:inherit;font:inherit;font-weight:700;cursor:pointer}',
       '#ow-ov .ow-btn[disabled]{opacity:.6;cursor:progress}',
       '#ow-ov .ow-btn-primary{background:var(--ow-accent);border-color:var(--ow-accent);color:#fff}',
+      // The panel loads on demand only (2026-11-17): no poll or timer refreshes it. The refresh button and
+      // «обновлено в HH:MM» stay together, so the owner always sees how fresh the data on screen is.
+      '#ow-ov .ow-refresh-box{display:inline-flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0}',
+      '#ow-ov .ow-refresh{white-space:nowrap;transition:filter .15s ease,box-shadow .15s ease,transform .15s ease}',
+      '#ow-ov .ow-refresh:hover:not([disabled]){filter:brightness(1.12);box-shadow:0 2px 10px rgba(29,78,216,.35);transform:translateY(-1px)}',
+      '#ow-ov .ow-refresh:active:not([disabled]){transform:none;box-shadow:none}',
+      '#ow-ov .ow-refresh:focus-visible{outline:2px solid var(--ow-accent);outline-offset:2px}',
+      '#ow-ov .ow-updated{color:var(--ow-sub);font-size:12px;font-weight:600;white-space:nowrap}',
+      '@media (max-width:719px){#ow-ov .ow-refresh-box{flex:1 1 100%}#ow-ov .ow-refresh-box .ow-refresh{flex:1 1 auto}}',
+      '@media (prefers-reduced-motion:reduce){#ow-ov .ow-refresh{transition:none}#ow-ov .ow-refresh:hover:not([disabled]){transform:none}}',
       // The panel language switcher: three always-visible flag buttons (a segmented control) in the
       // header; native language names, never translated. It is never hidden by any panel state.
       '#ow-ov .ow-lang{display:inline-flex !important;flex:0 0 auto;gap:2px;padding:2px;border-radius:11px;border:1px solid var(--ow-bd);background:var(--ow-card2)}',
@@ -679,7 +690,10 @@
         '<span class="ow-lang" id="ow-lang" role="group" data-owt-aria="Язык панели"></span>' +
         '<button class="ow-btn" id="ow-theme" type="button" data-owt="Тема"></button>' +
         '<button class="ow-btn" id="ow-export" type="button" data-owt="Экспорт"></button>' +
-        '<button class="ow-btn ow-btn-primary" id="ow-refresh" type="button" data-owt="Обновить"></button>' +
+        '<span class="ow-refresh-box">' +
+          '<button class="ow-btn ow-btn-primary ow-refresh" id="ow-refresh" type="button" data-owt="🔄 Обновить данные"></button>' +
+          '<span class="ow-updated" id="ow-updated" role="status" aria-live="polite" hidden></span>' +
+        '</span>' +
       '</div>' +
       '<div class="ow-controls" id="ow-controls">' +
         '<label><span data-owt="Период"></span> <select id="ow-preset"></select></label>' +
@@ -716,9 +730,9 @@
     ovEl.__syncTop = syncTop;
     // The panel is a body-level "-ov" overlay built lazily, so the shell's modal manager has to be
     // told about it: __lotoClose routes an external close (another modal opening, Escape, native
-    // back) through the REAL close(), which releases the scroll lock and stops the live poll, the
-    // map and the owner notification centre. Without this the manager stripped .show behind our
-    // back and the page stayed locked with the panel's timers running.
+    // back) through the REAL close(), which releases the scroll lock and stops the map and the
+    // owner notification centre. Without this the manager stripped .show behind our back and the
+    // page stayed locked with the panel's map and centre still running.
     ovEl.__lotoClose = function (reason) {
       // Escape closes the innermost layer first (notification centre, ⓘ note, sheet), the panel last.
       if (W.LotoSuggestions && (reason === 'escape' || reason === 'back') && W.LotoSuggestions.closeOwner()) return;
@@ -750,6 +764,7 @@
     ovEl.setAttribute('lang', code === 'no' ? 'nb' : code);
     ovEl.querySelectorAll('[data-owt]').forEach(function (el) { el.textContent = t(el.getAttribute('data-owt')); });
     ovEl.querySelectorAll('[data-owt-aria]').forEach(function (el) { el.setAttribute('aria-label', t(el.getAttribute('data-owt-aria'))); });
+    renderUpdated();
     // The three panel languages are always offered (the catalog is the panel's own, so even before
     // owner-i18n.js loads the buttons exist); the pressed one is the language the panel speaks.
     var langs = (i18n() && i18n().LANGS) || ['ru', 'en', 'no'];
@@ -802,6 +817,7 @@
     try {
       var response = await api({ section: section, params: params(extra) });
       state.data[section] = response;
+      markUpdated();
       return response;
     } catch (error) {
       state.error = error;
@@ -825,7 +841,7 @@
       var settled = await Promise.allSettled(sections.map(function (name) { return api({ section: name, params: params(extra) }); }));
       settled.forEach(function (outcome, index) {
         var name = sections[index];
-        if (outcome.status === 'fulfilled') { state.data[name] = outcome.value; return; }
+        if (outcome.status === 'fulfilled') { state.data[name] = outcome.value; markUpdated(); return; }
         state.data[name] = null;
         if (name === 'kpi') state.kpiError = outcome.reason;
         else if (name === 'journey' && section0 !== 'journey') state.journeyError = outcome.reason;   // the day report stands on its own
@@ -842,7 +858,6 @@
     ovEl.querySelectorAll('.ow-tab').forEach(function (tab) {
       tab.setAttribute('aria-selected', String(tab.getAttribute('data-section') === section));
     });
-    stopLive();
     // Leaving the map tab frees its WebGL context, markers and listeners at once; the next visit builds
     // a fresh map into the freshly rendered box (an orphaned instance kept answering for a detached box).
     if (section !== 'map' && mapApi) { mapApi.destroy(); mapApi = null; }
@@ -856,8 +871,6 @@
     render();
     if (section === 'overview') loadGa4();   // its own request, its own states — never on the overview's path
     if (section === 'promotion') loadGsc();  // likewise: Search Console never delays or breaks the section
-    if (section === 'live') startLive();
-    if (section === 'activity') startActivityPoll();
     if (section === 'map') {
       mountMap();
       // On a phone the folded filter bar still leaves the tabs above the map: bring the map up.
@@ -902,10 +915,31 @@
   }
   function reload() { return show(state.section); }
 
+  // ── «обновлено в HH:MM»: when the data on screen was loaded ────────────────────────────────
+  // The panel loads on demand only: once when it (or a section) opens, and again only on
+  // «🔄 Обновить данные». No interval, timeout or tab-visibility handler re-requests anything.
+  function markUpdated() { state.loadedAt = new Date(); renderUpdated(); }
+  function hhmm(value) {
+    try { return new Date(value).toLocaleTimeString(intl(), { timeZone: state.tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }) + hourSuffix(value); } catch (e) { return ''; }
+  }
+  function renderUpdated() {
+    var el = ovEl && ovEl.querySelector('#ow-updated');
+    if (!el) return;
+    el.textContent = state.loadedAt ? t('обновлено в {{0}}', hhmm(state.loadedAt)) : '';
+    el.hidden = !state.loadedAt;
+  }
+  // The bell badge (and an open notification list) and the suggestions counter (and an open inbox)
+  // refresh with the same button — each is one request, made only because the owner asked.
+  function refreshCompanions() {
+    try { if (W.LotoOwnerNotifications && W.LotoOwnerNotifications.refresh) W.LotoOwnerNotifications.refresh(); } catch (e) {}
+    try { if (W.LotoSuggestions && W.LotoSuggestions.refreshOwner) W.LotoSuggestions.refreshOwner(); } catch (e) {}
+  }
+
   // ── refresh with real stages ───────────────────────────────────────────────────────────────
   async function refresh() {
     if (state.refreshing) return;
     state.refreshing = true;
+    refreshCompanions();
     var button = ovEl.querySelector('#ow-refresh');
     button.disabled = true;
     button.setAttribute('data-owt', 'Обновление…');
@@ -938,8 +972,8 @@
     } finally {
       setHourglass(false);
       button.disabled = false;
-      button.setAttribute('data-owt', 'Обновить');
-      button.textContent = t('Обновить');
+      button.setAttribute('data-owt', '🔄 Обновить данные');
+      button.textContent = t('🔄 Обновить данные');
       state.refreshing = false;
     }
   }
@@ -973,17 +1007,6 @@
     box.appendChild(button);
     host.prepend(box);
   }
-
-  // ── live ───────────────────────────────────────────────────────────────────────────────────
-  function startLive() {
-    stopLive();
-    livePoll = setInterval(async function () {
-      if (state.section !== 'live' || D.hidden || state.busy || state.refreshing) return;
-      await load('live');
-      if (state.section === 'live') render();
-    }, 60000);   // was 15 s: each refresh is an Edge call + an Auth check (Supabase log events)
-  }
-  function stopLive() { if (livePoll) { clearInterval(livePoll); livePoll = null; } }
 
   // ── map ────────────────────────────────────────────────────────────────────────────────────
   function countryRows() {
@@ -1551,7 +1574,7 @@
       card('Чистыми сегодня', net ? esc(net) : none(), s.net_unknown ? et('RevenueCat не сообщил удержания для {{0}} из {{1}}', num(s.net_unknown), num((+s.net_known || 0) + (+s.net_unknown || 0))) : (s.net_usd != null ? esc(usdEstimate(s.net_usd)) : et('после удержаний магазина по данным RevenueCat')), 'netRevenue') +
       card('Owner-уведомления', num(data.unread_owner_notifications), et('непрочитанных'), 'liveFeed') +
       humanCards(s) +
-      card('Обновление', et('каждые 15 с'), et('пока открыт раздел') + ' · ' + esc(data.today || '')) +
+      card('Обновление', et('по запросу'), et('кнопка «{{0}}»', t('🔄 Обновить данные')) + ' · ' + esc(data.today || '')) +
     '</div>';
     var host = ovEl && ovEl.querySelector('#ow-section');
     var scroll = host ? host.scrollTop : 0;
@@ -2901,32 +2924,12 @@
     if (lastAt) actMarkSeen(lastAt);
     return '<div class="ow-act">' + actFilters() + body + '</div>';
   }
-  // Re-asks the server for the current view (filters kept), quietly while the owner is looking at
-  // a period that is still running; anything newer than the last look is highlighted.
-  async function reloadActivity(quiet) {
-    if (quiet) {
-      if (state.busy || state.section !== 'activity' || ovEl.querySelector('#ow-sheet')) return;
-      try {
-        var response = await api({ section: 'activity', params: actParams() });
-        if (state.section !== 'activity') return;
-        state.data.activity = response; state.error = null;
-        // what the owner had unfolded stays unfolded across the quiet refresh
-        var key = function (el) { var sum = el.querySelector('summary'); return sum ? sum.textContent : ''; };
-        var open = Array.prototype.map.call(ovEl.querySelectorAll('#ow-section details[open]'), key);
-        render();
-        if (open.length) Array.prototype.forEach.call(ovEl.querySelectorAll('#ow-section details'), function (el) { if (open.indexOf(key(el)) >= 0) el.open = true; });
-      } catch (e) { /* the next tick tries again */ }
-      return;
-    }
+  // Re-asks the server for the current view (filters kept) when the owner changes it; anything newer
+  // than the last look is highlighted. There is no background re-request (on demand only).
+  async function reloadActivity() {
     state.data.activity = null;
     await load('activity', actExtra());
     render();
-  }
-  function startActivityPoll() {
-    stopLive();
-    var range = currentRange();
-    if (new Date(range.to).getTime() < Date.now() - 60000) return;   // a closed period does not change
-    livePoll = setInterval(function () { if (!D.hidden) reloadActivity(true); }, 60000);   // was 20 s, also in hidden tabs
   }
   // The visitor card: who, how much, and the full chronological story, page after page.
   async function openVisitor(person) {
@@ -2992,10 +2995,10 @@
       if (state.section !== 'activity') return;
       var a = actState();
       var view = event.target.closest('[data-act-view]');
-      if (view) { a.view = view.getAttribute('data-act-view'); reloadActivity(false); return; }
+      if (view) { a.view = view.getAttribute('data-act-view'); reloadActivity(); return; }
       var chart = event.target.closest('[data-act-chart]');
       if (chart) { var p = chart.getAttribute('data-act-chart').split(':'); a.charts[p[0]] = p[1]; render(); return; }
-      if (event.target.closest('#ow-a-reset')) { Object.assign(a, { actor: 'all', source: 'all', status: 'all', kind: 'all', q: '', owner: true }); reloadActivity(false); return; }
+      if (event.target.closest('#ow-a-reset')) { Object.assign(a, { actor: 'all', source: 'all', status: 'all', kind: 'all', q: '', owner: true }); reloadActivity(); return; }
       var row = event.target.closest('tr.ow-click');
       if (row) {
         var response = state.data.activity;
@@ -3007,14 +3010,14 @@
       if (state.section !== 'activity') return;
       var a = actState();
       var map = { 'ow-a-actor': 'actor', 'ow-a-source': 'source', 'ow-a-status': 'status', 'ow-a-kind': 'kind' };
-      if (map[event.target.id]) { a[map[event.target.id]] = event.target.value; reloadActivity(false); }
-      else if (event.target.id === 'ow-a-owner') { a.owner = event.target.checked; reloadActivity(false); }
+      if (map[event.target.id]) { a[map[event.target.id]] = event.target.value; reloadActivity(); }
+      else if (event.target.id === 'ow-a-owner') { a.owner = event.target.checked; reloadActivity(); }
     });
     content.addEventListener('submit', function (event) {
       if (event.target.id !== 'ow-a-search') return;
       event.preventDefault();
       actState().q = String(ovEl.querySelector('#ow-a-q').value || '').trim().slice(0, 160);
-      reloadActivity(false);
+      reloadActivity();
     });
   }
 
@@ -3035,6 +3038,7 @@
     try {
       var response = await api({ free_test: { op: 'status' } });
       state.data.freetest = { data: (response && response.freeTest) || {} };
+      markUpdated();
     } catch (error) {
       state.error = error;
     } finally {
@@ -3989,7 +3993,6 @@
     if (!ovEl) return;
     ovEl.classList.remove('show');
     D.documentElement.style.overflow = '';
-    stopLive();
     stopOwnerNotifications();
     if (W.LotoSuggestions) W.LotoSuggestions.stopOwner();
     closePopup();

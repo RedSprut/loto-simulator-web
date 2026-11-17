@@ -1,7 +1,7 @@
 /* Public form + owner inbox. Database permissions remain the authority for every owner action. */
 (function () {
   'use strict';
-  var W=window,D=document,overlay=null,opener=null,busy=false,ownerHost=null,ownerButton=null,timer=null;
+  var W=window,D=document,overlay=null,opener=null,busy=false,ownerHost=null,ownerButton=null,ownerUnread=null;
   var requestId=null,offset=0,ownerData=null,ownerBusy=false,pendingReply={},ownerEpoch=0;
   function lang(owner){
     var app=D.documentElement.lang||'en';
@@ -126,7 +126,7 @@
   function repaintOwner(){
     if(!ownerHost||!ownerData)return;
     var drafts={};ownerHost.querySelectorAll('[data-reply]').forEach(function(el){drafts[el.dataset.reply]=el.value;});
-    ownerButton.textContent=t('owner',true)+' · '+ownerData.unread;
+    ownerUnread=ownerData.unread;ownerButton.textContent=ownerLabel();
     ownerHost.innerHTML='<section class="sg-box" data-i18n-ignore><div class="sg-head"><h2>'+ownerText('owner')+' · '+ownerData.unread+'</h2><button class="sg-close" type="button" data-owner-close aria-label="'+ownerText('close')+'">×</button></div>'+
       '<div role="status" aria-live="polite" class="sg-notice" data-owner-notice></div>'+
       (ownerData.items.length?ownerData.items.map(function(row){return '<article class="sg-card '+(row.read_at?'':'is-unread')+'" data-id="'+esc(row.id)+'">'+
@@ -156,9 +156,18 @@
     catch {ownerHost.innerHTML='<section class="sg-box"><p>'+ownerText('error')+'</p><button class="sg-close" data-owner-close type="button" aria-label="'+ownerText('close')+'">×</button></section>';}
   }
   function closeOwner(){if(!ownerHost||ownerHost.hidden)return false;ownerHost.hidden=true;ownerButton.setAttribute('aria-expanded','false');ownerButton.focus();return true;}
+  // The counter keeps its last known value across a language switch; it is re-read only on demand.
+  function ownerLabel(){return t('owner',true)+(ownerUnread==null?'':' · '+ownerUnread);}
   async function updateUnread(){
     var epoch=ownerEpoch;
-    try {var data=await ownerApi({op:'unread'});if(ownerButton&&epoch===ownerEpoch)ownerButton.textContent=t('owner',true)+' · '+data.unread;} catch { /* the inbox exposes retryable error on open */ }
+    try {var data=await ownerApi({op:'unread'});if(ownerButton&&epoch===ownerEpoch){ownerUnread=data.unread;ownerButton.textContent=ownerLabel();}} catch { /* the inbox exposes retryable error on open */ }
+  }
+  // On demand only (2026-11-17): the counter is read once when the Owner Panel opens and again only
+  // when the owner presses the panel's «🔄 Обновить данные» (owner-dashboard.js calls this). No timer.
+  function refreshOwner(){
+    if(!ownerButton||ownerButton.hidden)return;
+    if(ownerHost&&!ownerHost.hidden){if(!ownerBusy)ownerLoad().catch(function(){ownerNotice('error');});return;}
+    updateUnread();
   }
   function startOwner(){
     var panel=D.getElementById('ow-ov');if(!panel)return;
@@ -179,12 +188,12 @@
         if(row&&(row.replies||[]).some(function(r){return r.request_id===sentDraft.id;})){delete pendingReply[key];var current=ownerHost.querySelector('[data-reply="'+key+'"]');if(current)current.value='';ownerNotice('queued');}
       });
     }
-    ownerButton.hidden=false;ownerButton.textContent=t('owner',true);updateUnread();if(!timer)timer=setInterval(function(){if(!D.hidden)updateUnread();},300000);
+    ownerButton.hidden=false;ownerButton.textContent=ownerLabel();updateUnread();
   }
-  function stopOwner(){ownerEpoch++;if(timer){clearInterval(timer);timer=null;}if(ownerHost){ownerHost.hidden=true;ownerHost.innerHTML='';}if(ownerButton)ownerButton.hidden=true;ownerData=null;pendingReply={};}
+  function stopOwner(){ownerEpoch++;ownerUnread=null;if(ownerHost){ownerHost.hidden=true;ownerHost.innerHTML='';}if(ownerButton)ownerButton.hidden=true;ownerData=null;pendingReply={};}
   D.addEventListener('click',function(e){var from=e.target.closest('[data-suggestion-open]');if(from){e.preventDefault();if(overlay&&overlay.querySelector('form').hidden){overlay.querySelector('form').hidden=false;notice('');}open(from);}});
-  W.addEventListener('loto:languagechange',function(){relabelPublic();if(ownerData)repaintOwner();else if(ownerButton)ownerButton.textContent=t('owner',true);});
-  W.addEventListener('loto:ownerlanguagechange',function(){if(ownerData)repaintOwner();else if(ownerButton)ownerButton.textContent=t('owner',true);});
-  W.LotoSuggestions={open:open,startOwner:startOwner,stopOwner:stopOwner,closeOwner:closeOwner,openOwner:openOwner};
+  W.addEventListener('loto:languagechange',function(){relabelPublic();if(ownerData)repaintOwner();else if(ownerButton)ownerButton.textContent=ownerLabel();});
+  W.addEventListener('loto:ownerlanguagechange',function(){if(ownerData)repaintOwner();else if(ownerButton)ownerButton.textContent=ownerLabel();});
+  W.LotoSuggestions={open:open,startOwner:startOwner,stopOwner:stopOwner,closeOwner:closeOwner,openOwner:openOwner,refreshOwner:refreshOwner};
   relabelPublic();
 })();

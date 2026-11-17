@@ -33,23 +33,20 @@
   var BASE = String(CFG.supabaseUrl || '').replace(/\/+$/, '');
   var APIKEY = String(CFG.supabasePublishableKey || '');
   var LIB = W.LotoOwnerLib || {};
-  // Badge refresh while the panel is visible. Owner pushes and returning to the tab refresh at once
-  // (visibilitychange below), so a slow poll only bounds staleness: each poll is an Edge call + an
-  // Auth check, i.e. Supabase log events (log reduction, 2026-11-17: was 60 s).
-  var POLL_MS = 300000;
+  // On demand only (2026-11-17): the badge is read once when the panel opens and again only when the
+  // owner asks — «🔄 Обновить данные» in the panel header (refresh() below), opening the centre, or
+  // tapping an owner push. No interval, debounce timer or tab-visibility handler requests anything:
+  // each request is an Edge call + an Auth check, i.e. Supabase log events.
   var PAGE = 60;
   // A burst of analytics events must not grow the DOM without bound: the centre keeps at most this
   // many cards in memory/DOM and pages further back on demand. The unread COUNT is always the
   // server's own count over the full history, so nothing is lost by capping the rendered list.
   var MAX_ROWS = 300;
-  // Owner pushes can arrive many per minute during a traffic burst. Each one only marks the badge
-  // dirty; the actual request is coalesced into one call per REFRESH_DEBOUNCE_MS window.
-  var REFRESH_DEBOUNCE_MS = 4000;
 
   var state = { unread: 0, rows: [], prefs: null, open: false, filter: 'all', unreadOnly: false, view: 'list', busy: false, error: null, lastSync: null, more: true, expanded: {},
     ownerTest: null, ownerTestLink: '', ownerTestNote: '' };
-  var panel = null, pollTimer = null, wired = false;
-  var running = false, refreshTimer = null, refreshPending = false, refreshInFlight = false;
+  var panel = null, wired = false;
+  var running = false, refreshInFlight = false;
 
   // ── api ────────────────────────────────────────────────────────────────────────────────────
   async function api(payload) {
@@ -285,22 +282,16 @@
     try { var r = await notif('unread'); updateBadge(r.unread); state.error = null; }
     catch (e) { if (e.status === 403) conceal(); }
   }
-  // One request per burst. Any number of owner pushes/events inside the window collapse into a
-  // single badge refresh (plus one list refresh when the centre is actually on screen), so a spike
-  // in visitor activity cannot turn into a spike of requests or renders.
-  function scheduleRefresh() {
-    if (!running) return;
-    refreshPending = true;
-    if (refreshTimer) return;
-    refreshTimer = setTimeout(async function () {
-      refreshTimer = null;
-      if (!running || !refreshPending || refreshInFlight) return;
-      refreshPending = false; refreshInFlight = true;
-      try { await refreshUnread(); if (state.open && state.view === 'list') await loadList(false); }
-      finally { refreshInFlight = false; if (refreshPending) scheduleRefresh(); }
-    }, REFRESH_DEBOUNCE_MS);
+  // The owner asked (header refresh button, a tapped owner push): the badge, plus the list when the
+  // centre shows it — never both, since a list response carries the unread count too. A press while
+  // one is in flight is ignored, so repeated taps cannot stack requests.
+  async function refreshNow() {
+    if (!running || refreshInFlight) return;
+    refreshInFlight = true;
+    try { if (state.open && state.view === 'list') await loadList(false); else await refreshUnread(); }
+    finally { refreshInFlight = false; }
   }
-  // Identical deliveries (a push echo, an overlapping poll, a page that re-lists) must not produce
+  // Identical deliveries (a push echo, an overlapping refresh, a page that re-lists) must not produce
   // duplicate cards: rows are keyed by the event id, newest kept, and the list stays bounded.
   function mergeRows(existing, incoming, append) {
     var seen = Object.create(null), out = [];
@@ -645,9 +636,10 @@
     var d = data && (data.data || data) || {};
     return d.notificationType === 'owner_event' || d.eventType === 'owner_event' || d.destination === 'owner';
   }
-  // A raw owner event never drives a render of its own: it only marks the badge dirty and the
-  // debounced refresher does one request for the whole burst.
-  function onOwnerPush() { scheduleRefresh(); }
+  // A RECEIVED owner push requests nothing (on demand only): the OS already shows it, and the next
+  // «🔄 Обновить данные» picks it up. A TAPPED one is the owner asking, so it opens its deep link and
+  // re-reads the badge once.
+  function onOwnerTap() { refreshNow(); }
   // The listeners are installed once and are inert while the centre is stopped (running === false),
   // so opening and closing the Owner Panel any number of times can never accumulate subscriptions.
   function wireEvents() {
@@ -657,15 +649,12 @@
       if (navigator.serviceWorker) navigator.serviceWorker.addEventListener('message', function (e) {
         if (!running) return;
         var d = e.data || {};
-        if (d.type === 'LOTO_PUSH_RECEIVED' && isOwnerPush(d.data)) onOwnerPush();
-        if (d.type === 'LOTO_PUSH_OPEN' && isOwnerPush(d.data)) { onOwnerPush(); openLink(d.data.deepLink || d.data.deeplink); }
+        if (d.type === 'LOTO_PUSH_OPEN' && isOwnerPush(d.data)) { onOwnerTap(); openLink(d.data.deepLink || d.data.deeplink); }
       });
     } catch (e) {}
-    W.addEventListener('loto-push-received', function (e) { if (running && isOwnerPush(e.detail)) onOwnerPush(); });
     // Routed by the user notification centre / index.html when a push, a cold start or a native tap
     // carries destination = owner.
-    W.addEventListener('loto-owner-open', function (e) { if (!running) return; var d = e.detail || {}; onOwnerPush(); openLink(d.deepLink || d.deeplink || d.link); });
-    D.addEventListener('visibilitychange', function () { if (running && !D.hidden) scheduleRefresh(); });
+    W.addEventListener('loto-owner-open', function (e) { if (!running) return; var d = e.detail || {}; onOwnerTap(); openLink(d.deepLink || d.deeplink || d.link); });
   }
 
   // ── lifecycle: owned by the Owner Panel ────────────────────────────────────────────────────
@@ -687,19 +676,15 @@
       if (!running) return;                       // the panel closed while the probe was in flight
       reveal();
       wireEvents();
-      await refreshUnread();
-      if (running && !pollTimer) pollTimer = setInterval(function () { if (running && !D.hidden) scheduleRefresh(); }, POLL_MS);
+      await refreshUnread();                      // once per opening of the panel; no poll
     } catch (e) { conceal(); running = false; }
   }
   function stop() {
     running = false;
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-    if (refreshTimer) { clearTimeout(refreshTimer); refreshTimer = null; }
-    refreshPending = false;
     close();
   }
 
   W.LotoOwnerNotifications = { start: start, stop: stop, open: open, close: close, toggle: toggle, openLink: openLink,
-    refresh: function () { return loadList(false); },
+    refresh: refreshNow,
     _state: function () { return state; }, _running: function () { return running; } };
 })();
