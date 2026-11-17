@@ -15,10 +15,10 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-17T19:28:51.227Z",
-    "sourceFetchedAt": "2026-11-17T19:28:51.227Z",
+    "generatedAt": "2026-11-17T19:49:56.783Z",
+    "sourceFetchedAt": "2026-11-17T19:49:56.783Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "1494205919c9ab9a",
+    "snapshotVersion": "d71bacbdbff95c8f",
     "updatedAt": "2026-11-17",
     "latestDrawByGame": {
       "lotto": "2026-11-14",
@@ -27,7 +27,7 @@
       "powerball": "2026-11-16",
       "megaMillions": "2026-11-13",
       "euroMillions": "2026-11-13",
-      "superEnalotto": "2026-11-14",
+      "superEnalotto": "2026-11-17",
       "lottoMax": "2026-11-13",
       "powerballAustralia": "2026-11-12"
     },
@@ -38,7 +38,7 @@
       "powerball": 1434,
       "megaMillions": 168,
       "euroMillions": 1058,
-      "superEnalotto": 4302,
+      "superEnalotto": 4303,
       "lottoMax": 62,
       "powerballAustralia": 448
     },
@@ -82,8 +82,8 @@
       "superEnalotto": {
         "status": "ok",
         "source": "National-Lottery.com / Lottologia",
-        "fetched": 4302,
-        "merged": 4302
+        "fetched": 4303,
+        "merged": 4303
       },
       "lottoMax": {
         "status": "ok",
@@ -13006,6 +13006,28 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-11-17",
+        "main": [
+          1,
+          2,
+          10,
+          79,
+          85,
+          90
+        ],
+        "bonus": [
+          47
+        ],
+        "jackpot": null,
+        "lotteryId": "superEnalotto",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
+        "drawId": null,
+        "superStar": 68,
+        "ruleVersion": "superenalotto-6-90",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-14",
         "main": [
           26,
@@ -13872,10 +13894,10 @@
         "bonus": [
           46
         ],
-        "jackpot": 43.5,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/22-10-2026",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
         "drawId": null,
         "superStar": 84,
         "payoutTiers": [
@@ -14770,67 +14792,6 @@
           }
         ],
         "superStar": 6,
-        "currency": "EUR",
-        "ruleVersion": "superenalotto-6-90",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-09-25",
-        "main": [
-          10,
-          18,
-          26,
-          33,
-          39,
-          45
-        ],
-        "bonus": [
-          89
-        ],
-        "jackpot": null,
-        "lotteryId": "superEnalotto",
-        "source": "National-Lottery.com / SuperEnalotto",
-        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
-        "drawId": null,
-        "payoutTiers": [
-          {
-            "match": "6",
-            "label": "Match 6",
-            "prizeAmount": 31743001.82,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "Match 5 + Jolly",
-            "prizeAmount": 417320.75,
-            "winners": 1
-          },
-          {
-            "match": "5+0",
-            "label": "Match 5",
-            "prizeAmount": 67413.35,
-            "winners": 2
-          },
-          {
-            "match": "4",
-            "label": "Match 4",
-            "prizeAmount": 276.48,
-            "winners": 499
-          },
-          {
-            "match": "3",
-            "label": "Match 3",
-            "prizeAmount": 23.2,
-            "winners": 17846
-          },
-          {
-            "match": "2",
-            "label": "Match 2",
-            "prizeAmount": 5,
-            "winners": 272319
-          }
-        ],
-        "superStar": 48,
         "currency": "EUR",
         "ruleVersion": "superenalotto-6-90",
         "ruleEra": "current"
