@@ -113682,6 +113682,71 @@
     ],
     "powerballAustralia": [
       {
+        "date": "2026-11-19",
+        "lotteryId": "powerballAustralia",
+        "currency": "AUD",
+        "jackpot": 60,
+        "jackpotRolledOver": true,
+        "payoutTiers": [
+          {
+            "match": "7+1",
+            "label": "Division 1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "7+0",
+            "label": "Division 2",
+            "prizeAmount": 485885.9,
+            "winners": 2
+          },
+          {
+            "match": "6+1",
+            "label": "Division 3",
+            "prizeAmount": 8464.3,
+            "winners": 142
+          },
+          {
+            "match": "6+0",
+            "label": "Division 4",
+            "prizeAmount": 369.7,
+            "winners": 2836
+          },
+          {
+            "match": "5+1",
+            "label": "Division 5",
+            "prizeAmount": 217.85,
+            "winners": 3639
+          },
+          {
+            "match": "4+1",
+            "label": "Division 6",
+            "prizeAmount": 92.75,
+            "winners": 53219
+          },
+          {
+            "match": "5+0",
+            "label": "Division 7",
+            "prizeAmount": 55.15,
+            "winners": 69566
+          },
+          {
+            "match": "3+1",
+            "label": "Division 8",
+            "prizeAmount": 24.4,
+            "winners": 335722
+          },
+          {
+            "match": "2+1",
+            "label": "Division 9",
+            "prizeAmount": 14.4,
+            "winners": 975686
+          }
+        ],
+        "source": "The Lott",
+        "sourceUrl": "https://www.thelott.com/powerball/results"
+      },
+      {
         "date": "2026-11-12",
         "lotteryId": "powerballAustralia",
         "currency": "AUD",
@@ -114269,7 +114334,7 @@
         "date": "2026-09-10",
         "lotteryId": "powerballAustralia",
         "currency": "AUD",
-        "jackpot": 5,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7+1",
@@ -114326,8 +114391,8 @@
             "winners": 300279
           }
         ],
-        "source": "The Lott",
-        "sourceUrl": "https://www.thelott.com/powerball/results",
+        "source": "Australia National Lottery / The Lott",
+        "sourceUrl": "https://australia.national-lottery.com/powerball/results-archive-2026",
         "jackpotRolledOver": true
       },
       {

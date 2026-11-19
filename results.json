@@ -15,10 +15,10 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-19T08:49:14.590Z",
-    "sourceFetchedAt": "2026-11-19T08:49:14.590Z",
+    "generatedAt": "2026-11-19T11:09:59.191Z",
+    "sourceFetchedAt": "2026-11-19T11:09:59.191Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "77008523cf3debd6",
+    "snapshotVersion": "791aa779bf6a29f9",
     "updatedAt": "2026-11-19",
     "latestDrawByGame": {
       "lotto": "2026-11-14",
@@ -29,7 +29,7 @@
       "euroMillions": "2026-11-17",
       "superEnalotto": "2026-11-17",
       "lottoMax": "2026-11-17",
-      "powerballAustralia": "2026-11-12"
+      "powerballAustralia": "2026-11-19"
     },
     "recordCountByGame": {
       "lotto": 609,
@@ -40,7 +40,7 @@
       "euroMillions": 1059,
       "superEnalotto": 4303,
       "lottoMax": 63,
-      "powerballAustralia": 448
+      "powerballAustralia": 449
     },
     "sourceStatusByGame": {
       "lotto": {
@@ -94,8 +94,8 @@
       "powerballAustralia": {
         "status": "ok",
         "source": "Australia National Lottery / The Lott",
-        "fetched": 1591,
-        "merged": 448
+        "fetched": 1592,
+        "merged": 449
       }
     },
     "validationStatus": "ok"
@@ -15553,6 +15553,87 @@
     ],
     "powerballAustralia": [
       {
+        "date": "2026-11-19",
+        "main": [
+          3,
+          4,
+          9,
+          16,
+          21,
+          32,
+          35
+        ],
+        "bonus": [
+          16
+        ],
+        "jackpot": 60,
+        "lotteryId": "powerballAustralia",
+        "source": "The Lott",
+        "sourceUrl": "https://www.thelott.com/powerball/results",
+        "drawId": 1592,
+        "currency": "AUD",
+        "payoutTiers": [
+          {
+            "match": "7+1",
+            "label": "Division 1",
+            "prizeAmount": 0,
+            "winners": 0
+          },
+          {
+            "match": "7+0",
+            "label": "Division 2",
+            "prizeAmount": 485885.9,
+            "winners": 2
+          },
+          {
+            "match": "6+1",
+            "label": "Division 3",
+            "prizeAmount": 8464.3,
+            "winners": 142
+          },
+          {
+            "match": "6+0",
+            "label": "Division 4",
+            "prizeAmount": 369.7,
+            "winners": 2836
+          },
+          {
+            "match": "5+1",
+            "label": "Division 5",
+            "prizeAmount": 217.85,
+            "winners": 3639
+          },
+          {
+            "match": "4+1",
+            "label": "Division 6",
+            "prizeAmount": 92.75,
+            "winners": 53219
+          },
+          {
+            "match": "5+0",
+            "label": "Division 7",
+            "prizeAmount": 55.15,
+            "winners": 69566
+          },
+          {
+            "match": "3+1",
+            "label": "Division 8",
+            "prizeAmount": 24.4,
+            "winners": 335722
+          },
+          {
+            "match": "2+1",
+            "label": "Division 9",
+            "prizeAmount": 14.4,
+            "winners": 975686
+          }
+        ],
+        "jackpotRolledOver": true,
+        "jackpotRolledOverTo": 1593,
+        "ruleVersion": "powerballau-7-35",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-12",
         "main": [
           2,
@@ -16278,87 +16359,6 @@
         "ruleEra": "current",
         "jackpotRolledOver": true,
         "jackpotRolledOverTo": 1584
-      },
-      {
-        "date": "2026-09-10",
-        "main": [
-          2,
-          11,
-          24,
-          28,
-          29,
-          32,
-          34
-        ],
-        "bonus": [
-          13
-        ],
-        "jackpot": 5,
-        "lotteryId": "powerballAustralia",
-        "source": "The Lott",
-        "sourceUrl": "https://www.thelott.com/powerball/results",
-        "drawId": 1582,
-        "currency": "AUD",
-        "payoutTiers": [
-          {
-            "match": "7+1",
-            "label": "Division 1",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "7+0",
-            "label": "Division 2",
-            "prizeAmount": 147480.65,
-            "winners": 2
-          },
-          {
-            "match": "6+1",
-            "label": "Division 3",
-            "prizeAmount": 17372.4,
-            "winners": 21
-          },
-          {
-            "match": "6+0",
-            "label": "Division 4",
-            "prizeAmount": 657.55,
-            "winners": 484
-          },
-          {
-            "match": "5+1",
-            "label": "Division 5",
-            "prizeAmount": 230.5,
-            "winners": 1044
-          },
-          {
-            "match": "4+1",
-            "label": "Division 6",
-            "prizeAmount": 95.65,
-            "winners": 15662
-          },
-          {
-            "match": "5+0",
-            "label": "Division 7",
-            "prizeAmount": 59.05,
-            "winners": 19714
-          },
-          {
-            "match": "3+1",
-            "label": "Division 8",
-            "prizeAmount": 24.6,
-            "winners": 100963
-          },
-          {
-            "match": "2+1",
-            "label": "Division 9",
-            "prizeAmount": 14.2,
-            "winners": 300279
-          }
-        ],
-        "ruleVersion": "powerballau-7-35",
-        "ruleEra": "current",
-        "jackpotRolledOver": true,
-        "jackpotRolledOverTo": 1583
       }
     ]
   }
