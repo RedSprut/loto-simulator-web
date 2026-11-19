@@ -15,10 +15,10 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-19T12:55:44.087Z",
-    "sourceFetchedAt": "2026-11-19T12:55:44.087Z",
+    "generatedAt": "2026-11-19T19:43:28.961Z",
+    "sourceFetchedAt": "2026-11-19T19:43:28.961Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "791aa779bf6a29f9",
+    "snapshotVersion": "bab7001340052642",
     "updatedAt": "2026-11-19",
     "latestDrawByGame": {
       "lotto": "2026-11-14",
@@ -27,7 +27,7 @@
       "powerball": "2026-11-18",
       "megaMillions": "2026-11-17",
       "euroMillions": "2026-11-17",
-      "superEnalotto": "2026-11-17",
+      "superEnalotto": "2026-11-19",
       "lottoMax": "2026-11-17",
       "powerballAustralia": "2026-11-19"
     },
@@ -38,7 +38,7 @@
       "powerball": 1435,
       "megaMillions": 169,
       "euroMillions": 1059,
-      "superEnalotto": 4303,
+      "superEnalotto": 4304,
       "lottoMax": 63,
       "powerballAustralia": 449
     },
@@ -82,8 +82,8 @@
       "superEnalotto": {
         "status": "ok",
         "source": "National-Lottery.com / Lottologia",
-        "fetched": 4303,
-        "merged": 4303
+        "fetched": 4304,
+        "merged": 4304
       },
       "lottoMax": {
         "status": "ok",
@@ -13087,6 +13087,28 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-11-19",
+        "main": [
+          22,
+          38,
+          54,
+          61,
+          68,
+          75
+        ],
+        "bonus": [
+          2
+        ],
+        "jackpot": null,
+        "lotteryId": "superEnalotto",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
+        "drawId": null,
+        "superStar": 8,
+        "ruleVersion": "superenalotto-6-90",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-17",
         "main": [
           1,
@@ -13953,10 +13975,10 @@
         "bonus": [
           37
         ],
-        "jackpot": 44.2,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/23-10-2026",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
         "drawId": null,
         "superStar": 21,
         "payoutTiers": [
@@ -14854,67 +14876,6 @@
         ],
         "superStar": 32,
         "currency": "EUR"
-      },
-      {
-        "date": "2026-09-26",
-        "main": [
-          52,
-          54,
-          55,
-          64,
-          68,
-          78
-        ],
-        "bonus": [
-          31
-        ],
-        "jackpot": null,
-        "lotteryId": "superEnalotto",
-        "source": "National-Lottery.com / SuperEnalotto",
-        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
-        "drawId": null,
-        "payoutTiers": [
-          {
-            "match": "6",
-            "label": "Match 6",
-            "prizeAmount": 32535473.82,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "Match 5 + Jolly",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "Match 5",
-            "prizeAmount": 191286.35,
-            "winners": 1
-          },
-          {
-            "match": "4",
-            "label": "Match 4",
-            "prizeAmount": 502.38,
-            "winners": 387
-          },
-          {
-            "match": "3",
-            "label": "Match 3",
-            "prizeAmount": 35.12,
-            "winners": 16684
-          },
-          {
-            "match": "2",
-            "label": "Match 2",
-            "prizeAmount": 6.45,
-            "winners": 282350
-          }
-        ],
-        "superStar": 6,
-        "currency": "EUR",
-        "ruleVersion": "superenalotto-6-90",
-        "ruleEra": "current"
       }
     ],
     "lottoMax": [
