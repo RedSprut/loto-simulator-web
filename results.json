@@ -15,10 +15,10 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-20T20:13:24.030Z",
-    "sourceFetchedAt": "2026-11-20T20:13:24.030Z",
+    "generatedAt": "2026-11-20T20:53:42.245Z",
+    "sourceFetchedAt": "2026-11-20T20:53:42.245Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "90c42088e69c9377",
+    "snapshotVersion": "4eb439847de73da9",
     "updatedAt": "2026-11-20",
     "latestDrawByGame": {
       "lotto": "2026-11-14",
@@ -26,7 +26,7 @@
       "eurojackpot": "2026-11-17",
       "powerball": "2026-11-18",
       "megaMillions": "2026-11-17",
-      "euroMillions": "2026-11-17",
+      "euroMillions": "2026-11-20",
       "superEnalotto": "2026-11-20",
       "lottoMax": "2026-11-17",
       "powerballAustralia": "2026-11-19"
@@ -37,7 +37,7 @@
       "eurojackpot": 486,
       "powerball": 1435,
       "megaMillions": 169,
-      "euroMillions": 1059,
+      "euroMillions": 1060,
       "superEnalotto": 4305,
       "lottoMax": 63,
       "powerballAustralia": 449
@@ -76,8 +76,8 @@
       "euroMillions": {
         "status": "ok",
         "source": "Euro-Millions.com",
-        "fetched": 1999,
-        "merged": 1059
+        "fetched": 2000,
+        "merged": 1060
       },
       "superEnalotto": {
         "status": "ok",
@@ -8855,6 +8855,108 @@
     ],
     "euroMillions": [
       {
+        "date": "2026-11-20",
+        "main": [
+          8,
+          21,
+          24,
+          36,
+          49
+        ],
+        "bonus": [
+          1,
+          8
+        ],
+        "jackpot": 37.8,
+        "lotteryId": "euroMillions",
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "drawId": null,
+        "payoutTiers": [
+          {
+            "match": "5+2",
+            "label": "5+2",
+            "prizeAmount": 37825333,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 312267,
+            "winners": 2
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 11228,
+            "winners": 13
+          },
+          {
+            "match": "4+2",
+            "label": "4+2",
+            "prizeAmount": 1378,
+            "winners": 33
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 126,
+            "winners": 665
+          },
+          {
+            "match": "3+2",
+            "label": "3+2",
+            "prizeAmount": 62,
+            "winners": 1430
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 39,
+            "winners": 1603
+          },
+          {
+            "match": "2+2",
+            "label": "2+2",
+            "prizeAmount": 15,
+            "winners": 20722
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 12,
+            "winners": 29279
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 10,
+            "winners": 66220
+          },
+          {
+            "match": "1+2",
+            "label": "1+2",
+            "prizeAmount": 7,
+            "winners": 109013
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 6,
+            "winners": 426509
+          },
+          {
+            "match": "2+0",
+            "label": "2+0",
+            "prizeAmount": 4,
+            "winners": 967097
+          }
+        ],
+        "currency": "EUR",
+        "ruleVersion": "euromillions-2-12",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-17",
         "main": [
           35,
@@ -10295,10 +10397,10 @@
           8,
           11
         ],
-        "jackpot": 17,
+        "jackpot": null,
         "lotteryId": "euroMillions",
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history",
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
         "drawId": null,
         "payoutTiers": [
           {
@@ -13053,27 +13155,6 @@
         ],
         "bonus": [
           2,
-          12
-        ],
-        "jackpot": null,
-        "lotteryId": "euroMillions",
-        "source": "Euro-Millions.com",
-        "sourceUrl": "https://www.euro-millions.com/results-history-2026",
-        "drawId": null,
-        "ruleVersion": "euromillions-2-12",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-05-26",
-        "main": [
-          6,
-          23,
-          25,
-          35,
-          37
-        ],
-        "bonus": [
-          6,
           12
         ],
         "jackpot": null,
