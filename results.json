@@ -15,10 +15,10 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-20T13:00:45.725Z",
-    "sourceFetchedAt": "2026-11-20T13:00:45.725Z",
+    "generatedAt": "2026-11-20T19:43:31.120Z",
+    "sourceFetchedAt": "2026-11-20T19:43:31.120Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "43db3b0a63cc0369",
+    "snapshotVersion": "90c42088e69c9377",
     "updatedAt": "2026-11-20",
     "latestDrawByGame": {
       "lotto": "2026-11-14",
@@ -27,7 +27,7 @@
       "powerball": "2026-11-18",
       "megaMillions": "2026-11-17",
       "euroMillions": "2026-11-17",
-      "superEnalotto": "2026-11-19",
+      "superEnalotto": "2026-11-20",
       "lottoMax": "2026-11-17",
       "powerballAustralia": "2026-11-19"
     },
@@ -38,7 +38,7 @@
       "powerball": 1435,
       "megaMillions": 169,
       "euroMillions": 1059,
-      "superEnalotto": 4304,
+      "superEnalotto": 4305,
       "lottoMax": 63,
       "powerballAustralia": 449
     },
@@ -82,8 +82,8 @@
       "superEnalotto": {
         "status": "ok",
         "source": "National-Lottery.com / Lottologia",
-        "fetched": 4304,
-        "merged": 4304
+        "fetched": 4305,
+        "merged": 4305
       },
       "lottoMax": {
         "status": "ok",
@@ -13087,6 +13087,28 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-11-20",
+        "main": [
+          38,
+          50,
+          69,
+          80,
+          88,
+          89
+        ],
+        "bonus": [
+          46
+        ],
+        "jackpot": null,
+        "lotteryId": "superEnalotto",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
+        "drawId": null,
+        "superStar": 48,
+        "ruleVersion": "superenalotto-6-90",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-19",
         "main": [
           22,
@@ -13953,10 +13975,10 @@
         "bonus": [
           62
         ],
-        "jackpot": 45,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/24-10-2026",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
         "drawId": null,
         "superStar": 24,
         "payoutTiers": [
@@ -14853,67 +14875,6 @@
           }
         ],
         "superStar": 42,
-        "currency": "EUR"
-      },
-      {
-        "date": "2026-09-29",
-        "main": [
-          16,
-          26,
-          28,
-          30,
-          43,
-          72
-        ],
-        "bonus": [
-          5
-        ],
-        "jackpot": null,
-        "lotteryId": "superEnalotto",
-        "source": "National-Lottery.com / SuperEnalotto",
-        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
-        "drawId": null,
-        "ruleVersion": "superenalotto-6-90",
-        "ruleEra": "current",
-        "payoutTiers": [
-          {
-            "match": "6",
-            "label": "Match 6",
-            "prizeAmount": 33361456,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "Match 5 + Jolly",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "Match 5",
-            "prizeAmount": 24398.86,
-            "winners": 7
-          },
-          {
-            "match": "4",
-            "label": "Match 4",
-            "prizeAmount": 392.61,
-            "winners": 443
-          },
-          {
-            "match": "3",
-            "label": "Match 3",
-            "prizeAmount": 27.81,
-            "winners": 18828
-          },
-          {
-            "match": "2",
-            "label": "Match 2",
-            "prizeAmount": 5.46,
-            "winners": 297905
-          }
-        ],
-        "superStar": 32,
         "currency": "EUR"
       }
     ],
