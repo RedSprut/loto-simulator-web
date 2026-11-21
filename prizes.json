@@ -106777,7 +106777,7 @@
         "date": "2026-10-27",
         "lotteryId": "superEnalotto",
         "currency": "EUR",
-        "jackpot": 45.8,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "6",
@@ -106816,8 +106816,8 @@
             "winners": 257764
           }
         ],
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/27-10-2026"
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive"
       },
       {
         "date": "2026-10-24",
