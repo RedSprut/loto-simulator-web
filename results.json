@@ -15,8 +15,8 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-21T12:50:43.346Z",
-    "sourceFetchedAt": "2026-11-21T12:50:43.346Z",
+    "generatedAt": "2026-11-21T19:00:28.577Z",
+    "sourceFetchedAt": "2026-11-21T19:00:28.577Z",
     "updaterVersion": "update-results-db@2.0",
     "snapshotVersion": "774c292ad3ef76de",
     "updatedAt": "2026-11-21",
@@ -46,7 +46,7 @@
       "lotto": {
         "status": "ok",
         "source": "Norsk Tipping",
-        "fetched": 776,
+        "fetched": 777,
         "merged": 609
       },
       "vikinglotto": {
