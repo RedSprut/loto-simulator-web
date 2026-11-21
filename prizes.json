@@ -8,6 +8,46 @@
   "games": {
     "lotto": [
       {
+        "date": "2026-11-21",
+        "lotteryId": "lotto",
+        "currency": "NOK",
+        "jackpot": 7.4,
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 rette",
+            "prizeAmount": 7354310,
+            "winners": 7
+          },
+          {
+            "match": "6+1",
+            "label": "6 + 1 rette",
+            "prizeAmount": 98415,
+            "winners": 30
+          },
+          {
+            "match": "6",
+            "label": "6 rette",
+            "prizeAmount": 3445,
+            "winners": 897
+          },
+          {
+            "match": "5",
+            "label": "5 rette",
+            "prizeAmount": 100,
+            "winners": 33216
+          },
+          {
+            "match": "4",
+            "label": "4 rette",
+            "prizeAmount": 45,
+            "winners": 447645
+          }
+        ],
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/lotto/resultater"
+      },
+      {
         "date": "2026-11-14",
         "lotteryId": "lotto",
         "currency": "NOK",

@@ -15,13 +15,13 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-21T19:00:28.577Z",
-    "sourceFetchedAt": "2026-11-21T19:00:28.577Z",
+    "generatedAt": "2026-11-21T19:10:51.790Z",
+    "sourceFetchedAt": "2026-11-21T19:10:51.790Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "774c292ad3ef76de",
+    "snapshotVersion": "301ba7da82da2894",
     "updatedAt": "2026-11-21",
     "latestDrawByGame": {
-      "lotto": "2026-11-14",
+      "lotto": "2026-11-21",
       "vikinglotto": "2026-11-18",
       "eurojackpot": "2026-11-20",
       "powerball": "2026-11-18",
@@ -32,7 +32,7 @@
       "powerballAustralia": "2026-11-19"
     },
     "recordCountByGame": {
-      "lotto": 609,
+      "lotto": 610,
       "vikinglotto": 285,
       "eurojackpot": 487,
       "powerball": 1435,
@@ -47,7 +47,7 @@
         "status": "ok",
         "source": "Norsk Tipping",
         "fetched": 777,
-        "merged": 609
+        "merged": 610
       },
       "vikinglotto": {
         "status": "ok",
@@ -940,6 +940,62 @@
   "games": {
     "lotto": [
       {
+        "date": "2026-11-21",
+        "main": [
+          2,
+          3,
+          4,
+          9,
+          10,
+          20,
+          21
+        ],
+        "bonus": [
+          34
+        ],
+        "jackpot": 7.4,
+        "lotteryId": "lotto",
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/lotto/resultater",
+        "drawId": 1594,
+        "currency": "NOK",
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 rette",
+            "prizeAmount": 7354310,
+            "winners": 7
+          },
+          {
+            "match": "6+1",
+            "label": "6 + 1 rette",
+            "prizeAmount": 98415,
+            "winners": 30
+          },
+          {
+            "match": "6",
+            "label": "6 rette",
+            "prizeAmount": 3445,
+            "winners": 897
+          },
+          {
+            "match": "5",
+            "label": "5 rette",
+            "prizeAmount": 100,
+            "winners": 33216
+          },
+          {
+            "match": "4",
+            "label": "4 rette",
+            "prizeAmount": 45,
+            "winners": 447645
+          }
+        ],
+        "drawName": "LOTTO-21.11.2026 18:30",
+        "ruleVersion": "lotto-7-34-1",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-14",
         "main": [
           1,
@@ -1726,62 +1782,6 @@
           }
         ],
         "drawName": "LOTTO-15.08.2026 18:30",
-        "ruleVersion": "lotto-7-34-1",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-08-08",
-        "main": [
-          3,
-          11,
-          18,
-          21,
-          22,
-          28,
-          29
-        ],
-        "bonus": [
-          13
-        ],
-        "jackpot": 6.9,
-        "lotteryId": "lotto",
-        "source": "Norsk Tipping",
-        "sourceUrl": "https://www.norsk-tipping.no/lotteri/lotto/resultater",
-        "drawId": 1579,
-        "currency": "NOK",
-        "payoutTiers": [
-          {
-            "match": "7",
-            "label": "7 rette",
-            "prizeAmount": 6932855,
-            "winners": 2
-          },
-          {
-            "match": "6+1",
-            "label": "6 + 1 rette",
-            "prizeAmount": 97840,
-            "winners": 20
-          },
-          {
-            "match": "6",
-            "label": "6 rette",
-            "prizeAmount": 3605,
-            "winners": 568
-          },
-          {
-            "match": "5",
-            "label": "5 rette",
-            "prizeAmount": 100,
-            "winners": 21701
-          },
-          {
-            "match": "4",
-            "label": "4 rette",
-            "prizeAmount": 45,
-            "winners": 300236
-          }
-        ],
-        "drawName": "LOTTO-08.08.2026 18:30",
         "ruleVersion": "lotto-7-34-1",
         "ruleEra": "current"
       }
