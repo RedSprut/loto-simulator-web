@@ -407,7 +407,9 @@
       '#ow-ov .ow-btn-primary{background:var(--ow-accent);border-color:var(--ow-accent);color:#fff}',
       // The panel loads on demand only (2026-11-17): no poll or timer refreshes it. The refresh button and
       // «обновлено в HH:MM» stay together, so the owner always sees how fresh the data on screen is.
-      '#ow-ov .ow-refresh-box{display:inline-flex;align-items:center;gap:8px;flex:0 1 auto;min-width:0}',
+      // Both are nowrap, so the box wraps: where they don't fit on one line (a 320 px phone, the long
+      // Russian stamp, wider Linux fonts) the stamp drops under the button instead of past the screen edge.
+      '#ow-ov .ow-refresh-box{display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px;flex:0 1 auto;min-width:0}',
       '#ow-ov .ow-refresh{white-space:nowrap;transition:filter .15s ease,box-shadow .15s ease,transform .15s ease}',
       '#ow-ov .ow-refresh:hover:not([disabled]){filter:brightness(1.12);box-shadow:0 2px 10px rgba(29,78,216,.35);transform:translateY(-1px)}',
       '#ow-ov .ow-refresh:active:not([disabled]){transform:none;box-shadow:none}',
