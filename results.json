@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updatedAt": "2026-11-24",
+  "updatedAt": "2026-11-25",
   "generatedBy": "Lotto Simulator secure public bundle",
   "rulesMode": "recent-free-only",
   "freeRecentDrawsByGame": {
@@ -15,20 +15,20 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-24T21:57:02.482Z",
-    "sourceFetchedAt": "2026-11-24T21:57:02.482Z",
+    "generatedAt": "2026-11-25T16:34:43.644Z",
+    "sourceFetchedAt": "2026-11-25T16:34:43.644Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "2226c4f1db9e7573",
-    "updatedAt": "2026-11-24",
+    "snapshotVersion": "af978affd8395f2f",
+    "updatedAt": "2026-11-25",
     "latestDrawByGame": {
       "lotto": "2026-11-21",
       "vikinglotto": "2026-11-18",
       "eurojackpot": "2026-11-24",
       "powerball": "2026-11-23",
-      "megaMillions": "2026-11-20",
+      "megaMillions": "2026-11-24",
       "euroMillions": "2026-11-24",
       "superEnalotto": "2026-11-24",
-      "lottoMax": "2026-11-20",
+      "lottoMax": "2026-11-24",
       "powerballAustralia": "2026-11-19"
     },
     "recordCountByGame": {
@@ -36,10 +36,10 @@
       "vikinglotto": 285,
       "eurojackpot": 488,
       "powerball": 1437,
-      "megaMillions": 170,
+      "megaMillions": 171,
       "euroMillions": 1061,
       "superEnalotto": 4307,
-      "lottoMax": 64,
+      "lottoMax": 65,
       "powerballAustralia": 449
     },
     "sourceStatusByGame": {
@@ -70,8 +70,8 @@
       "megaMillions": {
         "status": "ok",
         "source": "NY Open Data / Mega Millions",
-        "fetched": 2559,
-        "merged": 170
+        "fetched": 2560,
+        "merged": 171
       },
       "euroMillions": {
         "status": "ok",
@@ -88,8 +88,8 @@
       "lottoMax": {
         "status": "ok",
         "source": "WCLC",
-        "fetched": 1288,
-        "merged": 64
+        "fetched": 1289,
+        "merged": 65
       },
       "powerballAustralia": {
         "status": "ok",
@@ -7929,6 +7929,83 @@
     ],
     "megaMillions": [
       {
+        "date": "2026-11-24",
+        "main": [
+          38,
+          42,
+          44,
+          45,
+          62
+        ],
+        "bonus": [
+          16
+        ],
+        "jackpot": 645,
+        "lotteryId": "megaMillions",
+        "source": "Mega Millions",
+        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-11-24",
+        "drawId": "2026-11-24T00:00:00.000",
+        "payoutTiers": [
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 645000000,
+            "winners": 0
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 2000000,
+            "winners": 0
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 20000,
+            "winners": 13
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 1000,
+            "winners": 214
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 400,
+            "winners": 562
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 20,
+            "winners": 13421
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 20,
+            "winners": 12161
+          },
+          {
+            "match": "1+1",
+            "label": "1+1",
+            "prizeAmount": 14,
+            "winners": 95920
+          },
+          {
+            "match": "0+1",
+            "label": "0+1",
+            "prizeAmount": 10,
+            "winners": 244328
+          }
+        ],
+        "currency": "USD",
+        "ruleVersion": "mega-70-24",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-20",
         "main": [
           32,
@@ -8769,83 +8846,6 @@
             "label": "0+1",
             "prizeAmount": 10,
             "winners": 176325
-          }
-        ],
-        "currency": "USD",
-        "ruleVersion": "mega-70-24",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-10-13",
-        "main": [
-          11,
-          12,
-          15,
-          40,
-          66
-        ],
-        "bonus": [
-          17
-        ],
-        "jackpot": 385,
-        "lotteryId": "megaMillions",
-        "source": "Mega Millions",
-        "sourceUrl": "https://www.megamillions.com/Winning-Numbers/Previous-Drawings/Previous-Drawing-Page.aspx?date=2026-10-13",
-        "drawId": "2026-10-13T00:00:00.000",
-        "payoutTiers": [
-          {
-            "match": "5+1",
-            "label": "5+1",
-            "prizeAmount": 385000000,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "5+0",
-            "prizeAmount": 2000000,
-            "winners": 0
-          },
-          {
-            "match": "4+1",
-            "label": "4+1",
-            "prizeAmount": 20000,
-            "winners": 7
-          },
-          {
-            "match": "4+0",
-            "label": "4+0",
-            "prizeAmount": 1000,
-            "winners": 145
-          },
-          {
-            "match": "3+1",
-            "label": "3+1",
-            "prizeAmount": 400,
-            "winners": 403
-          },
-          {
-            "match": "3+0",
-            "label": "3+0",
-            "prizeAmount": 20,
-            "winners": 9243
-          },
-          {
-            "match": "2+1",
-            "label": "2+1",
-            "prizeAmount": 20,
-            "winners": 8028
-          },
-          {
-            "match": "1+1",
-            "label": "1+1",
-            "prizeAmount": 14,
-            "winners": 63671
-          },
-          {
-            "match": "0+1",
-            "label": "0+1",
-            "prizeAmount": 10,
-            "winners": 148043
           }
         ],
         "currency": "USD",
@@ -15081,6 +15081,85 @@
     ],
     "lottoMax": [
       {
+        "date": "2026-11-24",
+        "main": [
+          10,
+          11,
+          13,
+          17,
+          20,
+          29,
+          39
+        ],
+        "bonus": [
+          19
+        ],
+        "jackpot": 30,
+        "lotteryId": "lottoMax",
+        "source": "WCLC",
+        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1290",
+        "drawId": 1290,
+        "payoutTiers": [
+          {
+            "match": "7",
+            "label": "7 of 7",
+            "prizeAmount": null,
+            "winners": 0
+          },
+          {
+            "match": "6+1",
+            "label": "6 of 7 + Bonus",
+            "prizeAmount": null,
+            "winners": 0
+          },
+          {
+            "match": "6+0",
+            "label": "6 of 7",
+            "prizeAmount": 4494.8,
+            "winners": 29
+          },
+          {
+            "match": "5+1",
+            "label": "5 of 7 + Bonus",
+            "prizeAmount": 705.9,
+            "winners": 120
+          },
+          {
+            "match": "5+0",
+            "label": "5 of 7",
+            "prizeAmount": 86.4,
+            "winners": 2202
+          },
+          {
+            "match": "4+1",
+            "label": "4 of 7 + Bonus",
+            "prizeAmount": 41.8,
+            "winners": 3792
+          },
+          {
+            "match": "4+0",
+            "label": "4 of 7",
+            "prizeAmount": 20,
+            "winners": 50481
+          },
+          {
+            "match": "3+1",
+            "label": "3 of 7 + Bonus",
+            "prizeAmount": 20,
+            "winners": 51386
+          },
+          {
+            "match": "3+0",
+            "label": "3 of 7",
+            "prizeAmount": null,
+            "winners": 512593
+          }
+        ],
+        "currency": "CAD",
+        "ruleVersion": "lottomax-7-52",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-20",
         "main": [
           6,
@@ -15627,85 +15706,6 @@
             "label": "3 of 7",
             "prizeAmount": null,
             "winners": 615736
-          }
-        ],
-        "currency": "CAD",
-        "ruleVersion": "lottomax-7-52",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-10-27",
-        "main": [
-          1,
-          20,
-          24,
-          26,
-          33,
-          36,
-          50
-        ],
-        "bonus": [
-          11
-        ],
-        "jackpot": 25,
-        "lotteryId": "lottoMax",
-        "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1282",
-        "drawId": 1282,
-        "payoutTiers": [
-          {
-            "match": "7",
-            "label": "7 of 7",
-            "prizeAmount": null,
-            "winners": 0
-          },
-          {
-            "match": "6+1",
-            "label": "6 of 7 + Bonus",
-            "prizeAmount": null,
-            "winners": 0
-          },
-          {
-            "match": "6+0",
-            "label": "6 of 7",
-            "prizeAmount": 7003.1,
-            "winners": 25
-          },
-          {
-            "match": "5+1",
-            "label": "5 of 7 + Bonus",
-            "prizeAmount": 1137.8,
-            "winners": 100
-          },
-          {
-            "match": "5+0",
-            "label": "5 of 7",
-            "prizeAmount": 112.8,
-            "winners": 2265
-          },
-          {
-            "match": "4+1",
-            "label": "4 of 7 + Bonus",
-            "prizeAmount": 53.9,
-            "winners": 3949
-          },
-          {
-            "match": "4+0",
-            "label": "4 of 7",
-            "prizeAmount": 20,
-            "winners": 53976
-          },
-          {
-            "match": "3+1",
-            "label": "3 of 7 + Bonus",
-            "prizeAmount": 20,
-            "winners": 56060
-          },
-          {
-            "match": "3+0",
-            "label": "3 of 7",
-            "prizeAmount": null,
-            "winners": 557938
           }
         ],
         "currency": "CAD",
