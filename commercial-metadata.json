@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-25",
+  "updatedAt": "2026-11-26",
   "freeRecentDrawsByGame": {
     "lotto": 15,
     "vikinglotto": 15,
@@ -365,7 +365,7 @@
       "freeDraws": 15
     },
     "vikinglotto": {
-      "availableDraws": 770,
+      "availableDraws": 771,
       "freeDraws": 15
     },
     "eurojackpot": {
@@ -373,7 +373,7 @@
       "freeDraws": 30
     },
     "powerball": {
-      "availableDraws": 2029,
+      "availableDraws": 2030,
       "freeDraws": 30
     },
     "megaMillions": {
@@ -393,7 +393,7 @@
       "freeDraws": 8
     },
     "powerballAustralia": {
-      "availableDraws": 1592,
+      "availableDraws": 1593,
       "freeDraws": 10
     }
   }
