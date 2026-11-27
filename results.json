@@ -15,10 +15,10 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-27T12:53:05.570Z",
-    "sourceFetchedAt": "2026-11-27T12:53:05.570Z",
+    "generatedAt": "2026-11-27T19:43:00.133Z",
+    "sourceFetchedAt": "2026-11-27T19:43:00.133Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "069e31072ea6e3c0",
+    "snapshotVersion": "28d019e9dd45522a",
     "updatedAt": "2026-11-27",
     "latestDrawByGame": {
       "lotto": "2026-11-21",
@@ -27,7 +27,7 @@
       "powerball": "2026-11-25",
       "megaMillions": "2026-11-24",
       "euroMillions": "2026-11-24",
-      "superEnalotto": "2026-11-26",
+      "superEnalotto": "2026-11-27",
       "lottoMax": "2026-11-24",
       "powerballAustralia": "2026-11-26"
     },
@@ -38,7 +38,7 @@
       "powerball": 1438,
       "megaMillions": 171,
       "euroMillions": 1061,
-      "superEnalotto": 4308,
+      "superEnalotto": 4309,
       "lottoMax": 65,
       "powerballAustralia": 450
     },
@@ -82,8 +82,8 @@
       "superEnalotto": {
         "status": "ok",
         "source": "National-Lottery.com / Lottologia",
-        "fetched": 4308,
-        "merged": 4308
+        "fetched": 4309,
+        "merged": 4309
       },
       "lottoMax": {
         "status": "ok",
@@ -13249,6 +13249,28 @@
     ],
     "superEnalotto": [
       {
+        "date": "2026-11-27",
+        "main": [
+          14,
+          22,
+          30,
+          38,
+          56,
+          85
+        ],
+        "bonus": [
+          67
+        ],
+        "jackpot": null,
+        "lotteryId": "superEnalotto",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
+        "drawId": null,
+        "superStar": 64,
+        "ruleVersion": "superenalotto-6-90",
+        "ruleEra": "current"
+      },
+      {
         "date": "2026-11-26",
         "main": [
           16,
@@ -14115,10 +14137,10 @@
         "bonus": [
           7
         ],
-        "jackpot": 48.1,
+        "jackpot": null,
         "lotteryId": "superEnalotto",
-        "source": "SuperEnalotto.net",
-        "sourceUrl": "https://www.superenalotto.net/en/results/31-10-2026",
+        "source": "National-Lottery.com / SuperEnalotto",
+        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
         "drawId": null,
         "superStar": 2,
         "payoutTiers": [
@@ -15011,67 +15033,6 @@
             "label": "Match 2",
             "prizeAmount": 6.28,
             "winners": 253874
-          }
-        ],
-        "currency": "EUR",
-        "ruleVersion": "superenalotto-6-90",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-10-06",
-        "main": [
-          22,
-          32,
-          34,
-          70,
-          74,
-          77
-        ],
-        "bonus": [
-          30
-        ],
-        "jackpot": null,
-        "lotteryId": "superEnalotto",
-        "source": "National-Lottery.com / SuperEnalotto",
-        "sourceUrl": "https://www.national-lottery.com/superenalotto/results/2026-archive",
-        "drawId": null,
-        "superStar": 14,
-        "payoutTiers": [
-          {
-            "match": "6",
-            "label": "Match 6",
-            "prizeAmount": 36570496.55,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "Match 5 + Jolly",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "5+0",
-            "label": "Match 5",
-            "prizeAmount": 34464.15,
-            "winners": 5
-          },
-          {
-            "match": "4",
-            "label": "Match 4",
-            "prizeAmount": 419.36,
-            "winners": 420
-          },
-          {
-            "match": "3",
-            "label": "Match 3",
-            "prizeAmount": 34.69,
-            "winners": 15248
-          },
-          {
-            "match": "2",
-            "label": "Match 2",
-            "prizeAmount": 6.16,
-            "winners": 266270
           }
         ],
         "currency": "EUR",
