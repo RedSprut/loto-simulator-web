@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "updated": "2026-11-27T19:41:47.001Z",
+  "updated": "2026-11-27T19:52:15.460Z",
   "values": {
     "lotto": {
       "amount": "14",
@@ -12,8 +12,8 @@
       "lastDrawDate": "2026-11-21",
       "expectedLastDraw": "2026-11-21",
       "nextDrawDate": "2026-11-28",
-      "updatedAt": "2026-11-27T19:41:47.001Z",
-      "sourceUpdatedAt": "2026-11-27T19:41:47.001Z",
+      "updatedAt": "2026-11-27T19:52:15.460Z",
+      "sourceUpdatedAt": "2026-11-27T19:52:15.460Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -36,8 +36,8 @@
       "lastDrawDate": "2026-11-25",
       "expectedLastDraw": "2026-11-25",
       "nextDrawDate": "2026-12-02",
-      "updatedAt": "2026-11-27T19:41:47.001Z",
-      "sourceUpdatedAt": "2026-11-27T19:41:47.001Z",
+      "updatedAt": "2026-11-27T19:52:15.460Z",
+      "sourceUpdatedAt": "2026-11-27T19:52:15.460Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -64,7 +64,7 @@
       "lastDrawDate": "2026-11-24",
       "expectedLastDraw": "2026-11-24",
       "nextDrawDate": "2026-11-27",
-      "updatedAt": "2026-11-27T19:41:47.001Z",
+      "updatedAt": "2026-11-27T19:52:15.460Z",
       "status": "fresh",
       "synced": true,
       "sourceAttempts": [
@@ -85,8 +85,8 @@
       "lastDrawDate": "2026-11-25",
       "expectedLastDraw": "2026-11-25",
       "nextDrawDate": "2026-11-28",
-      "updatedAt": "2026-11-27T19:41:47.001Z",
-      "sourceUpdatedAt": "2026-11-27T19:41:47.001Z",
+      "updatedAt": "2026-11-27T19:52:15.460Z",
+      "sourceUpdatedAt": "2026-11-27T19:52:15.460Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -102,8 +102,8 @@
       "lastDrawDate": "2026-11-24",
       "expectedLastDraw": "2026-11-24",
       "nextDrawDate": "2026-11-27",
-      "updatedAt": "2026-11-27T19:41:47.001Z",
-      "sourceUpdatedAt": "2026-11-27T19:41:47.001Z",
+      "updatedAt": "2026-11-27T19:52:15.460Z",
+      "sourceUpdatedAt": "2026-11-27T19:52:15.460Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
@@ -124,7 +124,7 @@
       "lastDrawDate": "2026-11-24",
       "expectedLastDraw": "2026-11-24",
       "nextDrawDate": "2026-11-27",
-      "updatedAt": "2026-11-27T19:41:47.001Z",
+      "updatedAt": "2026-11-27T19:52:15.460Z",
       "status": "fresh",
       "synced": true,
       "sourceAttempts": [
@@ -137,15 +137,23 @@
       "lastAttemptError": "stale amount rejected: source next-draw 2026-12-01 != computed 2026-11-27"
     },
     "superenalotto": {
-      "currency": "EUR",
+      "amount": "60.5",
+      "prefix": "€",
+      "sub": "MILLION",
       "cur": "EUR",
+      "currency": "EUR",
+      "display": "€60.5 MILLION",
       "lastDrawDate": "2026-11-27",
       "expectedLastDraw": "2026-11-27",
       "nextDrawDate": "2026-11-28",
-      "updatedAt": "2026-11-27T19:41:47.001Z",
-      "status": "updating",
+      "updatedAt": "2026-11-27T19:52:15.460Z",
+      "sourceUpdatedAt": "2026-11-27T19:52:15.460Z",
+      "sourceNextDraw": "2026-11-28",
+      "status": "fresh",
       "synced": true,
-      "source": null,
+      "source": "superenalotto.net",
+      "sourceUrl": "https://www.superenalotto.net/",
+      "extractedText": "jackpot di sabato vale circa 60,5 milioni di Euro",
       "sourceAttempts": [
         {
           "source": "superenalotto.it risultati",
@@ -185,31 +193,8 @@
         },
         {
           "source": "superenalotto.net",
-          "ok": false,
+          "ok": true,
           "sourceUrl": "https://www.superenalotto.net/"
-        },
-        {
-          "source": "sisal.it ultima estrazione",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/superenalotto/ultima-estrazione",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it estrazioni",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/estrazioni/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "sisal.it news",
-          "ok": false,
-          "sourceUrl": "https://www.sisal.it/news/superenalotto",
-          "error": "HTTP 403"
-        },
-        {
-          "source": "official backend",
-          "ok": false,
-          "sourceUrl": "https://lhwalikpbcaridxtstcp.supabase.co/functions/v1/jackpot-superenalotto?k=REDACTED&last=2026-11-27&next=2026-11-28"
         }
       ]
     },
@@ -223,8 +208,8 @@
       "lastDrawDate": "2026-11-24",
       "expectedLastDraw": "2026-11-24",
       "nextDrawDate": "2026-11-27",
-      "updatedAt": "2026-11-27T19:41:47.001Z",
-      "sourceUpdatedAt": "2026-11-27T19:41:47.001Z",
+      "updatedAt": "2026-11-27T19:52:15.460Z",
+      "sourceUpdatedAt": "2026-11-27T19:52:15.460Z",
       "sourceNextDraw": "2026-11-27",
       "status": "fresh",
       "synced": true,
@@ -258,8 +243,8 @@
       "lastDrawDate": "2026-11-26",
       "expectedLastDraw": "2026-11-26",
       "nextDrawDate": "2026-12-03",
-      "updatedAt": "2026-11-27T19:41:47.001Z",
-      "sourceUpdatedAt": "2026-11-27T19:41:47.001Z",
+      "updatedAt": "2026-11-27T19:52:15.460Z",
+      "sourceUpdatedAt": "2026-11-27T19:52:15.460Z",
       "sourceNextDraw": null,
       "status": "fresh",
       "synced": true,
