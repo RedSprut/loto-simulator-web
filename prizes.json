@@ -44602,6 +44602,88 @@
     ],
     "eurojackpot": [
       {
+        "date": "2026-11-27",
+        "lotteryId": "eurojackpot",
+        "currency": "NOK",
+        "jackpot": 106.9,
+        "payoutTiers": [
+          {
+            "match": "5+2",
+            "label": "5+2",
+            "prizeAmount": 106850000,
+            "winners": 1
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 2994560,
+            "winners": 6
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 921160,
+            "winners": 11
+          },
+          {
+            "match": "4+2",
+            "label": "4+2",
+            "prizeAmount": 39790,
+            "winners": 42
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 3030,
+            "winners": 689
+          },
+          {
+            "match": "3+2",
+            "label": "3+2",
+            "prizeAmount": 1445,
+            "winners": 1587
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 1240,
+            "winners": 1347
+          },
+          {
+            "match": "2+2",
+            "label": "2+2",
+            "prizeAmount": 210,
+            "winners": 25017
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 210,
+            "winners": 27763
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 190,
+            "winners": 57843
+          },
+          {
+            "match": "1+2",
+            "label": "1+2",
+            "prizeAmount": 95,
+            "winners": 147584
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 95,
+            "winners": 428483
+          }
+        ],
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/eurojackpot/resultater"
+      },
+      {
         "date": "2026-11-24",
         "lotteryId": "eurojackpot",
         "currency": "NOK",

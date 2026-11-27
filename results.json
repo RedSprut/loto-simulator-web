@@ -15,15 +15,15 @@
     "powerballAustralia": 10
   },
   "snapshot": {
-    "generatedAt": "2026-11-27T21:01:38.669Z",
-    "sourceFetchedAt": "2026-11-27T21:01:38.669Z",
+    "generatedAt": "2026-11-27T21:12:05.632Z",
+    "sourceFetchedAt": "2026-11-27T21:12:05.632Z",
     "updaterVersion": "update-results-db@2.0",
-    "snapshotVersion": "8297cd3106ad514e",
+    "snapshotVersion": "0ffcef36b9e87c34",
     "updatedAt": "2026-11-27",
     "latestDrawByGame": {
       "lotto": "2026-11-21",
       "vikinglotto": "2026-11-25",
-      "eurojackpot": "2026-11-24",
+      "eurojackpot": "2026-11-27",
       "powerball": "2026-11-25",
       "megaMillions": "2026-11-24",
       "euroMillions": "2026-11-27",
@@ -34,7 +34,7 @@
     "recordCountByGame": {
       "lotto": 610,
       "vikinglotto": 286,
-      "eurojackpot": 488,
+      "eurojackpot": 489,
       "powerball": 1438,
       "megaMillions": 171,
       "euroMillions": 1062,
@@ -58,8 +58,8 @@
       "eurojackpot": {
         "status": "ok",
         "source": "Euro-Jackpot.net",
-        "fetched": 1010,
-        "merged": 488
+        "fetched": 1011,
+        "merged": 489
       },
       "powerball": {
         "status": "ok",
@@ -2704,6 +2704,103 @@
       }
     ],
     "eurojackpot": [
+      {
+        "date": "2026-11-27",
+        "main": [
+          20,
+          21,
+          23,
+          25,
+          26
+        ],
+        "bonus": [
+          3,
+          9
+        ],
+        "jackpot": 106.9,
+        "lotteryId": "eurojackpot",
+        "source": "Norsk Tipping",
+        "sourceUrl": "https://www.norsk-tipping.no/lotteri/eurojackpot/resultater",
+        "drawId": 245,
+        "currency": "NOK",
+        "payoutTiers": [
+          {
+            "match": "5+2",
+            "label": "5+2",
+            "prizeAmount": 106850000,
+            "winners": 1
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 2994560,
+            "winners": 6
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 921160,
+            "winners": 11
+          },
+          {
+            "match": "4+2",
+            "label": "4+2",
+            "prizeAmount": 39790,
+            "winners": 42
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 3030,
+            "winners": 689
+          },
+          {
+            "match": "3+2",
+            "label": "3+2",
+            "prizeAmount": 1445,
+            "winners": 1587
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 1240,
+            "winners": 1347
+          },
+          {
+            "match": "2+2",
+            "label": "2+2",
+            "prizeAmount": 210,
+            "winners": 25017
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 210,
+            "winners": 27763
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 190,
+            "winners": 57843
+          },
+          {
+            "match": "1+2",
+            "label": "1+2",
+            "prizeAmount": 95,
+            "winners": 147584
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 95,
+            "winners": 428483
+          }
+        ],
+        "drawName": "EJP2022F-27.11.2026 22:00",
+        "ruleVersion": "eurojackpot-2-12",
+        "ruleEra": "current"
+      },
       {
         "date": "2026-11-24",
         "main": [
@@ -5514,103 +5611,6 @@
           }
         ],
         "drawName": "EJP2022T-18.08.2026 22:00",
-        "ruleVersion": "eurojackpot-2-12",
-        "ruleEra": "current"
-      },
-      {
-        "date": "2026-08-14",
-        "main": [
-          5,
-          26,
-          28,
-          30,
-          40
-        ],
-        "bonus": [
-          3,
-          6
-        ],
-        "jackpot": 240.5,
-        "lotteryId": "eurojackpot",
-        "source": "Norsk Tipping",
-        "sourceUrl": "https://www.norsk-tipping.no/lotteri/eurojackpot/resultater",
-        "drawId": 230,
-        "currency": "NOK",
-        "payoutTiers": [
-          {
-            "match": "5+2",
-            "label": "5+2",
-            "prizeAmount": 0,
-            "winners": 0
-          },
-          {
-            "match": "5+1",
-            "label": "5+1",
-            "prizeAmount": 6292825,
-            "winners": 3
-          },
-          {
-            "match": "5+0",
-            "label": "5+0",
-            "prizeAmount": 1774430,
-            "winners": 6
-          },
-          {
-            "match": "4+2",
-            "label": "4+2",
-            "prizeAmount": 51650,
-            "winners": 34
-          },
-          {
-            "match": "4+1",
-            "label": "4+1",
-            "prizeAmount": 3835,
-            "winners": 572
-          },
-          {
-            "match": "3+2",
-            "label": "3+2",
-            "prizeAmount": 1635,
-            "winners": 1474
-          },
-          {
-            "match": "4+0",
-            "label": "4+0",
-            "prizeAmount": 1480,
-            "winners": 1186
-          },
-          {
-            "match": "2+2",
-            "label": "2+2",
-            "prizeAmount": 240,
-            "winners": 22812
-          },
-          {
-            "match": "3+1",
-            "label": "3+1",
-            "prizeAmount": 225,
-            "winners": 27636
-          },
-          {
-            "match": "3+0",
-            "label": "3+0",
-            "prizeAmount": 205,
-            "winners": 57403
-          },
-          {
-            "match": "1+2",
-            "label": "1+2",
-            "prizeAmount": 115,
-            "winners": 125630
-          },
-          {
-            "match": "2+1",
-            "label": "2+1",
-            "prizeAmount": 105,
-            "winners": 413609
-          }
-        ],
-        "drawName": "EJP2022F-14.08.2026 22:00",
         "ruleVersion": "eurojackpot-2-12",
         "ruleEra": "current"
       }
