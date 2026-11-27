@@ -102992,6 +102992,94 @@
     ],
     "euroMillions": [
       {
+        "date": "2026-11-27",
+        "lotteryId": "euroMillions",
+        "currency": "EUR",
+        "jackpot": 59.8,
+        "payoutTiers": [
+          {
+            "match": "5+2",
+            "label": "5+2",
+            "prizeAmount": 59797144,
+            "winners": 0
+          },
+          {
+            "match": "5+1",
+            "label": "5+1",
+            "prizeAmount": 110078,
+            "winners": 6
+          },
+          {
+            "match": "5+0",
+            "label": "5+0",
+            "prizeAmount": 17151,
+            "winners": 9
+          },
+          {
+            "match": "4+2",
+            "label": "4+2",
+            "prizeAmount": 601,
+            "winners": 80
+          },
+          {
+            "match": "4+1",
+            "label": "4+1",
+            "prizeAmount": 91,
+            "winners": 975
+          },
+          {
+            "match": "3+2",
+            "label": "3+2",
+            "prizeAmount": 38,
+            "winners": 2490
+          },
+          {
+            "match": "4+0",
+            "label": "4+0",
+            "prizeAmount": 34,
+            "winners": 1913
+          },
+          {
+            "match": "2+2",
+            "label": "2+2",
+            "prizeAmount": 11,
+            "winners": 31275
+          },
+          {
+            "match": "3+1",
+            "label": "3+1",
+            "prizeAmount": 10,
+            "winners": 37953
+          },
+          {
+            "match": "3+0",
+            "label": "3+0",
+            "prizeAmount": 9,
+            "winners": 76349
+          },
+          {
+            "match": "1+2",
+            "label": "1+2",
+            "prizeAmount": 5,
+            "winners": 155471
+          },
+          {
+            "match": "2+1",
+            "label": "2+1",
+            "prizeAmount": 5,
+            "winners": 513066
+          },
+          {
+            "match": "2+0",
+            "label": "2+0",
+            "prizeAmount": 4,
+            "winners": 1052671
+          }
+        ],
+        "source": "Lottery.ie",
+        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
+      },
+      {
         "date": "2026-11-24",
         "lotteryId": "euroMillions",
         "currency": "EUR",
@@ -104227,7 +104315,7 @@
         "date": "2026-10-06",
         "lotteryId": "euroMillions",
         "currency": "EUR",
-        "jackpot": 17,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "5+2",
@@ -104308,8 +104396,8 @@
             "winners": 649412
           }
         ],
-        "source": "Lottery.ie",
-        "sourceUrl": "https://www.lottery.ie/results/euromillions/history"
+        "source": "Euro-Millions.com",
+        "sourceUrl": "https://www.euro-millions.com/results-history-2026"
       },
       {
         "date": "2026-10-02",
