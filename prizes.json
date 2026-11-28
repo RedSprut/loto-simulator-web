@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-11-27",
+  "updatedAt": "2026-11-28",
   "generatedBy": "scripts/update-results-db.mjs --prizes-out",
   "purpose": "public-prize-and-winner-statistics",
   "containsHistoricalWinningNumbers": false,
@@ -111675,7 +111675,7 @@
         "date": "2026-10-06",
         "lotteryId": "lottoMax",
         "currency": "CAD",
-        "jackpot": 75,
+        "jackpot": null,
         "payoutTiers": [
           {
             "match": "7",
@@ -111733,7 +111733,7 @@
           }
         ],
         "source": "WCLC",
-        "sourceUrl": "https://www.wclc.com/lotto-max-prize-details.htm?drawNumber=1276"
+        "sourceUrl": "https://www.wclc.com/lotto-max-extra.htm?back=1"
       },
       {
         "date": "2026-10-02",
